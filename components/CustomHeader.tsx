@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -9,7 +9,7 @@ interface CustomHeaderProps {
     showFilterButton?: boolean;
     isFilterActive?: boolean;
     onFilterTapped?: () => void;
-    showHamburgerMenu: { current: boolean };
+    showHamburgerMenu: React.MutableRefObject<boolean>;
     trailing?: () => React.ReactNode;
 }
 

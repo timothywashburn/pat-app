@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { Tabs, Stack, useRouter, useSegments } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useAuth, AuthProvider } from '../contexts/AuthProvider';
 
 // Auth guard component
@@ -36,79 +35,13 @@ export default function RootLayout() {
     return (
         <AuthProvider>
             <AuthGuard>
-                <RootLayoutNav />
+                <Stack screenOptions={{ headerShown: false }}>
+                    {/* Auth group won't appear in tab bar */}
+                    <Stack.Screen name="auth" />
+                    {/* (tabs) group will contain all tab screens */}
+                    <Stack.Screen name="(tabs)" />
+                </Stack>
             </AuthGuard>
         </AuthProvider>
-    );
-}
-
-// Navigation layout based on authentication
-function RootLayoutNav() {
-    const { isAuthenticated } = useAuth();
-
-    // If not authenticated, show auth screens
-    if (!isAuthenticated) {
-        return (
-            <Stack>
-                <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-                <Stack.Screen name="auth/register" options={{ headerShown: false }} />
-            </Stack>
-        );
-    }
-
-    // If authenticated, show main app tabs
-    return (
-        <Tabs>
-            <Tabs.Screen
-                name="index" // Agenda panel
-                options={{
-                    title: 'Agenda',
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="calendar" size={size} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-            />
-            <Tabs.Screen
-                name="inbox" // Inbox panel
-                options={{
-                    title: 'Inbox',
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="mail" size={size} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-            />
-            <Tabs.Screen
-                name="tasks" // Tasks panel
-                options={{
-                    title: 'Tasks',
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="list" size={size} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-            />
-            <Tabs.Screen
-                name="people" // People panel
-                options={{
-                    title: 'People',
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="people" size={size} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-            />
-            <Tabs.Screen
-                name="settings" // Settings panel
-                options={{
-                    title: 'Settings',
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="settings" size={size} color={color} />
-                    ),
-                    headerShown: false,
-                }}
-            />
-        </Tabs>
     );
 }
