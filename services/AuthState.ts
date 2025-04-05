@@ -91,7 +91,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 isEmailVerified: response.user.isEmailVerified,
             };
 
-            console.log(tokens);
             await SecureStorage.shared.saveTokens(tokens);
             await SecureStorage.shared.saveUserInfo(userInfo);
 
