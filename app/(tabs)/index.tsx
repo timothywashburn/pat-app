@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import CustomHeader from '../../components/CustomHeader';
 import { AgendaManager } from '../../managers';
 import { AgendaItem } from '../../models';
@@ -38,13 +39,28 @@ export default function AgendaPanel() {
     };
 
     const handleRefresh = async () => {
+        // Start refreshing
         setIsRefreshing(true);
+
+        // Provide haptic feedback when pull to refresh is triggered
         try {
+            // Use medium impact feedback
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } catch (error) {
+            console.log('Haptics not available:', error);
+        }
+
+        // Clear any previous errors
+        setErrorMessage(null);
+
+        try {
+            // Load fresh data
             await agendaManager.loadAgendaItems();
             setAgendaItems(agendaManager.agendaItems);
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to refresh items');
         } finally {
+            // End refreshing state
             setIsRefreshing(false);
         }
     };
@@ -142,6 +158,10 @@ export default function AgendaPanel() {
                         <RefreshControl
                             refreshing={isRefreshing}
                             onRefresh={handleRefresh}
+                            colors={['#007AFF']} // iOS uses tintColor, Android uses colors
+                            tintColor="#007AFF"
+                            title="Refreshing..."
+                            titleColor="#999999"
                         />
                     }
                 />
