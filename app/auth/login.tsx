@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Link } from 'expo-router';
-import { useAuth } from '../../contexts/AuthProvider';
+import {useAuthStore} from "@/services/AuthState";
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -9,7 +9,7 @@ export default function LoginScreen() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { signIn } = useAuth();
+    const { signIn } = useAuthStore();
 
     const handleLogin = async () => {
         if (!email || !password) {

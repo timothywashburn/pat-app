@@ -216,5 +216,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 }));
 
-// Export singleton instance
 export const AuthState = useAuthStore;

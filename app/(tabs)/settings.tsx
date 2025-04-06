@@ -2,10 +2,10 @@ import React, { useRef, useState } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import CustomHeader from '../../components/CustomHeader';
-import { useAuth } from '../../contexts/AuthProvider';
+import {useAuthStore} from "@/services/AuthState";
 
 export default function SettingsPanel() {
-    const { signOut, userInfo } = useAuth();
+    const { signOut, userInfo } = useAuthStore();
     const showHamburgerMenu = useRef(false);
     const [editMode, setEditMode] = useState(false);
 

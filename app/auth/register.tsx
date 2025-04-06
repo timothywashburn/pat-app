@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Link, useRouter } from 'expo-router';
-import { useAuth } from '../../contexts/AuthProvider';
+import {useAuthStore} from "@/services/AuthState";
 
 export default function RegisterScreen() {
     const [name, setName] = useState('');
@@ -11,8 +11,7 @@ export default function RegisterScreen() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { registerAccount } = useAuth();
-    const router = useRouter();
+    const { registerAccount } = useAuthStore();
 
     const handleRegister = async () => {
         if (!name || !email || !password || !confirmPassword) {
