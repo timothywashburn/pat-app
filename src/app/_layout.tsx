@@ -1,5 +1,3 @@
-// src/app/_layout.tsx
-
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
+import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 
 // Root layout with auth provider
 export default function RootLayout() {
@@ -18,6 +17,7 @@ export default function RootLayout() {
 
     useEffect(() => {
         initialize();
+        DeepLinkHandler.initialize();
     }, []);
 
     // Load settings when user is authenticated and email is verified
