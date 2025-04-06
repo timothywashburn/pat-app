@@ -10,7 +10,7 @@ export default function TabsLayout() {
     return (
         <Tabs screenOptions={{ headerShown: false }}>
             <Tabs.Screen
-                name="index" // This will be the agenda panel (default tab)
+                name="agenda" // This will be the agenda panel (default tab)
                 options={{
                     title: 'Agenda',
                     tabBarIcon: ({ color, size }: TabBarIconProps) => (
