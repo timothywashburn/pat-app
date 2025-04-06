@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import { AgendaManager } from '../../managers';
 import { AgendaItem } from '../../models';
@@ -113,9 +114,7 @@ export default function AgendaPanel() {
     );
 
     return (
-        <View style={styles.container}>
-            <StatusBar style="auto" />
-
+        <SafeAreaView style={styles.container} edges={['right', 'bottom', 'left']}>
             <CustomHeader
                 title="Agenda"
                 showAddButton
@@ -166,7 +165,7 @@ export default function AgendaPanel() {
                     }
                 />
             )}
-        </View>
+        </SafeAreaView>
     );
 }
 

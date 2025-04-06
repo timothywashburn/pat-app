@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CustomHeaderProps {
     title: string;
@@ -23,38 +24,48 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     showHamburgerMenu,
     trailing,
 }) => {
+    // Get safe area insets
+    const insets = useSafeAreaInsets();
+
     return (
-        <View style={styles.header}>
-            <View style={styles.leftSection}>
-                <TouchableOpacity
-                    onPress={() => {
-                        showHamburgerMenu.current = !showHamburgerMenu.current;
-                    }}
-                >
-                    <Ionicons name="menu" size={24} color="black" />
-                </TouchableOpacity>
-            </View>
-
-            <Text style={styles.title}>{title}</Text>
-
-            <View style={styles.rightSection}>
-                {showFilterButton && (
-                    <TouchableOpacity onPress={onFilterTapped} style={styles.iconButton}>
-                        <Ionicons
-                            name="filter"
-                            size={24}
-                            color={isFilterActive ? 'blue' : 'black'}
-                        />
+        <View
+            style={[
+                styles.header,
+                { paddingTop: insets.top } // Apply top inset as padding
+            ]}
+        >
+            <View style={styles.headerContent}>
+                <View style={styles.leftSection}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            showHamburgerMenu.current = !showHamburgerMenu.current;
+                        }}
+                    >
+                        <Ionicons name="menu" size={24} color="black" />
                     </TouchableOpacity>
-                )}
+                </View>
 
-                {showAddButton && (
-                    <TouchableOpacity onPress={onAddTapped} style={styles.iconButton}>
-                        <Ionicons name="add" size={24} color="black" />
-                    </TouchableOpacity>
-                )}
+                <Text style={styles.title}>{title}</Text>
 
-                {trailing && trailing()}
+                <View style={styles.rightSection}>
+                    {showFilterButton && (
+                        <TouchableOpacity onPress={onFilterTapped} style={styles.iconButton}>
+                            <Ionicons
+                                name="filter"
+                                size={24}
+                                color={isFilterActive ? 'blue' : 'black'}
+                            />
+                        </TouchableOpacity>
+                    )}
+
+                    {showAddButton && (
+                        <TouchableOpacity onPress={onAddTapped} style={styles.iconButton}>
+                            <Ionicons name="add" size={24} color="black" />
+                        </TouchableOpacity>
+                    )}
+
+                    {trailing && trailing()}
+                </View>
             </View>
         </View>
     );
@@ -62,14 +73,16 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
 const styles = StyleSheet.create({
     header: {
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0',
+    },
+    headerContent: {
         height: 60,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
     },
     leftSection: {
         flex: 1,
@@ -89,6 +102,7 @@ const styles = StyleSheet.create({
     },
     iconButton: {
         marginLeft: 16,
+        padding: 4, // Added padding for better touch target
     },
 });
 
