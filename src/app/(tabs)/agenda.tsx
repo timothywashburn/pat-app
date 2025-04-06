@@ -6,8 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '@/src/components/CustomHeader';
 import CreateAgendaItemView from '@/src/features/agenda/components/CreateAgendaItemView';
 import AgendaDetailPanel from '@/src/features/agenda/components/AgendaDetailPanel';
-import { AgendaItem } from '@/src/models';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
+import { AgendaItem } from "@/src/features/agenda/models";
 
 export default function AgendaPanel() {
     const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -18,7 +18,6 @@ export default function AgendaPanel() {
     const [showingCreateSheet, setShowingCreateSheet] = useState(false);
     const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
     const [showingDetail, setShowingDetail] = useState(false);
-    const showHamburgerMenu = useRef(false);
 
     // Initialize manager
     const agendaManager = AgendaManager.getInstance();
@@ -142,7 +141,6 @@ export default function AgendaPanel() {
                 showFilterButton
                 isFilterActive={showCompleted}
                 onFilterTapped={() => setShowCompleted(!showCompleted)}
-                showHamburgerMenu={showHamburgerMenu}
             />
 
             {errorMessage && (

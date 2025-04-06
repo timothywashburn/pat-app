@@ -10,7 +10,7 @@ export default function TabsLayout() {
     return (
         <Tabs screenOptions={{ headerShown: false }}>
             <Tabs.Screen
-                name="agenda" // This will be the agenda panel (default tab)
+                name="agenda"
                 options={{
                     title: 'Agenda',
                     tabBarIcon: ({ color, size }: TabBarIconProps) => (
@@ -19,7 +19,7 @@ export default function TabsLayout() {
                 }}
             />
             <Tabs.Screen
-                name="inbox" // This will be the inbox panel
+                name="inbox"
                 options={{
                     title: 'Inbox',
                     tabBarIcon: ({ color, size }: TabBarIconProps) => (
@@ -28,7 +28,7 @@ export default function TabsLayout() {
                 }}
             />
             <Tabs.Screen
-                name="tasks" // This will be the tasks panel
+                name="tasks"
                 options={{
                     title: 'Tasks',
                     tabBarIcon: ({ color, size }: TabBarIconProps) => (
@@ -37,7 +37,7 @@ export default function TabsLayout() {
                 }}
             />
             <Tabs.Screen
-                name="people" // This will be the people panel
+                name="people"
                 options={{
                     title: 'People',
                     tabBarIcon: ({ color, size }: TabBarIconProps) => (
@@ -46,7 +46,7 @@ export default function TabsLayout() {
                 }}
             />
             <Tabs.Screen
-                name="settings" // This will be the settings panel
+                name="settings"
                 options={{
                     title: 'Settings',
                     tabBarIcon: ({ color, size }: TabBarIconProps) => (

@@ -6,7 +6,6 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 
 export default function SettingsPanel() {
     const {signOut, userInfo} = useAuthStore();
-    const showHamburgerMenu = useRef(false);
     const [editMode, setEditMode] = useState(false);
 
     return (
@@ -16,7 +15,6 @@ export default function SettingsPanel() {
             <CustomHeader
                 title="Settings"
                 showAddButton={false}
-                showHamburgerMenu={showHamburgerMenu}
                 trailing={() => (
                     <Text
                         style={styles.editButton}

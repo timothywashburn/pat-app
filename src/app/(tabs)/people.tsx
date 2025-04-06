@@ -5,7 +5,7 @@ import CustomHeader from '@/src/components/CustomHeader';
 import PersonItemView from '@/src/features/people/components/PersonItemView';
 import PersonDetailPanel from '@/src/features/people/components/PersonDetailPanel';
 import CreatePersonView from '@/src/features/people/components/CreatePersonView';
-import { Person } from '@/src/models';
+import { Person } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
 export default function PeoplePanel() {
@@ -18,7 +18,6 @@ export default function PeoplePanel() {
     const [showingCreateSheet, setShowingCreateSheet] = useState(false);
     const showHamburgerMenu = useRef(false);
 
-    // Initialize manager
     const personManager = PersonManager.getInstance();
 
     useEffect(() => {
@@ -60,7 +59,7 @@ export default function PeoplePanel() {
 
     const handleDetailDismiss = () => {
         setShowingDetail(false);
-        loadPeople(); // Refresh list after possible changes
+        loadPeople();
     };
 
     const handleCreatePerson = () => {

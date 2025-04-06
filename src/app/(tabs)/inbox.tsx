@@ -25,7 +25,6 @@ export default function InboxPanel() {
     const [editingThought, setEditingThought] = useState<Thought | null>(null);
     const [editedContent, setEditedContent] = useState('');
     const [showingCreateAgendaSheet, setShowingCreateAgendaSheet] = useState(false);
-    const showHamburgerMenu = useRef(false);
 
     // Initialize manager
     const thoughtManager = ThoughtManager.getInstance();
@@ -164,7 +163,6 @@ export default function InboxPanel() {
                 title="Inbox"
                 showAddButton={true}
                 onAddTapped={() => setShowingCreateAgendaSheet(true)}
-                showHamburgerMenu={showHamburgerMenu}
             />
 
             <View style={styles.inputContainer}>

@@ -10,7 +10,6 @@ interface CustomHeaderProps {
     showFilterButton?: boolean;
     isFilterActive?: boolean;
     onFilterTapped?: () => void;
-    showHamburgerMenu: React.MutableRefObject<boolean>;
     trailing?: () => React.ReactNode;
 }
 
@@ -21,7 +20,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     showFilterButton = false,
     isFilterActive = false,
     onFilterTapped,
-    showHamburgerMenu,
     trailing,
 }) => {
     // Get safe area insets
@@ -38,7 +36,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                 <View style={styles.leftSection}>
                     <TouchableOpacity
                         onPress={() => {
-                            showHamburgerMenu.current = !showHamburgerMenu.current;
+                            // TODO: implement hamburger menu
                         }}
                     >
                         <Ionicons name="menu" size={24} color="black"/>

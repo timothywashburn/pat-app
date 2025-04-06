@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import CustomHeader from '@/src/components/CustomHeader';
 
 export default function TasksPanel() {
-    const showHamburgerMenu = useRef(false);
 
     return (
         <View style={styles.container}>
@@ -16,7 +15,6 @@ export default function TasksPanel() {
                 onAddTapped={() => {
                     console.log('Add task tapped');
                 }}
-                showHamburgerMenu={showHamburgerMenu}
             />
 
             <View style={styles.content}>
