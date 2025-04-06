@@ -1,6 +1,6 @@
-import { AgendaItem } from '@/src/models';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
+import { AgendaItem } from "@/src/features/agenda/models";
 
 export class AgendaManager {
     private static instance: AgendaManager;

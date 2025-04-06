@@ -1,4 +1,4 @@
-import { Person, PersonNote, PersonProperty } from '@/src/models';
+import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
 
