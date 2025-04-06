@@ -21,14 +21,16 @@ interface CreateAgendaItemViewProps {
     visible: boolean;
     onDismiss: () => void;
     onItemCreated?: () => void;
+    initialName?: string;
 }
 
 const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
     visible,
     onDismiss,
     onItemCreated,
+    initialName = ''
 }) => {
-    const [name, setName] = useState('');
+    const [name, setName] = useState(initialName);
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [notes, setNotes] = useState('');
