@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
+import CreateAgendaItemView from '../../components/CreateAgendaItemView';
+import AgendaDetailPanel from '../../components/AgendaDetailPanel';
 import { AgendaManager } from '../../managers';
 import { AgendaItem } from '../../models';
 
@@ -14,6 +16,9 @@ export default function AgendaPanel() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [showCompleted, setShowCompleted] = useState(false);
+    const [showingCreateSheet, setShowingCreateSheet] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
+    const [showingDetail, setShowingDetail] = useState(false);
     const showHamburgerMenu = useRef(false);
 
     // Initialize manager
@@ -66,6 +71,22 @@ export default function AgendaPanel() {
         }
     };
 
+    const handleAddItem = () => {
+        setShowingCreateSheet(true);
+    };
+
+    const handleItemSelect = (item: AgendaItem) => {
+        setSelectedItem(item);
+        setShowingDetail(true);
+    };
+
+    const handleDetailDismiss = () => {
+        setShowingDetail(false);
+        setSelectedItem(null);
+        // Refresh the list after details view is closed
+        loadItems();
+    };
+
     const filteredItems = agendaItems
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
@@ -88,17 +109,14 @@ export default function AgendaPanel() {
     const renderItem = ({ item }: { item: AgendaItem }) => (
         <TouchableOpacity
             style={styles.itemContainer}
-            onPress={() => {
-                // Handle item tap (show detail panel)
-                console.log('Item tapped:', item.id);
-            }}
+            onPress={() => handleItemSelect(item)}
         >
             <View style={styles.itemContent}>
                 <Text style={styles.itemTitle}>{item.name}</Text>
 
                 {item.date && (
                     <Text style={styles.itemDate}>
-                        {new Date(item.date).toLocaleDateString()}
+                        {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
                 )}
 
@@ -118,10 +136,7 @@ export default function AgendaPanel() {
             <CustomHeader
                 title="Agenda"
                 showAddButton
-                onAddTapped={() => {
-                    // Handle add button tap
-                    console.log('Add button tapped');
-                }}
+                onAddTapped={handleAddItem}
                 showFilterButton
                 isFilterActive={showCompleted}
                 onFilterTapped={() => setShowCompleted(!showCompleted)}
@@ -146,6 +161,12 @@ export default function AgendaPanel() {
                     <Text style={styles.emptyText}>
                         {showCompleted ? 'No completed items' : 'No pending items'}
                     </Text>
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={handleAddItem}
+                    >
+                        <Text style={styles.addButtonText}>Add Item</Text>
+                    </TouchableOpacity>
                 </View>
             ) : (
                 <FlatList
@@ -165,6 +186,22 @@ export default function AgendaPanel() {
                     }
                 />
             )}
+
+            {/* Create new item modal */}
+            <CreateAgendaItemView
+                visible={showingCreateSheet}
+                onDismiss={() => setShowingCreateSheet(false)}
+                onItemCreated={loadItems}
+            />
+
+            {/* Item detail panel */}
+            {selectedItem && (
+                <AgendaDetailPanel
+                    item={selectedItem}
+                    isPresented={showingDetail}
+                    onDismiss={handleDetailDismiss}
+                />
+            )}
         </SafeAreaView>
     );
 }
@@ -178,6 +215,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 20,
     },
     listContent: {
         padding: 16,
@@ -226,6 +264,17 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         color: 'gray',
-        marginTop: 12,
+        marginBottom: 20,
+    },
+    addButton: {
+        backgroundColor: '#007AFF',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 8,
+    },
+    addButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
