@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 
 export default function LoginScreen() {
@@ -10,6 +10,7 @@ export default function LoginScreen() {
     const [isLoading, setIsLoading] = useState(false);
 
     const {signIn} = useAuthStore();
+    const router = useRouter();
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -22,6 +23,7 @@ export default function LoginScreen() {
 
         try {
             await signIn(email, password);
+            router.replace('/(tabs)/agenda');
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Failed to sign in');
         } finally {
@@ -67,7 +69,7 @@ export default function LoginScreen() {
 
             <View style={styles.registerContainer}>
                 <Text style={styles.registerText}>Don't have an account? </Text>
-                <Link href="/auth/register" asChild>
+                <Link href="/(auth)/register" asChild>
                     <TouchableOpacity>
                         <Text style={styles.registerLink}>Register</Text>
                     </TouchableOpacity>

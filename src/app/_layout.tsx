@@ -1,15 +1,11 @@
-import { Stack } from 'expo-router';
+import { Stack, Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import AuthGuard from "@/src/features/auth/components/AuthGuard";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
-import { StyleSheet } from "react-native";
 
-// Root layout with auth provider
 export default function RootLayout() {
     const initialize = useAuthStore(state => state.initialize);
     const { isAuthenticated, isEmailVerified } = useAuthStore();
@@ -61,14 +57,12 @@ export default function RootLayout() {
     return (
         <>
             <StatusBar style="dark"/>
-            <AuthGuard>
-                <Stack screenOptions={{
-                    header: () => null
-                }}>
-                    <Stack.Screen name="(auth)"/>
-                    <Stack.Screen name="(tabs)"/>
-                </Stack>
-            </AuthGuard>
+            <Stack screenOptions={{
+                header: () => null
+            }}>
+                <Stack.Screen name="(auth)"/>
+                <Stack.Screen name="(tabs)"/>
+            </Stack>
         </>
     );
 }

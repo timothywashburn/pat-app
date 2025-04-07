@@ -10,7 +10,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({children}) => {
     const {isAuthenticated, isLoading} = useAuthStore();
 
     if (isLoading) return null;
-    if (!isAuthenticated) return <Redirect href="/auth/login"/>;
+    if (!isAuthenticated) return <Redirect href="/(auth)/login"/>;
     return <>{children}</>;
 };
 
