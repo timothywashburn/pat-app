@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import CustomHeader from '@/src/components/CustomHeader';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
@@ -9,7 +9,7 @@ export default function SettingsPanel() {
     const [editMode, setEditMode] = useState(false);
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style="auto"/>
 
             <CustomHeader
@@ -44,7 +44,7 @@ export default function SettingsPanel() {
                     Sign Out
                 </Text>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 

@@ -7,6 +7,7 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
+import { StyleSheet } from "react-native";
 
 // Root layout with auth provider
 export default function RootLayout() {
@@ -58,18 +59,16 @@ export default function RootLayout() {
     }, [isAuthenticated, isEmailVerified, isSettingsLoaded]);
 
     return (
-        <SafeAreaProvider>
+        <>
             <StatusBar style="dark"/>
             <AuthGuard>
                 <Stack screenOptions={{
                     header: () => null
                 }}>
-                    {/* Auth group won't appear in tab bar */}
-                    <Stack.Screen name="auth"/>
-                    {/* (tabs) group will contain all tab screens */}
+                    <Stack.Screen name="(auth)"/>
                     <Stack.Screen name="(tabs)"/>
                 </Stack>
             </AuthGuard>
-        </SafeAreaProvider>
+        </>
     );
 }

@@ -4,6 +4,7 @@ import {
     Alert,
     FlatList,
     RefreshControl,
+    SafeAreaView,
     StyleSheet,
     Text,
     TextInput,
@@ -26,7 +27,6 @@ export default function InboxPanel() {
     const [editedContent, setEditedContent] = useState('');
     const [showingCreateAgendaSheet, setShowingCreateAgendaSheet] = useState(false);
 
-    // Initialize manager
     const thoughtManager = ThoughtManager.getInstance();
 
     useEffect(() => {
@@ -158,7 +158,7 @@ export default function InboxPanel() {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <CustomHeader
                 title="Inbox"
                 showAddButton={true}
@@ -237,7 +237,7 @@ export default function InboxPanel() {
                     initialName={selectedThought?.content || ''}
                 />
             )}
-        </View>
+        </SafeAreaView>
     );
 }
 

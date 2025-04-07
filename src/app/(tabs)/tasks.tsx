@@ -1,12 +1,12 @@
 import React, { useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import CustomHeader from '@/src/components/CustomHeader';
 
 export default function TasksPanel() {
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style="auto"/>
 
             <CustomHeader
@@ -21,7 +21,7 @@ export default function TasksPanel() {
                 <Text style={styles.title}>Tasks Panel</Text>
                 <Text>This will be the Tasks panel for managing tasks</Text>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 

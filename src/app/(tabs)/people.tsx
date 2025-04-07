@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import CustomHeader from '@/src/components/CustomHeader';
 import PersonItemView from '@/src/features/people/components/PersonItemView';
@@ -16,7 +16,6 @@ export default function PeoplePanel() {
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
     const [showingDetail, setShowingDetail] = useState(false);
     const [showingCreateSheet, setShowingCreateSheet] = useState(false);
-    const showHamburgerMenu = useRef(false);
 
     const personManager = PersonManager.getInstance();
 
@@ -73,14 +72,13 @@ export default function PeoplePanel() {
     );
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <StatusBar style="auto" />
 
             <CustomHeader
                 title="People"
                 showAddButton
                 onAddTapped={handleCreatePerson}
-                showHamburgerMenu={showHamburgerMenu}
             />
 
             {errorMessage && (
@@ -129,7 +127,7 @@ export default function PeoplePanel() {
                 onDismiss={() => setShowingCreateSheet(false)}
                 onPersonCreated={loadPeople}
             />
-        </View>
+        </SafeAreaView>
     );
 }
 

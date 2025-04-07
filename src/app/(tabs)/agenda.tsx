@@ -19,7 +19,6 @@ export default function AgendaPanel() {
     const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
     const [showingDetail, setShowingDetail] = useState(false);
 
-    // Initialize manager
     const agendaManager = AgendaManager.getInstance();
 
     useEffect(() => {
@@ -133,7 +132,7 @@ export default function AgendaPanel() {
     );
 
     return (
-        <SafeAreaView style={styles.container} edges={['right', 'bottom', 'left']}>
+        <SafeAreaView style={styles.container}>
             <CustomHeader
                 title="Agenda"
                 showAddButton

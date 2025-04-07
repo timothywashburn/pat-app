@@ -22,15 +22,9 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     onFilterTapped,
     trailing,
 }) => {
-    // Get safe area insets
-    const insets = useSafeAreaInsets();
-
     return (
         <View
-            style={[
-                styles.header,
-                {paddingTop: insets.top} // Apply top inset as padding
-            ]}
+            style={styles.header}
         >
             <View style={styles.headerContent}>
                 <View style={styles.leftSection}>
@@ -100,7 +94,7 @@ const styles = StyleSheet.create({
     },
     iconButton: {
         marginLeft: 16,
-        padding: 4, // Added padding for better touch target
+        padding: 4,
     },
 });
 
