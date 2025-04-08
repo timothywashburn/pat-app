@@ -39,7 +39,7 @@ class WebStorage {
  */
 class SecureStorage {
     private static instance: SecureStorage;
-    private tokenService = 'dev.timothyw.pat';
+    private tokenService = 'dev.timothyw.patapp';
 
     private constructor() {
     }
@@ -52,7 +52,6 @@ class SecureStorage {
     }
 
     private getKey(key: string): string {
-        // Replace colons with dots as they're not supported in some environments
         return `${this.tokenService}.${key}`;
     }
 

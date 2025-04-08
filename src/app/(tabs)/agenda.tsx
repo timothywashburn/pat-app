@@ -42,28 +42,22 @@ export default function AgendaPanel() {
     };
 
     const handleRefresh = async () => {
-        // Start refreshing
         setIsRefreshing(true);
 
-        // Provide haptic feedback when pull to refresh is triggered
         try {
-            // Use medium impact feedback
             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } catch (error) {
             console.log('Haptics not available:', error);
         }
 
-        // Clear any previous errors
         setErrorMessage(null);
 
         try {
-            // Load fresh data
             await agendaManager.loadAgendaItems();
             setAgendaItems(agendaManager.agendaItems);
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to refresh items');
         } finally {
-            // End refreshing state
             setIsRefreshing(false);
         }
     };
@@ -80,26 +74,16 @@ export default function AgendaPanel() {
     const handleDetailDismiss = () => {
         setShowingDetail(false);
         setSelectedItem(null);
-        // Refresh the list after details view is closed
         loadItems();
     };
 
     const filteredItems = agendaItems
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
-            // Sort by urgency first
-            if (a.urgent !== b.urgent) {
-                return a.urgent ? -1 : 1;
-            }
-
-            // Then sort by date
-            if (a.date && b.date) {
-                return new Date(a.date).getTime() - new Date(b.date).getTime();
-            }
-
+            if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
+            if (a.date && b.date) return new Date(a.date).getTime() - new Date(b.date).getTime();
             if (a.date) return -1;
             if (b.date) return 1;
-
             return 0;
         });
 
