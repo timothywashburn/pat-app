@@ -12,13 +12,15 @@
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "bundleIdentifier": "dev.timothyw.patapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "dev.timothyw.patapp"
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +51,12 @@
         "projectId": "567a8eb7-3de0-44ff-b899-e0f7b83d5118"
       }
     },
-    "owner": "timothywashburn"
+    "owner": "timothywashburn",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/567a8eb7-3de0-44ff-b899-e0f7b83d5118"
+    }
   }
 }
