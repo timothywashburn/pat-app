@@ -52,10 +52,12 @@ export class SettingsManager {
                 visible: true,
             },
         ],
-        categories: ['Work', 'Personal', 'Family', 'Health', 'Finance'],
-        types: ['Meeting', 'Call', 'Task', 'Reminder', 'Appointment'],
-        propertyKeys: ['Email', 'Phone', 'Address', 'Website', 'Birthday'],
+        categories: ['School', 'Work', 'Personal'],
+        types: ['Assignment', 'Project'],
+        propertyKeys: ['Email', 'Phone', 'Company', 'Title'],
     };
+    private _config: Record<string, any> = {};
+    private _isLoaded: boolean = false;
 
     private constructor() {
     }
@@ -65,6 +67,10 @@ export class SettingsManager {
             SettingsManager.instance = new SettingsManager();
         }
         return SettingsManager.instance;
+    }
+
+    get isLoaded(): boolean {
+        return this._isLoaded;
     }
 
     get panels(): PanelSetting[] {
@@ -87,10 +93,14 @@ export class SettingsManager {
         return [...this._settings.propertyKeys];
     }
 
+    get config(): Record<string, any> {
+        return { ...this._config };
+    }
+
     async loadSettings(): Promise<void> {
         const authToken = AuthState.getState().authToken;
         if (!authToken) {
-            return;
+            throw new Error('No auth token');
         }
 
         try {
@@ -101,31 +111,35 @@ export class SettingsManager {
             });
 
             if (response.user) {
-                const userData = response.user;
-
-                if (userData.iosApp) {
-                    // When we get to implementing this for real, we'll use the equivalent
-                    // of the iOS app's settings, adapting them for React Native
-
-                    if (userData.iosApp.itemCategories) {
-                        this._settings.categories = userData.iosApp.itemCategories;
-                    }
-
-                    if (userData.iosApp.itemTypes) {
-                        this._settings.types = userData.iosApp.itemTypes;
-                    }
-
-                    if (userData.iosApp.propertyKeys) {
-                        this._settings.propertyKeys = userData.iosApp.propertyKeys;
-                    }
-
-                    if (userData.iosApp.panels) {
-                        this.updatePanelsFromSettings(userData.iosApp.panels);
-                    }
-                }
+                this._config = response.user;
+                this.updateFromConfig();
+                this._isLoaded = true;
             }
         } catch (error) {
             console.error('Failed to load settings:', error);
+            throw error;
+        }
+    }
+
+    private updateFromConfig(): void {
+        if (this._config.iosApp) {
+            const iosApp = this._config.iosApp;
+
+            if (iosApp.itemCategories) {
+                this._settings.categories = iosApp.itemCategories;
+            }
+
+            if (iosApp.itemTypes) {
+                this._settings.types = iosApp.itemTypes;
+            }
+
+            if (iosApp.propertyKeys) {
+                this._settings.propertyKeys = iosApp.propertyKeys;
+            }
+
+            if (iosApp.panels) {
+                this.updatePanelsFromSettings(iosApp.panels);
+            }
         }
     }
 
@@ -186,71 +200,84 @@ export class SettingsManager {
         this._settings.panels = newPanels;
     }
 
-    async updatePanelSettings(): Promise<void> {
+    private async updateConfig(newConfig: Record<string, any>): Promise<void> {
         const authToken = AuthState.getState().authToken;
         if (!authToken) {
-            return;
+            throw new Error('No auth token');
         }
 
         try {
-            const panelSettings = this._settings.panels.map(setting => ({
-                panel: setting.panel.type.toLowerCase(),
-                visible: setting.visible,
-            }));
+            const response = await NetworkManager.shared.perform({
+                endpoint: '/api/account/config',
+                method: HTTPMethod.PUT,
+                body: newConfig,
+                token: authToken,
+            });
 
-            const body = {
-                iosApp: {
-                    panels: panelSettings,
+            if (response.user) {
+                // If the config has an iosApp property, update just that part
+                if (newConfig.iosApp && this._config.iosApp) {
+                    const existingIosApp = { ...this._config.iosApp };
+                    for (const [key, value] of Object.entries(newConfig.iosApp)) {
+                        existingIosApp[key] = value;
+                    }
+                    this._config = {
+                        ...this._config,
+                        iosApp: existingIosApp
+                    };
+                } else {
+                    this._config = response.user;
                 }
-            };
 
-            await NetworkManager.shared.perform({
-                endpoint: '/api/account/config',
-                method: HTTPMethod.PUT,
-                body,
-                token: authToken,
-            });
-        } catch (error) {
-            console.error('Failed to update panel settings:', error);
-            throw error;
-        }
-    }
-
-    async updateItemCategories(categories: string[]): Promise<void> {
-        this._settings.categories = [...categories];
-        await this.updateConfig({itemCategories: categories});
-    }
-
-    async updateItemTypes(types: string[]): Promise<void> {
-        this._settings.types = [...types];
-        await this.updateConfig({itemTypes: types});
-    }
-
-    async updatePropertyKeys(keys: string[]): Promise<void> {
-        this._settings.propertyKeys = [...keys];
-        await this.updateConfig({propertyKeys: keys});
-    }
-
-    private async updateConfig(update: Record<string, any>): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            return;
-        }
-
-        try {
-            const body = {
-                iosApp: update,
-            };
-
-            await NetworkManager.shared.perform({
-                endpoint: '/api/account/config',
-                method: HTTPMethod.PUT,
-                body,
-                token: authToken,
-            });
+                this.updateFromConfig();
+                // TODO: decide if I should emit an event here?
+                console.log('settings changed');
+            }
         } catch (error) {
             console.error('Failed to update config:', error);
             throw error;
         }
+    }
+
+    async updatePanelSettings(): Promise<void> {
+        const panelSettings = this._settings.panels.map(setting => ({
+            panel: setting.panel.type.toLowerCase(),
+            visible: setting.visible,
+        }));
+
+        const newConfig = {
+            iosApp: {
+                panels: panelSettings,
+            }
+        };
+
+        await this.updateConfig(newConfig);
+    }
+
+    async updateItemCategories(categories: string[]): Promise<void> {
+        this._settings.categories = [...categories];
+        await this.updateConfig({
+            iosApp: {
+                itemCategories: categories
+            }
+        });
+    }
+
+    async updateItemTypes(types: string[]): Promise<void> {
+        this._settings.types = [...types];
+        await this.updateConfig({
+            iosApp: {
+                itemTypes: types
+            }
+        });
+    }
+
+    async updatePropertyKeys(keys: string[]): Promise<void> {
+        this._settings.propertyKeys = [...keys];
+        await this.updateConfig({
+            iosApp: {
+                propertyKeys: keys
+            }
+        });
     }
 }
