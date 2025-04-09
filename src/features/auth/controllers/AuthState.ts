@@ -12,7 +12,6 @@ interface AuthState {
     // Derived state
     isEmailVerified: boolean;
 
-    // Methods
     initialize: () => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
     registerAccount: (name: string, email: string, password: string) => Promise<void>;
@@ -58,21 +57,17 @@ export const useAuthStore = create<AuthState>((set, get) => {
         userInfo: null,
         authToken: null,
 
-        // Derived state
         get isEmailVerified() {
             return get().userInfo?.isEmailVerified ?? false;
         },
 
-        // Methods
         initialize: async () => {
             try {
-                // Load stored user info
                 const userInfo = await SecureStorage.shared.getUserInfo();
                 if (userInfo) {
                     set({ userInfo });
                 }
 
-                // Load stored tokens
                 const tokens = await SecureStorage.shared.getTokens();
                 if (tokens) {
                     set({ authToken: tokens.accessToken });
@@ -121,7 +116,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
                 await NetworkManager.shared.perform(request);
 
-                // After successful registration, sign in
                 await get().signIn(email, password);
             } catch (error) {
                 console.error('account registration failed:', error);
