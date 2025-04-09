@@ -10,7 +10,7 @@ import {
     View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Person, PersonNote, PersonProperty } from '@/src/models';
+import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
 interface PersonDetailPanelProps {
