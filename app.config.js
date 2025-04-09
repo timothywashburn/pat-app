@@ -21,7 +21,7 @@ const getIdentifier = () => {
 };
 
 const getAppName = () => {
-    if (IS_DEV) return 'PaT (Dev)';
-    if (IS_PREVIEW) return 'PaT (Preview)';
-    return 'PaT';
+    if (IS_DEV) return 'Pat (Dev)';
+    if (IS_PREVIEW) return 'Pat (Preview)';
+    return 'Pat';
 };
