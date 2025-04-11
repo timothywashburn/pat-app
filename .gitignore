@@ -3,10 +3,11 @@ node_modules/
 ios/
 android/
 .DS_Store
+service-account.json
 
 # Expo
 .expo/
 dist/
 web-build/
 expo-env.d.ts
-build-*
+build-*.*
