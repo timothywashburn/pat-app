@@ -89,14 +89,15 @@ export default function AgendaPanel() {
 
     const renderItem = ({item}: { item: AgendaItem }) => (
         <TouchableOpacity
+            className="bg-surface"
             style={styles.itemContainer}
             onPress={() => handleItemSelect(item)}
         >
             <View style={styles.itemContent}>
-                <Text style={styles.itemTitle}>{item.name}</Text>
+                <Text className="text-primary" style={styles.itemTitle}>{item.name}</Text>
 
                 {item.date && (
-                    <Text style={styles.itemDate}>
+                    <Text className="text-secondary" style={styles.itemDate}>
                         {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -104,7 +105,7 @@ export default function AgendaPanel() {
                     </Text>
                 )}
 
-                {item.category && <Text style={styles.itemCategory}>{item.category}</Text>}
+                {item.category && <Text className="text-accent" style={styles.itemCategory}>{item.category}</Text>}
 
                 {item.urgent && (
                     <View style={styles.urgentBadge}>
@@ -116,7 +117,7 @@ export default function AgendaPanel() {
     );
 
     return (
-        <SafeAreaView style={styles.container} className="bg-example">
+        <SafeAreaView>
             <CustomHeader
                 title="Agenda"
                 showAddButton
@@ -190,10 +191,6 @@ export default function AgendaPanel() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        // backgroundColor: '#fff',
-    },
     centerContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -204,7 +201,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     itemContainer: {
-        backgroundColor: '#f5f5f5',
+        // backgroundColor: '#f5f5f5',
         borderRadius: 10,
         padding: 16,
         marginBottom: 12,
@@ -219,12 +216,12 @@ const styles = StyleSheet.create({
     },
     itemDate: {
         fontSize: 14,
-        color: '#666',
+        // color: '#666',
         marginBottom: 4,
     },
     itemCategory: {
         fontSize: 14,
-        color: '#007AFF',
+        // color: '#007AFF',
         marginBottom: 4,
     },
     urgentBadge: {

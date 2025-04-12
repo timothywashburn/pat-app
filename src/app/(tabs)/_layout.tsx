@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AuthGuard from "@/src/features/auth/components/AuthGuard";
+import { useTheme } from '@/src/theme/ThemeManager';
 
 type TabBarIconProps = {
     color: string;
@@ -8,9 +9,20 @@ type TabBarIconProps = {
 };
 
 export default function TabsLayout() {
+    const { colors } = useTheme();
+
     return (
         <AuthGuard>
-            <Tabs screenOptions={{ headerShown: false }}>
+            <Tabs
+                screenOptions={{
+                    headerShown: false,
+                    tabBarActiveTintColor: colors.accent,
+                    tabBarInactiveTintColor: colors.secondary,
+                    tabBarStyle: {
+                        backgroundColor: colors.surface,
+                    }
+                }}
+            >
                 <Tabs.Screen
                     name="agenda"
                     options={{

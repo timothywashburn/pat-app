@@ -5,7 +5,11 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                example: 'var(--example)'
+                primary: 'var(--primary)',
+                secondary: 'var(--secondary)',
+                accent: 'var(--accent)',
+                background: 'var(--background)',
+                surface: 'var(--surface)'
             }
         },
     },
