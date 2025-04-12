@@ -1,4 +1,6 @@
 .idea/
+__tests__/
+coverage/
 node_modules/
 ios/
 android/
