@@ -7,6 +7,8 @@ import { SettingsManager } from '@/src/features/settings/controllers/SettingsMan
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ActivityIndicator, Text, View } from "react-native";
 
+import "@/global.css"
+
 export default function RootLayout() {
     const initialize = useAuthStore(state => state.initialize);
     const { isAuthenticated, isEmailVerified, isLoading } = useAuthStore();
