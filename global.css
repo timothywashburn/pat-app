@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --example: #5555aa;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --example: #55aa55;
+    }
+}

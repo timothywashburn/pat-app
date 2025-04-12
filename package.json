@@ -3,8 +3,8 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
-    "dev": "APP_VARIANT=development npx expo start",
+    "start": "expo start -c",
+    "dev": "APP_VARIANT=development npx expo start -c",
     "build:dev": "npm-run-all --parallel build:dev:ios build:dev:android",
     "build:dev:ios": "eas build --platform ios --profile development --local",
     "build:dev:android": "eas build --platform android --profile development --local",

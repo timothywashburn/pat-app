@@ -116,7 +116,7 @@ export default function AgendaPanel() {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} className="bg-example">
             <CustomHeader
                 title="Agenda"
                 showAddButton
@@ -192,7 +192,7 @@ export default function AgendaPanel() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        // backgroundColor: '#fff',
     },
     centerContainer: {
         flex: 1,

@@ -1,3 +1,5 @@
+import "@/global.css"
+
 import { Stack, Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
@@ -6,14 +8,16 @@ import SocketService from '@/src/services/SocketService';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ActivityIndicator, Text, View } from "react-native";
-
-import "@/global.css"
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { useColorScheme } from "nativewind";
 
 export default function RootLayout() {
     const initialize = useAuthStore(state => state.initialize);
     const { isAuthenticated, isEmailVerified, isLoading } = useAuthStore();
     const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
     const settingsManager = SettingsManager.shared;
+
+    const { colorScheme } = useColorScheme();
 
     useEffect(() => {
         initialize();
@@ -60,7 +64,7 @@ export default function RootLayout() {
     }
 
     return (
-        <>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
             <StatusBar style="dark"/>
             <Stack screenOptions={{
                 header: () => null
@@ -68,6 +72,6 @@ export default function RootLayout() {
                 <Stack.Screen name="(auth)"/>
                 <Stack.Screen name="(tabs)"/>
             </Stack>
-        </>
+        </ThemeProvider>
     );
 }
