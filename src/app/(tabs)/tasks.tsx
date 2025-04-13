@@ -1,44 +1,28 @@
-import React, { useRef } from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { SafeAreaView, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 
 export default function TasksPanel() {
+    const { colorScheme } = useTheme();
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar style="auto"/>
+        <SafeAreaView className="flex-1 bg-background">
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
             <CustomHeader
                 title="Tasks"
                 showAddButton
                 onAddTapped={() => {
-                    console.log('Add task tapped');
+                    console.log('add task tapped');
                 }}
             />
 
-            <View style={styles.content}>
-                <Text style={styles.title}>Tasks Panel</Text>
-                <Text>This will be the Tasks panel for managing tasks</Text>
+            <View className="flex-1 items-center justify-center p-5">
+                <Text className="text-2xl font-bold text-primary mb-5">Tasks Panel</Text>
+                <Text className="text-secondary">This will be the Tasks panel for managing tasks</Text>
             </View>
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    content: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-});

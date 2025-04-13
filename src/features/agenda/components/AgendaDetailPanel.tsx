@@ -4,7 +4,6 @@ import {
     Alert,
     Platform,
     ScrollView,
-    StyleSheet,
     Switch,
     Text,
     TextInput,
@@ -14,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@/src/theme/ThemeManager';
 import { SettingsManager } from "@/src/features/settings/controllers/SettingsManager";
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
@@ -30,6 +30,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
     onDismiss,
 }) => {
     const insets = useSafeAreaInsets();
+    const { colors } = useTheme();
 
     // State for edited values
     const [name, setName] = useState(item.name);
@@ -130,30 +131,25 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
 
     return (
         <View
-            style={[
-                styles.container,
-                { paddingTop: insets.top }
-            ]}
+            className="absolute inset-0 bg-surface z-50"
+            style={{ paddingTop: insets.top }}
         >
-            <View style={styles.header}>
+            <View className="flex-row justify-between items-center px-4 py-4 border-b border-unset">
                 <TouchableOpacity onPress={onDismiss}>
-                    <Ionicons name="chevron-back" size={24} color="#007AFF" />
+                    <Ionicons name="chevron-back" size={24} color={colors.accent} />
                 </TouchableOpacity>
 
-                <Text style={styles.title}>Edit Item</Text>
+                <Text className="text-lg font-bold text-primary">Edit Item</Text>
 
                 <TouchableOpacity
                     onPress={handleSave}
                     disabled={!name.trim() || isLoading}
                 >
                     {isLoading ? (
-                        <ActivityIndicator size="small" color="#007AFF" />
+                        <ActivityIndicator size="small" color={colors.accent} />
                     ) : (
                         <Text
-                            style={[
-                                styles.saveButton,
-                                !name.trim() && styles.disabledButton
-                            ]}
+                            className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
                         >
                             Save
                         </Text>
@@ -162,55 +158,56 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
             </View>
 
             {errorMessage && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
             )}
 
-            <ScrollView style={styles.content}>
-                <View style={styles.formGroup}>
-                    <Text style={styles.label}>Name</Text>
+            <ScrollView className="flex-1 p-4">
+                <View className="mb-5">
+                    <Text className="text-base font-medium text-primary mb-2">Name</Text>
                     <TextInput
-                        style={styles.input}
+                        className="border border-unset rounded-lg p-3 text-primary"
                         value={name}
                         onChangeText={setName}
                         placeholder="Item Name"
+                        placeholderTextColor={colors.secondary}
                     />
                 </View>
 
-                <View style={styles.formGroup}>
-                    <Text style={styles.label}>Date</Text>
-                    <View style={styles.dateContainer}>
+                <View className="mb-5">
+                    <Text className="text-base font-medium text-primary mb-2">Date</Text>
+                    <View className="flex-row items-center">
                         {date ? (
                             <TouchableOpacity
-                                style={styles.dateButton}
+                                className="flex-1 flex-row items-center justify-between border border-unset rounded-lg p-3"
                                 onPress={() => setShowDatePicker(true)}
                             >
-                                <Text style={styles.dateText}>
+                                <Text className="text-base text-primary">
                                     {date.toLocaleDateString()} at {date.toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 })}
                                 </Text>
-                                <Ionicons name="calendar" size={20} color="#007AFF" />
+                                <Ionicons name="calendar" size={20} color={colors.accent} />
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
-                                style={styles.addDateButton}
+                                className="flex-1 flex-row items-center justify-center border border-unset rounded-lg p-3 bg-background"
                                 onPress={() => {
                                     setDate(new Date());
                                     setShowDatePicker(true);
                                 }}
                             >
-                                <Text style={styles.addDateText}>Add Date</Text>
-                                <Ionicons name="add-circle" size={20} color="#007AFF" />
+                                <Text className="text-base text-accent mr-2">Add Date</Text>
+                                <Ionicons name="add-circle" size={20} color={colors.accent} />
                             </TouchableOpacity>
                         )}
 
                         {date && (
                             <TouchableOpacity
-                                style={styles.clearDateButton}
+                                className="ml-2 p-1"
                                 onPress={() => setDate(undefined)}
                             >
-                                <Ionicons name="close-circle" size={24} color="#999" />
+                                <Ionicons name="close-circle" size={24} color={colors.secondary} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -225,9 +222,9 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                     )}
                 </View>
 
-                <View style={styles.formGroup}>
-                    <View style={styles.urgentRow}>
-                        <Text style={[styles.label, styles.urgentLabel]}>Urgent</Text>
+                <View className="mb-5">
+                    <View className="flex-row items-center justify-between">
+                        <Text className="text-base font-medium text-red-500">Urgent</Text>
                         <Switch
                             value={urgent}
                             onValueChange={setUrgent}
@@ -238,25 +235,19 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                     </View>
                 </View>
 
-                <View style={styles.formGroup}>
-                    <Text style={styles.label}>Category</Text>
+                <View className="mb-5">
+                    <Text className="text-base font-medium text-primary mb-2">Category</Text>
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.categoryContainer}
+                        contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                     >
                         <TouchableOpacity
-                            style={[
-                                styles.categoryChip,
-                                category === undefined && styles.selectedChip
-                            ]}
+                            className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                             onPress={() => setCategory(undefined)}
                         >
                             <Text
-                                style={[
-                                    styles.categoryText,
-                                    category === undefined && styles.selectedChipText
-                                ]}
+                                className={`text-sm ${category === undefined ? 'text-white' : 'text-primary'}`}
                             >
                                 None
                             </Text>
@@ -265,17 +256,11 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                         {categories.map(cat => (
                             <TouchableOpacity
                                 key={cat}
-                                style={[
-                                    styles.categoryChip,
-                                    category === cat && styles.selectedChip
-                                ]}
+                                className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                                 onPress={() => setCategory(cat)}
                             >
                                 <Text
-                                    style={[
-                                        styles.categoryText,
-                                        category === cat && styles.selectedChipText
-                                    ]}
+                                    className={`text-sm ${category === cat ? 'text-white' : 'text-primary'}`}
                                 >
                                     {cat}
                                 </Text>
@@ -284,25 +269,19 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                     </ScrollView>
                 </View>
 
-                <View style={styles.formGroup}>
-                    <Text style={styles.label}>Type</Text>
+                <View className="mb-5">
+                    <Text className="text-base font-medium text-primary mb-2">Type</Text>
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.categoryContainer}
+                        contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                     >
                         <TouchableOpacity
-                            style={[
-                                styles.categoryChip,
-                                type === undefined && styles.selectedChip
-                            ]}
+                            className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                             onPress={() => setType(undefined)}
                         >
                             <Text
-                                style={[
-                                    styles.categoryText,
-                                    type === undefined && styles.selectedChipText
-                                ]}
+                                className={`text-sm ${type === undefined ? 'text-white' : 'text-primary'}`}
                             >
                                 None
                             </Text>
@@ -311,17 +290,11 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                         {types.map(t => (
                             <TouchableOpacity
                                 key={t}
-                                style={[
-                                    styles.categoryChip,
-                                    type === t && styles.selectedChip
-                                ]}
+                                className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                                 onPress={() => setType(t)}
                             >
                                 <Text
-                                    style={[
-                                        styles.categoryText,
-                                        type === t && styles.selectedChipText
-                                    ]}
+                                    className={`text-sm ${type === t ? 'text-white' : 'text-primary'}`}
                                 >
                                     {t}
                                 </Text>
@@ -330,212 +303,44 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                     </ScrollView>
                 </View>
 
-                <View style={styles.formGroup}>
-                    <Text style={styles.label}>Notes</Text>
+                <View className="mb-5">
+                    <Text className="text-base font-medium text-primary mb-2">Notes</Text>
                     <TextInput
-                        style={styles.notesInput}
+                        className="border border-unset rounded-lg p-3 text-base text-primary min-h-[100px]"
                         value={notes}
                         onChangeText={setNotes}
                         placeholder="Add notes..."
+                        placeholderTextColor={colors.secondary}
                         multiline
                         numberOfLines={4}
                         textAlignVertical="top"
                     />
                 </View>
 
-                <View style={styles.actionButtons}>
+                <View className="mt-5 gap-2.5">
                     <TouchableOpacity
-                        style={styles.completeButton}
+                        className="flex-row items-center justify-center bg-green-500 rounded-lg p-3"
                         onPress={handleToggleCompleted}
                     >
-                        <Ionicons name={item.completed ? "refresh-circle" : "checkmark-circle"} size={20}
-                                  color="white" />
-                        <Text style={styles.completeButtonText}>
+                        <Ionicons name={item.completed ? "refresh-circle" : "checkmark-circle"} size={20} color="white" />
+                        <Text className="text-white text-base font-semibold ml-2">
                             {item.completed ? "Mark as Incomplete" : "Mark as Complete"}
                         </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.deleteButton}
+                        className="flex-row items-center justify-center bg-red-500 rounded-lg p-3"
                         onPress={handleDelete}
                     >
                         <Ionicons name="trash-outline" size={20} color="white" />
-                        <Text style={styles.deleteButtonText}>Delete Item</Text>
+                        <Text className="text-white text-base font-semibold ml-2">Delete Item</Text>
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.bottomPadding} />
+                <View className="h-10" />
             </ScrollView>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'white',
-        zIndex: 1000,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    saveButton: {
-        color: '#007AFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    content: {
-        flex: 1,
-        padding: 16,
-    },
-    formGroup: {
-        marginBottom: 20,
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: '500',
-        marginBottom: 8,
-        color: '#333',
-    },
-    urgentLabel: {
-        color: '#FF3B30',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 16,
-    },
-    notesInput: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 16,
-        minHeight: 100,
-    },
-    dateContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    dateButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-    },
-    dateText: {
-        fontSize: 16,
-    },
-    addDateButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        backgroundColor: '#f8f8f8',
-    },
-    addDateText: {
-        fontSize: 16,
-        color: '#007AFF',
-        marginRight: 8,
-    },
-    clearDateButton: {
-        marginLeft: 8,
-        padding: 4,
-    },
-    urgentRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    categoryContainer: {
-        paddingVertical: 4,
-        gap: 8,
-    },
-    categoryChip: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 16,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        backgroundColor: '#f8f8f8',
-    },
-    selectedChip: {
-        backgroundColor: '#007AFF',
-        borderColor: '#007AFF',
-    },
-    categoryText: {
-        fontSize: 14,
-    },
-    selectedChipText: {
-        color: '#fff',
-    },
-    actionButtons: {
-        marginTop: 20,
-        gap: 10,
-    },
-    completeButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#4CD964',
-        borderRadius: 8,
-        padding: 12,
-    },
-    completeButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 8,
-    },
-    deleteButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#FF3B30',
-        borderRadius: 8,
-        padding: 12,
-    },
-    deleteButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 8,
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-    bottomPadding: {
-        height: 40,
-    },
-});
 
 export default AgendaDetailPanel;

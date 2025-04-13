@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/src/theme/ThemeManager';
 
 interface SettingsListProps {
     title: string;
@@ -15,6 +16,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
     onUpdateItems,
     editMode,
 }) => {
+    const { colors } = useTheme();
     const [newItem, setNewItem] = useState('');
 
     const handleAddItem = async () => {
@@ -54,17 +56,17 @@ export const SettingsList: React.FC<SettingsListProps> = ({
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.sectionTitle}>{title}</Text>
+        <View className="mb-5">
+            <Text className="text-base font-bold text-primary mb-2.5">{title}</Text>
 
             {items.map((item, index) => (
-                <View key={`${item}-${index}`} style={styles.itemContainer}>
-                    <Text style={styles.itemText}>{item}</Text>
+                <View key={`${item}-${index}`} className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2">
+                    <Text className="text-base text-primary">{item}</Text>
 
                     {editMode && (
                         <TouchableOpacity
                             onPress={() => handleDeleteItem(item)}
-                            style={styles.deleteButton}
+                            className="p-1"
                         >
                             <Ionicons name="remove-circle" size={24} color="red" />
                         </TouchableOpacity>
@@ -73,72 +75,23 @@ export const SettingsList: React.FC<SettingsListProps> = ({
             ))}
 
             {editMode && (
-                <View style={styles.addContainer}>
+                <View className="flex-row items-center mt-2">
                     <TextInput
-                        style={styles.input}
+                        className="flex-1 h-10 border border-unset rounded-lg px-3 mr-2"
                         placeholder={`New ${title.slice(0, -1)}`}
+                        placeholderTextColor={colors.secondary}
                         value={newItem}
                         onChangeText={setNewItem}
                     />
                     <TouchableOpacity
                         onPress={handleAddItem}
                         disabled={newItem.trim() === ''}
-                        style={[
-                            styles.addButton,
-                            newItem.trim() === '' && styles.disabledButton
-                        ]}
+                        className={`p-1 ${newItem.trim() === '' ? 'opacity-50' : ''}`}
                     >
-                        <Ionicons name="add-circle" size={24} color="#007AFF" />
+                        <Ionicons name="add-circle" size={24} color={colors.accent} />
                     </TouchableOpacity>
                 </View>
             )}
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    itemContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
-        marginBottom: 8,
-    },
-    itemText: {
-        fontSize: 16,
-    },
-    deleteButton: {
-        padding: 4,
-    },
-    addContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 8,
-    },
-    input: {
-        flex: 1,
-        height: 40,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        marginRight: 8,
-    },
-    addButton: {
-        padding: 4,
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-});

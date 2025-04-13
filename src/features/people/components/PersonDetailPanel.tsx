@@ -3,13 +3,13 @@ import {
     ActivityIndicator,
     Alert,
     ScrollView,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/src/theme/ThemeManager';
 import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
@@ -24,6 +24,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
     isPresented,
     onDismiss,
 }) => {
+    const { colors } = useTheme();
     const [name, setName] = useState(person.name);
     const [properties, setProperties] = useState<PersonProperty[]>(person.properties);
     const [notes, setNotes] = useState<PersonNote[]>(person.notes);
@@ -128,74 +129,74 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
         setNotes(notes.filter(note => note.id !== id));
     };
 
+    const borderStyle = "border-surface";
+
     return (
-        <View style={[styles.container, {display: isPresented ? 'flex' : 'none'}]}>
-            <View style={styles.header}>
+        <View className={`absolute inset-0 bg-background z-50 ${isPresented ? 'flex' : 'hidden'}`}>
+            <View className={`flex-row justify-between items-center px-4 py-3 border-b ${borderStyle}`}>
                 <TouchableOpacity onPress={isEditing ? handleCancel : onDismiss}>
                     <Ionicons
                         name={isEditing ? 'close' : 'chevron-back'}
                         size={24}
-                        color="#007AFF"
+                        color={colors.accent}
                     />
                 </TouchableOpacity>
 
-                <View style={styles.headerRight}>
+                <View className="flex-row items-center">
                     {isLoading ? (
-                        <ActivityIndicator size="small" color="#007AFF"/>
+                        <ActivityIndicator size="small" color={colors.accent} />
                     ) : isEditing ? (
                         <TouchableOpacity
                             onPress={handleSave}
                             disabled={name.trim() === ''}
                         >
                             <Text
-                                style={[
-                                    styles.headerButton,
-                                    name.trim() === '' && styles.disabledButton
-                                ]}
+                                className={`text-accent text-base font-semibold ${name.trim() === '' ? 'opacity-50' : ''}`}
                             >
                                 Save
                             </Text>
                         </TouchableOpacity>
                     ) : (
                         <TouchableOpacity onPress={() => setIsEditing(true)}>
-                            <Text style={styles.headerButton}>Edit</Text>
+                            <Text className="text-accent text-base font-semibold">Edit</Text>
                         </TouchableOpacity>
                     )}
                 </View>
             </View>
 
             {errorMessage && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
             )}
 
-            <ScrollView style={styles.content}>
-                <View style={styles.section}>
+            <ScrollView className="flex-1">
+                <View className={`p-4 border-b ${borderStyle}`}>
                     {isEditing ? (
                         <>
-                            <Text style={styles.sectionLabel}>Name</Text>
+                            <Text className="text-sm text-secondary mb-1">Name</Text>
                             <TextInput
-                                style={styles.nameInput}
+                                className="text-lg border border-unset rounded-lg p-2"
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Person Name"
+                                placeholderTextColor={colors.secondary}
                             />
                         </>
                     ) : (
-                        <Text style={styles.nameText}>{name}</Text>
+                        <Text className="text-2xl font-bold text-primary">{name}</Text>
                     )}
                 </View>
 
                 {/* Properties Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Properties</Text>
+                <View className={`p-4 border-b ${borderStyle}`}>
+                    <Text className="text-lg font-semibold text-primary mb-3">Properties</Text>
 
                     {properties.map(property => (
-                        <View key={property.id} style={styles.propertyItem}>
+                        <View key={property.id} className="flex-row items-center mb-2 p-2 bg-surface rounded-lg">
                             {editingProperty?.id === property.id ? (
-                                <View style={styles.editPropertyContainer}>
-                                    <Text style={styles.propertyKey}>{property.key}</Text>
+                                <View className="flex-1">
+                                    <Text className="text-xs text-secondary">{property.key}</Text>
                                     <TextInput
-                                        style={styles.editPropertyInput}
+                                        className="text-base border border-accent rounded p-1"
                                         value={editedValue}
                                         onChangeText={setEditedValue}
                                         onBlur={() => {
@@ -215,7 +216,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                 </View>
                             ) : (
                                 <TouchableOpacity
-                                    style={styles.propertyContent}
+                                    className="flex-1"
                                     onPress={() => {
                                         if (isEditing) {
                                             setEditingProperty(property);
@@ -224,43 +225,44 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                     }}
                                     disabled={!isEditing}
                                 >
-                                    <Text style={styles.propertyKey}>{property.key}</Text>
-                                    <Text style={styles.propertyValue}>{property.value}</Text>
+                                    <Text className="text-xs text-secondary">{property.key}</Text>
+                                    <Text className="text-base text-primary">{property.value}</Text>
                                 </TouchableOpacity>
                             )}
 
                             {isEditing && (
                                 <TouchableOpacity
                                     onPress={() => deleteProperty(property.id)}
-                                    style={styles.deleteButton}
+                                    className="p-2"
                                 >
-                                    <Ionicons name="trash-outline" size={18} color="red"/>
+                                    <Ionicons name="trash-outline" size={18} color="red" />
                                 </TouchableOpacity>
                             )}
                         </View>
                     ))}
 
                     {isEditing && (
-                        <View style={styles.addPropertyContainer}>
-                            <View style={styles.addPropertyInputs}>
-                                <View style={styles.propertyKeyInput}>
-                                    <Text style={styles.inputLabel}>Key</Text>
-                                    {/* This could be a dropdown or segmented control with predefined keys */}
+                        <View className="flex-row items-center mt-3">
+                            <View className="flex-1 flex-row">
+                                <View className="flex-1 mr-2">
+                                    <Text className="text-xs text-secondary mb-1">Key</Text>
                                     <TextInput
-                                        style={styles.input}
+                                        className="border border-unset rounded-lg p-2"
                                         value={newPropertyKey}
                                         onChangeText={setNewPropertyKey}
                                         placeholder="Property Key"
+                                        placeholderTextColor={colors.secondary}
                                     />
                                 </View>
 
-                                <View style={styles.propertyValueInput}>
-                                    <Text style={styles.inputLabel}>Value</Text>
+                                <View className="flex-1">
+                                    <Text className="text-xs text-secondary mb-1">Value</Text>
                                     <TextInput
-                                        style={styles.input}
+                                        className="border border-unset rounded-lg p-2"
                                         value={newPropertyValue}
                                         onChangeText={setNewPropertyValue}
                                         placeholder="Property Value"
+                                        placeholderTextColor={colors.secondary}
                                     />
                                 </View>
                             </View>
@@ -268,26 +270,23 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                             <TouchableOpacity
                                 onPress={addProperty}
                                 disabled={!newPropertyKey || !newPropertyValue}
-                                style={[
-                                    styles.addButton,
-                                    (!newPropertyKey || !newPropertyValue) && styles.disabledButton
-                                ]}
+                                className={`ml-2 p-2 ${(!newPropertyKey || !newPropertyValue) ? 'opacity-50' : ''}`}
                             >
-                                <Ionicons name="add-circle" size={24} color="#007AFF"/>
+                                <Ionicons name="add-circle" size={24} color={colors.accent} />
                             </TouchableOpacity>
                         </View>
                     )}
                 </View>
 
                 {/* Notes Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Notes</Text>
+                <View className={`p-4 border-b ${borderStyle}`}>
+                    <Text className="text-lg font-semibold text-primary mb-3">Notes</Text>
 
                     {notes.map(note => (
-                        <View key={note.id} style={styles.noteItem}>
+                        <View key={note.id} className="flex-row items-center mb-2 p-3 bg-surface rounded-lg">
                             {editingNote?.id === note.id ? (
                                 <TextInput
-                                    style={styles.editNoteInput}
+                                    className="flex-1 text-base border border-accent rounded p-2 min-h-[60px]"
                                     value={editedValue}
                                     onChangeText={setEditedValue}
                                     multiline
@@ -318,10 +317,10 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                         }
                                     }}
                                     disabled={!isEditing}
-                                    style={styles.noteContent}
+                                    className="flex-1"
                                 >
-                                    <Text style={styles.noteText}>{note.content}</Text>
-                                    <Text style={styles.noteDate}>
+                                    <Text className="text-base text-primary mb-1">{note.content}</Text>
+                                    <Text className="text-xs text-secondary">
                                         {new Date(note.updatedAt).toLocaleDateString()}
                                     </Text>
                                 </TouchableOpacity>
@@ -330,33 +329,31 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                             {isEditing && (
                                 <TouchableOpacity
                                     onPress={() => deleteNote(note.id)}
-                                    style={styles.deleteButton}
+                                    className="p-2"
                                 >
-                                    <Ionicons name="trash-outline" size={18} color="red"/>
+                                    <Ionicons name="trash-outline" size={18} color="red" />
                                 </TouchableOpacity>
                             )}
                         </View>
                     ))}
 
                     {isEditing && (
-                        <View style={styles.addNoteContainer}>
+                        <View className="flex-row items-center mt-3">
                             <TextInput
-                                style={styles.addNoteInput}
+                                className="flex-1 border border-unset rounded-lg p-2 min-h-[60px]"
                                 value={newNote}
                                 onChangeText={setNewNote}
                                 placeholder="Add a note..."
+                                placeholderTextColor={colors.secondary}
                                 multiline
                             />
 
                             <TouchableOpacity
                                 onPress={addNote}
                                 disabled={!newNote}
-                                style={[
-                                    styles.addButton,
-                                    !newNote && styles.disabledButton
-                                ]}
+                                className={`ml-2 p-2 ${!newNote ? 'opacity-50' : ''}`}
                             >
-                                <Ionicons name="add-circle" size={24} color="#007AFF"/>
+                                <Ionicons name="add-circle" size={24} color={colors.accent} />
                             </TouchableOpacity>
                         </View>
                     )}
@@ -364,207 +361,18 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
 
                 {isEditing && (
                     <TouchableOpacity
-                        style={styles.deletePersonButton}
+                        className="flex-row items-center justify-center bg-red-500 p-3 mx-4 my-5 rounded-lg"
                         onPress={handleDelete}
                     >
-                        <Ionicons name="trash-outline" size={20} color="white"/>
-                        <Text style={styles.deletePersonText}>Delete Person</Text>
+                        <Ionicons name="trash-outline" size={20} color="white" />
+                        <Text className="text-white text-base font-semibold ml-2">Delete Person</Text>
                     </TouchableOpacity>
                 )}
 
-                <View style={styles.bottomPadding}/>
+                <View className="h-10" />
             </ScrollView>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'white',
-        zIndex: 1000,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    headerButton: {
-        color: '#007AFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    content: {
-        flex: 1,
-    },
-    section: {
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 12,
-    },
-    sectionLabel: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 4,
-    },
-    nameText: {
-        fontSize: 22,
-        fontWeight: 'bold',
-    },
-    nameInput: {
-        fontSize: 18,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 8,
-        padding: 8,
-    },
-    propertyItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-        padding: 8,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
-    },
-    propertyContent: {
-        flex: 1,
-    },
-    propertyKey: {
-        fontSize: 12,
-        color: '#666',
-    },
-    propertyValue: {
-        fontSize: 16,
-    },
-    editPropertyContainer: {
-        flex: 1,
-    },
-    editPropertyInput: {
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#007AFF',
-        borderRadius: 4,
-        padding: 4,
-    },
-    addPropertyContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 12,
-    },
-    addPropertyInputs: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    propertyKeyInput: {
-        flex: 1,
-        marginRight: 8,
-    },
-    propertyValueInput: {
-        flex: 1,
-    },
-    inputLabel: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 4,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 8,
-        padding: 8,
-    },
-    addButton: {
-        marginLeft: 8,
-        padding: 8,
-    },
-    noteItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-        padding: 12,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
-    },
-    noteContent: {
-        flex: 1,
-    },
-    noteText: {
-        fontSize: 16,
-        marginBottom: 4,
-    },
-    noteDate: {
-        fontSize: 12,
-        color: '#666',
-    },
-    editNoteInput: {
-        flex: 1,
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#007AFF',
-        borderRadius: 4,
-        padding: 8,
-        minHeight: 60,
-    },
-    addNoteContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 12,
-    },
-    addNoteInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 8,
-        padding: 8,
-        minHeight: 60,
-    },
-    deleteButton: {
-        padding: 8,
-    },
-    deletePersonButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'red',
-        padding: 12,
-        marginVertical: 20,
-        marginHorizontal: 16,
-        borderRadius: 8,
-    },
-    deletePersonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
-        marginLeft: 8,
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-    bottomPadding: {
-        height: 40,
-    },
-});
 
 export default PersonDetailPanel;

@@ -4,7 +4,6 @@ import {
     Modal,
     Platform,
     ScrollView,
-    StyleSheet,
     Switch,
     Text,
     TextInput,
@@ -14,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@/src/theme/ThemeManager';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 
@@ -30,6 +30,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
     onItemCreated,
     initialName = ''
 }) => {
+    const { colors } = useTheme();
     const [name, setName] = useState(initialName);
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -96,26 +97,23 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
             animationType="slide"
             onRequestClose={onDismiss}
         >
-            <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
-                <View style={styles.header}>
+            <SafeAreaView className="flex-1 bg-surface" edges={['top', 'right', 'left']}>
+                <View className="flex-row justify-between items-center px-4 py-4 border-b border-unset">
                     <TouchableOpacity onPress={onDismiss}>
-                        <Text style={styles.cancelButton}>Cancel</Text>
+                        <Text className="text-accent text-base">Cancel</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.title}>New Item</Text>
+                    <Text className="text-lg font-bold text-primary">New Item</Text>
 
                     <TouchableOpacity
                         onPress={handleCreateItem}
                         disabled={!name.trim() || isLoading}
                     >
                         {isLoading ? (
-                            <ActivityIndicator size="small" color="#007AFF"/>
+                            <ActivityIndicator size="small" color={colors.accent} />
                         ) : (
                             <Text
-                                style={[
-                                    styles.addButton,
-                                    !name.trim() && styles.disabledButton
-                                ]}
+                                className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
                             >
                                 Add
                             </Text>
@@ -124,55 +122,56 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                 </View>
 
                 {errorMessage && (
-                    <Text style={styles.errorText}>{errorMessage}</Text>
+                    <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
                 )}
 
-                <ScrollView style={styles.content}>
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Name</Text>
+                <ScrollView className="flex-1 p-4">
+                    <View className="mb-5">
+                        <Text className="text-base font-medium text-primary mb-2">Name</Text>
                         <TextInput
-                            style={styles.input}
+                            className="border border-unset rounded-lg p-3 text-primary"
                             value={name}
                             onChangeText={setName}
                             placeholder="Item Name"
+                            placeholderTextColor={colors.secondary}
                         />
                     </View>
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Date</Text>
-                        <View style={styles.dateContainer}>
+                    <View className="mb-5">
+                        <Text className="text-base font-medium text-primary mb-2">Date</Text>
+                        <View className="flex-row items-center">
                             {date ? (
                                 <TouchableOpacity
-                                    style={styles.dateButton}
+                                    className="flex-1 flex-row items-center justify-between border border-unset rounded-lg p-3"
                                     onPress={() => setShowDatePicker(true)}
                                 >
-                                    <Text style={styles.dateText}>
+                                    <Text className="text-base text-primary">
                                         {date.toLocaleDateString()} at {date.toLocaleTimeString([], {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}
                                     </Text>
-                                    <Ionicons name="calendar" size={20} color="#007AFF"/>
+                                    <Ionicons name="calendar" size={20} color={colors.accent} />
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity
-                                    style={styles.addDateButton}
+                                    className="flex-1 flex-row items-center justify-center border border-unset rounded-lg p-3 bg-background"
                                     onPress={() => {
                                         setDate(new Date());
                                         setShowDatePicker(true);
                                     }}
                                 >
-                                    <Text style={styles.addDateText}>Add Date</Text>
-                                    <Ionicons name="add-circle" size={20} color="#007AFF"/>
+                                    <Text className="text-base text-accent mr-2">Add Date</Text>
+                                    <Ionicons name="add-circle" size={20} color={colors.accent} />
                                 </TouchableOpacity>
                             )}
 
                             {date && (
                                 <TouchableOpacity
-                                    style={styles.clearDateButton}
+                                    className="ml-2 p-1"
                                     onPress={() => setDate(undefined)}
                                 >
-                                    <Ionicons name="close-circle" size={24} color="#999"/>
+                                    <Ionicons name="close-circle" size={24} color={colors.secondary} />
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -187,38 +186,32 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                         )}
                     </View>
 
-                    <View style={styles.formGroup}>
-                        <View style={styles.urgentRow}>
-                            <Text style={[styles.label, styles.urgentLabel]}>Urgent</Text>
+                    <View className="mb-5">
+                        <View className="flex-row items-center justify-between">
+                            <Text className="text-base font-medium text-red-500">Urgent</Text>
                             <Switch
                                 value={urgent}
                                 onValueChange={setUrgent}
-                                trackColor={{false: "#d3d3d3", true: "#FF3B30"}}
+                                trackColor={{ false: "#d3d3d3", true: "#FF3B30" }}
                                 thumbColor={urgent ? "#fff" : "#f4f3f4"}
                                 ios_backgroundColor="#d3d3d3"
                             />
                         </View>
                     </View>
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Category</Text>
+                    <View className="mb-5">
+                        <Text className="text-base font-medium text-primary mb-2">Category</Text>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.categoryContainer}
+                            contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                         >
                             <TouchableOpacity
-                                style={[
-                                    styles.categoryChip,
-                                    category === undefined && styles.selectedChip
-                                ]}
+                                className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                                 onPress={() => setCategory(undefined)}
                             >
                                 <Text
-                                    style={[
-                                        styles.categoryText,
-                                        category === undefined && styles.selectedChipText
-                                    ]}
+                                    className={`text-sm ${category === undefined ? 'text-white' : 'text-primary'}`}
                                 >
                                     None
                                 </Text>
@@ -227,17 +220,11 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             {categories.map(cat => (
                                 <TouchableOpacity
                                     key={cat}
-                                    style={[
-                                        styles.categoryChip,
-                                        category === cat && styles.selectedChip
-                                    ]}
+                                    className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                                     onPress={() => setCategory(cat)}
                                 >
                                     <Text
-                                        style={[
-                                            styles.categoryText,
-                                            category === cat && styles.selectedChipText
-                                        ]}
+                                        className={`text-sm ${category === cat ? 'text-white' : 'text-primary'}`}
                                     >
                                         {cat}
                                     </Text>
@@ -246,25 +233,19 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                         </ScrollView>
                     </View>
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Type</Text>
+                    <View className="mb-5">
+                        <Text className="text-base font-medium text-primary mb-2">Type</Text>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.categoryContainer}
+                            contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                         >
                             <TouchableOpacity
-                                style={[
-                                    styles.categoryChip,
-                                    type === undefined && styles.selectedChip
-                                ]}
+                                className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                                 onPress={() => setType(undefined)}
                             >
                                 <Text
-                                    style={[
-                                        styles.categoryText,
-                                        type === undefined && styles.selectedChipText
-                                    ]}
+                                    className={`text-sm ${type === undefined ? 'text-white' : 'text-primary'}`}
                                 >
                                     None
                                 </Text>
@@ -273,17 +254,11 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             {types.map(t => (
                                 <TouchableOpacity
                                     key={t}
-                                    style={[
-                                        styles.categoryChip,
-                                        type === t && styles.selectedChip
-                                    ]}
+                                    className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
                                     onPress={() => setType(t)}
                                 >
                                     <Text
-                                        style={[
-                                            styles.categoryText,
-                                            type === t && styles.selectedChipText
-                                        ]}
+                                        className={`text-sm ${type === t ? 'text-white' : 'text-primary'}`}
                                     >
                                         {t}
                                     </Text>
@@ -292,159 +267,25 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                         </ScrollView>
                     </View>
 
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Notes</Text>
+                    <View className="mb-5">
+                        <Text className="text-base font-medium text-primary mb-2">Notes</Text>
                         <TextInput
-                            style={styles.notesInput}
+                            className="border border-unset rounded-lg p-3 text-base text-primary min-h-[100px]"
                             value={notes}
                             onChangeText={setNotes}
                             placeholder="Add notes..."
+                            placeholderTextColor={colors.secondary}
                             multiline
                             numberOfLines={4}
                             textAlignVertical="top"
                         />
                     </View>
 
-                    <View style={styles.bottomPadding}/>
+                    <View className="h-10" />
                 </ScrollView>
             </SafeAreaView>
         </Modal>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'white',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    cancelButton: {
-        color: '#007AFF',
-        fontSize: 16,
-    },
-    addButton: {
-        color: '#007AFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    content: {
-        flex: 1,
-        padding: 16,
-    },
-    formGroup: {
-        marginBottom: 20,
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: '500',
-        marginBottom: 8,
-        color: '#333',
-    },
-    urgentLabel: {
-        color: '#FF3B30',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 16,
-    },
-    notesInput: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 16,
-        minHeight: 100,
-    },
-    dateContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    dateButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-    },
-    dateText: {
-        fontSize: 16,
-    },
-    addDateButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        backgroundColor: '#f8f8f8',
-    },
-    addDateText: {
-        fontSize: 16,
-        color: '#007AFF',
-        marginRight: 8,
-    },
-    clearDateButton: {
-        marginLeft: 8,
-        padding: 4,
-    },
-    urgentRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    categoryContainer: {
-        paddingVertical: 4,
-        gap: 8,
-    },
-    categoryChip: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 16,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        backgroundColor: '#f8f8f8',
-    },
-    selectedChip: {
-        backgroundColor: '#007AFF',
-        borderColor: '#007AFF',
-    },
-    categoryText: {
-        fontSize: 14,
-    },
-    selectedChipText: {
-        color: '#fff',
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-    bottomPadding: {
-        height: 40,
-    },
-});
 
 export default CreateAgendaItemView;

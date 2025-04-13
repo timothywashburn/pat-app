@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Text, SafeAreaView, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, SafeAreaView, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { PanelManagement } from '@/src/features/settings/components/PanelManagement';
@@ -8,6 +9,7 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 
 export default function SettingsScreen() {
+    const { colors, colorScheme } = useTheme();
     const { signOut, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -102,30 +104,30 @@ export default function SettingsScreen() {
 
     if (isLoading && !settingsManager.isLoaded) {
         return (
-            <SafeAreaView style={styles.container}>
-                <StatusBar style="auto" />
+            <SafeAreaView className="flex-1 bg-background">
+                <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
                 <CustomHeader
                     title="Settings"
                     showAddButton={false}
                 />
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#007AFF" />
-                    <Text style={styles.loadingText}>Loading settings...</Text>
+                <View className="flex-1 justify-center items-center">
+                    <ActivityIndicator size="large" color={colors.accent} />
+                    <Text className="mt-3 text-base text-secondary">Loading settings...</Text>
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar style="auto" />
+        <SafeAreaView className="flex-1 bg-background">
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
             <CustomHeader
                 title="Settings"
                 showAddButton={false}
                 trailing={() => (
                     <Text
-                        style={styles.editButton}
+                        className="text-accent text-base"
                         onPress={() => setEditMode(!editMode)}
                     >
                         {editMode ? 'Done' : 'Edit'}
@@ -134,24 +136,24 @@ export default function SettingsScreen() {
             />
 
             {errorMessage && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && (
-                <View style={styles.loadingOverlay}>
-                    <ActivityIndicator size="large" color="#007AFF" />
+                <View className="absolute inset-0 bg-background/70 justify-center items-center z-50">
+                    <ActivityIndicator size="large" color={colors.accent} />
                 </View>
             )}
 
-            <ScrollView style={styles.scrollView}>
-                <View style={styles.content}>
+            <ScrollView className="flex-1">
+                <View className="p-4">
                     <PanelManagement
                         panels={panels}
                         onUpdatePanels={handleUpdatePanels}
                         editMode={editMode}
                     />
 
-                    <View style={styles.divider} />
+                    <View className="h-px bg-surface my-4" />
 
                     <SettingsList
                         title="Item Categories"
@@ -160,7 +162,7 @@ export default function SettingsScreen() {
                         editMode={editMode}
                     />
 
-                    <View style={styles.divider} />
+                    <View className="h-px bg-surface my-4" />
 
                     <SettingsList
                         title="Item Types"
@@ -169,7 +171,7 @@ export default function SettingsScreen() {
                         editMode={editMode}
                     />
 
-                    <View style={styles.divider} />
+                    <View className="h-px bg-surface my-4" />
 
                     <SettingsList
                         title="Property Keys"
@@ -179,16 +181,16 @@ export default function SettingsScreen() {
                     />
 
                     {userInfo && (
-                        <View style={styles.userInfoContainer}>
-                            <Text style={styles.sectionTitle}>User Info</Text>
-                            <Text>Name: {userInfo.name}</Text>
-                            <Text>Email: {userInfo.email}</Text>
-                            <Text>Email Verified: {userInfo.isEmailVerified ? 'Yes' : 'No'}</Text>
+                        <View className="w-full p-4 bg-surface rounded-lg mt-5 mb-5">
+                            <Text className="text-base font-bold text-primary mb-2.5">User Info</Text>
+                            <Text className="text-primary">Name: {userInfo.name}</Text>
+                            <Text className="text-primary">Email: {userInfo.email}</Text>
+                            <Text className="text-primary">Email Verified: {userInfo.isEmailVerified ? 'Yes' : 'No'}</Text>
                         </View>
                     )}
 
                     <Text
-                        style={styles.signOutButton}
+                        className="text-red-500 text-base font-bold text-center py-3"
                         onPress={() => signOut()}
                     >
                         Sign Out
@@ -198,71 +200,3 @@ export default function SettingsScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    content: {
-        padding: 16,
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-    editButton: {
-        color: '#007AFF',
-        fontSize: 16,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#E0E0E0',
-        marginVertical: 16,
-    },
-    userInfoContainer: {
-        width: '100%',
-        padding: 16,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 10,
-        marginTop: 20,
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    signOutButton: {
-        color: '#FF3B30',
-        fontSize: 16,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        paddingVertical: 12,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    loadingText: {
-        marginTop: 12,
-        fontSize: 16,
-        color: '#666',
-    },
-    loadingOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 999,
-    },
-});

@@ -9,7 +9,8 @@ module.exports = {
                 secondary: 'var(--secondary)',
                 accent: 'var(--accent)',
                 background: 'var(--background)',
-                surface: 'var(--surface)'
+                surface: 'var(--surface)',
+                unset: 'var(--unset)'
             }
         },
     },

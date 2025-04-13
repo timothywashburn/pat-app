@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Link } from 'expo-router';
+import { useTheme } from '@/src/theme/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 
 export default function RegisterScreen() {
+    const { colors } = useTheme();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -11,7 +13,7 @@ export default function RegisterScreen() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const {registerAccount} = useAuthStore();
+    const { registerAccount } = useAuthStore();
 
     const handleRegister = async () => {
         if (!name || !email || !password || !confirmPassword) {
@@ -37,22 +39,24 @@ export default function RegisterScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Sign up to get started</Text>
+        <View className="flex-1 p-5 justify-center bg-background">
+            <Text className="text-3xl font-bold mb-2.5 text-center text-primary">Create Account</Text>
+            <Text className="text-base text-secondary mb-8 text-center">Sign up to get started</Text>
 
-            {error && <Text style={styles.errorText}>{error}</Text>}
+            {error && <Text className="text-red-500 mb-4 text-center">{error}</Text>}
 
             <TextInput
-                style={styles.input}
+                className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Full Name"
+                placeholderTextColor={colors.secondary}
                 value={name}
                 onChangeText={setName}
             />
 
             <TextInput
-                style={styles.input}
+                className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Email"
+                placeholderTextColor={colors.secondary}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -60,101 +64,43 @@ export default function RegisterScreen() {
             />
 
             <TextInput
-                style={styles.input}
+                className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Password"
+                placeholderTextColor={colors.secondary}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
             />
 
             <TextInput
-                style={styles.input}
+                className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Confirm Password"
+                placeholderTextColor={colors.secondary}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
             />
 
             <TouchableOpacity
-                style={styles.button}
+                className="bg-accent h-[50px] rounded-lg justify-center items-center mt-2.5"
                 onPress={handleRegister}
                 disabled={isLoading}
             >
                 {isLoading ? (
-                    <ActivityIndicator color="#fff"/>
+                    <ActivityIndicator color="#fff" />
                 ) : (
-                    <Text style={styles.buttonText}>Register</Text>
+                    <Text className="text-white text-base font-semibold">Register</Text>
                 )}
             </TouchableOpacity>
 
-            <View style={styles.loginContainer}>
-                <Text style={styles.loginText}>Already have an account? </Text>
+            <View className="flex-row justify-center mt-5">
+                <Text className="text-secondary">Already have an account? </Text>
                 <Link href="/(auth)/login" asChild>
                     <TouchableOpacity>
-                        <Text style={styles.loginLink}>Sign In</Text>
+                        <Text className="text-accent font-semibold">Sign In</Text>
                     </TouchableOpacity>
                 </Link>
             </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        justifyContent: 'center',
-        backgroundColor: '#fff',
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        textAlign: 'center',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 30,
-        textAlign: 'center',
-    },
-    input: {
-        height: 50,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        marginBottom: 16,
-        paddingHorizontal: 12,
-        fontSize: 16,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        height: 50,
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    errorText: {
-        color: 'red',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    loginContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 20,
-    },
-    loginText: {
-        color: '#666',
-    },
-    loginLink: {
-        color: '#007AFF',
-        fontWeight: '600',
-    },
-});

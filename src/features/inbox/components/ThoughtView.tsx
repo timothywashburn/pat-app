@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import React from 'react';
+import { Text, TextInput, View } from 'react-native';
+import { useTheme } from '@/src/theme/ThemeManager';
 import { Thought } from '../controllers/ThoughtManager';
 
 interface ThoughtViewProps {
@@ -17,11 +18,13 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
     onChangeEditContent,
     onCommitEdit
 }) => {
+    const { colors } = useTheme();
+
     return (
-        <View style={styles.container}>
+        <View className="w-full p-4 bg-surface rounded-lg mb-3">
             {isEditing ? (
                 <TextInput
-                    style={styles.input}
+                    className="text-base border border-accent rounded-lg p-2"
                     value={editedContent}
                     onChangeText={onChangeEditContent}
                     onBlur={onCommitEdit}
@@ -30,30 +33,10 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                     multiline
                 />
             ) : (
-                <Text style={styles.text}>{thought.content}</Text>
+                <Text className="text-base text-primary">{thought.content}</Text>
             )}
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        padding: 16,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 10,
-        marginBottom: 12,
-    },
-    text: {
-        fontSize: 16,
-    },
-    input: {
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#007AFF',
-        borderRadius: 8,
-        padding: 8,
-    }
-});
 
 export default ThoughtView;

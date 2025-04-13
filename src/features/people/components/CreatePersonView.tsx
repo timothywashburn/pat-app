@@ -3,14 +3,14 @@ import {
     ActivityIndicator,
     Modal,
     ScrollView,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { PersonNote, PersonProperty } from '@/src/models';
+import { useTheme } from '@/src/theme/ThemeManager';
+import { PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
 interface CreatePersonViewProps {
@@ -24,6 +24,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
     onDismiss,
     onPersonCreated,
 }) => {
+    const { colors } = useTheme();
     const [name, setName] = useState('');
     const [properties, setProperties] = useState<PersonProperty[]>([]);
     const [notes, setNotes] = useState<PersonNote[]>([]);
@@ -101,26 +102,23 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
             animationType="slide"
             onRequestClose={onDismiss}
         >
-            <View style={styles.container}>
-                <View style={styles.header}>
+            <View className="flex-1 bg-surface">
+                <View className="flex-row justify-between items-center px-4 py-4 border-b border-unset">
                     <TouchableOpacity onPress={onDismiss}>
-                        <Text style={styles.cancelButton}>Cancel</Text>
+                        <Text className="text-accent text-base">Cancel</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.title}>New Person</Text>
+                    <Text className="text-lg font-bold text-primary">New Person</Text>
 
                     <TouchableOpacity
                         onPress={handleCreatePerson}
                         disabled={!name.trim() || isLoading}
                     >
                         {isLoading ? (
-                            <ActivityIndicator size="small" color="#007AFF"/>
+                            <ActivityIndicator size="small" color={colors.accent} />
                         ) : (
                             <Text
-                                style={[
-                                    styles.addButton,
-                                    !name.trim() && styles.disabledButton
-                                ]}
+                                className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
                             >
                                 Add
                             </Text>
@@ -129,59 +127,62 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                 </View>
 
                 {errorMessage && (
-                    <Text style={styles.errorText}>{errorMessage}</Text>
+                    <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
                 )}
 
-                <ScrollView style={styles.content}>
-                    <View style={styles.section}>
-                        <Text style={styles.sectionLabel}>Name</Text>
+                <ScrollView className="flex-1">
+                    <View className="p-4 border-b border-unset">
+                        <Text className="text-sm text-secondary mb-1">Name</Text>
                         <TextInput
-                            style={styles.nameInput}
+                            className="text-base border border-unset rounded-lg p-2.5"
                             value={name}
                             onChangeText={setName}
                             placeholder="Person Name"
+                            placeholderTextColor={colors.secondary}
                         />
                     </View>
 
                     {/* Properties Section */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Properties</Text>
+                    <View className="p-4 border-b border-unset">
+                        <Text className="text-lg font-semibold text-primary mb-3">Properties</Text>
 
                         {properties.map(property => (
-                            <View key={property.id} style={styles.propertyItem}>
-                                <View style={styles.propertyContent}>
-                                    <Text style={styles.propertyKey}>{property.key}</Text>
-                                    <Text style={styles.propertyValue}>{property.value}</Text>
+                            <View key={property.id} className="flex-row items-center mb-2 p-2.5 bg-background rounded-lg">
+                                <View className="flex-1">
+                                    <Text className="text-xs text-secondary">{property.key}</Text>
+                                    <Text className="text-base text-primary">{property.value}</Text>
                                 </View>
 
                                 <TouchableOpacity
                                     onPress={() => deleteProperty(property.id)}
-                                    style={styles.deleteButton}
+                                    className="p-2"
                                 >
-                                    <Ionicons name="trash-outline" size={18} color="red"/>
+                                    <Ionicons name="trash-outline" size={18} color="red" />
                                 </TouchableOpacity>
                             </View>
                         ))}
 
-                        <View style={styles.addPropertyContainer}>
-                            <View style={styles.addPropertyInputs}>
-                                <View style={styles.propertyKeyInput}>
-                                    <Text style={styles.inputLabel}>Key</Text>
+                        <View className="flex-row items-center mt-3">
+                            <View className="flex-1 flex-row">
+                                <View className="flex-1 mr-2">
+                                    <Text className="text-xs text-secondary mb-1">Key</Text>
                                     <TextInput
-                                        style={styles.input}
+                                        className="border border-unset rounded-lg p-2"
                                         value={newPropertyKey}
                                         onChangeText={setNewPropertyKey}
                                         placeholder="Property Key"
+                                        placeholderTextColor={colors.secondary}
                                     />
                                 </View>
 
-                                <View style={styles.propertyValueInput}>
-                                    <Text style={styles.inputLabel}>Value</Text>
+                                <View className="flex-1">
+                                    <Text className="text-xs text-secondary mb-1">Value</Text>
                                     <TextInput
-                                        style={styles.input}
+                                        className="border border-unset rounded-lg p-2"
                                         value={newPropertyValue}
                                         onChangeText={setNewPropertyValue}
                                         placeholder="Property Value"
+                                        placeholderTextColor={colors.secondary}
                                     />
                                 </View>
                             </View>
@@ -189,54 +190,55 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                             <TouchableOpacity
                                 onPress={addProperty}
                                 disabled={!newPropertyKey || !newPropertyValue}
-                                style={styles.addIconButton}
+                                className="ml-2 p-1"
                             >
                                 <Ionicons
                                     name="add-circle"
                                     size={24}
-                                    color={(!newPropertyKey || !newPropertyValue) ? "#CCCCCC" : "#007AFF"}
+                                    color={(!newPropertyKey || !newPropertyValue) ? "#CCCCCC" : colors.accent}
                                 />
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     {/* Notes Section */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Notes</Text>
+                    <View className="p-4 border-b border-unset">
+                        <Text className="text-lg font-semibold text-primary mb-3">Notes</Text>
 
                         {notes.map(note => (
-                            <View key={note.id} style={styles.noteItem}>
-                                <View style={styles.noteContent}>
-                                    <Text style={styles.noteText}>{note.content}</Text>
+                            <View key={note.id} className="flex-row items-center mb-2 p-2.5 bg-background rounded-lg">
+                                <View className="flex-1">
+                                    <Text className="text-base text-primary">{note.content}</Text>
                                 </View>
 
                                 <TouchableOpacity
                                     onPress={() => deleteNote(note.id)}
-                                    style={styles.deleteButton}
+                                    className="p-2"
                                 >
-                                    <Ionicons name="trash-outline" size={18} color="red"/>
+                                    <Ionicons name="trash-outline" size={18} color="red" />
                                 </TouchableOpacity>
                             </View>
                         ))}
 
-                        <View style={styles.addNoteContainer}>
+                        <View className="flex-row items-center mt-3">
                             <TextInput
-                                style={styles.addNoteInput}
+                                className="flex-1 border border-unset rounded-lg p-2 min-h-[60px]"
                                 value={newNote}
                                 onChangeText={setNewNote}
                                 placeholder="Add a note..."
+                                placeholderTextColor={colors.secondary}
                                 multiline
                             />
 
                             <TouchableOpacity
                                 onPress={addNote}
                                 disabled={!newNote}
-                                style={styles.addIconButton}
+                                className="ml-2 p-1"
                             >
                                 <Ionicons
                                     name="add-circle"
                                     size={24}
-                                    color={!newNote ? "#CCCCCC" : "#007AFF"}
+                                    color={!newNote ? "#CCCCCC" : colors.accent}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -246,146 +248,5 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
         </Modal>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'white',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    cancelButton: {
-        color: '#007AFF',
-        fontSize: 16,
-    },
-    addButton: {
-        color: '#007AFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    content: {
-        flex: 1,
-    },
-    section: {
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 12,
-    },
-    sectionLabel: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 4,
-    },
-    nameInput: {
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 8,
-        padding: 10,
-    },
-    propertyItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-        padding: 10,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
-    },
-    propertyContent: {
-        flex: 1,
-    },
-    propertyKey: {
-        fontSize: 12,
-        color: '#666',
-    },
-    propertyValue: {
-        fontSize: 16,
-    },
-    addPropertyContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 12,
-    },
-    addPropertyInputs: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    propertyKeyInput: {
-        flex: 1,
-        marginRight: 8,
-    },
-    propertyValueInput: {
-        flex: 1,
-    },
-    inputLabel: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 4,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 8,
-        padding: 8,
-    },
-    addIconButton: {
-        marginLeft: 8,
-        padding: 4,
-    },
-    noteItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-        padding: 10,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
-    },
-    noteContent: {
-        flex: 1,
-    },
-    noteText: {
-        fontSize: 16,
-    },
-    addNoteContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 12,
-    },
-    addNoteInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 8,
-        padding: 8,
-        minHeight: 60,
-    },
-    deleteButton: {
-        padding: 8,
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-});
 
 export default CreatePersonView;

@@ -7,7 +7,8 @@ export const lightColors = {
     secondary: '#2D3748',
     accent: '#625fff',
     background: '#F5F7FA',
-    surface: '#FFFFFF'
+    surface: '#FFFFFF',
+    unset: '#FF0000'
 };
 
 export const darkColors = {
@@ -15,7 +16,8 @@ export const darkColors = {
     secondary: '#9AA1B0',
     accent: '#625FFF',
     background: '#1A1D21',
-    surface: '#2A2D35'
+    surface: '#2A2D35',
+    unset: '#FF0000'
 };
 
 interface CustomColors {

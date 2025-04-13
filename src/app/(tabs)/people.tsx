@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import PersonItemView from '@/src/features/people/components/PersonItemView';
 import PersonDetailPanel from '@/src/features/people/components/PersonDetailPanel';
@@ -9,6 +10,7 @@ import { Person } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
 export default function PeoplePanel() {
+    const { colors, colorScheme } = useTheme();
     const [people, setPeople] = useState<Person[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -72,8 +74,8 @@ export default function PeoplePanel() {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar style="auto" />
+        <SafeAreaView className="flex-1 bg-surface">
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
             <CustomHeader
                 title="People"
@@ -82,21 +84,21 @@ export default function PeoplePanel() {
             />
 
             {errorMessage && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && people.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#007AFF" />
+                <View className="flex-1 justify-center items-center">
+                    <ActivityIndicator size="large" color={colors.accent} />
                 </View>
             ) : people.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <Text style={styles.emptyText}>No people added yet</Text>
+                <View className="flex-1 justify-center items-center">
+                    <Text className="text-base text-secondary mb-4">No people added yet</Text>
                     <TouchableOpacity
-                        style={styles.addButton}
+                        className="bg-accent px-5 py-2.5 rounded-lg"
                         onPress={handleCreatePerson}
                     >
-                        <Text style={styles.addButtonText}>Add Person</Text>
+                        <Text className="text-white text-base font-semibold">Add Person</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
@@ -104,11 +106,13 @@ export default function PeoplePanel() {
                     data={people}
                     renderItem={renderItem}
                     keyExtractor={item => item.id}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={{ padding: 16 }}
                     refreshControl={
                         <RefreshControl
                             refreshing={isRefreshing}
                             onRefresh={handleRefresh}
+                            colors={[colors.accent]}
+                            tintColor={colors.accent}
                         />
                     }
                 />
@@ -130,39 +134,3 @@ export default function PeoplePanel() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    listContent: {
-        padding: 16,
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-    emptyText: {
-        fontSize: 16,
-        color: 'gray',
-        marginBottom: 16,
-    },
-    addButton: {
-        backgroundColor: '#007AFF',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 8,
-    },
-    addButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-});

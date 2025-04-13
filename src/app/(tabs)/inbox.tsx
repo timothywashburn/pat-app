@@ -5,18 +5,19 @@ import {
     FlatList,
     RefreshControl,
     SafeAreaView,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useTheme } from '@/src/theme/ThemeManager';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/ThoughtManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import CreateAgendaItemView from '@/src/features/agenda/components/CreateAgendaItemView';
 
 export default function InboxPanel() {
+    const { colors, colorScheme } = useTheme();
     const [thoughts, setThoughts] = useState<Thought[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -158,45 +159,46 @@ export default function InboxPanel() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView className="flex-1 bg-background">
             <CustomHeader
                 title="Inbox"
                 showAddButton={true}
                 onAddTapped={() => setShowingCreateAgendaSheet(true)}
             />
 
-            <View style={styles.inputContainer}>
+            <View className="flex-row p-4 py-2 items-center">
                 <TextInput
-                    style={styles.input}
+                    className="flex-1 border border-unset rounded-lg p-2.5 mr-2"
                     placeholder="Add a thought..."
+                    placeholderTextColor={colors.secondary}
                     value={newThought}
                     onChangeText={setNewThought}
                     onSubmitEditing={handleAddThought}
                 />
                 <TouchableOpacity
-                    style={[styles.addButton, newThought.trim() === '' && styles.disabledButton]}
+                    className={`bg-accent rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-50' : ''}`}
                     onPress={handleAddThought}
                     disabled={newThought.trim() === '' || isLoading}
                 >
                     {isLoading ? (
                         <ActivityIndicator size="small" color="#fff" />
                     ) : (
-                        <Text style={styles.addButtonText}>Add</Text>
+                        <Text className="text-white font-bold">Add</Text>
                     )}
                 </TouchableOpacity>
             </View>
 
             {errorMessage && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && thoughts.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#007AFF" />
+                <View className="flex-1 justify-center items-center">
+                    <ActivityIndicator size="large" color={colors.accent} />
                 </View>
             ) : thoughts.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <Text style={styles.emptyText}>No thoughts added yet</Text>
+                <View className="flex-1 justify-center items-center">
+                    <Text className="text-base text-secondary">No thoughts added yet</Text>
                 </View>
             ) : (
                 <FlatList
@@ -213,11 +215,13 @@ export default function InboxPanel() {
                         </TouchableOpacity>
                     )}
                     keyExtractor={item => item.id}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={{ padding: 16 }}
                     refreshControl={
                         <RefreshControl
                             refreshing={isRefreshing}
                             onRefresh={handleRefresh}
+                            colors={[colors.accent]}
+                            tintColor={colors.accent}
                         />
                     }
                 />
@@ -240,56 +244,3 @@ export default function InboxPanel() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        padding: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
-        alignItems: 'center',
-    },
-    input: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 10,
-        marginRight: 8,
-    },
-    addButton: {
-        backgroundColor: '#007AFF',
-        borderRadius: 8,
-        padding: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-    emptyText: {
-        fontSize: 16,
-        color: 'gray',
-    },
-    listContent: {
-        padding: 16,
-    },
-});

@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/src/theme/ThemeManager';
 import { PanelSetting } from '@/src/features/settings/models';
 
 const getIconName = (iconKey: string): any => {
@@ -26,6 +27,7 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
     onUpdatePanels,
     editMode,
 }) => {
+    const { colors } = useTheme();
     const visiblePanels = panels.filter(p => p.visible);
     const hiddenPanels = panels.filter(p => !p.visible);
 
@@ -48,25 +50,22 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
     ];
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.mainTitle}>Panel Arrangement</Text>
+        <View className="mb-5">
+            <Text className="text-base font-bold text-primary mb-4">Panel Arrangement</Text>
 
             {sections.map(section => (
-                <View key={section.title} style={styles.section}>
-                    <Text style={styles.sectionTitle}>{section.title}</Text>
+                <View key={section.title} className="mb-4">
+                    <Text className="text-sm text-secondary mb-2">{section.title}</Text>
 
                     {section.data.map(panel => (
-                        <View key={panel.id} style={styles.panelRow}>
-                            <View style={styles.panelInfo}>
+                        <View key={panel.id} className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2">
+                            <View className="flex-row items-center">
                                 <Ionicons
                                     name={getIconName(panel.panel.icon)}
                                     size={24}
-                                    color={panel.visible ? '#007AFF' : '#8E8E93'}
+                                    color={panel.visible ? colors.accent : colors.secondary}
                                 />
-                                <Text style={[
-                                    styles.panelTitle,
-                                    !panel.visible && styles.hiddenText
-                                ]}>
+                                <Text className={`text-base ml-3 ${panel.visible ? 'text-primary' : 'text-secondary'}`}>
                                     {panel.panel.title}
                                 </Text>
                             </View>
@@ -78,7 +77,7 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
                                     <Ionicons
                                         name={panel.visible ? 'eye-off' : 'eye'}
                                         size={24}
-                                        color="#007AFF"
+                                        color={colors.accent}
                                     />
                                 </TouchableOpacity>
                             )}
@@ -89,43 +88,3 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        marginBottom: 20,
-    },
-    mainTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 16,
-    },
-    section: {
-        marginBottom: 16,
-    },
-    sectionTitle: {
-        fontSize: 14,
-        color: '#8E8E93',
-        marginBottom: 8,
-    },
-    panelRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
-        marginBottom: 8,
-    },
-    panelInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    panelTitle: {
-        fontSize: 16,
-        marginLeft: 12,
-    },
-    hiddenText: {
-        color: '#8E8E93',
-    },
-});

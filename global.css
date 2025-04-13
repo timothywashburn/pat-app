@@ -9,6 +9,7 @@
     --accent: #625fff;
     --background: #F5F7FA;
     --surface: #FFFFFF;
+    --unset: #FF0000;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,5 +19,6 @@
         --accent: #625FFF;
         --background: #1A1D21;
         --surface: #2A2D35;
+        --unset: #FF0000;
     }
 }
