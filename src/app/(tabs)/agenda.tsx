@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import CreateAgendaItemView from '@/src/features/agenda/components/CreateAgendaItemView';
 import AgendaDetailPanel from '@/src/features/agenda/components/AgendaDetailPanel';
@@ -10,6 +11,7 @@ import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 
 export default function AgendaPanel() {
+    const { colors } = useTheme();
     const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -47,7 +49,7 @@ export default function AgendaPanel() {
         try {
             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } catch (error) {
-            console.log('Haptics not available:', error);
+            console.log('haptics not available:', error);
         }
 
         setErrorMessage(null);
@@ -89,15 +91,14 @@ export default function AgendaPanel() {
 
     const renderItem = ({item}: { item: AgendaItem }) => (
         <TouchableOpacity
-            className="bg-surface"
-            style={styles.itemContainer}
+            className="bg-surface rounded-lg p-4 mb-3"
             onPress={() => handleItemSelect(item)}
         >
-            <View style={styles.itemContent}>
-                <Text className="text-primary" style={styles.itemTitle}>{item.name}</Text>
+            <View className="flex-col">
+                <Text className="text-primary text-base font-semibold mb-2">{item.name}</Text>
 
                 {item.date && (
-                    <Text className="text-secondary" style={styles.itemDate}>
+                    <Text className="text-secondary text-sm mb-1">
                         {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -105,11 +106,11 @@ export default function AgendaPanel() {
                     </Text>
                 )}
 
-                {item.category && <Text className="text-accent" style={styles.itemCategory}>{item.category}</Text>}
+                {item.category && <Text className="text-accent text-sm mb-1">{item.category}</Text>}
 
                 {item.urgent && (
-                    <View style={styles.urgentBadge}>
-                        <Text style={styles.urgentText}>Urgent</Text>
+                    <View className="bg-red-500 px-2 py-0.5 rounded self-start">
+                        <Text className="text-white text-xs font-semibold">Urgent</Text>
                     </View>
                 )}
             </View>
@@ -117,7 +118,7 @@ export default function AgendaPanel() {
     );
 
     return (
-        <SafeAreaView>
+        <SafeAreaView className="flex-1 bg-background">
             <CustomHeader
                 title="Agenda"
                 showAddButton
@@ -128,28 +129,28 @@ export default function AgendaPanel() {
             />
 
             {errorMessage && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && agendaItems.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#007AFF"/>
+                <View className="flex-1 justify-center items-center p-5">
+                    <ActivityIndicator size="large" color={colors.accent} />
                 </View>
             ) : filteredItems.length === 0 ? (
-                <View style={styles.centerContainer}>
+                <View className="flex-1 justify-center items-center p-5">
                     <Ionicons
                         name="checkmark-circle"
                         size={48}
-                        color="gray"
+                        color={colors.secondary}
                     />
-                    <Text style={styles.emptyText}>
+                    <Text className="text-base text-secondary mb-5">
                         {showCompleted ? 'No completed items' : 'No pending items'}
                     </Text>
                     <TouchableOpacity
-                        style={styles.addButton}
+                        className="bg-accent px-5 py-2.5 rounded-lg"
                         onPress={handleAddItem}
                     >
-                        <Text style={styles.addButtonText}>Add Item</Text>
+                        <Text className="text-white text-base font-semibold">Add Item</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
@@ -157,15 +158,15 @@ export default function AgendaPanel() {
                     data={filteredItems}
                     renderItem={renderItem}
                     keyExtractor={item => item.id}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={{ padding: 16 }}
                     refreshControl={
                         <RefreshControl
                             refreshing={isRefreshing}
                             onRefresh={handleRefresh}
-                            colors={['#007AFF']} // iOS uses tintColor, Android uses colors
-                            tintColor="#007AFF"
+                            colors={[colors.accent]}
+                            tintColor={colors.accent}
                             title="Refreshing..."
-                            titleColor="#999999"
+                            titleColor={colors.secondary}
                         />
                     }
                 />
@@ -189,72 +190,3 @@ export default function AgendaPanel() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    listContent: {
-        padding: 16,
-    },
-    itemContainer: {
-        // backgroundColor: '#f5f5f5',
-        borderRadius: 10,
-        padding: 16,
-        marginBottom: 12,
-    },
-    itemContent: {
-        flexDirection: 'column',
-    },
-    itemTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 8,
-    },
-    itemDate: {
-        fontSize: 14,
-        // color: '#666',
-        marginBottom: 4,
-    },
-    itemCategory: {
-        fontSize: 14,
-        // color: '#007AFF',
-        marginBottom: 4,
-    },
-    urgentBadge: {
-        backgroundColor: '#FF3B30',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
-        alignSelf: 'flex-start',
-    },
-    urgentText: {
-        color: 'white',
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    errorText: {
-        color: 'red',
-        padding: 16,
-        textAlign: 'center',
-    },
-    emptyText: {
-        fontSize: 16,
-        color: 'gray',
-        marginBottom: 20,
-    },
-    addButton: {
-        backgroundColor: '#007AFF',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 8,
-    },
-    addButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-});
