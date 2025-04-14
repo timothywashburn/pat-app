@@ -73,15 +73,22 @@ jobs:
         run: npm install
 
       - name: Build app
+#        run: |
+#          eas build --local \
+#            --non-interactive \
+#            --output=./build \
+#            --platform=ios
         run: |
-          eas build --local \
-            --non-interactive \
-            --output=./build \
-            --platform=${{ github.event.inputs.platform }} \
-            --profile=${{ github.event.inputs.profile }}
+          touch build
 
-      - name: Upload binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-${{ github.event.inputs.platform }}
-          path: build
+      - name: Upload app
+        run: |
+          eas submit --platform=ios \
+            --non-interactive \
+            --path=build
+
+#      - name: Upload app
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: app-${{ github.event.inputs.platform }}
+#          path: build
