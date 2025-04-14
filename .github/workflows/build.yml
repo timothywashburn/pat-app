@@ -49,7 +49,7 @@ jobs:
 #            })
 
   build-ios:
-    runs-on: ios
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
