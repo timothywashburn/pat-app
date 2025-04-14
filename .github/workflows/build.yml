@@ -66,29 +66,18 @@ jobs:
           expo-version: latest
           eas-version: latest
 
-#      - name: Setup EAS local builds
-#        run: npm install -g eas-cli-local-build-plugin
-
       - name: Install dependencies
         run: npm install
 
       - name: Build app
-#        run: |
-#          eas build --local \
-#            --non-interactive \
-#            --output=./build \
-#            --platform=ios
         run: |
-          touch build
+          eas build --local \
+            --non-interactive \
+            --output=./build \
+            --platform=ios
 
       - name: Upload app
         run: |
           eas submit --platform=ios \
             --non-interactive \
             --path=build
-
-#      - name: Upload app
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: app-${{ github.event.inputs.platform }}
-#          path: build
