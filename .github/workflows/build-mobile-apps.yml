@@ -1,0 +1,75 @@
+name: Build Mobile Apps
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v7
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          expo-version: latest
+          eas-version: latest
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build app
+        run: |
+          eas build --platform=ios \
+            --output=build \
+            --local \
+            --non-interactive
+
+      - name: Upload app
+        run: |
+          eas submit --platform=ios \
+            --path=build \
+            --non-interactive
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v7
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          expo-version: latest
+          eas-version: latest
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build app
+        run: |
+          eas build --platform=android \
+            --output=build \
+            --local \
+            --non-interactive
+
+      - name: Create service account file
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > service-account.json
+
+      - name: Upload app
+        run: |
+          eas submit --platform=android \
+            --path=build \
+            --non-interactive
