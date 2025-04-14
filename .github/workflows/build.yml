@@ -6,48 +6,48 @@ on:
   workflow_dispatch:
 
 jobs:
-#  build-web:
-#    runs-on: ubuntu-latest
-#    permissions:
-#      contents: write
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Setup Node.js
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: '18'
-#          cache: 'npm'
-#
-#      - name: Install dependencies
-#        run: npm install
-#
-#      - name: Build web
-#        run: npx expo export --platform web
-#
-#      - name: Create tar.gz archive
-#        run: cd dist && tar -czf ../patapp.tar.gz .
-#
-#      - name: Create Release
-#        id: create_release
-#        uses: softprops/action-gh-release@v1
-#        with:
-#          files: patapp.tar.gz
-#          tag_name: v${{ github.run_number }}
-#          name: ${{ github.run_number }}
-#
-#      - name: Trigger backend deployment
-#        uses: actions/github-script@v7
-#        with:
-#          github-token: ${{ secrets.PAT_API_REPO_GITHUB_TOKEN }}
-#          script: |
-#            await github.rest.actions.createWorkflowDispatch({
-#              owner: 'timothywashburn',
-#              repo: 'pat-api',
-#              workflow_id: 'deploy.yml',
-#              ref: 'main'
-#            })
-#
+  build-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build web
+        run: npx expo export --platform web
+
+      - name: Create tar.gz archive
+        run: cd dist && tar -czf ../patapp.tar.gz .
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: patapp.tar.gz
+          tag_name: v${{ github.run_number }}
+          name: ${{ github.run_number }}
+
+      - name: Trigger backend deployment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_API_REPO_GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'timothywashburn',
+              repo: 'pat-api',
+              workflow_id: 'deploy.yml',
+              ref: 'main'
+            })
+
 #  build-ios:
 #    runs-on: macos-latest
 #    steps:
@@ -81,42 +81,40 @@ jobs:
 #          eas submit --platform=ios \
 #            --path=build \
 #            --non-interactive \
-
-  build-android:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: npm
-
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v7
-        with:
-          token: ${{ secrets.EXPO_TOKEN }}
-          expo-version: latest
-          eas-version: latest
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build app
+#
+#  build-android:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup Node
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 18
+#          cache: npm
+#
+#      - name: Setup Expo and EAS
+#        uses: expo/expo-github-action@v7
+#        with:
+#          token: ${{ secrets.EXPO_TOKEN }}
+#          expo-version: latest
+#          eas-version: latest
+#
+#      - name: Install dependencies
+#        run: npm install
+#
+#      - name: Build app
 #        run: |
 #          eas build --platform=android \
 #            --output=build \
 #            --local \
 #            --non-interactive \
-        run: |
-          touch build
-
-      - name: Create service account file
-        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > service-account.json
-
-      - name: Upload app
-        run: |
-          eas submit --platform=android \
-            --path=build \
-            --non-interactive \
+#
+#      - name: Create service account file
+#        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > service-account.json
+#
+#      - name: Upload app
+#        run: |
+#          eas submit --platform=android \
+#            --path=build \
+#            --non-interactive \
