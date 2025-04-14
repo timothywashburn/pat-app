@@ -119,5 +119,4 @@ jobs:
         run: |
           eas submit --platform=android \
             --path=build \
-#            --service-account=service-account.json \
             --non-interactive \
