@@ -1,24 +1,9 @@
 import { DarkTheme, DefaultTheme, Theme } from "@react-navigation/native";
 import { useColorScheme } from "nativewind";
 
-// Keep in sync with global.css
-export const lightColors = {
-    primary: '#1A1D21',
-    secondary: '#2D3748',
-    accent: '#625fff',
-    background: '#F5F7FA',
-    surface: '#FFFFFF',
-    unset: '#FF0000'
-};
-
-export const darkColors = {
-    primary: '#E8ECEF',
-    secondary: '#9AA1B0',
-    accent: '#625FFF',
-    background: '#1A1D21',
-    surface: '#2A2D35',
-    unset: '#FF0000'
-};
+import themeData from '@/theme.json';
+export const lightColors = themeData.light;
+export const darkColors = themeData.dark;
 
 interface CustomColors {
     primary: string;
@@ -26,6 +11,7 @@ interface CustomColors {
     accent: string;
     background: string;
     surface: string;
+    unset: string;
 }
 
 interface CustomTheme extends Theme {
@@ -75,13 +61,10 @@ export const useTheme = () => {
 
     return {
         theme: themeManager.getTheme(currentColorScheme),
-        colors: {
-            primary: themeManager.getColor('primary', currentColorScheme),
-            secondary: themeManager.getColor('secondary', currentColorScheme),
-            accent: themeManager.getColor('accent', currentColorScheme),
-            background: themeManager.getColor('background', currentColorScheme),
-            surface: themeManager.getColor('surface', currentColorScheme),
-        },
+        colors: Object.keys(lightColors).reduce((acc, key) => {
+            acc[key as keyof CustomColors] = themeManager.getColor(key as keyof CustomColors, currentColorScheme);
+            return acc;
+        }, {} as Record<keyof CustomColors, string>),
         colorScheme: currentColorScheme,
     };
 };
