@@ -48,8 +48,42 @@ jobs:
 #              ref: 'main'
 #            })
 
-  build-ios:
-    runs-on: macos-latest
+#  build-ios:
+#    runs-on: macos-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup Node
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 18
+#          cache: npm
+#
+#      - name: Setup Expo and EAS
+#        uses: expo/expo-github-action@v7
+#        with:
+#          token: ${{ secrets.EXPO_TOKEN }}
+#          expo-version: latest
+#          eas-version: latest
+#
+#      - name: Install dependencies
+#        run: npm install
+#
+#      - name: Build app
+#        run: |
+#          eas build --local \
+#            --non-interactive \
+#            --output=./build \
+#            --platform=ios
+#
+#      - name: Upload app
+#        run: |
+#          eas submit --platform=ios \
+#            --non-interactive \
+#            --path=build
+
+  build-android:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -74,10 +108,10 @@ jobs:
           eas build --local \
             --non-interactive \
             --output=./build \
-            --platform=ios
+            --platform=android
 
       - name: Upload app
         run: |
-          eas submit --platform=ios \
+          eas submit --platform=android \
             --non-interactive \
             --path=build

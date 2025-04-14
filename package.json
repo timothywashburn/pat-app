@@ -9,8 +9,8 @@
     "build:dev:ios": "eas build --platform ios --profile development --local",
     "build:dev:android": "eas build --platform android --profile development --local",
     "build": "npm-run-all --parallel build:ios build:android build:web",
-    "build:ios": "eas build --platform ios --local",
-    "build:android": "eas build --platform android --local",
+    "build:ios": "eas build --platform ios --local --non-interactive",
+    "build:android": "eas build --platform android --local --non-interactive",
     "build:web": "npx expo export --platform web",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -36,7 +36,8 @@
       "reactNativeDirectoryCheck": {
         "exclude": [
           "npm-run-all",
-          "socket.io-client"
+          "socket.io-client",
+          "tailwindcss"
         ]
       }
     }
