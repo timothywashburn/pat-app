@@ -47,7 +47,7 @@ jobs:
 #              workflow_id: 'deploy.yml',
 #              ref: 'main'
 #            })
-
+#
 #  build-ios:
 #    runs-on: macos-latest
 #    steps:
@@ -71,16 +71,16 @@ jobs:
 #
 #      - name: Build app
 #        run: |
-#          eas build --local \
+#          eas build --platform=ios \
+#            --output=build \
+#            --local \
 #            --non-interactive \
-#            --output=./build \
-#            --platform=ios
 #
 #      - name: Upload app
 #        run: |
 #          eas submit --platform=ios \
+#            --path=build \
 #            --non-interactive \
-#            --path=build
 
   build-android:
     runs-on: ubuntu-latest
@@ -104,14 +104,20 @@ jobs:
         run: npm install
 
       - name: Build app
+#        run: |
+#          eas build --platform=android \
+#            --output=build \
+#            --local \
+#            --non-interactive \
         run: |
-          eas build --local \
-            --non-interactive \
-            --output=./build \
-            --platform=android
+          touch output
+
+      - name: Create service account file
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > service-account.json
 
       - name: Upload app
         run: |
           eas submit --platform=android \
+            --path=build \
+            --service-account-path=service-account.json \
             --non-interactive \
-            --path=build
