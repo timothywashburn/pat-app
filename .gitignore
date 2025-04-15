@@ -4,6 +4,7 @@ coverage/
 node_modules/
 ios/
 android/
+.env*.local
 .DS_Store
 service-account.json
 

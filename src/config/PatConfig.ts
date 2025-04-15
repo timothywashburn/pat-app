@@ -2,6 +2,6 @@
  * Global configuration for the Pat application
  */
 export default {
-    apiURL: 'https://pat.timothyw.dev', // Replace with your actual API URL
-    socketPath: '/ws',
+    apiURL: process.env.EXPO_PUBLIC_API_URL!,
+    socketPath: process.env.EXPO_PUBLIC_SOCKET_PATH!,
 };
