@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     Modal,
     Platform,
     ScrollView,
@@ -16,41 +17,46 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/theme/ThemeManager';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
+import { AgendaItem } from "@/src/features/agenda/models";
 // Import the WebDateTimePicker component
 import WebDateTimePicker from './WebDateTimePicker';
 
-interface CreateAgendaItemViewProps {
+interface AgendaItemFormViewProps {
     visible: boolean;
     onDismiss: () => void;
-    onItemCreated?: () => void;
+    onItemSaved?: () => void;
     initialName?: string;
+    existingItem?: AgendaItem;
+    isEditMode?: boolean;
 }
 
-const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
+const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     visible,
     onDismiss,
-    onItemCreated,
-    initialName = ''
+    onItemSaved,
+    initialName = '',
+    existingItem,
+    isEditMode = false
 }) => {
     const { getColor } = useTheme();
-    const [name, setName] = useState(initialName);
-    const [date, setDate] = useState<Date | undefined>(new Date());
+
+    const [name, setName] = useState(existingItem?.name || initialName);
+    const [date, setDate] = useState<Date | undefined>(existingItem?.date || new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [notes, setNotes] = useState('');
-    const [urgent, setUrgent] = useState(false);
-    const [category, setCategory] = useState<string | undefined>(undefined);
-    const [type, setType] = useState<string | undefined>(undefined);
+    const [notes, setNotes] = useState(existingItem?.notes || '');
+    const [urgent, setUrgent] = useState(existingItem?.urgent || false);
+    const [category, setCategory] = useState<string | undefined>(existingItem?.category);
+    const [type, setType] = useState<string | undefined>(existingItem?.type);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // Get categories and types from settings
     const settingsManager = SettingsManager.shared;
     const categories = settingsManager.categories;
     const types = settingsManager.types;
 
     const agendaManager = AgendaManager.getInstance();
 
-    const handleCreateItem = async () => {
+    const handleSaveItem = async () => {
         if (!name.trim()) {
             setErrorMessage('Name is required');
             return;
@@ -60,43 +66,93 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await agendaManager.createAgendaItem({
+            const itemData = {
                 name: name.trim(),
                 date: date,
                 notes: notes.trim() || undefined,
                 urgent: urgent,
                 category: category,
                 type: type,
-            });
+            };
 
-            // Reset form
-            setName('');
-            setDate(new Date());
-            setNotes('');
-            setUrgent(false);
-            setCategory(undefined);
-            setType(undefined);
+            if (isEditMode && existingItem) {
+                await agendaManager.updateAgendaItem(existingItem.id, itemData);
+            } else {
+                await agendaManager.createAgendaItem(itemData);
+            }
 
-            onItemCreated?.();
+            if (!isEditMode) {
+                setName('');
+                setDate(new Date());
+                setNotes('');
+                setUrgent(false);
+                setCategory(undefined);
+                setType(undefined);
+            }
+
+            onItemSaved?.();
             onDismiss();
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to create item');
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to save item');
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleToggleCompleted = async () => {
+        if (!existingItem) return;
+
+        setIsLoading(true);
+        setErrorMessage(null);
+
+        try {
+            await agendaManager.setCompleted(existingItem.id, !existingItem.completed);
+            onItemSaved?.();
+            onDismiss();
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to update item');
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = () => {
+        if (!existingItem) return;
+
+        Alert.alert(
+            'Delete Item',
+            'Are you sure you want to delete this item? This action cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setIsLoading(true);
+                        setErrorMessage(null);
+
+                        try {
+                            await agendaManager.deleteAgendaItem(existingItem.id);
+                            onItemSaved?.();
+                            onDismiss();
+                        } catch (error) {
+                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
+                            setIsLoading(false);
+                        }
+                    }
+                },
+            ]
+        );
+    };
+
     const handleDateChange = (event: any, selectedDate?: Date) => {
         const currentDate = selectedDate || date || new Date();
 
-        // For native platforms
         setShowDatePicker(Platform.OS === 'ios');
         if (selectedDate) {
             setDate(selectedDate);
         }
     };
 
-    // Handle date change from web date picker
     const handleWebDateChange = (selectedDate: Date) => {
         setDate(selectedDate);
     };
@@ -117,10 +173,12 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                         <Text className="text-error text-base">Cancel</Text>
                     </TouchableOpacity>
 
-                    <Text className="text-on-surface text-lg font-bold">New Item</Text>
+                    <Text className="text-on-surface text-lg font-bold">
+                        {isEditMode ? 'Edit Item' : 'New Item'}
+                    </Text>
 
                     <TouchableOpacity
-                        onPress={handleCreateItem}
+                        onPress={handleSaveItem}
                         disabled={!name.trim() || isLoading}
                     >
                         {isLoading ? (
@@ -129,7 +187,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             <Text
                                 className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
                             >
-                                Add
+                                {isEditMode ? 'Save' : 'Add'}
                             </Text>
                         )}
                     </TouchableOpacity>
@@ -201,7 +259,6 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             )}
                         </View>
 
-                        {/* Native Date Picker */}
                         {Platform.OS !== 'web' && showDatePicker && (
                             <DateTimePicker
                                 value={date || new Date()}
@@ -307,6 +364,29 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                         />
                     </View>
 
+                    {/* Additional actions for edit mode */}
+                    {isEditMode && existingItem && (
+                        <View className="mt-5 gap-2.5">
+                            <TouchableOpacity
+                                className="bg-primary flex-row items-center justify-center rounded-lg p-3"
+                                onPress={handleToggleCompleted}
+                            >
+                                <Ionicons name={existingItem.completed ? "refresh-circle" : "checkmark-circle"} size={20} color={getColor("on-primary")} />
+                                <Text className="text-on-primary text-base font-semibold ml-2">
+                                    {existingItem.completed ? "Mark as Incomplete" : "Mark as Complete"}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                className="bg-error flex-row items-center justify-center rounded-lg p-3"
+                                onPress={handleDelete}
+                            >
+                                <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
+                                <Text className="text-on-error text-base font-semibold ml-2">Delete Item</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
                     <View className="h-10" />
                 </ScrollView>
             </SafeAreaView>
@@ -314,4 +394,4 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
     );
 };
 
-export default CreateAgendaItemView;
+export default AgendaItemFormView;

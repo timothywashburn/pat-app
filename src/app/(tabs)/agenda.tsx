@@ -5,8 +5,8 @@ import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
-import CreateAgendaItemView from '@/src/features/agenda/components/CreateAgendaItemView';
-import AgendaDetailPanel from '@/src/features/agenda/components/AgendaDetailPanel';
+import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
+import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 
@@ -17,9 +17,14 @@ export default function AgendaPanel() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [showCompleted, setShowCompleted] = useState(false);
-    const [showingCreateSheet, setShowingCreateSheet] = useState(false);
+
+    // State for the create/edit form
+    const [showingCreateForm, setShowingCreateForm] = useState(false);
+    const [showingEditForm, setShowingEditForm] = useState(false);
+
+    // State for detail view
     const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
-    const [showingDetail, setShowingDetail] = useState(false);
+    const [showingDetailView, setShowingDetailView] = useState(false);
 
     const agendaManager = AgendaManager.getInstance();
 
@@ -65,16 +70,27 @@ export default function AgendaPanel() {
     };
 
     const handleAddItem = () => {
-        setShowingCreateSheet(true);
+        setShowingCreateForm(true);
     };
 
     const handleItemSelect = (item: AgendaItem) => {
         setSelectedItem(item);
-        setShowingDetail(true);
+        setShowingDetailView(true);
     };
 
     const handleDetailDismiss = () => {
-        setShowingDetail(false);
+        setShowingDetailView(false);
+        setSelectedItem(null);
+    };
+
+    const handleEditRequest = () => {
+        setShowingDetailView(false);
+        setShowingEditForm(true);
+    };
+
+    const handleFormDismiss = () => {
+        setShowingCreateForm(false);
+        setShowingEditForm(false);
         setSelectedItem(null);
         loadItems();
     };
@@ -171,18 +187,30 @@ export default function AgendaPanel() {
             )}
 
             {/* Create new item modal */}
-            <CreateAgendaItemView
-                visible={showingCreateSheet}
-                onDismiss={() => setShowingCreateSheet(false)}
-                onItemCreated={loadItems}
+            <AgendaItemFormView
+                visible={showingCreateForm}
+                onDismiss={handleFormDismiss}
+                onItemSaved={loadItems}
             />
 
-            {/* Item detail panel */}
+            {/* Edit item modal */}
             {selectedItem && (
-                <AgendaDetailPanel
+                <AgendaItemFormView
+                    visible={showingEditForm}
+                    onDismiss={handleFormDismiss}
+                    onItemSaved={loadItems}
+                    existingItem={selectedItem}
+                    isEditMode={true}
+                />
+            )}
+
+            {/* Item detail view */}
+            {selectedItem && (
+                <AgendaItemDetailView
                     item={selectedItem}
-                    isPresented={showingDetail}
+                    isPresented={showingDetailView}
                     onDismiss={handleDetailDismiss}
+                    onEditRequest={handleEditRequest}
                 />
             )}
         </SafeAreaView>

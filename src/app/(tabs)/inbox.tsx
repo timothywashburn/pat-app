@@ -14,7 +14,7 @@ import { useTheme } from '@/src/theme/ThemeManager';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/ThoughtManager';
 import CustomHeader from '@/src/components/CustomHeader';
-import CreateAgendaItemView from '@/src/features/agenda/components/CreateAgendaItemView';
+import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 
 export default function InboxPanel() {
     const { getColor } = useTheme();
@@ -26,7 +26,7 @@ export default function InboxPanel() {
     const [selectedThought, setSelectedThought] = useState<Thought | null>(null);
     const [editingThought, setEditingThought] = useState<Thought | null>(null);
     const [editedContent, setEditedContent] = useState('');
-    const [showingCreateAgendaSheet, setShowingCreateAgendaSheet] = useState(false);
+    const [showingCreateAgendaForm, setShowingCreateAgendaForm] = useState(false);
 
     const thoughtManager = ThoughtManager.getInstance();
 
@@ -112,6 +112,18 @@ export default function InboxPanel() {
         );
     };
 
+    const handleAgendaFormDismiss = () => {
+        setShowingCreateAgendaForm(false);
+        setSelectedThought(null);
+    };
+
+    const handleItemCreated = () => {
+        if (selectedThought) {
+            handleDeleteThought(selectedThought.id);
+            setSelectedThought(null);
+        }
+    };
+
     const handleShowActionSheet = (thought: Thought) => {
         setSelectedThought(thought);
         Alert.alert(
@@ -121,7 +133,7 @@ export default function InboxPanel() {
                 {
                     text: 'Move to Agenda',
                     onPress: () => {
-                        setShowingCreateAgendaSheet(true);
+                        setShowingCreateAgendaForm(true);
                     }
                 },
                 {
@@ -163,7 +175,7 @@ export default function InboxPanel() {
             <CustomHeader
                 title="Inbox"
                 showAddButton={true}
-                onAddTapped={() => setShowingCreateAgendaSheet(true)}
+                onAddTapped={() => setShowingCreateAgendaForm(true)}
             />
 
             <View className="flex-row p-4 py-2 items-center">
@@ -227,20 +239,13 @@ export default function InboxPanel() {
                 />
             )}
 
-            {showingCreateAgendaSheet && (
-                <CreateAgendaItemView
-                    visible={showingCreateAgendaSheet}
-                    onDismiss={() => setShowingCreateAgendaSheet(false)}
-                    onItemCreated={() => {
-                        // If this was created from a thought, delete the thought
-                        if (selectedThought) {
-                            handleDeleteThought(selectedThought.id);
-                            setSelectedThought(null);
-                        }
-                    }}
-                    initialName={selectedThought?.content || ''}
-                />
-            )}
+            <AgendaItemFormView
+                visible={showingCreateAgendaForm}
+                onDismiss={handleAgendaFormDismiss}
+                onItemSaved={handleItemCreated}
+                initialName={selectedThought?.content || ''}
+                isEditMode={false}
+            />
         </SafeAreaView>
     );
 }
