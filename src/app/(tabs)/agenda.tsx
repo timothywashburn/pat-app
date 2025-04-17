@@ -7,6 +7,7 @@ import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
+import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 
@@ -105,34 +106,6 @@ export default function AgendaPanel() {
             return 0;
         });
 
-    const renderItem = ({item}: { item: AgendaItem }) => (
-        <TouchableOpacity
-            className="bg-surface rounded-lg p-4 mb-3"
-            onPress={() => handleItemSelect(item)}
-        >
-            <View className="flex-col">
-                <Text className="text-on-surface text-base font-semibold mb-2">{item.name}</Text>
-
-                {item.date && (
-                    <Text className="text-secondary text-sm mb-1">
-                        {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                    </Text>
-                )}
-
-                {item.category && <Text className="text-primary text-sm mb-1">{item.category}</Text>}
-
-                {item.urgent && (
-                    <View className="bg-error px-2 py-0.5 rounded self-start">
-                        <Text className="text-on-error text-xs font-semibold">Urgent</Text>
-                    </View>
-                )}
-            </View>
-        </TouchableOpacity>
-    );
-
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
@@ -172,7 +145,12 @@ export default function AgendaPanel() {
             ) : (
                 <FlatList
                     data={filteredItems}
-                    renderItem={renderItem}
+                    renderItem={({ item }) => (
+                        <AgendaItemCard
+                            item={item}
+                            onPress={handleItemSelect}
+                        />
+                    )}
                     keyExtractor={item => item.id}
                     contentContainerStyle={{ padding: 16 }}
                     refreshControl={
