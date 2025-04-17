@@ -24,7 +24,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
     onDismiss,
     onPersonCreated,
 }) => {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const [name, setName] = useState('');
     const [properties, setProperties] = useState<PersonProperty[]>([]);
     const [notes, setNotes] = useState<PersonNote[]>([]);
@@ -115,7 +115,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                         disabled={!name.trim() || isLoading}
                     >
                         {isLoading ? (
-                            <ActivityIndicator size="small" color={colors.accent} />
+                            <ActivityIndicator size="small" color={getColor("primary")} />
                         ) : (
                             <Text
                                 className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
@@ -138,7 +138,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                             value={name}
                             onChangeText={setName}
                             placeholder="Person Name"
-                            placeholderTextColor={colors.secondary}
+                            placeholderTextColor={getColor("unknown")}
                         />
                     </View>
 
@@ -171,7 +171,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                                         value={newPropertyKey}
                                         onChangeText={setNewPropertyKey}
                                         placeholder="Property Key"
-                                        placeholderTextColor={colors.secondary}
+                                        placeholderTextColor={getColor("unknown")}
                                     />
                                 </View>
 
@@ -182,7 +182,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                                         value={newPropertyValue}
                                         onChangeText={setNewPropertyValue}
                                         placeholder="Property Value"
-                                        placeholderTextColor={colors.secondary}
+                                        placeholderTextColor={getColor("unknown")}
                                     />
                                 </View>
                             </View>
@@ -192,10 +192,11 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                                 disabled={!newPropertyKey || !newPropertyValue}
                                 className="ml-2 p-1"
                             >
+                                {/*TODO: hex code*/}
                                 <Ionicons
                                     name="add-circle"
                                     size={24}
-                                    color={(!newPropertyKey || !newPropertyValue) ? "#CCCCCC" : colors.accent}
+                                    color={(!newPropertyKey || !newPropertyValue) ? "#CCCCCC" : getColor("primary")}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -226,7 +227,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                                 value={newNote}
                                 onChangeText={setNewNote}
                                 placeholder="Add a note..."
-                                placeholderTextColor={colors.secondary}
+                                placeholderTextColor={getColor("unknown")}
                                 multiline
                             />
 
@@ -235,10 +236,11 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                                 disabled={!newNote}
                                 className="ml-2 p-1"
                             >
+                                {/*TODO: hex code*/}
                                 <Ionicons
                                     name="add-circle"
                                     size={24}
-                                    color={!newNote ? "#CCCCCC" : colors.accent}
+                                    color={!newNote ? "#CCCCCC" : getColor("primary")}
                                 />
                             </TouchableOpacity>
                         </View>

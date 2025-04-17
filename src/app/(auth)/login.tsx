@@ -5,7 +5,7 @@ import { useTheme } from '@/src/theme/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 
 export default function LoginScreen() {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function LoginScreen() {
             <TextInput
                 className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Email"
-                placeholderTextColor={colors.secondary}
+                placeholderTextColor={getColor("unknown")}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -53,7 +53,7 @@ export default function LoginScreen() {
             <TextInput
                 className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Password"
-                placeholderTextColor={colors.secondary}
+                placeholderTextColor={getColor("unknown")}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry

@@ -17,7 +17,7 @@ import CustomHeader from '@/src/components/CustomHeader';
 import CreateAgendaItemView from '@/src/features/agenda/components/CreateAgendaItemView';
 
 export default function InboxPanel() {
-    const { colors, colorScheme } = useTheme();
+    const { getColor } = useTheme();
     const [thoughts, setThoughts] = useState<Thought[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -168,37 +168,37 @@ export default function InboxPanel() {
 
             <View className="flex-row p-4 py-2 items-center">
                 <TextInput
-                    className="flex-1 border border-unset rounded-lg p-2.5 mr-2"
+                    className="bg-surface flex-1 border border-unset rounded-lg p-2.5 mr-2"
                     placeholder="Add a thought..."
-                    placeholderTextColor={colors.secondary}
+                    placeholderTextColor={getColor("on-surface-variant")}
                     value={newThought}
                     onChangeText={setNewThought}
                     onSubmitEditing={handleAddThought}
                 />
                 <TouchableOpacity
-                    className={`bg-accent rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-50' : ''}`}
+                    className={`bg-primary rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-50' : ''}`}
                     onPress={handleAddThought}
                     disabled={newThought.trim() === '' || isLoading}
                 >
                     {isLoading ? (
-                        <ActivityIndicator size="small" color="#fff" />
+                        <ActivityIndicator size="small" color={getColor("on-primary")} />
                     ) : (
-                        <Text className="text-white font-bold">Add</Text>
+                        <Text className="text-on-primary font-bold">Add</Text>
                     )}
                 </TouchableOpacity>
             </View>
 
             {errorMessage && (
-                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
+                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && thoughts.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color={colors.accent} />
+                    <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
             ) : thoughts.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
-                    <Text className="text-base text-secondary">No thoughts added yet</Text>
+                    <Text className="text-on-background text-base">No thoughts added yet</Text>
                 </View>
             ) : (
                 <FlatList
@@ -220,8 +220,8 @@ export default function InboxPanel() {
                         <RefreshControl
                             refreshing={isRefreshing}
                             onRefresh={handleRefresh}
-                            colors={[colors.accent]}
-                            tintColor={colors.accent}
+                            colors={[getColor("primary")]}
+                            tintColor={getColor("primary")}
                         />
                     }
                 />

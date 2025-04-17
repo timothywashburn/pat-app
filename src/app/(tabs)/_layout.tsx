@@ -9,17 +9,17 @@ type TabBarIconProps = {
 };
 
 export default function TabsLayout() {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
 
     return (
         <AuthGuard>
             <Tabs
                 screenOptions={{
                     headerShown: false,
-                    tabBarActiveTintColor: colors.accent,
-                    tabBarInactiveTintColor: colors.secondary,
+                    tabBarActiveTintColor: getColor("primary"),
+                    tabBarInactiveTintColor: getColor("on-surface"),
                     tabBarStyle: {
-                        backgroundColor: colors.surface,
+                        backgroundColor: getColor("surface"),
                     }
                 }}
             >

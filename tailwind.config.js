@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-const themeData = require('./theme.json');
+const themeData = require('./colors.json');
 const lightTheme = themeData.light || {};
 const darkTheme = themeData.dark || {};
 

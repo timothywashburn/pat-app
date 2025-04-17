@@ -18,8 +18,6 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
     onChangeEditContent,
     onCommitEdit
 }) => {
-    const { colors } = useTheme();
-
     return (
         <View className="w-full p-4 bg-surface rounded-lg mb-3">
             {isEditing ? (

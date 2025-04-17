@@ -10,7 +10,7 @@ import { Person } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
 export default function PeoplePanel() {
-    const { colors, colorScheme } = useTheme();
+    const { getColor, colorScheme } = useTheme();
     const [people, setPeople] = useState<Person[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -89,7 +89,7 @@ export default function PeoplePanel() {
 
             {isLoading && people.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color={colors.accent} />
+                    <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
             ) : people.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
@@ -111,8 +111,8 @@ export default function PeoplePanel() {
                         <RefreshControl
                             refreshing={isRefreshing}
                             onRefresh={handleRefresh}
-                            colors={[colors.accent]}
-                            tintColor={colors.accent}
+                            colors={[getColor("primary")]}
+                            tintColor={getColor("primary")}
                         />
                     }
                 />

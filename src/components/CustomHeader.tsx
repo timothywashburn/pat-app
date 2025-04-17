@@ -22,10 +22,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     onFilterTapped,
     trailing,
 }) => {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
 
     return (
-        <View className="border-b border-surface">
+        <View className="bg-surface border-b border-surface">
             <View className="h-15 flex-row items-center justify-between px-4">
                 <View className="flex-1 items-start">
                     <TouchableOpacity
@@ -33,11 +33,11 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                             console.log("menu button pressed")
                         }}
                     >
-                        <Ionicons name="menu" size={24} color={colors.primary} />
+                        <Ionicons name="menu" size={24} color={getColor("on-surface")} />
                     </TouchableOpacity>
                 </View>
 
-                <Text className="text-primary text-lg font-bold flex-2 text-center">{title}</Text>
+                <Text className="text-on-surface text-lg font-bold flex-2 text-center">{title}</Text>
 
                 <View className="flex-1 flex-row justify-end items-center">
                     {showFilterButton && (
@@ -45,14 +45,14 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                             <Ionicons
                                 name="filter"
                                 size={24}
-                                color={isFilterActive ? colors.accent : colors.primary}
+                                color={isFilterActive ? getColor("primary") : getColor("on-surface")}
                             />
                         </TouchableOpacity>
                     )}
 
                     {showAddButton && (
                         <TouchableOpacity onPress={onAddTapped} className="ml-4 p-1">
-                            <Ionicons name="add" size={24} color={colors.primary} />
+                            <Ionicons name="add" size={24} color={getColor("on-surface")} />
                         </TouchableOpacity>
                     )}
 

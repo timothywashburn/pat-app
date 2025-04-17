@@ -11,7 +11,7 @@ import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 
 export default function AgendaPanel() {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -95,7 +95,7 @@ export default function AgendaPanel() {
             onPress={() => handleItemSelect(item)}
         >
             <View className="flex-col">
-                <Text className="text-primary text-base font-semibold mb-2">{item.name}</Text>
+                <Text className="text-on-surface text-base font-semibold mb-2">{item.name}</Text>
 
                 {item.date && (
                     <Text className="text-secondary text-sm mb-1">
@@ -106,11 +106,11 @@ export default function AgendaPanel() {
                     </Text>
                 )}
 
-                {item.category && <Text className="text-accent text-sm mb-1">{item.category}</Text>}
+                {item.category && <Text className="text-primary text-sm mb-1">{item.category}</Text>}
 
                 {item.urgent && (
-                    <View className="bg-red-500 px-2 py-0.5 rounded self-start">
-                        <Text className="text-white text-xs font-semibold">Urgent</Text>
+                    <View className="bg-error px-2 py-0.5 rounded self-start">
+                        <Text className="text-on-error text-xs font-semibold">Urgent</Text>
                     </View>
                 )}
             </View>
@@ -129,28 +129,28 @@ export default function AgendaPanel() {
             />
 
             {errorMessage && (
-                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
+                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && agendaItems.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
-                    <ActivityIndicator size="large" color={colors.accent} />
+                    <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
             ) : filteredItems.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
                     <Ionicons
                         name="checkmark-circle"
                         size={48}
-                        color={colors.secondary}
+                        color={getColor("unknown")}
                     />
                     <Text className="text-base text-secondary mb-5">
                         {showCompleted ? 'No completed items' : 'No pending items'}
                     </Text>
                     <TouchableOpacity
-                        className="bg-accent px-5 py-2.5 rounded-lg"
+                        className="bg-primary px-5 py-2.5 rounded-lg"
                         onPress={handleAddItem}
                     >
-                        <Text className="text-white text-base font-semibold">Add Item</Text>
+                        <Text className="text-on-primary text-base font-semibold">Add Item</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
@@ -163,10 +163,10 @@ export default function AgendaPanel() {
                         <RefreshControl
                             refreshing={isRefreshing}
                             onRefresh={handleRefresh}
-                            colors={[colors.accent]}
-                            tintColor={colors.accent}
+                            colors={[getColor("primary")]}
+                            tintColor={getColor("primary")}
                             title="Refreshing..."
-                            titleColor={colors.secondary}
+                            titleColor={getColor("unknown")}
                         />
                     }
                 />

@@ -24,7 +24,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
     isPresented,
     onDismiss,
 }) => {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const [name, setName] = useState(person.name);
     const [properties, setProperties] = useState<PersonProperty[]>(person.properties);
     const [notes, setNotes] = useState<PersonNote[]>(person.notes);
@@ -138,13 +138,13 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                     <Ionicons
                         name={isEditing ? 'close' : 'chevron-back'}
                         size={24}
-                        color={colors.accent}
+                        color={getColor("primary")}
                     />
                 </TouchableOpacity>
 
                 <View className="flex-row items-center">
                     {isLoading ? (
-                        <ActivityIndicator size="small" color={colors.accent} />
+                        <ActivityIndicator size="small" color={getColor("primary")} />
                     ) : isEditing ? (
                         <TouchableOpacity
                             onPress={handleSave}
@@ -178,7 +178,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Person Name"
-                                placeholderTextColor={colors.secondary}
+                                placeholderTextColor={getColor("unknown")}
                             />
                         </>
                     ) : (
@@ -251,7 +251,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                         value={newPropertyKey}
                                         onChangeText={setNewPropertyKey}
                                         placeholder="Property Key"
-                                        placeholderTextColor={colors.secondary}
+                                        placeholderTextColor={getColor("unknown")}
                                     />
                                 </View>
 
@@ -262,7 +262,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                         value={newPropertyValue}
                                         onChangeText={setNewPropertyValue}
                                         placeholder="Property Value"
-                                        placeholderTextColor={colors.secondary}
+                                        placeholderTextColor={getColor("unknown")}
                                     />
                                 </View>
                             </View>
@@ -272,7 +272,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                 disabled={!newPropertyKey || !newPropertyValue}
                                 className={`ml-2 p-2 ${(!newPropertyKey || !newPropertyValue) ? 'opacity-50' : ''}`}
                             >
-                                <Ionicons name="add-circle" size={24} color={colors.accent} />
+                                <Ionicons name="add-circle" size={24} color={getColor("primary")} />
                             </TouchableOpacity>
                         </View>
                     )}
@@ -344,7 +344,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                 value={newNote}
                                 onChangeText={setNewNote}
                                 placeholder="Add a note..."
-                                placeholderTextColor={colors.secondary}
+                                placeholderTextColor={getColor("unknown")}
                                 multiline
                             />
 
@@ -353,7 +353,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                 disabled={!newNote}
                                 className={`ml-2 p-2 ${!newNote ? 'opacity-50' : ''}`}
                             >
-                                <Ionicons name="add-circle" size={24} color={colors.accent} />
+                                <Ionicons name="add-circle" size={24} color={getColor("primary")} />
                             </TouchableOpacity>
                         </View>
                     )}

@@ -9,7 +9,7 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 
 export default function SettingsScreen() {
-    const { colors, colorScheme } = useTheme();
+    const { getColor, colorScheme } = useTheme();
     const { signOut, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -111,7 +111,7 @@ export default function SettingsScreen() {
                     showAddButton={false}
                 />
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color={colors.accent} />
+                    <ActivityIndicator size="large" color={getColor("primary")} />
                     <Text className="mt-3 text-base text-secondary">Loading settings...</Text>
                 </View>
             </SafeAreaView>
@@ -141,7 +141,7 @@ export default function SettingsScreen() {
 
             {isLoading && (
                 <View className="absolute inset-0 bg-background/70 justify-center items-center z-50">
-                    <ActivityIndicator size="large" color={colors.accent} />
+                    <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
             )}
 

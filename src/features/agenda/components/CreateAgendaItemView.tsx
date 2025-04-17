@@ -30,7 +30,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
     onItemCreated,
     initialName = ''
 }) => {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const [name, setName] = useState(initialName);
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -110,7 +110,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                         disabled={!name.trim() || isLoading}
                     >
                         {isLoading ? (
-                            <ActivityIndicator size="small" color={colors.accent} />
+                            <ActivityIndicator size="small" color={getColor("primary")} />
                         ) : (
                             <Text
                                 className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
@@ -133,7 +133,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             value={name}
                             onChangeText={setName}
                             placeholder="Item Name"
-                            placeholderTextColor={colors.secondary}
+                            placeholderTextColor={getColor("unknown")}
                         />
                     </View>
 
@@ -151,7 +151,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                                         minute: '2-digit'
                                     })}
                                     </Text>
-                                    <Ionicons name="calendar" size={20} color={colors.accent} />
+                                    <Ionicons name="calendar" size={20} color={getColor("primary")} />
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity
@@ -162,7 +162,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                                     }}
                                 >
                                     <Text className="text-base text-accent mr-2">Add Date</Text>
-                                    <Ionicons name="add-circle" size={20} color={colors.accent} />
+                                    <Ionicons name="add-circle" size={20} color={getColor("primary")} />
                                 </TouchableOpacity>
                             )}
 
@@ -171,7 +171,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                                     className="ml-2 p-1"
                                     onPress={() => setDate(undefined)}
                                 >
-                                    <Ionicons name="close-circle" size={24} color={colors.secondary} />
+                                    <Ionicons name="close-circle" size={24} color={getColor("unknown")} />
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -274,7 +274,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             value={notes}
                             onChangeText={setNotes}
                             placeholder="Add notes..."
-                            placeholderTextColor={colors.secondary}
+                            placeholderTextColor={getColor("unknown")}
                             multiline
                             numberOfLines={4}
                             textAlignVertical="top"

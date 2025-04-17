@@ -30,7 +30,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
     onDismiss,
 }) => {
     const insets = useSafeAreaInsets();
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
 
     // State for edited values
     const [name, setName] = useState(item.name);
@@ -136,7 +136,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
         >
             <View className="flex-row justify-between items-center px-4 py-4 border-b border-unset">
                 <TouchableOpacity onPress={onDismiss}>
-                    <Ionicons name="chevron-back" size={24} color={colors.accent} />
+                    <Ionicons name="chevron-back" size={24} color={getColor("primary")} />
                 </TouchableOpacity>
 
                 <Text className="text-lg font-bold text-primary">Edit Item</Text>
@@ -146,7 +146,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                     disabled={!name.trim() || isLoading}
                 >
                     {isLoading ? (
-                        <ActivityIndicator size="small" color={colors.accent} />
+                        <ActivityIndicator size="small" color={getColor("primary")} />
                     ) : (
                         <Text
                             className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
@@ -169,7 +169,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                         value={name}
                         onChangeText={setName}
                         placeholder="Item Name"
-                        placeholderTextColor={colors.secondary}
+                        placeholderTextColor={getColor("unknown")}
                     />
                 </View>
 
@@ -187,7 +187,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                                     minute: '2-digit'
                                 })}
                                 </Text>
-                                <Ionicons name="calendar" size={20} color={colors.accent} />
+                                <Ionicons name="calendar" size={20} color={getColor("primary")} />
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
@@ -198,7 +198,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                                 }}
                             >
                                 <Text className="text-base text-accent mr-2">Add Date</Text>
-                                <Ionicons name="add-circle" size={20} color={colors.accent} />
+                                <Ionicons name="add-circle" size={20} color={getColor("primary")} />
                             </TouchableOpacity>
                         )}
 
@@ -207,7 +207,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                                 className="ml-2 p-1"
                                 onPress={() => setDate(undefined)}
                             >
-                                <Ionicons name="close-circle" size={24} color={colors.secondary} />
+                                <Ionicons name="close-circle" size={24} color={getColor("unknown")} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -310,7 +310,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                         value={notes}
                         onChangeText={setNotes}
                         placeholder="Add notes..."
-                        placeholderTextColor={colors.secondary}
+                        placeholderTextColor={getColor("unknown")}
                         multiline
                         numberOfLines={4}
                         textAlignVertical="top"

@@ -16,7 +16,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
     onUpdateItems,
     editMode,
 }) => {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const [newItem, setNewItem] = useState('');
 
     const handleAddItem = async () => {
@@ -79,7 +79,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
                     <TextInput
                         className="flex-1 h-10 border border-unset rounded-lg px-3 mr-2"
                         placeholder={`New ${title.slice(0, -1)}`}
-                        placeholderTextColor={colors.secondary}
+                        placeholderTextColor={getColor("unknown")}
                         value={newItem}
                         onChangeText={setNewItem}
                     />
@@ -88,7 +88,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
                         disabled={newItem.trim() === ''}
                         className={`p-1 ${newItem.trim() === '' ? 'opacity-50' : ''}`}
                     >
-                        <Ionicons name="add-circle" size={24} color={colors.accent} />
+                        <Ionicons name="add-circle" size={24} color={getColor("primary")} />
                     </TouchableOpacity>
                 </View>
             )}

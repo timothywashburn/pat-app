@@ -5,7 +5,7 @@ import { useTheme } from '@/src/theme/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 
 export default function RegisterScreen() {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -48,7 +48,7 @@ export default function RegisterScreen() {
             <TextInput
                 className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Full Name"
-                placeholderTextColor={colors.secondary}
+                placeholderTextColor={getColor("unknown")}
                 value={name}
                 onChangeText={setName}
             />
@@ -56,7 +56,7 @@ export default function RegisterScreen() {
             <TextInput
                 className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Email"
-                placeholderTextColor={colors.secondary}
+                placeholderTextColor={getColor("unknown")}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -66,7 +66,7 @@ export default function RegisterScreen() {
             <TextInput
                 className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Password"
-                placeholderTextColor={colors.secondary}
+                placeholderTextColor={getColor("unknown")}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -75,7 +75,7 @@ export default function RegisterScreen() {
             <TextInput
                 className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
                 placeholder="Confirm Password"
-                placeholderTextColor={colors.secondary}
+                placeholderTextColor={getColor("unknown")}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry

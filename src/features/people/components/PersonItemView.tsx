@@ -8,8 +8,6 @@ interface PersonItemViewProps {
 }
 
 const PersonItemView: React.FC<PersonItemViewProps> = ({ person }) => {
-    const { colors } = useTheme();
-
     return (
         <View className="w-full p-4 bg-surface rounded-lg mb-3">
             <Text className="text-lg font-bold text-primary mb-2">{person.name}</Text>

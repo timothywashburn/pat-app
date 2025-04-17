@@ -27,7 +27,7 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
     onUpdatePanels,
     editMode,
 }) => {
-    const { colors } = useTheme();
+    const { getColor } = useTheme();
     const visiblePanels = panels.filter(p => p.visible);
     const hiddenPanels = panels.filter(p => !p.visible);
 
@@ -63,7 +63,7 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
                                 <Ionicons
                                     name={getIconName(panel.panel.icon)}
                                     size={24}
-                                    color={panel.visible ? colors.accent : colors.secondary}
+                                    color={panel.visible ? getColor("primary") : getColor("unknown")}
                                 />
                                 <Text className={`text-base ml-3 ${panel.visible ? 'text-primary' : 'text-secondary'}`}>
                                     {panel.panel.title}
@@ -77,7 +77,7 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
                                     <Ionicons
                                         name={panel.visible ? 'eye-off' : 'eye'}
                                         size={24}
-                                        color={colors.accent}
+                                        color={getColor("primary")}
                                     />
                                 </TouchableOpacity>
                             )}
