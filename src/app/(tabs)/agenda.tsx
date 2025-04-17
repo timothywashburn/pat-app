@@ -118,7 +118,7 @@ export default function AgendaPanel() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView className="bg-background flex-1">
             <CustomHeader
                 title="Agenda"
                 showAddButton

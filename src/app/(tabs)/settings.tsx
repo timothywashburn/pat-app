@@ -104,7 +104,7 @@ export default function SettingsScreen() {
 
     if (isLoading && !settingsManager.isLoaded) {
         return (
-            <SafeAreaView className="flex-1 bg-background">
+            <SafeAreaView className="bg-background flex-1">
                 <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
                 <CustomHeader
                     title="Settings"
@@ -119,7 +119,7 @@ export default function SettingsScreen() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView className="bg-background flex-1">
             <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
             <CustomHeader

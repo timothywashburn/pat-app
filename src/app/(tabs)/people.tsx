@@ -74,7 +74,7 @@ export default function PeoplePanel() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView className="bg-background flex-1">
             <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
             <CustomHeader

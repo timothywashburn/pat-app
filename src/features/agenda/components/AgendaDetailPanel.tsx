@@ -131,15 +131,15 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
 
     return (
         <View
-            className="absolute inset-0 bg-surface z-50"
+            className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="flex-row justify-between items-center px-4 py-4 border-b border-unset">
+            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-unset">
                 <TouchableOpacity onPress={onDismiss}>
-                    <Ionicons name="chevron-back" size={24} color={getColor("primary")} />
+                    <Ionicons name="chevron-back" size={24} color={getColor("error")} />
                 </TouchableOpacity>
 
-                <Text className="text-lg font-bold text-primary">Edit Item</Text>
+                <Text className="text-on-surface text-lg font-bold">Edit Item</Text>
 
                 <TouchableOpacity
                     onPress={handleSave}
@@ -149,7 +149,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                         <ActivityIndicator size="small" color={getColor("primary")} />
                     ) : (
                         <Text
-                            className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
+                            className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
                         >
                             Save
                         </Text>
@@ -158,30 +158,30 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
             </View>
 
             {errorMessage && (
-                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
+                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
             )}
 
             <ScrollView className="flex-1 p-4">
                 <View className="mb-5">
-                    <Text className="text-base font-medium text-primary mb-2">Name</Text>
+                    <Text className="text-on-background text-base font-medium mb-2">Name</Text>
                     <TextInput
-                        className="border border-unset rounded-lg p-3 text-primary"
+                        className="text-on-surface border border-unset rounded-lg p-3"
                         value={name}
                         onChangeText={setName}
                         placeholder="Item Name"
-                        placeholderTextColor={getColor("unknown")}
+                        placeholderTextColor={getColor("on-surface-variant")}
                     />
                 </View>
 
                 <View className="mb-5">
-                    <Text className="text-base font-medium text-primary mb-2">Date</Text>
+                    <Text className="text-on-background text-base font-medium mb-2">Date</Text>
                     <View className="flex-row items-center">
                         {date ? (
                             <TouchableOpacity
                                 className="flex-1 flex-row items-center justify-between border border-unset rounded-lg p-3"
                                 onPress={() => setShowDatePicker(true)}
                             >
-                                <Text className="text-base text-primary">
+                                <Text className="text-on-surface text-base">
                                     {date.toLocaleDateString()} at {date.toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
@@ -207,7 +207,7 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                                 className="ml-2 p-1"
                                 onPress={() => setDate(undefined)}
                             >
-                                <Ionicons name="close-circle" size={24} color={getColor("unknown")} />
+                                <Ionicons name="close-circle" size={24} color={getColor("error")} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -224,30 +224,30 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
 
                 <View className="mb-5">
                     <View className="flex-row items-center justify-between">
-                        <Text className="text-base font-medium text-red-500">Urgent</Text>
+                        <Text className="text-on-background text-base font-medium">Urgent</Text>
                         <Switch
                             value={urgent}
                             onValueChange={setUrgent}
-                            trackColor={{ false: "#d3d3d3", true: "#FF3B30" }}
-                            thumbColor={urgent ? "#fff" : "#f4f3f4"}
-                            ios_backgroundColor="#d3d3d3"
+                            trackColor={{ false: getColor("unknown"), true: getColor("error") }}
+                            thumbColor={getColor("on-error")}
+                            ios_backgroundColor={getColor("unknown")}
                         />
                     </View>
                 </View>
 
                 <View className="mb-5">
-                    <Text className="text-base font-medium text-primary mb-2">Category</Text>
+                    <Text className="text-on-background text-base font-medium mb-2">Category</Text>
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                     >
                         <TouchableOpacity
-                            className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                            className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                             onPress={() => setCategory(undefined)}
                         >
                             <Text
-                                className={`text-sm ${category === undefined ? 'text-white' : 'text-primary'}`}
+                                className={`text-sm ${category === undefined ? 'text-on-primary' : 'text-primary'}`}
                             >
                                 None
                             </Text>
@@ -256,11 +256,11 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                         {categories.map(cat => (
                             <TouchableOpacity
                                 key={cat}
-                                className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                                className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                                 onPress={() => setCategory(cat)}
                             >
                                 <Text
-                                    className={`text-sm ${category === cat ? 'text-white' : 'text-primary'}`}
+                                    className={`text-sm ${category === cat ? 'text-on-primary' : 'text-primary'}`}
                                 >
                                     {cat}
                                 </Text>
@@ -270,18 +270,18 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                 </View>
 
                 <View className="mb-5">
-                    <Text className="text-base font-medium text-primary mb-2">Type</Text>
+                    <Text className="text-on-background text-base font-medium mb-2">Type</Text>
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                     >
                         <TouchableOpacity
-                            className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                            className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                             onPress={() => setType(undefined)}
                         >
                             <Text
-                                className={`text-sm ${type === undefined ? 'text-white' : 'text-primary'}`}
+                                className={`text-sm ${type === undefined ? 'text-on-primary' : 'text-primary'}`}
                             >
                                 None
                             </Text>
@@ -290,11 +290,11 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                         {types.map(t => (
                             <TouchableOpacity
                                 key={t}
-                                className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                                className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                                 onPress={() => setType(t)}
                             >
                                 <Text
-                                    className={`text-sm ${type === t ? 'text-white' : 'text-primary'}`}
+                                    className={`text-sm ${type === t ? 'text-on-primary' : 'text-primary'}`}
                                 >
                                     {t}
                                 </Text>
@@ -304,13 +304,13 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
                 </View>
 
                 <View className="mb-5">
-                    <Text className="text-base font-medium text-primary mb-2">Notes</Text>
+                    <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
                     <TextInput
-                        className="border border-unset rounded-lg p-3 text-base text-primary min-h-[100px]"
+                        className="text-on-surface border border-unset rounded-lg p-3 text-base min-h-[100px]"
                         value={notes}
                         onChangeText={setNotes}
                         placeholder="Add notes..."
-                        placeholderTextColor={getColor("unknown")}
+                        placeholderTextColor={getColor("on-surface-variant")}
                         multiline
                         numberOfLines={4}
                         textAlignVertical="top"
@@ -319,21 +319,21 @@ const AgendaDetailPanel: React.FC<AgendaDetailPanelProps> = ({
 
                 <View className="mt-5 gap-2.5">
                     <TouchableOpacity
-                        className="flex-row items-center justify-center bg-green-500 rounded-lg p-3"
+                        className="bg-primary flex-row items-center justify-center rounded-lg p-3"
                         onPress={handleToggleCompleted}
                     >
-                        <Ionicons name={item.completed ? "refresh-circle" : "checkmark-circle"} size={20} color="white" />
-                        <Text className="text-white text-base font-semibold ml-2">
+                        <Ionicons name={item.completed ? "refresh-circle" : "checkmark-circle"} size={20} color={getColor("on-primary")} />
+                        <Text className="text-on-primary text-base font-semibold ml-2">
                             {item.completed ? "Mark as Incomplete" : "Mark as Complete"}
                         </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="flex-row items-center justify-center bg-red-500 rounded-lg p-3"
+                        className="bg-error flex-row items-center justify-center rounded-lg p-3"
                         onPress={handleDelete}
                     >
-                        <Ionicons name="trash-outline" size={20} color="white" />
-                        <Text className="text-white text-base font-semibold ml-2">Delete Item</Text>
+                        <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
+                        <Text className="text-on-error text-base font-semibold ml-2">Delete Item</Text>
                     </TouchableOpacity>
                 </View>
 

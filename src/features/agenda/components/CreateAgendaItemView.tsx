@@ -16,6 +16,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/theme/ThemeManager';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
+// Import the WebDateTimePicker component
+import WebDateTimePicker from './WebDateTimePicker';
 
 interface CreateAgendaItemViewProps {
     visible: boolean;
@@ -85,10 +87,22 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
     };
 
     const handleDateChange = (event: any, selectedDate?: Date) => {
+        const currentDate = selectedDate || date || new Date();
+
+        // For native platforms
         setShowDatePicker(Platform.OS === 'ios');
         if (selectedDate) {
             setDate(selectedDate);
         }
+    };
+
+    // Handle date change from web date picker
+    const handleWebDateChange = (selectedDate: Date) => {
+        setDate(selectedDate);
+    };
+
+    const showDateTimePickerModal = () => {
+        setShowDatePicker(true);
     };
 
     return (
@@ -97,13 +111,13 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
             animationType="slide"
             onRequestClose={onDismiss}
         >
-            <SafeAreaView className="flex-1 bg-surface" edges={['top', 'right', 'left']}>
-                <View className="flex-row justify-between items-center px-4 py-4 border-b border-unset">
+            <SafeAreaView className="bg-background flex-1" edges={['top', 'right', 'left']}>
+                <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-unset">
                     <TouchableOpacity onPress={onDismiss}>
-                        <Text className="text-accent text-base">Cancel</Text>
+                        <Text className="text-error text-base">Cancel</Text>
                     </TouchableOpacity>
 
-                    <Text className="text-lg font-bold text-primary">New Item</Text>
+                    <Text className="text-on-surface text-lg font-bold">New Item</Text>
 
                     <TouchableOpacity
                         onPress={handleCreateItem}
@@ -113,7 +127,7 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             <ActivityIndicator size="small" color={getColor("primary")} />
                         ) : (
                             <Text
-                                className={`text-accent text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
+                                className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
                             >
                                 Add
                             </Text>
@@ -122,28 +136,39 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                 </View>
 
                 {errorMessage && (
-                    <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
+                    <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
+                )}
+
+                {/* Web Date Picker Modal */}
+                {Platform.OS === 'web' && showDatePicker && (
+                    <View className="absolute z-10 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+                        <WebDateTimePicker
+                            date={date}
+                            onDateChange={handleWebDateChange}
+                            onDismiss={() => setShowDatePicker(false)}
+                        />
+                    </View>
                 )}
 
                 <ScrollView className="flex-1 p-4">
                     <View className="mb-5">
-                        <Text className="text-base font-medium text-primary mb-2">Name</Text>
+                        <Text className="text-on-background text-base font-medium mb-2">Name</Text>
                         <TextInput
-                            className="border border-unset rounded-lg p-3 text-primary"
+                            className="bg-surface text-on-surface border border-unset rounded-lg p-3"
                             value={name}
                             onChangeText={setName}
                             placeholder="Item Name"
-                            placeholderTextColor={getColor("unknown")}
+                            placeholderTextColor={getColor("on-surface-variant")}
                         />
                     </View>
 
                     <View className="mb-5">
-                        <Text className="text-base font-medium text-primary mb-2">Date</Text>
+                        <Text className="text-on-background text-base font-medium mb-2">Date</Text>
                         <View className="flex-row items-center">
                             {date ? (
                                 <TouchableOpacity
                                     className="flex-1 flex-row items-center justify-between border border-unset rounded-lg p-3"
-                                    onPress={() => setShowDatePicker(true)}
+                                    onPress={showDateTimePickerModal}
                                 >
                                     <Text className="text-base text-primary">
                                         {date.toLocaleDateString()} at {date.toLocaleTimeString([], {
@@ -155,13 +180,13 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity
-                                    className="flex-1 flex-row items-center justify-center border border-unset rounded-lg p-3 bg-background"
+                                    className="bg-surface flex-1 flex-row items-center justify-center border border-unset rounded-lg p-3"
                                     onPress={() => {
                                         setDate(new Date());
-                                        setShowDatePicker(true);
+                                        showDateTimePickerModal();
                                     }}
                                 >
-                                    <Text className="text-base text-accent mr-2">Add Date</Text>
+                                    <Text className="text-on-surface text-base mr-2">Add Date</Text>
                                     <Ionicons name="add-circle" size={20} color={getColor("primary")} />
                                 </TouchableOpacity>
                             )}
@@ -171,12 +196,13 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                                     className="ml-2 p-1"
                                     onPress={() => setDate(undefined)}
                                 >
-                                    <Ionicons name="close-circle" size={24} color={getColor("unknown")} />
+                                    <Ionicons name="close-circle" size={24} color={getColor("error")} />
                                 </TouchableOpacity>
                             )}
                         </View>
 
-                        {showDatePicker && (
+                        {/* Native Date Picker */}
+                        {Platform.OS !== 'web' && showDatePicker && (
                             <DateTimePicker
                                 value={date || new Date()}
                                 mode="datetime"
@@ -188,30 +214,30 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
 
                     <View className="mb-5">
                         <View className="flex-row items-center justify-between">
-                            <Text className="text-base font-medium text-red-500">Urgent</Text>
+                            <Text className="text-on-surface text-base font-medium">Urgent</Text>
                             <Switch
                                 value={urgent}
                                 onValueChange={setUrgent}
-                                trackColor={{ false: "#d3d3d3", true: "#FF3B30" }}
-                                thumbColor={urgent ? "#fff" : "#f4f3f4"}
-                                ios_backgroundColor="#d3d3d3"
+                                trackColor={{ false: getColor("unknown"), true: getColor("error") }}
+                                thumbColor={getColor("on-error")}
+                                ios_backgroundColor={getColor("unknown")}
                             />
                         </View>
                     </View>
 
                     <View className="mb-5">
-                        <Text className="text-base font-medium text-primary mb-2">Category</Text>
+                        <Text className="text-on-background text-base font-medium mb-2">Category</Text>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                         >
                             <TouchableOpacity
-                                className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                                className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                                 onPress={() => setCategory(undefined)}
                             >
                                 <Text
-                                    className={`text-sm ${category === undefined ? 'text-white' : 'text-primary'}`}
+                                    className={`text-sm ${category === undefined ? 'text-on-primary' : 'text-primary'}`}
                                 >
                                     None
                                 </Text>
@@ -220,11 +246,11 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             {categories.map(cat => (
                                 <TouchableOpacity
                                     key={cat}
-                                    className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                                    className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                                     onPress={() => setCategory(cat)}
                                 >
                                     <Text
-                                        className={`text-sm ${category === cat ? 'text-white' : 'text-primary'}`}
+                                        className={`text-sm ${category === cat ? 'text-on-primary' : 'text-primary'}`}
                                     >
                                         {cat}
                                     </Text>
@@ -234,18 +260,18 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                     </View>
 
                     <View className="mb-5">
-                        <Text className="text-base font-medium text-primary mb-2">Type</Text>
+                        <Text className="text-on-background text-base font-medium mb-2">Type</Text>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                         >
                             <TouchableOpacity
-                                className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                                className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                                 onPress={() => setType(undefined)}
                             >
                                 <Text
-                                    className={`text-sm ${type === undefined ? 'text-white' : 'text-primary'}`}
+                                    className={`text-sm ${type === undefined ? 'text-on-primary' : 'text-primary'}`}
                                 >
                                     None
                                 </Text>
@@ -254,11 +280,11 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                             {types.map(t => (
                                 <TouchableOpacity
                                     key={t}
-                                    className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-accent border-accent' : 'bg-background border-unset'}`}
+                                    className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-primary border-unknown' : 'bg-surface border-unset'}`}
                                     onPress={() => setType(t)}
                                 >
                                     <Text
-                                        className={`text-sm ${type === t ? 'text-white' : 'text-primary'}`}
+                                        className={`text-sm ${type === t ? 'text-on-primary' : 'text-primary'}`}
                                     >
                                         {t}
                                     </Text>
@@ -270,11 +296,11 @@ const CreateAgendaItemView: React.FC<CreateAgendaItemViewProps> = ({
                     <View className="mb-5">
                         <Text className="text-base font-medium text-primary mb-2">Notes</Text>
                         <TextInput
-                            className="border border-unset rounded-lg p-3 text-base text-primary min-h-[100px]"
+                            className="text-on-surface border border-unset rounded-lg p-3 text-base min-h-[100px]"
                             value={notes}
                             onChangeText={setNotes}
                             placeholder="Add notes..."
-                            placeholderTextColor={getColor("unknown")}
+                            placeholderTextColor={getColor("on-surface-variant")}
                             multiline
                             numberOfLines={4}
                             textAlignVertical="top"

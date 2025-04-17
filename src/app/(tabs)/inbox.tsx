@@ -159,7 +159,7 @@ export default function InboxPanel() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView className="bg-background flex-1">
             <CustomHeader
                 title="Inbox"
                 showAddButton={true}
