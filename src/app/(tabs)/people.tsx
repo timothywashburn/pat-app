@@ -84,7 +84,7 @@ export default function PeoplePanel() {
             />
 
             {errorMessage && (
-                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
+                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && people.length === 0 ? (
@@ -95,10 +95,10 @@ export default function PeoplePanel() {
                 <View className="flex-1 justify-center items-center">
                     <Text className="text-base text-secondary mb-4">No people added yet</Text>
                     <TouchableOpacity
-                        className="bg-accent px-5 py-2.5 rounded-lg"
+                        className="bg-primary px-5 py-2.5 rounded-lg"
                         onPress={handleCreatePerson}
                     >
-                        <Text className="text-white text-base font-semibold">Add Person</Text>
+                        <Text className="text-on-primary text-base font-semibold">Add Person</Text>
                     </TouchableOpacity>
                 </View>
             ) : (

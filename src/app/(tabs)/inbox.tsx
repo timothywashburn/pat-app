@@ -198,7 +198,7 @@ export default function InboxPanel() {
                 </View>
             ) : thoughts.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
-                    <Text className="text-on-background text-base">No thoughts added yet</Text>
+                    <Text className="text-on-background-variant text-base">No thoughts added yet</Text>
                 </View>
             ) : (
                 <FlatList

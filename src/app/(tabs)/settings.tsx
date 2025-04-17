@@ -112,7 +112,7 @@ export default function SettingsScreen() {
                 />
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color={getColor("primary")} />
-                    <Text className="mt-3 text-base text-secondary">Loading settings...</Text>
+                    <Text className="mt-3 text-base text-on-background-variant">Loading settings...</Text>
                 </View>
             </SafeAreaView>
         );
@@ -127,7 +127,7 @@ export default function SettingsScreen() {
                 showAddButton={false}
                 trailing={() => (
                     <Text
-                        className="text-accent text-base"
+                        className="text-primary text-base"
                         onPress={() => setEditMode(!editMode)}
                     >
                         {editMode ? 'Done' : 'Edit'}
@@ -136,11 +136,11 @@ export default function SettingsScreen() {
             />
 
             {errorMessage && (
-                <Text className="text-red-500 p-4 text-center">{errorMessage}</Text>
+                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
             )}
 
             {isLoading && (
-                <View className="absolute inset-0 bg-background/70 justify-center items-center z-50">
+                <View className="absolute inset-0 justify-center items-center z-50">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
             )}
@@ -181,16 +181,16 @@ export default function SettingsScreen() {
                     />
 
                     {userInfo && (
-                        <View className="w-full p-4 bg-surface rounded-lg mt-5 mb-5">
-                            <Text className="text-base font-bold text-primary mb-2.5">User Info</Text>
-                            <Text className="text-primary">Name: {userInfo.name}</Text>
-                            <Text className="text-primary">Email: {userInfo.email}</Text>
-                            <Text className="text-primary">Email Verified: {userInfo.isEmailVerified ? 'Yes' : 'No'}</Text>
+                        <View className="bg-surface w-full p-4 rounded-lg mt-5 mb-5">
+                            <Text className="text-on-surface text-base font-bold mb-2.5">User Info</Text>
+                            <Text className="text-on-surface">Name: {userInfo.name}</Text>
+                            <Text className="text-on-surface">Email: {userInfo.email}</Text>
+                            <Text className="text-on-surface">Email Verified: {userInfo.isEmailVerified ? 'Yes' : 'No'}</Text>
                         </View>
                     )}
 
                     <Text
-                        className="text-red-500 text-base font-bold text-center py-3"
+                        className="text-unknown text-base font-bold text-center py-3"
                         onPress={() => signOut()}
                     >
                         Sign Out

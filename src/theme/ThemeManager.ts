@@ -20,6 +20,7 @@ type ThemeColors = {
     "on-error-container": string;
     "background": string;
     "on-background": string;
+    "on-background-variant": string;
     "surface": string;
     "on-surface": string;
     "on-surface-variant": string;

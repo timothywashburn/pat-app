@@ -34,16 +34,16 @@ export default function LoginScreen() {
     };
 
     return (
-        <View className="flex-1 p-5 justify-center bg-background">
-            <Text className="text-3xl font-bold mb-2.5 text-center text-primary">Welcome to PAT</Text>
-            <Text className="text-base text-secondary mb-8 text-center">Sign in to continue</Text>
+        <View className="bg-background flex-1 p-5 justify-center">
+            <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Welcome to PAT</Text>
+            <Text className="text-on-background-variant text-base mb-8 text-center">Sign in to continue</Text>
 
-            {error && <Text className="text-red-500 mb-4 text-center">{error}</Text>}
+            {error && <Text className="text-unknown mb-4 text-center">{error}</Text>}
 
             <TextInput
-                className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
+                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
                 placeholder="Email"
-                placeholderTextColor={getColor("unknown")}
+                placeholderTextColor={getColor("on-surface-variant")}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -51,31 +51,31 @@ export default function LoginScreen() {
             />
 
             <TextInput
-                className="h-[50px] border border-unset rounded-lg mb-4 px-3 text-base text-primary"
+                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
                 placeholder="Password"
-                placeholderTextColor={getColor("unknown")}
+                placeholderTextColor={getColor("on-surface-variant")}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
             />
 
             <TouchableOpacity
-                className="bg-accent h-[50px] rounded-lg justify-center items-center mt-2.5"
+                className="bg-primary h-[50px] rounded-lg justify-center items-center mt-2.5"
                 onPress={handleLogin}
                 disabled={isLoading}
             >
                 {isLoading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color={getColor("on-primary")} />
                 ) : (
-                    <Text className="text-white text-base font-semibold">Sign In</Text>
+                    <Text className="text-on-primary text-base font-semibold">Sign In</Text>
                 )}
             </TouchableOpacity>
 
             <View className="flex-row justify-center mt-5">
-                <Text className="text-secondary">Don't have an account? </Text>
+                <Text className="text-on-background-variant">Don't have an account? </Text>
                 <Link href="/(auth)/register" asChild>
                     <TouchableOpacity>
-                        <Text className="text-accent font-semibold">Register</Text>
+                        <Text className="text-primary font-semibold">Register</Text>
                     </TouchableOpacity>
                 </Link>
             </View>

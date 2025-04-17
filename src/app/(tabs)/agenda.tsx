@@ -141,7 +141,7 @@ export default function AgendaPanel() {
                     <Ionicons
                         name="checkmark-circle"
                         size={48}
-                        color={getColor("unknown")}
+                        color={getColor("primary")}
                     />
                     <Text className="text-base text-secondary mb-5">
                         {showCompleted ? 'No completed items' : 'No pending items'}
@@ -165,8 +165,6 @@ export default function AgendaPanel() {
                             onRefresh={handleRefresh}
                             colors={[getColor("primary")]}
                             tintColor={getColor("primary")}
-                            title="Refreshing..."
-                            titleColor={getColor("unknown")}
                         />
                     }
                 />
