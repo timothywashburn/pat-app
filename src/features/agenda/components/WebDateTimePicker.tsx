@@ -63,7 +63,7 @@ const WebDateTimePicker: React.FC<WebDateTimePickerProps> = ({
                         type="date"
                         value={formatDateForInput(currentDate)}
                         onChange={handleWebDateChange}
-                        className="w-full p-3 border border-unknown rounded-lg"
+                        className="w-full p-3 border border-outline rounded-lg"
                         style={{ color: getColor("on-surface") }}
                     />
                 </View>
@@ -74,7 +74,7 @@ const WebDateTimePicker: React.FC<WebDateTimePickerProps> = ({
                         type="time"
                         value={formatTimeForInput(currentDate)}
                         onChange={handleWebTimeChange}
-                        className="w-full p-3 border border-unknown rounded-lg"
+                        className="w-full p-3 border border-outline rounded-lg"
                         style={{ color: getColor("on-surface") }}
                     />
                 </View>

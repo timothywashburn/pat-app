@@ -35,7 +35,7 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
             className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-unknown">
+            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
                 <TouchableOpacity onPress={onDismiss}>
                     <Ionicons name="chevron-back" size={24} color={getColor("primary")} />
                 </TouchableOpacity>
@@ -90,7 +90,7 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                     {item.notes && (
                         <View className="mb-4">
                             <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
-                            <View className="bg-surface border border-unknown rounded-lg p-3">
+                            <View className="bg-surface border border-outline rounded-lg p-3">
                                 <Text className="text-on-surface text-base">{item.notes}</Text>
                             </View>
                         </View>

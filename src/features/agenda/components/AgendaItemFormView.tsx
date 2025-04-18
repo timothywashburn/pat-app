@@ -169,7 +169,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         >
             <SafeAreaProvider>
                 <SafeAreaView className="bg-background flex-1" edges={['top', 'right', 'left']}>
-                    <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-unknown">
+                    <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
                         <TouchableOpacity onPress={onDismiss}>
                             <Text className="text-error text-base">Cancel</Text>
                         </TouchableOpacity>
@@ -213,7 +213,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                         <View className="mb-5">
                             <Text className="text-on-background text-base font-medium mb-2">Name</Text>
                             <TextInput
-                                className="bg-surface text-on-surface border border-unknown rounded-lg p-3"
+                                className="bg-surface text-on-surface border border-outline rounded-lg p-3"
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Item Name"
@@ -226,7 +226,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                             <View className="flex-row items-center">
                                 {date ? (
                                     <TouchableOpacity
-                                        className="flex-1 flex-row items-center justify-between border border-unknown rounded-lg p-3"
+                                        className="flex-1 flex-row items-center justify-between border border-outline rounded-lg p-3"
                                         onPress={showDateTimePickerModal}
                                     >
                                         <Text className="text-base text-primary">
@@ -239,7 +239,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                                     </TouchableOpacity>
                                 ) : (
                                     <TouchableOpacity
-                                        className="bg-surface flex-1 flex-row items-center justify-center border border-unknown rounded-lg p-3"
+                                        className="bg-surface flex-1 flex-row items-center justify-center border border-outline rounded-lg p-3"
                                         onPress={() => {
                                             setDate(new Date());
                                             showDateTimePickerModal();
@@ -291,7 +291,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                                 contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                             >
                                 <TouchableOpacity
-                                    className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-primary border-unknown' : 'bg-surface border-unknown'}`}
+                                    className={`border rounded-2xl px-3 py-1.5 ${category === undefined ? 'bg-primary border-outline' : 'bg-surface border-outline'}`}
                                     onPress={() => setCategory(undefined)}
                                 >
                                     <Text
@@ -304,7 +304,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                                 {categories.map(cat => (
                                     <TouchableOpacity
                                         key={cat}
-                                        className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-primary border-unknown' : 'bg-surface border-unknown'}`}
+                                        className={`border rounded-2xl px-3 py-1.5 ${category === cat ? 'bg-primary border-outline' : 'bg-surface border-outline'}`}
                                         onPress={() => setCategory(cat)}
                                     >
                                         <Text
@@ -325,7 +325,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                                 contentContainerStyle={{ paddingVertical: 4, gap: 8 }}
                             >
                                 <TouchableOpacity
-                                    className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-primary border-unknown' : 'bg-surface border-unknown'}`}
+                                    className={`border rounded-2xl px-3 py-1.5 ${type === undefined ? 'bg-primary border-outline' : 'bg-surface border-outline'}`}
                                     onPress={() => setType(undefined)}
                                 >
                                     <Text
@@ -338,7 +338,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                                 {types.map(t => (
                                     <TouchableOpacity
                                         key={t}
-                                        className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-primary border-unknown' : 'bg-surface border-unknown'}`}
+                                        className={`border rounded-2xl px-3 py-1.5 ${type === t ? 'bg-primary border-outline' : 'bg-surface border-outline'}`}
                                         onPress={() => setType(t)}
                                     >
                                         <Text
@@ -354,7 +354,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                         <View className="mb-5">
                             <Text className="text-base font-medium text-primary mb-2">Notes</Text>
                             <TextInput
-                                className="text-on-surface border border-unknown rounded-lg p-3 text-base min-h-[100px]"
+                                className="text-on-surface border border-outline rounded-lg p-3 text-base min-h-[100px]"
                                 value={notes}
                                 onChangeText={setNotes}
                                 placeholder="Add notes..."

@@ -77,7 +77,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
             {editMode && (
                 <View className="flex-row items-center mt-2">
                     <TextInput
-                        className="bg-surface text-on-surface flex-1 h-10 border border-unknown rounded-lg px-3 mr-2"
+                        className="bg-surface text-on-surface flex-1 h-10 border border-outline rounded-lg px-3 mr-2"
                         placeholder={`New ${title.slice(0, -1)}`}
                         placeholderTextColor={getColor("on-surface-variant")}
                         value={newItem}

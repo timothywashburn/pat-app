@@ -150,7 +150,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         >
             <SafeAreaProvider>
                 <SafeAreaView className="bg-background flex-1" edges={['top', 'right', 'left']}>
-                    <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-unknown">
+                    <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
                         <TouchableOpacity onPress={onDismiss}>
                             <Text className="text-error text-base">Cancel</Text>
                         </TouchableOpacity>
@@ -183,7 +183,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                         <View className="mb-5">
                             <Text className="text-on-background text-base font-medium mb-2">Name</Text>
                             <TextInput
-                                className="bg-surface text-on-surface border border-unknown rounded-lg p-3"
+                                className="bg-surface text-on-surface border border-outline rounded-lg p-3"
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Person Name"
@@ -196,7 +196,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                             <Text className="text-on-background text-base font-medium mb-2">Properties</Text>
 
                             {properties.map(property => (
-                                <View key={property.id} className="bg-surface border border-unknown flex-row items-center mb-2 p-2.5 rounded-lg">
+                                <View key={property.id} className="bg-surface border border-outline flex-row items-center mb-2 p-2.5 rounded-lg">
                                     <View className="flex-1">
                                         <Text className="text-on-surface-variant text-xs">{property.key}</Text>
                                         <Text className="text-on-surface text-base">{property.value}</Text>
@@ -216,7 +216,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                                     <View className="flex-1 mr-2">
                                         <Text className="text-on-background text-xs mb-1">Key</Text>
                                         <TextInput
-                                            className="bg-surface text-on-surface border border-unknown rounded-lg p-2"
+                                            className="bg-surface text-on-surface border border-outline rounded-lg p-2"
                                             value={newPropertyKey}
                                             onChangeText={setNewPropertyKey}
                                             placeholder="Property Key"
@@ -227,7 +227,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                                     <View className="flex-1">
                                         <Text className="text-on-background text-xs mb-1">Value</Text>
                                         <TextInput
-                                            className="bg-surface text-on-surface border border-unknown rounded-lg p-2"
+                                            className="bg-surface text-on-surface border border-outline rounded-lg p-2"
                                             value={newPropertyValue}
                                             onChangeText={setNewPropertyValue}
                                             placeholder="Property Value"
@@ -255,7 +255,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                             <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
 
                             {notes.map(note => (
-                                <View key={note.id} className="bg-surface border border-unknown flex-row items-center mb-2 p-2.5 rounded-lg">
+                                <View key={note.id} className="bg-surface border border-outline flex-row items-center mb-2 p-2.5 rounded-lg">
                                     <View className="flex-1">
                                         <Text className="text-on-surface text-base mb-1">{note.content}</Text>
                                         <Text className="text-on-surface-variant text-xs">
@@ -274,7 +274,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
 
                             <View className="flex-row items-center mt-3">
                                 <TextInput
-                                    className="bg-surface text-on-surface flex-1 border border-unknown rounded-lg p-2 min-h-[60px]"
+                                    className="bg-surface text-on-surface flex-1 border border-outline rounded-lg p-2 min-h-[60px]"
                                     value={newNote}
                                     onChangeText={setNewNote}
                                     placeholder="Add a note..."
