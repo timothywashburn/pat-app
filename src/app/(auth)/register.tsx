@@ -46,7 +46,7 @@ export default function RegisterScreen() {
             {error && <Text className="text-red-500 mb-4 text-center">{error}</Text>}
 
             <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
+                className="bg-surface text-on-surface h-[50px] border border-unknown rounded-lg mb-4 px-3 text-base"
                 placeholder="Full Name"
                 placeholderTextColor={getColor("on-surface-variant")}
                 value={name}
@@ -54,7 +54,7 @@ export default function RegisterScreen() {
             />
 
             <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
+                className="bg-surface text-on-surface h-[50px] border border-unknown rounded-lg mb-4 px-3 text-base"
                 placeholder="Email"
                 placeholderTextColor={getColor("on-surface-variant")}
                 value={email}
@@ -64,7 +64,7 @@ export default function RegisterScreen() {
             />
 
             <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
+                className="bg-surface text-on-surface h-[50px] border border-unknown rounded-lg mb-4 px-3 text-base"
                 placeholder="Password"
                 placeholderTextColor={getColor("on-surface-variant")}
                 value={password}
@@ -73,7 +73,7 @@ export default function RegisterScreen() {
             />
 
             <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
+                className="bg-surface text-on-surface h-[50px] border border-unknown rounded-lg mb-4 px-3 text-base"
                 placeholder="Confirm Password"
                 placeholderTextColor={getColor("on-surface-variant")}
                 value={confirmPassword}

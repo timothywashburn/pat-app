@@ -41,7 +41,7 @@ export default function LoginScreen() {
             {error && <Text className="text-unknown mb-4 text-center">{error}</Text>}
 
             <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
+                className="bg-surface text-on-surface h-[50px] border border-unknown rounded-lg mb-4 px-3 text-base"
                 placeholder="Email"
                 placeholderTextColor={getColor("on-surface-variant")}
                 value={email}
@@ -51,7 +51,7 @@ export default function LoginScreen() {
             />
 
             <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-unset rounded-lg mb-4 px-3 text-base"
+                className="bg-surface text-on-surface h-[50px] border border-unknown rounded-lg mb-4 px-3 text-base"
                 placeholder="Password"
                 placeholderTextColor={getColor("on-surface-variant")}
                 value={password}

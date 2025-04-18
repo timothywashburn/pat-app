@@ -175,7 +175,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                         <>
                             <Text className="text-sm text-secondary mb-1">Name</Text>
                             <TextInput
-                                className="text-lg border border-unset rounded-lg p-2"
+                                className="text-lg border border-unknown rounded-lg p-2"
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Person Name"
@@ -248,7 +248,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                 <View className="flex-1 mr-2">
                                     <Text className="text-xs text-secondary mb-1">Key</Text>
                                     <TextInput
-                                        className="border border-unset rounded-lg p-2"
+                                        className="border border-unknown rounded-lg p-2"
                                         value={newPropertyKey}
                                         onChangeText={setNewPropertyKey}
                                         placeholder="Property Key"
@@ -259,7 +259,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                                 <View className="flex-1">
                                     <Text className="text-xs text-secondary mb-1">Value</Text>
                                     <TextInput
-                                        className="border border-unset rounded-lg p-2"
+                                        className="border border-unknown rounded-lg p-2"
                                         value={newPropertyValue}
                                         onChangeText={setNewPropertyValue}
                                         placeholder="Property Value"
@@ -341,7 +341,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
                     {isEditing && (
                         <View className="flex-row items-center mt-3">
                             <TextInput
-                                className="flex-1 border border-unset rounded-lg p-2 min-h-[60px]"
+                                className="flex-1 border border-unknown rounded-lg p-2 min-h-[60px]"
                                 value={newNote}
                                 onChangeText={setNewNote}
                                 placeholder="Add a note..."

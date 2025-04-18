@@ -105,7 +105,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
         >
             <SafeAreaProvider>
                 <SafeAreaView className="bg-background flex-1" edges={['top', 'right', 'left']}>
-                    <View className="flex-row justify-between items-center px-4 py-4 border-b border-unset">
+                    <View className="flex-row justify-between items-center px-4 py-4 border-b border-unknown">
                         <TouchableOpacity onPress={onDismiss}>
                             <Text className="text-accent text-base">Cancel</Text>
                         </TouchableOpacity>
@@ -133,10 +133,10 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                     )}
 
                     <ScrollView className="flex-1">
-                        <View className="p-4 border-b border-unset">
+                        <View className="p-4 border-b border-unknown">
                             <Text className="text-sm text-secondary mb-1">Name</Text>
                             <TextInput
-                                className="text-base border border-unset rounded-lg p-2.5"
+                                className="text-base border border-unknown rounded-lg p-2.5"
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Person Name"
@@ -145,7 +145,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                         </View>
 
                         {/* Properties Section */}
-                        <View className="p-4 border-b border-unset">
+                        <View className="p-4 border-b border-unknown">
                             <Text className="text-lg font-semibold text-primary mb-3">Properties</Text>
 
                             {properties.map(property => (
@@ -169,7 +169,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                                     <View className="flex-1 mr-2">
                                         <Text className="text-xs text-secondary mb-1">Key</Text>
                                         <TextInput
-                                            className="border border-unset rounded-lg p-2"
+                                            className="border border-unknown rounded-lg p-2"
                                             value={newPropertyKey}
                                             onChangeText={setNewPropertyKey}
                                             placeholder="Property Key"
@@ -180,7 +180,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                                     <View className="flex-1">
                                         <Text className="text-xs text-secondary mb-1">Value</Text>
                                         <TextInput
-                                            className="border border-unset rounded-lg p-2"
+                                            className="border border-unknown rounded-lg p-2"
                                             value={newPropertyValue}
                                             onChangeText={setNewPropertyValue}
                                             placeholder="Property Value"
@@ -205,7 +205,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
                         </View>
 
                         {/* Notes Section */}
-                        <View className="p-4 border-b border-unset">
+                        <View className="p-4 border-b border-unknown">
                             <Text className="text-lg font-semibold text-primary mb-3">Notes</Text>
 
                             {notes.map(note => (
@@ -225,7 +225,7 @@ const CreatePersonView: React.FC<CreatePersonViewProps> = ({
 
                             <View className="flex-row items-center mt-3">
                                 <TextInput
-                                    className="flex-1 border border-unset rounded-lg p-2 min-h-[60px]"
+                                    className="flex-1 border border-unknown rounded-lg p-2 min-h-[60px]"
                                     value={newNote}
                                     onChangeText={setNewNote}
                                     placeholder="Add a note..."
