@@ -1,11 +1,17 @@
 import React from 'react';
-import { SafeAreaView, Text, View } from 'react-native';
+import { SafeAreaView, Text, View, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
+import { useToast } from '@/src/components/toast';
 
 export default function TasksPanel() {
     const { colorScheme } = useTheme();
+    const { showToast } = useToast();
+
+    const shortMessage = "Short toast message";
+    const mediumMessage = "This is a medium length toast message that spans about two lines when displayed properly";
+    const longMessage = "This is a much longer toast message that will definitely need to wrap to multiple lines. It contains a lot of text to show how the toast component handles varying content sizes and ensures proper spacing between multiple stacked toasts with different heights.";
 
     return (
         <SafeAreaView className="bg-background flex-1">
@@ -16,12 +22,68 @@ export default function TasksPanel() {
                 showAddButton
                 onAddTapped={() => {
                     console.log('add task tapped');
+                    showToast({
+                        message: mediumMessage,
+                        type: 'info',
+                        duration: 3000,
+                        position: 'bottom'
+                    });
                 }}
             />
 
             <View className="flex-1 items-center justify-center p-5">
                 <Text className="text-on-background text-2xl font-bold mb-5">Tasks Panel</Text>
-                <Text className="text-on-background-variant">This will be the Tasks panel for managing tasks</Text>
+                <Text className="text-on-background-variant mb-5">This will be the Tasks panel for managing tasks</Text>
+
+                <View className="flex-row flex-wrap justify-center">
+                    <TouchableOpacity
+                        className="bg-primary m-2 p-3 rounded-lg"
+                        onPress={() => showToast({
+                            message: shortMessage,
+                            type: 'info',
+                            position: 'top',
+                            duration: 5000
+                        })}
+                    >
+                        <Text className="text-white">Short Toast</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className="bg-primary m-2 p-3 rounded-lg"
+                        onPress={() => showToast({
+                            message: mediumMessage,
+                            type: 'info',
+                            position: 'top',
+                            duration: 5000
+                        })}
+                    >
+                        <Text className="text-white">Medium Toast</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className="bg-primary m-2 p-3 rounded-lg"
+                        onPress={() => showToast({
+                            message: longMessage,
+                            type: 'info',
+                            position: 'top',
+                            duration: 5000
+                        })}
+                    >
+                        <Text className="text-white">Long Toast</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className="bg-unknown m-2 p-3 rounded-lg"
+                        onPress={() => showToast({
+                            message: "Error toast message",
+                            type: 'error',
+                            position: 'bottom',
+                            duration: 5000
+                        })}
+                    >
+                        <Text className="text-white">Error Toast</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     );

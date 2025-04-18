@@ -10,6 +10,7 @@ import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ActivityIndicator, Text, View } from "react-native";
 import { ThemeProvider } from "@react-navigation/native";
 import { useTheme } from "@/src/theme/ThemeManager";
+import { ToastProvider } from "@/src/components/toast";
 
 export default function RootLayout() {
     const initialize = useAuthStore(state => state.initialize);
@@ -64,14 +65,16 @@ export default function RootLayout() {
     }
 
     return (
-        <ThemeProvider value={theme}>
-            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-            <Stack screenOptions={{
-                header: () => null
-            }}>
-                <Stack.Screen name="(auth)"/>
-                <Stack.Screen name="(tabs)"/>
-            </Stack>
-        </ThemeProvider>
+        <ToastProvider>
+            <ThemeProvider value={theme}>
+                <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                <Stack screenOptions={{
+                    header: () => null
+                }}>
+                    <Stack.Screen name="(auth)"/>
+                    <Stack.Screen name="(tabs)"/>
+                </Stack>
+            </ThemeProvider>
+        </ToastProvider>
     );
 }
