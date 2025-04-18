@@ -27,7 +27,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
             await onUpdateItems(updatedItems);
             setNewItem('');
         } catch (error) {
-            console.error(`failed to add item: ${error}`);
+            console.log(`failed to add item: ${error}`);
             Alert.alert('Error', `Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     };
@@ -46,7 +46,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
                             const updatedItems = items.filter(item => item !== itemToDelete);
                             await onUpdateItems(updatedItems);
                         } catch (error) {
-                            console.error(`failed to delete item: ${error}`);
+                            console.log(`failed to delete item: ${error}`);
                             Alert.alert('Error', `Failed to delete item: ${error instanceof Error ? error.message : 'Unknown error'}`);
                         }
                     }
@@ -57,18 +57,18 @@ export const SettingsList: React.FC<SettingsListProps> = ({
 
     return (
         <View className="mb-5">
-            <Text className="text-base font-bold text-primary mb-2.5">{title}</Text>
+            <Text className="text-on-background text-base font-bold mb-2.5">{title}</Text>
 
             {items.map((item, index) => (
                 <View key={`${item}-${index}`} className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2">
-                    <Text className="text-base text-primary">{item}</Text>
+                    <Text className="text-on-surface text-base">{item}</Text>
 
                     {editMode && (
                         <TouchableOpacity
                             onPress={() => handleDeleteItem(item)}
                             className="p-1"
                         >
-                            <Ionicons name="remove-circle" size={24} color="red" />
+                            <Ionicons name="remove-circle" size={24} color={getColor("error")} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -77,9 +77,9 @@ export const SettingsList: React.FC<SettingsListProps> = ({
             {editMode && (
                 <View className="flex-row items-center mt-2">
                     <TextInput
-                        className="flex-1 h-10 border border-unknown rounded-lg px-3 mr-2"
+                        className="bg-surface text-on-surface flex-1 h-10 border border-unknown rounded-lg px-3 mr-2"
                         placeholder={`New ${title.slice(0, -1)}`}
-                        placeholderTextColor={getColor("unknown")}
+                        placeholderTextColor={getColor("on-surface-variant")}
                         value={newItem}
                         onChangeText={setNewItem}
                     />

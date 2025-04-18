@@ -51,11 +51,11 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
 
     return (
         <View className="mb-5">
-            <Text className="text-base font-bold text-primary mb-4">Panel Arrangement</Text>
+            <Text className="text-on-background text-base font-bold mb-4">Panel Arrangement</Text>
 
             {sections.map(section => (
                 <View key={section.title} className="mb-4">
-                    <Text className="text-sm text-secondary mb-2">{section.title}</Text>
+                    <Text className="text-on-background-variant text-sm mb-2">{section.title}</Text>
 
                     {section.data.map(panel => (
                         <View key={panel.id} className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2">
@@ -63,9 +63,9 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
                                 <Ionicons
                                     name={getIconName(panel.panel.icon)}
                                     size={24}
-                                    color={panel.visible ? getColor("primary") : getColor("unknown")}
+                                    color={panel.visible ? getColor("primary") : getColor("on-surface-variant")}
                                 />
-                                <Text className={`text-base ml-3 ${panel.visible ? 'text-primary' : 'text-secondary'}`}>
+                                <Text className={`text-base ml-3 ${panel.visible ? 'text-on-surface' : 'text-on-surface-variant'}`}>
                                     {panel.panel.title}
                                 </Text>
                             </View>
