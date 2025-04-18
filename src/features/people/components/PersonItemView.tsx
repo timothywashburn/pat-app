@@ -9,8 +9,8 @@ interface PersonItemViewProps {
 
 const PersonItemView: React.FC<PersonItemViewProps> = ({ person }) => {
     return (
-        <View className="w-full p-4 bg-surface rounded-lg mb-3">
-            <Text className="text-lg font-bold text-primary mb-2">{person.name}</Text>
+        <View className="bg-surface rounded-lg p-4 mb-3">
+            <Text className="text-on-surface text-base font-semibold mb-2">{person.name}</Text>
 
             {person.properties.length > 0 && (
                 <ScrollView
@@ -19,8 +19,8 @@ const PersonItemView: React.FC<PersonItemViewProps> = ({ person }) => {
                     contentContainerStyle={{ flexDirection: 'row', gap: 8, paddingVertical: 4 }}
                 >
                     {person.properties.map((property) => (
-                        <View key={property.id} className="p-2 bg-accent/10 rounded-lg">
-                            <Text className="text-xs text-secondary">{property.key}</Text>
+                        <View key={property.id} className="px-3 py-1 bg-surface border border-primary rounded-2xl">
+                            <Text className="text-xs text-on-surface-variant">{property.key}</Text>
                             <Text className="text-sm text-primary">{property.value}</Text>
                         </View>
                     ))}
