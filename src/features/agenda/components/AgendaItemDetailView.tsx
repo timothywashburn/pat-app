@@ -54,8 +54,8 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                     <View className="mb-4">
                         {item.date && (
                             <View className="flex-row items-center mb-2">
-                                <Ionicons name="calendar-outline" size={20} color={getColor("secondary")} />
-                                <Text className="text-secondary text-base ml-2">
+                                <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
+                                <Text className="text-on-surface-variant text-base ml-2">
                                     {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
@@ -73,8 +73,8 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                                 )}
 
                                 {item.type && (
-                                    <View className="bg-surface border border-secondary rounded-2xl px-3 py-1 mr-2 mb-2">
-                                        <Text className="text-secondary text-sm">{item.type}</Text>
+                                    <View className="bg-surface border border-on-surface-variant rounded-2xl px-3 py-1 mr-2 mb-2">
+                                        <Text className="text-on-surface-variant text-sm">{item.type}</Text>
                                     </View>
                                 )}
                             </View>

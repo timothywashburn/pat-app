@@ -93,7 +93,7 @@ export default function PeoplePanel() {
                 </View>
             ) : people.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
-                    <Text className="text-base text-secondary mb-4">No people added yet</Text>
+                    <Text className="text-base text-on-background-variant mb-4">No people added yet</Text>
                     <TouchableOpacity
                         className="bg-primary px-5 py-2.5 rounded-lg"
                         onPress={handleCreatePerson}

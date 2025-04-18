@@ -17,7 +17,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress }) => {
                 <Text className="text-on-surface text-base font-semibold mb-2">{item.name}</Text>
 
                 {item.date && (
-                    <Text className="text-secondary text-sm mb-1">
+                    <Text className="text-on-surface-variant text-sm mb-1">
                         {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'

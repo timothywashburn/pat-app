@@ -132,7 +132,7 @@ export default function AgendaPanel() {
                         size={48}
                         color={getColor("primary")}
                     />
-                    <Text className="text-base text-secondary mb-5">
+                    <Text className="text-base text-on-background-variant mb-5">
                         {showCompleted ? 'No completed items' : 'No pending items'}
                     </Text>
                     <TouchableOpacity
