@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/theme/ThemeManager';
 import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface PersonDetailPanelProps {
     person: Person;
@@ -132,7 +133,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
     const borderStyle = "border-surface";
 
     return (
-        <View className={`absolute inset-0 bg-background z-50 ${isPresented ? 'flex' : 'hidden'}`}>
+        <SafeAreaView className={`absolute inset-0 bg-background z-50 ${isPresented ? 'flex' : 'hidden'}`}>
             <View className={`flex-row justify-between items-center px-4 py-3 border-b ${borderStyle}`}>
                 <TouchableOpacity onPress={isEditing ? handleCancel : onDismiss}>
                     <Ionicons
@@ -371,7 +372,7 @@ const PersonDetailPanel: React.FC<PersonDetailPanelProps> = ({
 
                 <View className="h-10" />
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 };
 
