@@ -1,15 +1,34 @@
-export default ({ config }) => ({
-    ...config,
-    name: getAppName(),
-    ios: {
-        ...config.ios,
-        bundleIdentifier: getIdentifier(),
-    },
-    android: {
-        ...config.android,
-        package: getIdentifier(),
-    },
-});
+export default ({ config }) => {
+    const appName = getAppName();
+    const bundleId = getIdentifier();
+
+    const updatedConfig = {
+        ...config,
+        name: appName,
+        ios: {
+            ...config.ios,
+            bundleIdentifier: bundleId,
+        },
+        android: {
+            ...config.android,
+            package: bundleId,
+        }
+    };
+
+    if (IS_DEV) {
+        updatedConfig.ios = {
+            ...updatedConfig.ios,
+            infoPlist: {
+                ...updatedConfig.ios?.infoPlist,
+                NSAppTransportSecurity: {
+                    NSAllowsArbitraryLoads: true
+                }
+            }
+        };
+    }
+
+    return updatedConfig;
+};
 
 const IS_DEV = process.env.APP_VARIANT === 'development';
 const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
