@@ -11,6 +11,7 @@ interface ToastProps {
     position: 'top' | 'bottom';
     actionLabel?: string;
     onActionPress?: () => void;
+    hideToast?: (id: string) => void;
 }
 
 const toastColorScheme = {
@@ -33,12 +34,14 @@ const toastColorScheme = {
 };
 
 export const Toast: React.FC<ToastProps> = ({
+    id,
     message,
     type,
     duration,
     position,
     actionLabel,
-    onActionPress
+    onActionPress,
+    hideToast
 }) => {
     const opacity = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(position === 'top' ? -20 : 20)).current;
@@ -59,18 +62,9 @@ export const Toast: React.FC<ToastProps> = ({
         ]).start();
 
         animationTimeoutRef.current = setTimeout(() => {
-            Animated.parallel([
-                Animated.timing(opacity, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(translateY, {
-                    toValue: position === 'top' ? -20 : 20,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-            ]).start();
+            startHideAnimation(() => {
+                if (hideToast) hideToast(id);
+            });
         }, duration - 300);
 
         return () => {
@@ -78,15 +72,9 @@ export const Toast: React.FC<ToastProps> = ({
                 clearTimeout(animationTimeoutRef.current);
             }
         };
-    }, [opacity, translateY, duration, position]);
+    }, [opacity, translateY, duration, position, id]);
 
-    const handleActionPress = () => {
-        if (animationTimeoutRef.current) {
-            clearTimeout(animationTimeoutRef.current);
-        }
-
-        if (onActionPress) onActionPress();
-
+    const startHideAnimation = (onComplete?: () => void) => {
         Animated.parallel([
             Animated.timing(opacity, {
                 toValue: 0,
@@ -98,7 +86,18 @@ export const Toast: React.FC<ToastProps> = ({
                 duration: 300,
                 useNativeDriver: true,
             }),
-        ]).start();
+        ]).start(onComplete);
+    };
+
+    const handleActionPress = () => {
+        if (animationTimeoutRef.current) {
+            clearTimeout(animationTimeoutRef.current);
+        }
+
+        startHideAnimation(() => {
+            if (onActionPress) onActionPress();
+            if (hideToast) hideToast(id);
+        });
     };
 
     const styles = toastColorScheme[type];

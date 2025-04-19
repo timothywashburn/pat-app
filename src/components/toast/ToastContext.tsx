@@ -52,34 +52,31 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         };
 
         setToasts((currentToasts) => [...currentToasts, newToast]);
-
-        setTimeout(() => {
-            setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
-        }, newToast.duration);
-
         return id;
     }, []);
 
     const hideToast = useCallback((id: string) => {
+        console.log(`hiding toast with id: ${id}`);
         setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
     }, []);
 
     return (
         <ToastContext.Provider value={{ showToast, hideToast }}>
             {children}
-            <ToastContainer toasts={toasts} setToasts={setToasts} />
+            <ToastContainer toasts={toasts} setToasts={setToasts} hideToast={hideToast} />
         </ToastContext.Provider>
     );
 };
 
-const TOAST_SPACING = 10; // Space between toasts
+const TOAST_SPACING = 10;
 
 interface ToastContainerProps {
     toasts: ToastItem[];
     setToasts: React.Dispatch<React.SetStateAction<ToastItem[]>>;
+    hideToast: (id: string) => void;
 }
 
-const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) => {
+const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts, hideToast }) => {
     const insets = useSafeAreaInsets();
     const topToasts = toasts.filter(toast => toast.position === 'top');
     const bottomToasts = toasts.filter(toast => toast.position === 'bottom');
@@ -94,23 +91,19 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
         );
     }, [setToasts]);
 
-    const topOffsets = topToasts.reduce<Record<string, number>>((offsets, toast, index) => {
-        const previousToast = topToasts[index - 1];
-        const previousOffset = previousToast ? offsets[previousToast.id] : 0;
-        const previousHeight = previousToast?.height || 0;
+    const calculateOffsets = (toastItems: ToastItem[]) => {
+        return toastItems.reduce<Record<string, number>>((offsets, toast, index) => {
+            const previousToast = toastItems[index - 1];
+            const previousOffset = previousToast ? offsets[previousToast.id] : 0;
+            const previousHeight = previousToast?.height || 0;
 
-        offsets[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
-        return offsets;
-    }, {});
+            offsets[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
+            return offsets;
+        }, {});
+    };
 
-    const bottomOffsets = bottomToasts.reduce<Record<string, number>>((offsets, toast, index) => {
-        const previousToast = bottomToasts[index - 1];
-        const previousOffset = previousToast ? offsets[previousToast.id] : 0;
-        const previousHeight = previousToast?.height || 0;
-
-        offsets[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
-        return offsets;
-    }, {});
+    const topOffsets = calculateOffsets(topToasts);
+    const bottomOffsets = calculateOffsets(bottomToasts);
 
     return (
         <>
@@ -128,7 +121,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
                         }}
                         onLayout={(event: LayoutChangeEvent) => handleToastLayout(toast.id, event)}
                     >
-                        <Toast {...toast} />
+                        <Toast {...toast} hideToast={hideToast} />
                     </View>
                 ))}
             </View>
@@ -147,7 +140,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
                         }}
                         onLayout={(event: LayoutChangeEvent) => handleToastLayout(toast.id, event)}
                     >
-                        <Toast {...toast} />
+                        <Toast {...toast} hideToast={hideToast} />
                     </View>
                 ))}
             </View>

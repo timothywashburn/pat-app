@@ -73,7 +73,7 @@ export default function TasksPanel() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="bg-unknown m-2 p-3 rounded-lg"
+                        className="bg-error m-2 p-3 rounded-lg"
                         onPress={() => showToast({
                             message: "Error toast message",
                             type: 'error',
