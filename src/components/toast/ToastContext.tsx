@@ -10,6 +10,8 @@ export interface ToastOptions {
     type?: ToastType;
     duration?: number;
     position?: 'top' | 'bottom';
+    actionLabel?: string;
+    onActionPress?: () => void;
 }
 
 interface ToastItem {
@@ -18,11 +20,14 @@ interface ToastItem {
     type: ToastType;
     duration: number;
     position: 'top' | 'bottom';
+    actionLabel?: string;
+    onActionPress?: () => void;
     height?: number;
 }
 
 interface ToastContextType {
-    showToast: (options: ToastOptions) => void;
+    showToast: (options: ToastOptions) => string;
+    hideToast: (id: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -42,6 +47,8 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
             type: options.type || 'info',
             duration: options.duration || 3000,
             position: options.position || 'bottom',
+            actionLabel: options.actionLabel,
+            onActionPress: options.onActionPress,
         };
 
         setToasts((currentToasts) => [...currentToasts, newToast]);
@@ -49,10 +56,16 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         setTimeout(() => {
             setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
         }, newToast.duration);
+
+        return id;
+    }, []);
+
+    const hideToast = useCallback((id: string) => {
+        setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
     }, []);
 
     return (
-        <ToastContext.Provider value={{ showToast }}>
+        <ToastContext.Provider value={{ showToast, hideToast }}>
             {children}
             <ToastContainer toasts={toasts} setToasts={setToasts} />
         </ToastContext.Provider>
@@ -103,9 +116,9 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
         <>
             {/* Top toasts container */}
             <View
-                className="absolute top-0 left-0 right-0 items-center pointer-events-none"
+                className="absolute top-0 left-0 right-0 items-center"
             >
-                {topToasts.map((toast, index) => (
+                {topToasts.map((toast) => (
                     <View
                         key={toast.id}
                         className="w-full items-center"
@@ -122,9 +135,9 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
 
             {/* Bottom toasts container */}
             <View
-                className="absolute bottom-0 left-0 right-0 items-center pointer-events-none"
+                className="absolute bottom-0 left-0 right-0 items-center"
             >
-                {bottomToasts.map((toast, index) => (
+                {bottomToasts.map((toast) => (
                     <View
                         key={toast.id}
                         className="w-full items-center"

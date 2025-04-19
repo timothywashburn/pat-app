@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Text, View } from 'react-native';
+import { Animated, Text, View, TouchableOpacity } from 'react-native';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -9,30 +9,40 @@ interface ToastProps {
     type: ToastType;
     duration: number;
     position: 'top' | 'bottom';
+    actionLabel?: string;
+    onActionPress?: () => void;
 }
 
 const toastColorScheme = {
     success: {
         background: 'bg-green-500',
-        text: 'text-white'
+        text: 'text-white',
     },
     error: {
         background: 'bg-error',
-        text: 'text-on-error'
+        text: 'text-on-error',
     },
     warning: {
         background: 'bg-yellow-500',
-        text: 'text-white'
+        text: 'text-white',
     },
     info: {
         background: 'bg-primary',
-        text: 'text-on-primary'
+        text: 'text-on-primary',
     }
 };
 
-export const Toast: React.FC<ToastProps> = ({ message, type, duration, position }) => {
+export const Toast: React.FC<ToastProps> = ({
+    message,
+    type,
+    duration,
+    position,
+    actionLabel,
+    onActionPress
+}) => {
     const opacity = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(position === 'top' ? -20 : 20)).current;
+    const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         Animated.parallel([
@@ -48,7 +58,7 @@ export const Toast: React.FC<ToastProps> = ({ message, type, duration, position 
             }),
         ]).start();
 
-        const hideTimeout = setTimeout(() => {
+        animationTimeoutRef.current = setTimeout(() => {
             Animated.parallel([
                 Animated.timing(opacity, {
                     toValue: 0,
@@ -63,8 +73,33 @@ export const Toast: React.FC<ToastProps> = ({ message, type, duration, position 
             ]).start();
         }, duration - 300);
 
-        return () => clearTimeout(hideTimeout);
+        return () => {
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+            }
+        };
     }, [opacity, translateY, duration, position]);
+
+    const handleActionPress = () => {
+        if (animationTimeoutRef.current) {
+            clearTimeout(animationTimeoutRef.current);
+        }
+
+        if (onActionPress) onActionPress();
+
+        Animated.parallel([
+            Animated.timing(opacity, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateY, {
+                toValue: position === 'top' ? -20 : 20,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
 
     const styles = toastColorScheme[type];
     return (
@@ -76,10 +111,21 @@ export const Toast: React.FC<ToastProps> = ({ message, type, duration, position 
             }}
         >
             <View
-                className={`rounded-lg shadow-md overflow-hidden min-w-[150px] max-w-[90%] mx-auto ${styles.background}`}
+                className={`rounded-lg shadow-md overflow-hidden mx-auto min-w-[150px] max-w-[90%] ${styles.background}`}
             >
-                <View className="px-4 py-3">
-                    <Text className={`text-center ${styles.text}`}>{message}</Text>
+                <View className="px-4 py-3 flex-row items-center">
+                    <Text className={`flex-shrink ${styles.text}`}>{message}</Text>
+
+                    {actionLabel && (
+                        <TouchableOpacity
+                            onPress={handleActionPress}
+                            className="ml-3 flex-shrink-0"
+                        >
+                            <Text className={`font-bold ${styles.text}`}>
+                                {actionLabel}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </Animated.View>

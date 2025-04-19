@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, Text, View, TouchableOpacity } from 'react-native';
+import { SafeAreaView, Text, View, TouchableOpacity, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
@@ -82,6 +82,35 @@ export default function TasksPanel() {
                         })}
                     >
                         <Text className="text-white">Error Toast</Text>
+                    </TouchableOpacity>
+
+                    {/* New action toast buttons */}
+                    <TouchableOpacity
+                        className="bg-yellow-500 m-2 p-3 rounded-lg"
+                        onPress={() => showToast({
+                            message: "Warning: Some tasks were not synced. ajwioefjioa wejfioj aweiofj ioawejfoiawej foiawej ofij awoefj oiawjef oi",
+                            type: 'warning',
+                            position: 'bottom',
+                            duration: 5000,
+                            actionLabel: 'Sync',
+                            onActionPress: () => Alert.alert('Sync', 'Syncing tasks...')
+                        })}
+                    >
+                        <Text className="text-white">Warning Toast + Action</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className="bg-green-500 m-2 p-3 rounded-lg"
+                        onPress={() => showToast({
+                            message: "Task completed successfully",
+                            type: 'success',
+                            position: 'bottom',
+                            duration: 5000,
+                            actionLabel: 'Undo',
+                            onActionPress: () => Alert.alert('Undo', 'Undoing task completion...')
+                        })}
+                    >
+                        <Text className="text-white">Success Toast + Action</Text>
                     </TouchableOpacity>
                 </View>
             </View>
