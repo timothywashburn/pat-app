@@ -1,6 +1,7 @@
-// src/components/toast/ToastContext.tsx
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { View, Platform, LayoutChangeEvent } from 'react-native';
+import { View, LayoutChangeEvent } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Toast } from './Toast';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -25,14 +26,6 @@ interface ToastContextType {
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-export const useToast = () => {
-    const context = useContext(ToastContext);
-    if (!context) {
-        throw new Error('useToast must be used within a ToastProvider');
-    }
-    return context;
-};
 
 interface ToastProviderProps {
     children: ReactNode;
@@ -74,6 +67,7 @@ interface ToastContainerProps {
 }
 
 const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) => {
+    const insets = useSafeAreaInsets();
     const topToasts = toasts.filter(toast => toast.position === 'top');
     const bottomToasts = toasts.filter(toast => toast.position === 'bottom');
 
@@ -87,24 +81,22 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
         );
     }, [setToasts]);
 
-    // Calculate positions for top toasts
-    const topOffsets = topToasts.reduce<Record<string, number>>((acc, toast, index) => {
+    const topOffsets = topToasts.reduce<Record<string, number>>((offsets, toast, index) => {
         const previousToast = topToasts[index - 1];
-        const previousOffset = previousToast ? acc[previousToast.id] : 0;
+        const previousOffset = previousToast ? offsets[previousToast.id] : 0;
         const previousHeight = previousToast?.height || 0;
 
-        acc[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
-        return acc;
+        offsets[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
+        return offsets;
     }, {});
 
-    // Calculate positions for bottom toasts
-    const bottomOffsets = bottomToasts.reduce<Record<string, number>>((acc, toast, index) => {
+    const bottomOffsets = bottomToasts.reduce<Record<string, number>>((offsets, toast, index) => {
         const previousToast = bottomToasts[index - 1];
-        const previousOffset = previousToast ? acc[previousToast.id] : 0;
+        const previousOffset = previousToast ? offsets[previousToast.id] : 0;
         const previousHeight = previousToast?.height || 0;
 
-        acc[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
-        return acc;
+        offsets[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
+        return offsets;
     }, {});
 
     return (
@@ -112,7 +104,6 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
             {/* Top toasts container */}
             <View
                 className="absolute top-0 left-0 right-0 items-center pointer-events-none"
-                style={{ paddingTop: Platform.OS === 'web' ? 20 : 50 }}
             >
                 {topToasts.map((toast, index) => (
                     <View
@@ -120,7 +111,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
                         className="w-full items-center"
                         style={{
                             position: 'absolute',
-                            top: (Platform.OS === 'web' ? 20 : 50) + (topOffsets[toast.id] || index * TOAST_SPACING),
+                            top: TOAST_SPACING + insets.top + topOffsets[toast.id],
                         }}
                         onLayout={(event: LayoutChangeEvent) => handleToastLayout(toast.id, event)}
                     >
@@ -132,7 +123,6 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
             {/* Bottom toasts container */}
             <View
                 className="absolute bottom-0 left-0 right-0 items-center pointer-events-none"
-                style={{ paddingBottom: Platform.OS === 'web' ? 20 : 50 }}
             >
                 {bottomToasts.map((toast, index) => (
                     <View
@@ -140,7 +130,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
                         className="w-full items-center"
                         style={{
                             position: 'absolute',
-                            bottom: (Platform.OS === 'web' ? 20 : 50) + (bottomOffsets[toast.id] || index * TOAST_SPACING),
+                            bottom: TOAST_SPACING + insets.bottom + bottomOffsets[toast.id],
                         }}
                         onLayout={(event: LayoutChangeEvent) => handleToastLayout(toast.id, event)}
                     >
@@ -152,5 +142,10 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts }) =>
     );
 };
 
-// Import Toast component
-import { Toast } from './Toast';
+export const useToast = () => {
+    const context = useContext(ToastContext);
+    if (!context) {
+        throw new Error('useToast must be used within a ToastProvider');
+    }
+    return context;
+};

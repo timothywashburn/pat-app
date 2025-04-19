@@ -1,6 +1,5 @@
-// src/components/toast/Toast.tsx
 import React, { useEffect, useRef } from 'react';
-import { Animated, Text, Platform, Dimensions, View } from 'react-native';
+import { Animated, Text, View } from 'react-native';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -11,6 +10,25 @@ interface ToastProps {
     duration: number;
     position: 'top' | 'bottom';
 }
+
+const toastColorScheme = {
+    success: {
+        background: 'bg-green-500',
+        text: 'text-white'
+    },
+    error: {
+        background: 'bg-error',
+        text: 'text-on-error'
+    },
+    warning: {
+        background: 'bg-yellow-500',
+        text: 'text-white'
+    },
+    info: {
+        background: 'bg-primary',
+        text: 'text-on-primary'
+    }
+};
 
 export const Toast: React.FC<ToastProps> = ({ message, type, duration, position }) => {
     const opacity = useRef(new Animated.Value(0)).current;
@@ -48,24 +66,7 @@ export const Toast: React.FC<ToastProps> = ({ message, type, duration, position 
         return () => clearTimeout(hideTimeout);
     }, [opacity, translateY, duration, position]);
 
-    // Get background color based on type
-    const getBgColor = () => {
-        switch (type) {
-            case 'success':
-                return '#4CAF50'; // Green
-            case 'error':
-                return '#FF3B30'; // Red (assuming "unknown" is red)
-            case 'warning':
-                return '#FF9500'; // Yellow
-            case 'info':
-            default:
-                return '#007AFF'; // Blue (assuming "primary")
-        }
-    };
-
-    const maxWidth = Dimensions.get('window').width - 40;
-
-    // Using a nested approach with Animated.View inside a regular View with className
+    const styles = toastColorScheme[type];
     return (
         <Animated.View
             style={{
@@ -75,15 +76,10 @@ export const Toast: React.FC<ToastProps> = ({ message, type, duration, position 
             }}
         >
             <View
-                className="rounded-lg shadow-md overflow-hidden"
-                style={{
-                    backgroundColor: getBgColor(),
-                    minWidth: 150,
-                    maxWidth,
-                }}
+                className={`rounded-lg shadow-md overflow-hidden min-w-[150px] max-w-[90%] mx-auto ${styles.background}`}
             >
                 <View className="px-4 py-3">
-                    <Text className="text-white text-center">{message}</Text>
+                    <Text className={`text-center ${styles.text}`}>{message}</Text>
                 </View>
             </View>
         </Animated.View>
