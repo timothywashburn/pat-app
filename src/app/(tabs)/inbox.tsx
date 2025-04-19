@@ -15,14 +15,15 @@ import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/ThoughtManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
+import { useToast } from "@/src/components/toast/ToastContext";
 
 export default function InboxPanel() {
     const { getColor } = useTheme();
+    const { errorToast } = useToast();
     const [thoughts, setThoughts] = useState<Thought[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [newThought, setNewThought] = useState('');
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedThought, setSelectedThought] = useState<Thought | null>(null);
     const [editingThought, setEditingThought] = useState<Thought | null>(null);
     const [editedContent, setEditedContent] = useState('');
@@ -38,13 +39,13 @@ export default function InboxPanel() {
         if (isRefreshing) return;
 
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             await thoughtManager.loadThoughts();
             setThoughts(thoughtManager.thoughts);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to load thoughts');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to load thoughts';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -56,7 +57,8 @@ export default function InboxPanel() {
             await thoughtManager.loadThoughts();
             setThoughts(thoughtManager.thoughts);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to refresh thoughts');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to refresh thoughts';
+            errorToast(errorMsg);
         } finally {
             setIsRefreshing(false);
         }
@@ -66,14 +68,14 @@ export default function InboxPanel() {
         if (newThought.trim() === '') return;
 
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             await thoughtManager.createThought(newThought);
             setThoughts(thoughtManager.thoughts);
             setNewThought('');
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to create thought');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to create thought';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -89,7 +91,8 @@ export default function InboxPanel() {
             await thoughtManager.updateThought(editingThought.id, editedContent);
             setThoughts(thoughtManager.thoughts);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update thought');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update thought';
+            errorToast(errorMsg);
         } finally {
             setEditingThought(null);
         }
@@ -100,7 +103,8 @@ export default function InboxPanel() {
             await thoughtManager.deleteThought(id);
             setThoughts(thoughtManager.thoughts);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete thought');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to delete thought';
+            errorToast(errorMsg);
         }
     };
 
@@ -199,10 +203,6 @@ export default function InboxPanel() {
                     )}
                 </TouchableOpacity>
             </View>
-
-            {errorMessage && (
-                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
-            )}
 
             {isLoading && thoughts.length === 0 ? (
                 <View className="flex-1 justify-center items-center">

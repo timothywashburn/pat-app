@@ -10,13 +10,14 @@ import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 import PersonItemView from "@/src/features/people/components/PersonItemView";
 import PersonFormView from "@/src/features/people/components/PersonFormView";
 import PersonDetailView from "@/src/features/people/components/PersonDetailView";
+import { useToast } from "@/src/components/toast/ToastContext";
 
 export default function PeoplePanel() {
     const { getColor } = useTheme();
+    const { errorToast } = useToast();
     const [people, setPeople] = useState<Person[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // State for the create/edit form
     const [showingCreateForm, setShowingCreateForm] = useState(false);
@@ -36,13 +37,13 @@ export default function PeoplePanel() {
         if (isRefreshing) return;
 
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             await personManager.loadPeople();
             setPeople(personManager.people);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to load people');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to load people';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -57,13 +58,12 @@ export default function PeoplePanel() {
             console.log('haptics not available:', error);
         }
 
-        setErrorMessage(null);
-
         try {
             await personManager.loadPeople();
             setPeople(personManager.people);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to refresh people');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to refresh people';
+            errorToast(errorMsg);
         } finally {
             setIsRefreshing(false);
         }
@@ -102,10 +102,6 @@ export default function PeoplePanel() {
                 showAddButton
                 onAddTapped={handleAddPerson}
             />
-
-            {errorMessage && (
-                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
-            )}
 
             {isLoading && people.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">

@@ -32,7 +32,6 @@ export default function AgendaPanel() {
 
     useEffect(() => {
         loadItems();
-        errorToast("hi");
     }, []);
 
     const loadItems = async () => {

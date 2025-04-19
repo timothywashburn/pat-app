@@ -7,26 +7,24 @@ import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { PanelManagement } from '@/src/features/settings/components/PanelManagement';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
+import { useToast } from "@/src/components/toast/ToastContext";
 
 export default function SettingsScreen() {
     const { getColor, colorScheme } = useTheme();
+    const { errorToast } = useToast();
     const { signOut, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const settingsManager = SettingsManager.shared;
 
-    // Local state to track settings
     const [panels, setPanels] = useState(settingsManager.panels);
     const [categories, setCategories] = useState(settingsManager.categories);
     const [types, setTypes] = useState(settingsManager.types);
     const [propertyKeys, setPropertyKeys] = useState(settingsManager.propertyKeys);
 
-    // Initialize and load settings
     useEffect(() => {
         const loadSettings = async () => {
             setIsLoading(true);
-            setErrorMessage(null);
 
             try {
                 await settingsManager.loadSettings();
@@ -36,25 +34,26 @@ export default function SettingsScreen() {
                 setPropertyKeys([...settingsManager.propertyKeys]);
             } catch (error) {
                 console.error('failed to load settings:', error);
-                setErrorMessage(error instanceof Error ? error.message : 'Failed to load settings');
+                const errorMsg = error instanceof Error ? error.message : 'Failed to load settings';
+                errorToast(errorMsg);
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadSettings();
-    }, []); // Empty dependency array means this only runs once
+    }, []);
 
     const handleUpdatePanels = async (updatedPanels: typeof panels) => {
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             settingsManager.panels = updatedPanels;
             await settingsManager.updatePanelSettings();
-            setPanels([...updatedPanels]); // Make sure to use a new array reference
+            setPanels([...updatedPanels]);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update panels');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update panels';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -62,13 +61,13 @@ export default function SettingsScreen() {
 
     const handleUpdateCategories = async (updatedCategories: string[]) => {
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             await settingsManager.updateItemCategories(updatedCategories);
-            setCategories([...updatedCategories]); // Make sure to use a new array reference
+            setCategories([...updatedCategories]);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update categories');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update categories';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -76,13 +75,13 @@ export default function SettingsScreen() {
 
     const handleUpdateTypes = async (updatedTypes: string[]) => {
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             await settingsManager.updateItemTypes(updatedTypes);
-            setTypes([...updatedTypes]); // Make sure to use a new array reference
+            setTypes([...updatedTypes]);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update types');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update types';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -90,13 +89,13 @@ export default function SettingsScreen() {
 
     const handleUpdatePropertyKeys = async (updatedKeys: string[]) => {
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             await settingsManager.updatePropertyKeys(updatedKeys);
-            setPropertyKeys([...updatedKeys]); // Make sure to use a new array reference
+            setPropertyKeys([...updatedKeys]);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update property keys');
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update property keys';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -134,10 +133,6 @@ export default function SettingsScreen() {
                     </Text>
                 )}
             />
-
-            {errorMessage && (
-                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
-            )}
 
             {isLoading && (
                 <View className="absolute inset-0 justify-center items-center z-50">
