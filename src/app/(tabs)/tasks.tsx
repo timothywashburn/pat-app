@@ -3,7 +3,7 @@ import { SafeAreaView, Text, View, TouchableOpacity, Alert } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/src/theme/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
-import { useToast } from '@/src/components/toast';
+import { useToast } from '@/src/components/toast/ToastContext';
 
 export default function TasksPanel() {
     const { colorScheme } = useTheme();

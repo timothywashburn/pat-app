@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Text, View, TouchableOpacity } from 'react-native';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = 'info' | 'success' | 'error' | 'warning';
 
 interface ToastProps {
     id: string;
@@ -48,6 +48,7 @@ export const Toast: React.FC<ToastProps> = ({
     const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
+        // Show animation
         Animated.parallel([
             Animated.timing(opacity, {
                 toValue: 1,
@@ -61,11 +62,13 @@ export const Toast: React.FC<ToastProps> = ({
             }),
         ]).start();
 
-        animationTimeoutRef.current = setTimeout(() => {
-            startHideAnimation(() => {
-                if (hideToast) hideToast(id);
-            });
-        }, duration - 300);
+        if (duration > 0) {
+            animationTimeoutRef.current = setTimeout(() => {
+                startHideAnimation(() => {
+                    if (hideToast) hideToast(id);
+                });
+            }, duration - 300);
+        }
 
         return () => {
             if (animationTimeoutRef.current) {
@@ -112,7 +115,7 @@ export const Toast: React.FC<ToastProps> = ({
             <View
                 className={`rounded-lg shadow-md overflow-hidden mx-auto min-w-[150px] max-w-[90%] ${styles.background}`}
             >
-                <View className="px-4 py-3 flex-row items-center">
+                <View className="px-4 py-3 flex-row items-center justify-between">
                     <Text className={`flex-shrink ${styles.text}`}>{message}</Text>
 
                     {actionLabel && (

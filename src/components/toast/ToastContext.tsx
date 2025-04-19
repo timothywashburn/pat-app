@@ -1,20 +1,17 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { View, LayoutChangeEvent } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Toast } from './Toast';
-
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+import { ToastContainer } from './ToastContainer';
+import { ToastType } from './Toast';
 
 export interface ToastOptions {
     message: string;
-    type?: ToastType;
-    duration?: number;
-    position?: 'top' | 'bottom';
+    type: ToastType;
+    duration: number;
+    position: 'top' | 'bottom';
     actionLabel?: string;
     onActionPress?: () => void;
 }
 
-interface ToastItem {
+export interface ToastItem {
     id: string;
     message: string;
     type: ToastType;
@@ -28,6 +25,10 @@ interface ToastItem {
 interface ToastContextType {
     showToast: (options: ToastOptions) => string;
     hideToast: (id: string) => void;
+    infoToast: (message: string) => string;
+    successToast: (message: string) => string;
+    errorToast: (message: string) => string;
+    warningToast: (message: string) => string;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -44,9 +45,9 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         const newToast: ToastItem = {
             id,
             message: options.message,
-            type: options.type || 'info',
-            duration: options.duration || 3000,
-            position: options.position || 'bottom',
+            type: options.type,
+            duration: options.duration,
+            position: options.position,
             actionLabel: options.actionLabel,
             onActionPress: options.onActionPress,
         };
@@ -60,91 +61,55 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         setToasts((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
     }, []);
 
+    const infoToast = useCallback((message: string) => {
+        return showToast({
+            message,
+            type: 'info',
+            duration: 3000,
+            position: 'top'
+        });
+    }, [showToast]);
+
+    const successToast = useCallback((message: string) => {
+        return showToast({
+            message,
+            type: 'success',
+            duration: 3000,
+            position: 'top'
+        });
+    }, [showToast]);
+
+    const errorToast = useCallback((message: string) => {
+        return showToast({
+            message,
+            type: 'error',
+            duration: 0,
+            position: 'top',
+            actionLabel: 'DISMISS'
+        });
+    }, [showToast]);
+
+    const warningToast = useCallback((message: string) => {
+        return showToast({
+            message,
+            type: 'warning',
+            duration: 4000,
+            position: 'top'
+        });
+    }, [showToast]);
+
     return (
-        <ToastContext.Provider value={{ showToast, hideToast }}>
+        <ToastContext.Provider value={{
+            showToast,
+            hideToast,
+            infoToast,
+            successToast,
+            errorToast,
+            warningToast
+        }}>
             {children}
             <ToastContainer toasts={toasts} setToasts={setToasts} hideToast={hideToast} />
         </ToastContext.Provider>
-    );
-};
-
-const TOAST_SPACING = 10;
-
-interface ToastContainerProps {
-    toasts: ToastItem[];
-    setToasts: React.Dispatch<React.SetStateAction<ToastItem[]>>;
-    hideToast: (id: string) => void;
-}
-
-const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToasts, hideToast }) => {
-    const insets = useSafeAreaInsets();
-    const topToasts = toasts.filter(toast => toast.position === 'top');
-    const bottomToasts = toasts.filter(toast => toast.position === 'bottom');
-
-    const handleToastLayout = useCallback((id: string, event: LayoutChangeEvent) => {
-        const { height } = event.nativeEvent.layout;
-
-        setToasts(currentToasts =>
-            currentToasts.map(toast =>
-                toast.id === id ? { ...toast, height } : toast
-            )
-        );
-    }, [setToasts]);
-
-    const calculateOffsets = (toastItems: ToastItem[]) => {
-        return toastItems.reduce<Record<string, number>>((offsets, toast, index) => {
-            const previousToast = toastItems[index - 1];
-            const previousOffset = previousToast ? offsets[previousToast.id] : 0;
-            const previousHeight = previousToast?.height || 0;
-
-            offsets[toast.id] = previousOffset + previousHeight + (index > 0 ? TOAST_SPACING : 0);
-            return offsets;
-        }, {});
-    };
-
-    const topOffsets = calculateOffsets(topToasts);
-    const bottomOffsets = calculateOffsets(bottomToasts);
-
-    return (
-        <>
-            {/* Top toasts container */}
-            <View
-                className="absolute top-0 left-0 right-0 items-center"
-            >
-                {topToasts.map((toast) => (
-                    <View
-                        key={toast.id}
-                        className="w-full items-center"
-                        style={{
-                            position: 'absolute',
-                            top: TOAST_SPACING + insets.top + topOffsets[toast.id],
-                        }}
-                        onLayout={(event: LayoutChangeEvent) => handleToastLayout(toast.id, event)}
-                    >
-                        <Toast {...toast} hideToast={hideToast} />
-                    </View>
-                ))}
-            </View>
-
-            {/* Bottom toasts container */}
-            <View
-                className="absolute bottom-0 left-0 right-0 items-center"
-            >
-                {bottomToasts.map((toast) => (
-                    <View
-                        key={toast.id}
-                        className="w-full items-center"
-                        style={{
-                            position: 'absolute',
-                            bottom: TOAST_SPACING + insets.bottom + bottomOffsets[toast.id],
-                        }}
-                        onLayout={(event: LayoutChangeEvent) => handleToastLayout(toast.id, event)}
-                    >
-                        <Toast {...toast} hideToast={hideToast} />
-                    </View>
-                ))}
-            </View>
-        </>
     );
 };
 

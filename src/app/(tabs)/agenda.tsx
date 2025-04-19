@@ -10,13 +10,14 @@ import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDet
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
+import { useToast } from "@/src/components/toast/ToastContext";
 
 export default function AgendaPanel() {
     const { getColor } = useTheme();
+    const { errorToast } = useToast();
     const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [showCompleted, setShowCompleted] = useState(false);
 
     // State for the create/edit form
@@ -31,19 +32,20 @@ export default function AgendaPanel() {
 
     useEffect(() => {
         loadItems();
+        errorToast("hi");
     }, []);
 
     const loadItems = async () => {
         if (isRefreshing) return;
 
         setIsLoading(true);
-        setErrorMessage(null);
 
         try {
             await agendaManager.loadAgendaItems();
             setAgendaItems(agendaManager.agendaItems);
-        } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to load items');
+        } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : 'Failed to load items';
+            errorToast(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -54,17 +56,16 @@ export default function AgendaPanel() {
 
         try {
             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        } catch (error) {
-            console.log('haptics not available:', error);
+        } catch (err) {
+            console.log('haptics not available:', err);
         }
-
-        setErrorMessage(null);
 
         try {
             await agendaManager.loadAgendaItems();
             setAgendaItems(agendaManager.agendaItems);
-        } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to refresh items');
+        } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : 'Failed to refresh items';
+            errorToast(errorMsg);
         } finally {
             setIsRefreshing(false);
         }
@@ -116,10 +117,6 @@ export default function AgendaPanel() {
                 isFilterActive={showCompleted}
                 onFilterTapped={() => setShowCompleted(!showCompleted)}
             />
-
-            {errorMessage && (
-                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
-            )}
 
             {isLoading && agendaItems.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start -c",
     "dev": "APP_VARIANT=development npx expo start -c",
+    "dev:tunnel": "APP_VARIANT=development npx expo start -c --tunnel",
     "build:ios": "./scripts/build-ios.sh",
     "build:android": "./scripts/build-android.sh",
     "build:web": "npx expo export --platform web",

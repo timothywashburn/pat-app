@@ -10,7 +10,7 @@ import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ActivityIndicator, Text, View } from "react-native";
 import { ThemeProvider } from "@react-navigation/native";
 import { useTheme } from "@/src/theme/ThemeManager";
-import { ToastProvider } from "@/src/components/toast";
+import { ToastProvider } from "@/src/components/toast/ToastContext";
 
 export default function RootLayout() {
     const initialize = useAuthStore(state => state.initialize);
