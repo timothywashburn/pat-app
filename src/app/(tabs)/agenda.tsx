@@ -160,17 +160,17 @@ export default function AgendaPanel() {
                 />
             )}
 
-            {/* Create new item modal */}
+            {/* Create new item view */}
             <AgendaItemFormView
-                visible={showingCreateForm}
+                isPresented={showingCreateForm}
                 onDismiss={handleFormDismiss}
                 onItemSaved={loadItems}
             />
 
-            {/* Edit item modal */}
+            {/* Edit item view */}
             {selectedItem && (
                 <AgendaItemFormView
-                    visible={showingEditForm}
+                    isPresented={showingEditForm}
                     onDismiss={handleFormDismiss}
                     onItemSaved={loadItems}
                     existingItem={selectedItem}

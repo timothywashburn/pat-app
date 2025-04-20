@@ -145,17 +145,17 @@ export default function PeoplePanel() {
                 />
             )}
 
-            {/* Create new person modal */}
+            {/* Create new person view */}
             <PersonFormView
-                visible={showingCreateForm}
+                isPresented={showingCreateForm}
                 onDismiss={handleFormDismiss}
                 onPersonSaved={loadPeople}
             />
 
-            {/* Edit person modal */}
+            {/* Edit person view */}
             {selectedPerson && (
                 <PersonFormView
-                    visible={showingEditForm}
+                    isPresented={showingEditForm}
                     onDismiss={handleFormDismiss}
                     onPersonSaved={loadPeople}
                     existingPerson={selectedPerson}
