@@ -240,7 +240,7 @@ export default function InboxPanel() {
             )}
 
             <AgendaItemFormView
-                visible={showingCreateAgendaForm}
+                isPresented={showingCreateAgendaForm}
                 onDismiss={handleAgendaFormDismiss}
                 onItemSaved={handleItemCreated}
                 initialName={selectedThought?.content || ''}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/theme/ThemeManager';
 import { Thought } from '../controllers/ThoughtManager';
 
@@ -18,20 +18,28 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
     onChangeEditContent,
     onCommitEdit
 }) => {
+    const { getColor } = useTheme();
+
     return (
         <View className="w-full p-4 bg-surface rounded-lg mb-3">
             {isEditing ? (
-                <TextInput
-                    className="text-base border border-accent rounded-lg p-2"
-                    value={editedContent}
-                    onChangeText={onChangeEditContent}
-                    onBlur={onCommitEdit}
-                    onSubmitEditing={onCommitEdit}
-                    autoFocus
-                    multiline
-                />
+                <View className="flex-row">
+                    <TextInput
+                        className="text-base border border-primary rounded-lg p-2 flex-1 mr-2"
+                        value={editedContent}
+                        onChangeText={onChangeEditContent}
+                        autoFocus
+                        multiline
+                    />
+                    <TouchableOpacity
+                        className="bg-primary rounded-lg px-3 justify-center"
+                        onPress={onCommitEdit}
+                    >
+                        <Text className="text-on-primary font-bold">Save</Text>
+                    </TouchableOpacity>
+                </View>
             ) : (
-                <Text className="text-base text-primary">{thought.content}</Text>
+                <Text className="text-on-surface text-base">{thought.content}</Text>
             )}
         </View>
     );
