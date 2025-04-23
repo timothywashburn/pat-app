@@ -1,4 +1,4 @@
-import PatConfig from '@/src/config/PatConfig';
+import PatConfig from '@/src/controllers/PatConfig';
 
 export enum HTTPMethod {
     GET = 'GET',

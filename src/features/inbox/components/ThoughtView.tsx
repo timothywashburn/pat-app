@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextInput, View, TouchableOpacity } from 'react-native';
-import { useTheme } from '@/src/theme/ThemeManager';
+import { useTheme } from '@/src/controllers/ThemeManager';
 import { Thought } from '../controllers/ThoughtManager';
 
 interface ThoughtViewProps {
@@ -18,8 +18,6 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
     onChangeEditContent,
     onCommitEdit
 }) => {
-    const { getColor } = useTheme();
-
     return (
         <View className="w-full p-4 bg-surface rounded-lg mb-3">
             {isEditing ? (

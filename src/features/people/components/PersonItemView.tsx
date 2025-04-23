@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useTheme } from '@/src/theme/ThemeManager';
+import { useTheme } from '@/src/controllers/ThemeManager';
 import { Person } from '@/src/features/people/models';
 
 interface PersonItemViewProps {

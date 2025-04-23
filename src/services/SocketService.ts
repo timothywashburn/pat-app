@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
-import PatConfig from '@/src/config/PatConfig';
+import PatConfig from '@/src/controllers/PatConfig';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
 
 interface SocketMessage<T> {

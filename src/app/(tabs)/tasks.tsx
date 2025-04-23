@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '@/src/theme/ThemeManager';
+import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 
 export default function TasksPanel() {

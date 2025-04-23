@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, Vi
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '@/src/theme/ThemeManager';
+import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';

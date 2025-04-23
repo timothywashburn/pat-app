@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AuthGuard from "@/src/features/auth/components/AuthGuard";
-import { useTheme } from '@/src/theme/ThemeManager';
+import { useTheme } from '@/src/controllers/ThemeManager';
 
 type TabBarIconProps = {
     color: string;

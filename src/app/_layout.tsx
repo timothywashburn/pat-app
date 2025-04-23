@@ -9,7 +9,7 @@ import { SettingsManager } from '@/src/features/settings/controllers/SettingsMan
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ActivityIndicator, Text, View } from "react-native";
 import { ThemeProvider } from "@react-navigation/native";
-import { useTheme } from "@/src/theme/ThemeManager";
+import { useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 
 export default function RootLayout() {

@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '@/src/theme/ThemeManager';
+import { useTheme } from '@/src/controllers/ThemeManager';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/ThoughtManager';
 import CustomHeader from '@/src/components/CustomHeader';

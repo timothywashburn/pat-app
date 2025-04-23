@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, SafeAreaView, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '@/src/theme/ThemeManager';
+import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { PanelManagement } from '@/src/features/settings/components/PanelManagement';
