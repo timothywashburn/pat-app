@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start -c",
-    "dev": "APP_VARIANT=development npx expo start -c",
-    "dev:tunnel": "APP_VARIANT=development npx expo start -c --tunnel",
+    "dev": "npm install @timothyw/pat-common && APP_VARIANT=development npx expo start -c",
+    "dev:tunnel": "npm install @timothyw/pat-common && APP_VARIANT=development npx expo start -c --tunnel",
     "build:ios": "./scripts/build-ios.sh",
     "build:android": "./scripts/build-android.sh",
     "build:web": "npx expo export --platform web",
@@ -44,6 +44,7 @@
     "@react-native-community/datetimepicker": "8.2.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@timothyw/pat-common": "^1.0.4",
     "expo": "~52.0.41",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.8",

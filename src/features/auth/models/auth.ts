@@ -5,11 +5,6 @@ export interface UserInfo {
     isEmailVerified: boolean;
 }
 
-export interface AuthTokens {
-    accessToken: string;
-    refreshToken: string;
-}
-
 export enum AuthError {
     INVALID_CREDENTIALS = 'Invalid email or password',
     NETWORK_ERROR = 'Network error occurred',
