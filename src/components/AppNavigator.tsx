@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { usePathname, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '@/src/features/auth/controllers/AuthState';
+import { View } from 'react-native';
 
-function AppNavigator({ children }: { children: React.ReactNode }) {
+function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLayout?: () => void }) {
     const router = useRouter();
     const segments = useSegments();
     const pathname = usePathname();
@@ -43,7 +44,11 @@ function AppNavigator({ children }: { children: React.ReactNode }) {
 
     }, [isAuthenticated, isLoading, userInfo?.isEmailVerified, segments, router]);
 
-    return <>{children}</>;
+    return (
+        <View style={{ flex: 1 }} onLayout={onLayout}>
+            {children}
+        </View>
+    );
 }
 
 export default AppNavigator;

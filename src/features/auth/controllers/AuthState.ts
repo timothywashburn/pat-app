@@ -17,7 +17,6 @@ interface AuthState {
     userInfo: UserInfo | null;
     authToken: string | null;
 
-    // Methods
     initialize: () => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
@@ -40,12 +39,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 set({userInfo});
             }
 
-            // Load stored tokens
             const tokens = await SecureStorage.shared.getTokens();
             if (tokens) {
                 set({authToken: tokens.accessToken});
 
-                // Try to refresh auth using the refresh token
                 try {
                     await get().refreshAuth();
                     set({isAuthenticated: true});
@@ -89,7 +86,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 id: response.user._id,
                 email: response.authData.email,
                 name: response.user.name,
-                isEmailVerified: false,
+                isEmailVerified: response.authData.emailVerified,
             };
 
             await SecureStorage.shared.saveTokens(tokens);

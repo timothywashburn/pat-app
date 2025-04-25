@@ -2,28 +2,43 @@ import "@/global.css"
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
-import { ActivityIndicator, Text, View } from "react-native";
 import { ThemeProvider } from "@react-navigation/native";
 import { useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({
+    duration: 1000,
+    fade: true,
+});
 
 export default function RootLayout() {
     const initialize = useAuthStore(state => state.initialize);
     const { isAuthenticated, isLoading, userInfo } = useAuthStore();
-    const [isSettingsLoaded, setIsSettingsLoaded] = useState<boolean>(false);
+    const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
     const settingsManager = SettingsManager.shared;
 
     const { theme, colorScheme } = useTheme();
 
     useEffect(() => {
-        initialize();
-        DeepLinkHandler.initialize();
+        async function prepare() {
+            try {
+                await initialize();
+                DeepLinkHandler.initialize();
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            } catch (error) {
+                console.error('initialization error:', error);
+            }
+        }
+
+        prepare();
     }, []);
 
     useEffect(() => {
@@ -56,19 +71,18 @@ export default function RootLayout() {
         return () => socketService.disconnect();
     }, [isAuthenticated]);
 
-    if (isLoading) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Text style={{ marginTop: 10, color: theme.colors.text }}>Loading...</Text>
-            </View>
-        );
-    }
+    const onLayoutRootView = useCallback(async () => {
+        if (!isLoading) {
+            await SplashScreen.hideAsync();
+        }
+    }, [isLoading]);
+
+    if (isLoading) return null;
 
     return (
         <ToastProvider>
             <ThemeProvider value={theme}>
-                <AppNavigator>
+                <AppNavigator onLayout={onLayoutRootView}>
                     <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
                     <Stack screenOptions={{
                         header: () => null

@@ -11,7 +11,6 @@ export default function VerifyEmailScreen() {
     const { successToast, errorToast } = useToast();
     const [isResending, setIsResending] = useState(false);
     const { resendVerificationEmail, logout } = useAuthStore();
-    const router = useRouter();
 
     const handleResendVerification = async () => {
         setIsResending(true);
