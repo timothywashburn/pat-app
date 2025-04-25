@@ -10,16 +10,12 @@ import {
     RegisterRequest,
     RegisterResponse, ResendVerificationResponse
 } from "@timothyw/pat-common";
-import { unknown } from "zod";
 
 interface AuthState {
     isAuthenticated: boolean;
     isLoading: boolean;
     userInfo: UserInfo | null;
     authToken: string | null;
-
-    // Derived state
-    isEmailVerified: boolean;
 
     // Methods
     initialize: () => Promise<void>;
@@ -36,10 +32,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     isLoading: true,
     userInfo: null,
     authToken: null,
-
-    get isEmailVerified() {
-        return get().userInfo?.isEmailVerified ?? false;
-    },
 
     initialize: async () => {
         try {
@@ -97,7 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 id: response.user._id,
                 email: response.authData.email,
                 name: response.user.name,
-                isEmailVerified: response.authData.emailVerified,
+                isEmailVerified: false,
             };
 
             await SecureStorage.shared.saveTokens(tokens);

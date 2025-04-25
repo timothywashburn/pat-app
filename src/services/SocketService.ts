@@ -64,10 +64,7 @@ class SocketService {
     }
 
     disconnect(): void {
-        if (!this.socket) {
-            console.log('socket disconnection skipped: not initialized');
-            return;
-        }
+        if (!this.socket) return;
 
         console.log('socket disconnecting...');
         this.socket.disconnect();

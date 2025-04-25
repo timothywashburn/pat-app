@@ -11,10 +11,11 @@ import { ActivityIndicator, Text, View } from "react-native";
 import { ThemeProvider } from "@react-navigation/native";
 import { useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
+import AppNavigator from "@/src/components/AppNavigator";
 
 export default function RootLayout() {
     const initialize = useAuthStore(state => state.initialize);
-    const { isAuthenticated, isEmailVerified, isLoading } = useAuthStore();
+    const { isAuthenticated, isLoading, userInfo } = useAuthStore();
     const [isSettingsLoaded, setIsSettingsLoaded] = useState<boolean>(false);
     const settingsManager = SettingsManager.shared;
 
@@ -26,7 +27,7 @@ export default function RootLayout() {
     }, []);
 
     useEffect(() => {
-        if (isAuthenticated && isEmailVerified && !isSettingsLoaded) {
+        if (isAuthenticated && userInfo?.isEmailVerified && !isSettingsLoaded) {
             const loadSettings = async () => {
                 try {
                     await settingsManager.loadSettings();
@@ -41,19 +42,19 @@ export default function RootLayout() {
         } else if (!isAuthenticated) {
             setIsSettingsLoaded(false);
         }
-    }, [isAuthenticated, isEmailVerified, isSettingsLoaded]);
+    }, [isAuthenticated, userInfo?.isEmailVerified, isSettingsLoaded]);
 
     useEffect(() => {
         const socketService = SocketService.shared;
 
-        if (isAuthenticated && isEmailVerified && isSettingsLoaded) {
+        if (isAuthenticated) {
             socketService.connect();
         } else {
             socketService.disconnect();
         }
 
         return () => socketService.disconnect();
-    }, [isAuthenticated, isEmailVerified, isSettingsLoaded]);
+    }, [isAuthenticated]);
 
     if (isLoading) {
         return (
@@ -67,13 +68,15 @@ export default function RootLayout() {
     return (
         <ToastProvider>
             <ThemeProvider value={theme}>
-                <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                <Stack screenOptions={{
-                    header: () => null
-                }}>
-                    <Stack.Screen name="(auth)"/>
-                    <Stack.Screen name="(tabs)"/>
-                </Stack>
+                <AppNavigator>
+                    <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                    <Stack screenOptions={{
+                        header: () => null
+                    }}>
+                        <Stack.Screen name="(auth)"/>
+                        <Stack.Screen name="(tabs)"/>
+                    </Stack>
+                </AppNavigator>
             </ThemeProvider>
         </ToastProvider>
     );

@@ -1,38 +1,38 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
+import { useToast } from '@/src/components/toast/ToastContext';
 
 export default function RegisterScreen() {
     const { getColor } = useTheme();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
+    const { errorToast } = useToast();
+    const [name, setName] = useState('test'); // TODO: DEV
+    const [email, setEmail] = useState('test@test.com'); // TODO: DEV
+    const [password, setPassword] = useState('test'); // TODO: DEV
+    const [confirmPassword, setConfirmPassword] = useState('test'); // TODO: DEV
     const [isLoading, setIsLoading] = useState(false);
 
     const { register } = useAuthStore();
 
     const handleRegister = async () => {
         if (!name || !email || !password || !confirmPassword) {
-            setError('Please fill out all fields');
+            errorToast('Please fill out all fields');
             return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            errorToast('Passwords do not match');
             return;
         }
 
-        setError(null);
         setIsLoading(true);
 
         try {
             await register(name, email, password);
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Failed to register');
+            errorToast(error instanceof Error ? error.message : 'Failed to register');
         } finally {
             setIsLoading(false);
         }
@@ -42,8 +42,6 @@ export default function RegisterScreen() {
         <View className="bg-background flex-1 p-5 justify-center">
             <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Create Account</Text>
             <Text className="text-on-background-variant text-base mb-8 text-center">Sign up to get started</Text>
-
-            {error && <Text className="text-red-500 mb-4 text-center">{error}</Text>}
 
             <TextInput
                 className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg mb-4 px-3 text-base"

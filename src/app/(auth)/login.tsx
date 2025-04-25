@@ -1,33 +1,30 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { Link, Redirect, useRouter } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
+import { useToast } from '@/src/components/toast/ToastContext';
 
 export default function LoginScreen() {
     const { getColor } = useTheme();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
+    const [email, setEmail] = useState('trwisinthehouse@gmail.com'); // TODO: DEV
+    const [password, setPassword] = useState('pass'); // TODO: DEV
     const [isLoading, setIsLoading] = useState(false);
-
+    const { errorToast } = useToast();
     const { login } = useAuthStore();
-    const router = useRouter();
 
     const handleLogin = async () => {
         if (!email || !password) {
-            setError('Please enter both email and password');
+            errorToast('Please enter both email and password');
             return;
         }
 
-        setError(null);
         setIsLoading(true);
 
         try {
             await login(email, password);
-            router.replace('/(tabs)/agenda');
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Failed to sign in');
+            errorToast(error instanceof Error ? error.message : 'Failed to sign in');
         } finally {
             setIsLoading(false);
         }
@@ -37,8 +34,6 @@ export default function LoginScreen() {
         <View className="bg-background flex-1 p-5 justify-center">
             <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Welcome to PAT</Text>
             <Text className="text-on-background-variant text-base mb-8 text-center">Sign in to continue</Text>
-
-            {error && <Text className="text-unknown mb-4 text-center">{error}</Text>}
 
             <TextInput
                 className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg mb-4 px-3 text-base"
