@@ -1,5 +1,11 @@
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
+import {
+    CreateThoughtRequest,
+    CreateThoughtResponse, DeleteThoughtResponse,
+    GetThoughtsResponse,
+    UpdateThoughtRequest, UpdateThoughtResponse
+} from "@timothyw/pat-common";
 
 export interface Thought {
     id: string;
@@ -31,7 +37,7 @@ class ThoughtManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<undefined, GetThoughtsResponse>({
                 endpoint: '/api/thoughts',
                 method: HTTPMethod.GET,
                 token: authToken,
@@ -58,7 +64,7 @@ class ThoughtManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<CreateThoughtRequest, CreateThoughtResponse>({
                 endpoint: '/api/thoughts',
                 method: HTTPMethod.POST,
                 body: { content },
@@ -73,7 +79,7 @@ class ThoughtManager {
             await this.loadThoughts();
 
             return {
-                id: response.thought.id || response.thought._id,
+                id: response.thought.id,
                 content: response.thought.content
             };
         } catch (error) {
@@ -89,7 +95,7 @@ class ThoughtManager {
         }
 
         try {
-            await NetworkManager.shared.perform({
+            await NetworkManager.shared.perform<UpdateThoughtRequest, UpdateThoughtResponse>({
                 endpoint: `/api/thoughts/${id}`,
                 method: HTTPMethod.PUT,
                 body: { content },
@@ -111,7 +117,7 @@ class ThoughtManager {
         }
 
         try {
-            await NetworkManager.shared.perform({
+            await NetworkManager.shared.perform<undefined, DeleteThoughtResponse>({
                 endpoint: `/api/thoughts/${id}`,
                 method: HTTPMethod.DELETE,
                 token: authToken,

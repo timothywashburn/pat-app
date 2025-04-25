@@ -12,7 +12,7 @@ import { useToast } from "@/src/components/toast/ToastContext";
 export default function SettingsScreen() {
     const { getColor, colorScheme } = useTheme();
     const { errorToast } = useToast();
-    const { signOut, userInfo } = useAuthStore();
+    const { logout, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const settingsManager = SettingsManager.shared;
@@ -186,7 +186,7 @@ export default function SettingsScreen() {
 
                     <Text
                         className="text-unknown text-base font-bold text-center py-3"
-                        onPress={() => signOut()}
+                        onPress={() => logout()}
                     >
                         Sign Out
                     </Text>

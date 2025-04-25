@@ -1,6 +1,14 @@
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import { AgendaItem } from "@/src/features/agenda/models";
+import {
+    CompleteItemRequest, CompleteItemResponse,
+    CreateItemRequest,
+    CreateItemResponse, DeleteItemResponse,
+    GetItemsResponse,
+    UpdateItemRequest,
+    UpdateItemResponse
+} from "@timothyw/pat-common";
 
 export class AgendaManager {
     private static instance: AgendaManager;
@@ -28,11 +36,11 @@ export class AgendaManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<undefined, GetItemsResponse>({
                 endpoint: '/api/items',
                 method: HTTPMethod.GET,
                 token: authToken,
-            });
+            }) as GetItemsResponse;
 
             if (!response.items || !Array.isArray(response.items)) {
                 throw new Error('Invalid response format');
@@ -69,7 +77,7 @@ export class AgendaManager {
             throw new Error('Not authenticated');
         }
 
-        const body: Record<string, any> = {
+        const body: CreateItemRequest = {
             name: params.name,
             notes: params.notes || '',
             urgent: params.urgent || false,
@@ -88,7 +96,7 @@ export class AgendaManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<CreateItemRequest, CreateItemResponse>({
                 endpoint: '/api/items',
                 method: HTTPMethod.POST,
                 body,
@@ -101,19 +109,17 @@ export class AgendaManager {
 
             const item = response.item;
             const agendaItem: AgendaItem = {
-                id: item.id || item._id,
+                id: item.id,
                 name: item.name,
                 date: item.dueDate ? new Date(item.dueDate) : undefined,
                 notes: item.notes,
-                completed: !!item.completed,
-                urgent: !!item.urgent,
+                completed: item.completed,
+                urgent: item.urgent,
                 category: item.category,
                 type: item.type,
             };
 
-            // Refresh the list
             await this.loadAgendaItems();
-
             return agendaItem;
         } catch (error) {
             console.error('Failed to create agenda item:', error);
@@ -137,7 +143,7 @@ export class AgendaManager {
             throw new Error('Not authenticated');
         }
 
-        const body: Record<string, any> = {};
+        const body: UpdateItemRequest = {};
 
         if (updates.name !== undefined) {
             body.name = updates.name;
@@ -164,7 +170,7 @@ export class AgendaManager {
         }
 
         try {
-            await NetworkManager.shared.perform({
+            await NetworkManager.shared.perform<UpdateItemRequest, UpdateItemResponse>({
                 endpoint: `/api/items/${id}`,
                 method: HTTPMethod.PUT,
                 body,
@@ -186,7 +192,7 @@ export class AgendaManager {
         }
 
         try {
-            await NetworkManager.shared.perform({
+            await NetworkManager.shared.perform<CompleteItemRequest, CompleteItemResponse>({
                 endpoint: `/api/items/${id}/complete`,
                 method: HTTPMethod.PUT,
                 body: {completed},
@@ -208,7 +214,7 @@ export class AgendaManager {
         }
 
         try {
-            await NetworkManager.shared.perform({
+            await NetworkManager.shared.perform<undefined, DeleteItemResponse>({
                 endpoint: `/api/items/${id}`,
                 method: HTTPMethod.DELETE,
                 token: authToken,

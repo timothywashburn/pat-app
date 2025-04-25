@@ -13,7 +13,7 @@ export default function RegisterScreen() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { registerAccount } = useAuthStore();
+    const { register } = useAuthStore();
 
     const handleRegister = async () => {
         if (!name || !email || !password || !confirmPassword) {
@@ -30,7 +30,7 @@ export default function RegisterScreen() {
         setIsLoading(true);
 
         try {
-            await registerAccount(name, email, password);
+            await register(name, email, password);
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Failed to register');
         } finally {

@@ -2,7 +2,15 @@ import { create } from 'zustand';
 import { AuthError, UserInfo } from '@/src/features/auth/models/auth';
 import NetworkManager, { HTTPMethod, NetworkRequest } from '../../../services/NetworkManager';
 import SecureStorage from '../../../services/SecureStorage';
-import { AuthTokens } from "@timothyw/pat-common";
+import {
+    AuthTokens,
+    LoginRequest,
+    LoginResponse, RefreshAuthRequest,
+    RefreshAuthResponse,
+    RegisterRequest,
+    RegisterResponse, ResendVerificationResponse
+} from "@timothyw/pat-common";
+import { unknown } from "zod";
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -15,11 +23,11 @@ interface AuthState {
 
     // Methods
     initialize: () => Promise<void>;
-    signIn: (email: string, password: string) => Promise<void>;
-    registerAccount: (name: string, email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<void>;
+    register: (name: string, email: string, password: string) => Promise<void>;
     resendVerificationEmail: () => Promise<void>;
     refreshAuth: () => Promise<void>;
-    signOut: () => void;
+    logout: () => void;
     updateUserInfo: (update: (userInfo: UserInfo) => void) => void;
 }
 
@@ -51,7 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     set({isAuthenticated: true});
                 } catch (error) {
                     console.log('auth refresh failed, signing out', error);
-                    get().signOut();
+                    get().logout();
                 }
             }
         } catch (error) {
@@ -61,32 +69,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    signIn: async (email: string, password: string) => {
+    login: async (email: string, password: string) => {
         console.log('Signing in with email:', email);
 
         try {
-            const request: NetworkRequest = {
+            const request = {
                 endpoint: '/api/auth/login',
                 method: HTTPMethod.POST,
-                body: {email, password},
+                body: {
+                    email,
+                    password
+                },
             };
 
-            const response = await NetworkManager.shared.perform(request);
+            const response = await NetworkManager.shared.perform<LoginRequest, LoginResponse>(request);
 
-            if (!response.token || !response.refreshToken || !response.user) {
+            if (!response.tokenData ||!response.authData || !response.user) {
                 throw new Error(AuthError.INVALID_RESPONSE);
             }
 
             const tokens: AuthTokens = {
-                accessToken: response.token,
-                refreshToken: response.refreshToken,
+                accessToken: response.tokenData.accessToken,
+                refreshToken: response.tokenData.refreshToken,
             };
 
             const userInfo: UserInfo = {
-                id: response.user.id,
-                email: response.user.email,
+                id: response.user._id,
+                email: response.authData.email,
                 name: response.user.name,
-                isEmailVerified: response.user.isEmailVerified,
+                isEmailVerified: response.authData.emailVerified,
             };
 
             await SecureStorage.shared.saveTokens(tokens);
@@ -103,17 +114,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    registerAccount: async (name: string, email: string, password: string) => {
+    register: async (name: string, email: string, password: string) => {
         try {
-            const request: NetworkRequest = {
+            const request = {
                 endpoint: '/api/auth/register',
                 method: HTTPMethod.POST,
                 body: {name, email, password},
             };
 
-            await NetworkManager.shared.perform(request);
+            await NetworkManager.shared.perform<RegisterRequest, RegisterResponse>(request);
 
-            await get().signIn(email, password);
+            await get().login(email, password);
         } catch (error) {
             console.error('account registration failed:', error);
             throw error;
@@ -128,13 +139,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
 
         try {
-            const request: NetworkRequest = {
+            const request = {
                 endpoint: '/api/auth/resend-verification',
                 method: HTTPMethod.POST,
                 token: authToken,
             };
 
-            await NetworkManager.shared.perform(request);
+            await NetworkManager.shared.perform<undefined, ResendVerificationResponse>(request);
         } catch (error) {
             console.error('failed to resend verification email:', error);
             throw error;
@@ -149,35 +160,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
 
         try {
-            const request: NetworkRequest = {
+            const request = {
                 endpoint: '/api/auth/refresh',
                 method: HTTPMethod.POST,
                 body: {refreshToken: tokens.refreshToken},
             };
 
-            const response = await NetworkManager.shared.perform(request);
+            const response = await NetworkManager.shared.perform<RefreshAuthRequest, RefreshAuthResponse>(request);
 
-            if (!response.token || !response.refreshToken || !response.user) {
+            if (!response.tokenData || !response.authData) {
                 throw new Error(AuthError.INVALID_RESPONSE);
             }
 
             const newTokens: AuthTokens = {
-                accessToken: response.token,
-                refreshToken: response.refreshToken,
-            };
-
-            const userInfo: UserInfo = {
-                id: response.user.id,
-                email: response.user.email,
-                name: response.user.name,
-                isEmailVerified: response.user.isEmailVerified,
+                accessToken: response.tokenData.accessToken,
+                refreshToken: response.tokenData.refreshToken,
             };
 
             await SecureStorage.shared.saveTokens(newTokens);
-            await SecureStorage.shared.saveUserInfo(userInfo);
 
             set({
-                userInfo,
                 authToken: newTokens.accessToken,
                 isAuthenticated: true,
             });
@@ -187,7 +189,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    signOut: () => {
+    logout: () => {
         SecureStorage.shared.clearStoredAuth();
 
         set({

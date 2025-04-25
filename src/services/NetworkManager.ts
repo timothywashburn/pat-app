@@ -7,10 +7,10 @@ export enum HTTPMethod {
     DELETE = 'DELETE',
 }
 
-export interface NetworkRequest {
+export interface NetworkRequest<ReqData> {
     endpoint: string;
     method: HTTPMethod;
-    body?: Record<string, any>;
+    body?: ReqData;
     token?: string;
 }
 
@@ -42,7 +42,7 @@ class NetworkManager {
         return NetworkManager.instance;
     }
 
-    async perform(request: NetworkRequest): Promise<Record<string, any>> {
+    async perform<ReqData = never, ResData = never>(request: NetworkRequest<ReqData>): Promise<ResData> {
         const url = `${this.baseURL}${request.endpoint}`;
 
         const headers: HeadersInit = {

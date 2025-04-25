@@ -11,7 +11,7 @@ export default function LoginScreen() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { signIn } = useAuthStore();
+    const { login } = useAuthStore();
     const router = useRouter();
 
     const handleLogin = async () => {
@@ -24,7 +24,7 @@ export default function LoginScreen() {
         setIsLoading(true);
 
         try {
-            await signIn(email, password);
+            await login(email, password);
             router.replace('/(tabs)/agenda');
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Failed to sign in');

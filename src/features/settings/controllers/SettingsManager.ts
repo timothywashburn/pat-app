@@ -1,6 +1,7 @@
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import { PanelType, Settings, PanelSetting } from "@/src/features/settings/models";
+import { GetUserConfigResponse, UpdateUserConfigRequest, UpdateUserConfigResponse } from "@timothyw/pat-common";
 
 export class SettingsManager {
     private static instance: SettingsManager;
@@ -104,7 +105,7 @@ export class SettingsManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<undefined, GetUserConfigResponse>({
                 endpoint: '/api/account/config',
                 method: HTTPMethod.GET,
                 token: authToken,
@@ -207,7 +208,7 @@ export class SettingsManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<UpdateUserConfigRequest, UpdateUserConfigResponse>({
                 endpoint: '/api/account/config',
                 method: HTTPMethod.PUT,
                 body: newConfig,

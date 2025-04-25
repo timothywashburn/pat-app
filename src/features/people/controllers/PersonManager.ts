@@ -1,6 +1,12 @@
 import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
+import {
+    CreatePersonRequest,
+    CreatePersonResponse, DeletePersonResponse,
+    GetPeopleResponse,
+    UpdatePersonRequest, UpdatePersonResponse
+} from "@timothyw/pat-common";
 
 export class PersonManager {
     private static instance: PersonManager;
@@ -28,7 +34,7 @@ export class PersonManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<undefined, GetPeopleResponse>({
                 endpoint: '/api/people',
                 method: HTTPMethod.GET,
                 token: authToken,
@@ -83,7 +89,7 @@ export class PersonManager {
         };
 
         try {
-            const response = await NetworkManager.shared.perform({
+            const response = await NetworkManager.shared.perform<CreatePersonRequest, CreatePersonResponse>({
                 endpoint: '/api/people',
                 method: HTTPMethod.POST,
                 body,
@@ -133,7 +139,7 @@ export class PersonManager {
         };
 
         try {
-            await NetworkManager.shared.perform({
+            await NetworkManager.shared.perform<UpdatePersonRequest, UpdatePersonResponse>({
                 endpoint: `/api/people/${id}`,
                 method: HTTPMethod.PUT,
                 body,
@@ -155,7 +161,7 @@ export class PersonManager {
         }
 
         try {
-            await NetworkManager.shared.perform({
+            await NetworkManager.shared.perform<undefined, DeletePersonResponse>({
                 endpoint: `/api/people/${id}`,
                 method: HTTPMethod.DELETE,
                 token: authToken,

@@ -33,7 +33,7 @@ export default function RootLayout() {
                     setIsSettingsLoaded(true);
                 } catch (error) {
                     console.error('settings load error:', error);
-                    useAuthStore.getState().signOut();
+                    useAuthStore.getState().logout();
                 }
             };
 
