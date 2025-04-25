@@ -3,13 +3,13 @@ import "@/global.css"
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from "react";
-import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
+import { useAuthStore, setAuthState } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
 import { useTheme } from "@/src/controllers/ThemeManager";
-import { ToastProvider } from "@/src/components/toast/ToastContext";
+import { ToastProvider, useToast } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -20,19 +20,19 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
+    const { theme, colorScheme } = useTheme();
     const initialize = useAuthStore(state => state.initialize);
     const { isAuthenticated, isLoading, userInfo } = useAuthStore();
     const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
     const settingsManager = SettingsManager.shared;
-
-    const { theme, colorScheme } = useTheme();
 
     useEffect(() => {
         async function prepare() {
             try {
                 await initialize();
                 DeepLinkHandler.initialize();
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                // await new Promise(resolve => setTimeout(resolve, 1000));
+                setAuthState({ isLoading: false });
             } catch (error) {
                 console.error('initialization error:', error);
             }

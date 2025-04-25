@@ -53,13 +53,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
         } catch (error) {
             console.error('failed to initialize auth state:', error);
-        } finally {
-            set({isLoading: false});
         }
     },
 
     login: async (email: string, password: string) => {
-        console.log('Signing in with email:', email);
+        console.log('signing in with email:', email);
 
         try {
             const request = {
@@ -204,4 +202,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 }));
 
+export const setAuthState = useAuthStore.setState;
 export const AuthState = useAuthStore;
