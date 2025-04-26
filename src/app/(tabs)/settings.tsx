@@ -6,116 +6,20 @@ import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { PanelManagement } from '@/src/features/settings/components/PanelManagement';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
-import { SettingsManager } from '@/src/features/settings/controllers/SettingsManager';
 import { useToast } from "@/src/components/toast/ToastContext";
+import { ConfigManager } from "@/src/features/settings/controllers/ConfigManager";
 
 export default function SettingsScreen() {
     const { getColor, colorScheme } = useTheme();
     const { errorToast } = useToast();
     const { logout, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const settingsManager = SettingsManager.shared;
+    const configManager = ConfigManager.shared;
 
-    const [panels, setPanels] = useState(settingsManager.panels);
-    const [categories, setCategories] = useState(settingsManager.categories);
-    const [types, setTypes] = useState(settingsManager.types);
-    const [propertyKeys, setPropertyKeys] = useState(settingsManager.propertyKeys);
-
-    useEffect(() => {
-        const loadSettings = async () => {
-            setIsLoading(true);
-
-            try {
-                await settingsManager.loadSettings();
-                setPanels([...settingsManager.panels]);
-                setCategories([...settingsManager.categories]);
-                setTypes([...settingsManager.types]);
-                setPropertyKeys([...settingsManager.propertyKeys]);
-            } catch (error) {
-                console.error('failed to load settings:', error);
-                const errorMsg = error instanceof Error ? error.message : 'Failed to load settings';
-                errorToast(errorMsg);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadSettings();
-    }, []);
-
-    const handleUpdatePanels = async (updatedPanels: typeof panels) => {
-        setIsLoading(true);
-
-        try {
-            settingsManager.panels = updatedPanels;
-            await settingsManager.updatePanelSettings();
-            setPanels([...updatedPanels]);
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update panels';
-            errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleUpdateCategories = async (updatedCategories: string[]) => {
-        setIsLoading(true);
-
-        try {
-            await settingsManager.updateItemCategories(updatedCategories);
-            setCategories([...updatedCategories]);
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update categories';
-            errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleUpdateTypes = async (updatedTypes: string[]) => {
-        setIsLoading(true);
-
-        try {
-            await settingsManager.updateItemTypes(updatedTypes);
-            setTypes([...updatedTypes]);
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update types';
-            errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleUpdatePropertyKeys = async (updatedKeys: string[]) => {
-        setIsLoading(true);
-
-        try {
-            await settingsManager.updatePropertyKeys(updatedKeys);
-            setPropertyKeys([...updatedKeys]);
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update property keys';
-            errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    if (isLoading && !settingsManager.isLoaded) {
-        return (
-            <SafeAreaView className="bg-background flex-1">
-                <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-                <CustomHeader
-                    title="Settings"
-                    showAddButton={false}
-                />
-                <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color={getColor("primary")} />
-                    <Text className="mt-3 text-base text-on-background-variant">Loading settings...</Text>
-                </View>
-            </SafeAreaView>
-        );
-    }
+    const [panels, setPanels] = useState(configManager.config.iosApp.panels);
+    const [itemCategories, setItemCategories] = useState(configManager.config.iosApp.itemCategories);
+    const [itemTypes, setItemTypes] = useState(configManager.config.iosApp.itemTypes);
+    const [propertyKeys, setPropertyKeys] = useState(configManager.config.iosApp.propertyKeys);
 
     return (
         <SafeAreaView className="bg-background flex-1">
@@ -134,17 +38,11 @@ export default function SettingsScreen() {
                 )}
             />
 
-            {isLoading && (
-                <View className="absolute inset-0 justify-center items-center z-50">
-                    <ActivityIndicator size="large" color={getColor("primary")} />
-                </View>
-            )}
-
             <ScrollView className="flex-1">
                 <View className="p-4">
                     <PanelManagement
                         panels={panels}
-                        onUpdatePanels={handleUpdatePanels}
+                        onUpdatePanels={async (): Promise<void> => {}}
                         editMode={editMode}
                     />
 
@@ -152,8 +50,8 @@ export default function SettingsScreen() {
 
                     <SettingsList
                         title="Item Categories"
-                        items={categories}
-                        onUpdateItems={handleUpdateCategories}
+                        items={itemCategories}
+                        onUpdateItems={async (): Promise<void> => {}}
                         editMode={editMode}
                     />
 
@@ -161,8 +59,8 @@ export default function SettingsScreen() {
 
                     <SettingsList
                         title="Item Types"
-                        items={types}
-                        onUpdateItems={handleUpdateTypes}
+                        items={itemTypes}
+                        onUpdateItems={async (): Promise<void> => {}}
                         editMode={editMode}
                     />
 
@@ -171,7 +69,7 @@ export default function SettingsScreen() {
                     <SettingsList
                         title="Property Keys"
                         items={propertyKeys}
-                        onUpdateItems={handleUpdatePropertyKeys}
+                        onUpdateItems={async (): Promise<void> => {}}
                         editMode={editMode}
                     />
 

@@ -17,7 +17,7 @@ interface AuthState {
     userInfo: UserInfo | null;
     authToken: string | null;
 
-    initialize: () => Promise<void>;
+    initializeAuth: () => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
     resendVerificationEmail: () => Promise<void>;
@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     userInfo: null,
     authToken: null,
 
-    initialize: async () => {
+    initializeAuth: async () => {
         try {
             const userInfo = await SecureStorage.shared.getUserInfo();
             if (userInfo) {
@@ -172,7 +172,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             });
         } catch (error) {
             console.error('auth refresh failed:', error);
-            throw error;
+            get().logout();
         }
     },
 
