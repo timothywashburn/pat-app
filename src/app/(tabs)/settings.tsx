@@ -7,19 +7,19 @@ import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { PanelManagement } from '@/src/features/settings/components/PanelManagement';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from "@/src/components/toast/ToastContext";
-import { ConfigManager } from "@/src/features/settings/controllers/ConfigManager";
+import { useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
 
 export default function SettingsScreen() {
     const { getColor, colorScheme } = useTheme();
     const { errorToast } = useToast();
     const { logout, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
-    const configManager = ConfigManager.shared;
 
-    const [panels, setPanels] = useState(configManager.config.iosApp.panels);
-    const [itemCategories, setItemCategories] = useState(configManager.config.iosApp.itemCategories);
-    const [itemTypes, setItemTypes] = useState(configManager.config.iosApp.itemTypes);
-    const [propertyKeys, setPropertyKeys] = useState(configManager.config.iosApp.propertyKeys);
+    const { config } = useConfigStore();
+    const [panels, setPanels] = useState(config.iosApp.panels);
+    const [itemCategories, setItemCategories] = useState(config.iosApp.itemCategories);
+    const [itemTypes, setItemTypes] = useState(config.iosApp.itemTypes);
+    const [propertyKeys, setPropertyKeys] = useState(config.iosApp.propertyKeys);
 
     return (
         <SafeAreaView className="bg-background flex-1">

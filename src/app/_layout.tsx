@@ -5,7 +5,6 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuthStore, setAuthState } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
-import { ConfigManager } from '@/src/features/settings/controllers/ConfigManager';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
 import { useTheme } from "@/src/controllers/ThemeManager";
@@ -13,6 +12,7 @@ import { ToastProvider, useToast } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, View } from "react-native";
+import { useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
@@ -24,8 +24,7 @@ export default function RootLayout() {
     const { theme, colorScheme, getColor } = useTheme();
     const initializeAuth = useAuthStore(state => state.initializeAuth);
     const { isAuthenticated, isLoading, userInfo } = useAuthStore();
-    const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
-    const settingsManager = ConfigManager.shared;
+    const { isLoaded, loadConfig } = useConfigStore();
 
     useEffect(() => {
         // TODO: handle case where use effect is called twice; figure out a better way to do this
@@ -44,22 +43,19 @@ export default function RootLayout() {
     }, []);
 
     useEffect(() => {
-        if (isAuthenticated && userInfo?.isEmailVerified && !isSettingsLoaded) {
-            const loadSettings = async () => {
+        if (isAuthenticated && userInfo?.isEmailVerified && !isLoaded) {
+            const load = async () => {
                 try {
-                    await settingsManager.loadConfig();
-                    setIsSettingsLoaded(true);
+                    loadConfig();
                 } catch (error) {
                     console.error('settings load error:', error);
                     useAuthStore.getState().logout();
                 }
             };
 
-            loadSettings();
-        } else if (!isAuthenticated) {
-            setIsSettingsLoaded(false);
+            load();
         }
-    }, [isAuthenticated, userInfo?.isEmailVerified, isSettingsLoaded]);
+    }, [isAuthenticated, userInfo?.isEmailVerified, isLoaded]);
 
     useEffect(() => {
         const socketService = SocketService.shared;
@@ -81,7 +77,7 @@ export default function RootLayout() {
 
     if (isLoading) return null;
 
-    if (isAuthenticated && userInfo?.isEmailVerified && !isSettingsLoaded) {
+    if (isAuthenticated && userInfo?.isEmailVerified && !isLoaded) {
         return (
             <View onLayout={onLayoutRootView} className="flex-1 justify-center items-center p-5">
                 <ActivityIndicator size="large" color={getColor("primary")} />

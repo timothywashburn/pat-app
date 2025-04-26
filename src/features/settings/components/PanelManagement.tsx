@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Panel, PanelType } from "@timothyw/pat-common";
-import { panelInfo } from "@/src/features/settings/controllers/ConfigManager";
+import { panelInfo } from "@/src/features/settings/controllers/ConfigStore";
 
 interface PanelManagementProps {
     panels: Panel[];

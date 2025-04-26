@@ -14,11 +14,10 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { ConfigManager } from '@/src/features/settings/controllers/ConfigManager';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
-// Import the WebDateTimePicker component
 import WebDateTimePicker from './WebDateTimePicker';
+import { useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
 
 interface AgendaItemFormViewProps {
     isPresented: boolean;
@@ -50,9 +49,9 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const settingsManager = ConfigManager.shared;
-    const categories = settingsManager.config.iosApp.itemCategories;
-    const types = settingsManager.config.iosApp.itemTypes;
+    const { config } = useConfigStore();
+    const categories = config.iosApp.itemCategories;
+    const types = config.iosApp.itemTypes;
 
     const agendaManager = AgendaManager.getInstance();
 
