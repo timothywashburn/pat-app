@@ -1,10 +1,9 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { useState, useEffect } from 'react';
-import { Panel, PANEL_TYPES, PanelType } from '@timothyw/pat-common';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import { panelInfo, useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
+import WebHeader from '@/src/components/WebHeader';
 
 type TabBarIconProps = {
     color: string;
@@ -14,45 +13,48 @@ type TabBarIconProps = {
 export default function TabsLayout() {
     const { getColor } = useTheme();
     const { config } = useConfigStore();
+    const isWeb = Platform.OS === 'web';
 
     if (config?.iosApp.panels.length === 0) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: getColor('background') }}>
+            <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
                 <Text style={{ color: getColor('on-background') }}>No panels configured</Text>
             </View>
         );
     }
 
     return (
-        <Tabs
-            screenOptions={{
-                headerShown: false,
-                tabBarActiveTintColor: getColor("primary"),
-                tabBarInactiveTintColor: getColor("on-surface"),
-                tabBarStyle: {
-                    backgroundColor: getColor("surface"),
-                }
-            }}
-        >
-            {config?.iosApp.panels.map((panel) => {
-                const panelType = panel.type;
-                const { icon, title } = panelInfo[panelType];
-
-                return (
-                    <Tabs.Screen
-                        key={panelType}
-                        name={panelType}
-                        options={{
-                            title: title,
-                            // TODO: remove settings hardcode after hamburger menu
-                            href: panel.visible || panel.type == "settings" ? undefined : null,
-                            tabBarIcon: ({ color, size }: TabBarIconProps) => (
-                                <Ionicons name={icon} size={size} color={color} />
-                            ),
-                        }}
-                    />
-                );
-            })}
-        </Tabs>
+        <View className="flex-1">
+            {isWeb && <WebHeader panels={config?.iosApp.panels} />}
+            <Tabs
+                screenOptions={{
+                    headerShown: false,
+                    tabBarActiveTintColor: getColor("primary"),
+                    tabBarInactiveTintColor: getColor("on-surface"),
+                    tabBarStyle: {
+                        backgroundColor: getColor("surface"),
+                        display: isWeb ? 'none' : 'flex',
+                    }
+                }}
+            >
+                {config?.iosApp.panels.map((panel) => {
+                    const panelType = panel.type;
+                    const { icon, title } = panelInfo[panelType];
+                    return (
+                        <Tabs.Screen
+                            key={panelType}
+                            name={panelType}
+                            options={{
+                                title: title,
+                                href: panel.visible || panel.type == "settings" ? undefined : null,
+                                tabBarIcon: ({ color, size }: TabBarIconProps) => (
+                                    <Ionicons name={icon} size={size} color={color} />
+                                ),
+                            }}
+                        />
+                    );
+                })}
+            </Tabs>
+        </View>
     );
 }
