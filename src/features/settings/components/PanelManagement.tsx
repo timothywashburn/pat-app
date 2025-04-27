@@ -70,9 +70,9 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
                                     onPress={() => togglePanelVisibility(panel.type, !panel.visible)}
                                 >
                                     <Ionicons
-                                        name={panel.visible ? 'eye-off' : 'eye'}
+                                        name={panel.visible ? 'eye' : 'eye-off'}
                                         size={24}
-                                        color={getColor("primary")}
+                                        color={panel.visible ? getColor("primary") : getColor("on-surface-variant")}
                                     />
                                 </TouchableOpacity>
                             )}

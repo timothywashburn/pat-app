@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { useState, useEffect } from 'react';
-import { Panel, PanelType } from '@timothyw/pat-common';
+import { Panel, PANEL_TYPES, PanelType } from '@timothyw/pat-common';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { panelInfo, useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
 
@@ -44,6 +44,8 @@ export default function TabsLayout() {
                         name={panelType}
                         options={{
                             title: title,
+                            // TODO: remove settings hardcode after hamburger menu
+                            href: panel.visible || panel.type == "settings" ? undefined : null,
                             tabBarIcon: ({ color, size }: TabBarIconProps) => (
                                 <Ionicons name={icon} size={size} color={color} />
                             ),
