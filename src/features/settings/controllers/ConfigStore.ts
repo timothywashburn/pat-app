@@ -22,7 +22,7 @@ interface ConfigState {
     isLoaded: boolean;
 
     loadConfig: () => Promise<void>;
-    updateConfig: (partialConfig: Partial<UpdateUserConfigRequest>) => Promise<void>;
+    updateConfig: (partialConfig: UpdateUserConfigRequest) => Promise<void>;
 }
 
 export const useConfigStore = create<ConfigState>((set, get) => ({
@@ -58,7 +58,7 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
         }
     },
 
-    updateConfig: async (partialConfig: Partial<UpdateUserConfigRequest>) => {
+    updateConfig: async (partialConfig: UpdateUserConfigRequest) => {
         try {
             const authToken = AuthState.getState().authToken;
             if (!authToken) {
@@ -72,9 +72,9 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
                 token: authToken,
             });
 
-            set(state => ({
-                config: { ...state.config, ...partialConfig },
-            }));
+            set({
+                config: response.user,
+            });
 
             console.log('config updated');
         } catch (error) {

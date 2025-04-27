@@ -3,32 +3,37 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Panel, PanelType } from "@timothyw/pat-common";
-import { panelInfo } from "@/src/features/settings/controllers/ConfigStore";
+import { panelInfo, useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
 
 interface PanelManagementProps {
-    panels: Panel[];
-    onUpdatePanels: (panels: Panel[]) => Promise<void>;
     editMode: boolean;
 }
 
 export const PanelManagement: React.FC<PanelManagementProps> = ({
-    panels,
-    onUpdatePanels,
     editMode,
 }) => {
     const { getColor } = useTheme();
+    const { config, updateConfig } = useConfigStore();
+
+    const panels = config?.iosApp.panels || [];
     const visiblePanels: Panel[] = panels.filter(p => p.visible);
     const hiddenPanels: Panel[] = panels.filter(p => !p.visible);
 
     const togglePanelVisibility = async (panelType: PanelType, visible: boolean) => {
         try {
-            const updatedPanels = panels.map(panel => {
+            const updatedPanels: Panel[] = panels.map(panel => {
                 if (panel.type === panelType) {
                     return { ...panel, visible };
                 }
                 return panel;
             });
-            await onUpdatePanels(updatedPanels);
+
+            await updateConfig({
+                iosApp: {
+                    panels: updatedPanels
+                }
+            });
+            console.log(`panel ${panelType} visibility toggled to ${visible}`)
         } catch (error) {
             console.error(`failed to toggle panel visibility: ${error}`);
         }

@@ -16,7 +16,6 @@ export default function SettingsScreen() {
     const [editMode, setEditMode] = useState(false);
 
     const { config } = useConfigStore();
-    const [panels, setPanels] = useState(config.iosApp.panels);
     const [itemCategories, setItemCategories] = useState(config.iosApp.itemCategories);
     const [itemTypes, setItemTypes] = useState(config.iosApp.itemTypes);
     const [propertyKeys, setPropertyKeys] = useState(config.iosApp.propertyKeys);
@@ -41,8 +40,6 @@ export default function SettingsScreen() {
             <ScrollView className="flex-1">
                 <View className="p-4">
                     <PanelManagement
-                        panels={panels}
-                        onUpdatePanels={async (): Promise<void> => {}}
                         editMode={editMode}
                     />
 
