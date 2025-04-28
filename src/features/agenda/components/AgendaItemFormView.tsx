@@ -39,8 +39,14 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
 
+    const getTonight = () => {
+        const today = new Date();
+        today.setHours(23, 59, 0, 0);
+        return today;
+    };
+
     const [name, setName] = useState(existingItem?.name || initialName);
-    const [date, setDate] = useState<Date | undefined>(existingItem?.date || new Date());
+    const [date, setDate] = useState<Date | undefined>(existingItem?.date || getTonight());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [notes, setNotes] = useState(existingItem?.notes || '');
     const [urgent, setUrgent] = useState(existingItem?.urgent || false);
@@ -86,7 +92,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
             if (!isEditMode) {
                 setName('');
-                setDate(new Date());
+                setDate(getTonight());
                 setNotes('');
                 setUrgent(false);
                 setCategory(undefined);
@@ -132,7 +138,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     };
 
     const handleDateChange = (event: any, selectedDate?: Date) => {
-        const currentDate = selectedDate || date || new Date();
+        const currentDate = selectedDate || date || getTonight();
 
         setShowDatePicker(Platform.OS === 'ios');
         if (selectedDate) {
@@ -225,7 +231,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                             <TouchableOpacity
                                 className="bg-surface flex-1 flex-row items-center justify-center border border-outline rounded-lg p-3"
                                 onPress={() => {
-                                    setDate(new Date());
+                                    setDate(getTonight());
                                     showDateTimePickerModal();
                                 }}
                             >
@@ -246,7 +252,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
                     {Platform.OS !== 'web' && showDatePicker && (
                         <DateTimePicker
-                            value={date || new Date()}
+                            value={date || getTonight()}
                             mode="datetime"
                             display="default"
                             onChange={handleDateChange}
