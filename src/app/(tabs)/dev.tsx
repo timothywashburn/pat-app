@@ -176,7 +176,11 @@ export default function DevPanel() {
                     )}
 
                     <TouchableOpacity
-                        className="bg-primary disabled:bg-error h-[50px] rounded-lg justify-center items-center mt-2.5"
+                        className={`h-[50px] rounded-lg justify-center items-center mt-2.5 ${
+                            isRegistering
+                                ? "bg-error"
+                                : "bg-primary"
+                        }`}
                         onPress={handleRegisterForPushNotifications}
                         disabled={isRegistering}
                     >
@@ -188,7 +192,11 @@ export default function DevPanel() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="bg-primary disabled:bg-error h-[50px] rounded-lg justify-center items-center mt-2.5"
+                        className={`h-[50px] rounded-lg justify-center items-center mt-2.5 ${
+                            isSending || !expoPushToken || expoPushToken.startsWith('Error:')
+                                ? "bg-error"
+                                : "bg-primary"
+                        }`}
                         onPress={handleSendNotification}
                         disabled={isSending || !expoPushToken || expoPushToken.startsWith('Error:')}
                     >
