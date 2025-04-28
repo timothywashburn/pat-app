@@ -54,16 +54,6 @@ export default function TabsLayout() {
                         />
                     );
                 })}
-
-                <Tabs.Screen
-                    name="dev"
-                    options={{
-                        title: 'Dev',
-                        tabBarIcon: ({ color, size }: TabBarIconProps) => (
-                            <Ionicons name="code-slash" size={size} color={color} />
-                        ),
-                    }}
-                />
             </Tabs>
         </View>
     );

@@ -14,7 +14,8 @@ export const panelInfo: Record<PanelType, { icon: keyof typeof Ionicons.glyphMap
     inbox: { icon: 'mail', title: 'Inbox' },
     tasks: { icon: 'list', title: 'Tasks' },
     people: { icon: 'people', title: 'People' },
-    settings: { icon: 'settings', title: 'Settings' }
+    settings: { icon: 'settings', title: 'Settings' },
+    dev: { icon: 'code-slash', title: 'Dev' },
 };
 
 interface ConfigState {

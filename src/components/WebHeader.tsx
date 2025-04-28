@@ -44,34 +44,6 @@ export default function WebHeader({ panels }: WebHeaderProps) {
                     </Link>
                 );
             })}
-
-
-            <Link key="dev" href="/dev" asChild>
-                <Pressable>
-                    <View className="flex-row items-center px-4 h-full">
-                        {(() => {
-                            const isActive = pathname.includes("dev");
-                            return (
-                                <>
-                                    <Ionicons
-                                        name="code-slash"
-                                        size={24}
-                                        color={isActive ? getColor("primary") : getColor("on-surface")}
-                                    />
-                                    <Text
-                                        className="ml-2"
-                                        style={{
-                                            color: isActive ? getColor("primary") : getColor("on-surface")
-                                        }}
-                                    >
-                                        Dev
-                                    </Text>
-                                </>
-                            );
-                        })()}
-                    </View>
-                </Pressable>
-            </Link>
         </View>
     );
 }
