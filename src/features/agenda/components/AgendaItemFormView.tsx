@@ -102,22 +102,6 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         }
     };
 
-    const handleToggleCompleted = async () => {
-        if (!existingItem) return;
-
-        setIsLoading(true);
-        setErrorMessage(null);
-
-        try {
-            await agendaManager.setCompleted(existingItem.id, !existingItem.completed);
-            onItemSaved?.();
-            onDismiss();
-        } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update item');
-            setIsLoading(false);
-        }
-    };
-
     const handleDelete = () => {
         if (!existingItem) return;
 
@@ -365,19 +349,8 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     />
                 </View>
 
-                {/* Additional actions for edit mode */}
                 {isEditMode && existingItem && (
-                    <View className="mt-5 gap-2.5">
-                        <TouchableOpacity
-                            className="bg-primary flex-row items-center justify-center rounded-lg p-3"
-                            onPress={handleToggleCompleted}
-                        >
-                            <Ionicons name={existingItem.completed ? "refresh-circle" : "checkmark-circle"} size={20} color={getColor("on-primary")} />
-                            <Text className="text-on-primary text-base font-semibold ml-2">
-                                {existingItem.completed ? "Mark as Incomplete" : "Mark as Complete"}
-                            </Text>
-                        </TouchableOpacity>
-
+                    <View className="mt-5">
                         <TouchableOpacity
                             className="bg-error flex-row items-center justify-center rounded-lg p-3"
                             onPress={handleDelete}

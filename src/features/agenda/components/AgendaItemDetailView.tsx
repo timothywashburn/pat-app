@@ -4,17 +4,20 @@ import {
     Text,
     TouchableOpacity,
     View,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { AgendaItem } from "@/src/features/agenda/models";
+import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 
 interface AgendaItemDetailViewProps {
     item: AgendaItem;
     isPresented: boolean;
     onDismiss: () => void;
     onEditRequest: () => void;
+    onItemUpdated?: () => void;
 }
 
 const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
@@ -22,13 +25,32 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
     isPresented,
     onDismiss,
     onEditRequest,
+    onItemUpdated,
 }) => {
     const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+    const agendaManager = AgendaManager.getInstance();
 
     if (!isPresented) {
         return null;
     }
+
+    const handleToggleCompleted = async () => {
+        setIsLoading(true);
+        setErrorMessage(null);
+
+        try {
+            await agendaManager.setCompleted(item.id, !item.completed);
+            onItemUpdated?.();
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to update item');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <View
@@ -46,6 +68,10 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                     <Ionicons name="create-outline" size={24} color={getColor("primary")} />
                 </TouchableOpacity>
             </View>
+
+            {errorMessage && (
+                <Text className="text-error p-4 text-center">{errorMessage}</Text>
+            )}
 
             <ScrollView className="flex-1 p-4">
                 <View className="bg-surface rounded-lg p-4 mb-5">
@@ -110,13 +136,34 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
 
                 <View className="mt-5 gap-2.5">
                     <TouchableOpacity
-                        className="bg-primary flex-row items-center justify-center rounded-lg p-3"
+                        className="bg-surface border border-outline flex-row items-center justify-center rounded-lg p-3 mt-2"
                         onPress={onEditRequest}
                     >
-                        <Ionicons name="create-outline" size={20} color={getColor("on-primary")} />
-                        <Text className="text-on-primary text-base font-semibold ml-2">
+                        <Ionicons name="create-outline" size={20} color={getColor("primary")} />
+                        <Text className="text-primary text-base font-semibold ml-2">
                             Edit Item
                         </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className="bg-primary flex-row items-center justify-center rounded-lg p-3"
+                        onPress={handleToggleCompleted}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color={getColor("on-primary")} />
+                        ) : (
+                            <>
+                                <Ionicons
+                                    name={item.completed ? "refresh-circle" : "checkmark-circle"}
+                                    size={20}
+                                    color={getColor("on-primary")}
+                                />
+                                <Text className="text-on-primary text-base font-semibold ml-2">
+                                    {item.completed ? "Mark as Incomplete" : "Mark as Complete"}
+                                </Text>
+                            </>
+                        )}
                     </TouchableOpacity>
                 </View>
 
