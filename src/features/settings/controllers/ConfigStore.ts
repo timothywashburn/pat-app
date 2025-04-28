@@ -3,7 +3,7 @@ import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import { Ionicons } from "@expo/vector-icons";
 import {
-    GetUserConfigResponse, PanelType,
+    GetUserConfigResponse, Panel, PanelType,
     UpdateUserConfigRequest,
     UpdateUserConfigResponse,
     UserConfig
@@ -23,6 +23,8 @@ interface ConfigState {
 
     loadConfig: () => Promise<void>;
     updateConfig: (partialConfig: UpdateUserConfigRequest) => Promise<void>;
+
+    getFirstPanel: () => Panel;
 }
 
 export const useConfigStore = create<ConfigState>((set, get) => ({
@@ -82,6 +84,11 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
             throw error;
         }
     },
+
+    getFirstPanel: () => {
+        const { config } = get();
+        return config.iosApp.panels.find(panel => panel.visible)!;
+    }
 }));
 
 export const setConfigState = useConfigStore.setState;

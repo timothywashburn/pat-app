@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { usePathname, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '@/src/features/auth/controllers/AuthState';
 import { View } from 'react-native';
+import { useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
 
 function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLayout?: () => void }) {
     const router = useRouter();
     const segments = useSegments();
     const pathname = usePathname();
     const { isAuthenticated, isLoading, userInfo } = useAuthStore();
+    const { getFirstPanel } = useConfigStore();
 
     const isInAuthGroup = segments[0] === '(auth)';
     const isVerifyPage = pathname === '/verify';
@@ -29,7 +31,7 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
         if (isAuthenticated) {
             if (isEmailVerified) {
                 if (isInAuthGroup) {
-                    router.replace('/(tabs)/agenda');
+                    router.replace(`/(tabs)/${getFirstPanel().type}`);
                 }
             } else {
                 if (!isVerifyPage) {
@@ -42,7 +44,7 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
             }
         }
 
-    }, [isAuthenticated, isLoading, userInfo?.isEmailVerified, segments, router]);
+    }, [isAuthenticated, isLoading, userInfo?.isEmailVerified, segments, router, getFirstPanel]);
 
     return (
         <View style={{ flex: 1 }} onLayout={onLayout}>
