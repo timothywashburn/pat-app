@@ -27,6 +27,8 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress }) => {
 
                 {item.category && <Text className="text-primary text-sm mb-1">{item.category}</Text>}
 
+                {item.type && <Text className="text-primary text-sm mb-1">{item.type}</Text>}
+
                 {item.urgent && (
                     <View className="bg-error px-2 py-0.5 rounded self-start">
                         <Text className="text-on-error text-xs font-semibold">Urgent</Text>
