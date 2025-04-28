@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     login: async (email: string, password: string) => {
-        console.log('signing in with email:', email);
+        console.log(`signing in with email (${process.env.EXPO_PUBLIC_API_URL}): ${email}`);
 
         try {
             const request = {
