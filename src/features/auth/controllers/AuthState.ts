@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { AuthError, UserInfo } from '@/src/features/auth/models/auth';
-import NetworkManager, { HTTPMethod, NetworkRequest } from '../../../services/NetworkManager';
+import NetworkManager, { HTTPMethod } from '../../../services/NetworkManager';
 import SecureStorage from '../../../services/SecureStorage';
 import {
     AuthTokens,

@@ -5,5 +5,5 @@ import { useConfigStore } from "@/src/features/settings/controllers/ConfigStore"
 export default function Index() {
     const { getFirstPanel } = useConfigStore();
 
-    return <Redirect href={`/(tabs)/${getFirstPanel().type}`} />;
+    return <Redirect href={`/(tabs)/${getFirstPanel()}`} />;
 }

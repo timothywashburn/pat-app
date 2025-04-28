@@ -31,7 +31,7 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
         if (isAuthenticated) {
             if (isEmailVerified) {
                 if (isInAuthGroup) {
-                    router.replace(`/(tabs)/${getFirstPanel().type}`);
+                    router.replace(`/(tabs)/${getFirstPanel()}`);
                 }
             } else {
                 if (!isVerifyPage) {
