@@ -56,8 +56,8 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const { config } = useConfigStore();
-    const categories = config.iosApp.itemCategories;
-    const types = config.iosApp.itemTypes;
+    const categories = config?.iosApp.itemCategories;
+    const types = config?.iosApp.itemTypes;
 
     const agendaManager = AgendaManager.getInstance();
 
