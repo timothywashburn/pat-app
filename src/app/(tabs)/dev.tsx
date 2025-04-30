@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SafeAreaView, Text, View, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { SafeAreaView, Text, View, TouchableOpacity, Platform, ActivityIndicator, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
@@ -143,6 +143,15 @@ export default function DevPanel() {
         }
     };
 
+    const handleOpenDeepLink = async () => {
+        try {
+            Linking.openURL('dev.timothyw.patapp://redirect');
+            console.log("opening url: dev.timothyw.patapp://redirect")
+        } catch (err) {
+            console.log('cannot open url:', err);
+        }
+    };
+
     return (
         <SafeAreaView className="bg-background flex-1">
             <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
@@ -204,6 +213,27 @@ export default function DevPanel() {
                             <ActivityIndicator color={getColor("on-primary")} />
                         ) : (
                             <Text className="text-on-primary text-base font-semibold">Send Test Notification</Text>
+                        )}
+                    </TouchableOpacity>
+                </View>
+
+                {/* Deep Link Section */}
+                <View className="bg-surface rounded-lg p-4 mb-4">
+                    <Text className="text-on-surface text-lg font-semibold mb-3">Deep Links</Text>
+
+                    <TouchableOpacity
+                        className={`h-[50px] rounded-lg justify-center items-center mt-2.5 ${
+                            isRegistering
+                                ? "bg-error"
+                                : "bg-primary"
+                        }`}
+                        onPress={handleOpenDeepLink}
+                        disabled={isRegistering}
+                    >
+                        {isRegistering ? (
+                            <ActivityIndicator color={getColor("on-primary")} />
+                        ) : (
+                            <Text className="text-on-primary text-base font-semibold">Open verify-success</Text>
                         )}
                     </TouchableOpacity>
                 </View>

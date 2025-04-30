@@ -1,41 +1,66 @@
 import { Linking } from 'react-native';
 import { router } from 'expo-router';
+import { ConfigState, useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
 
-class DeepLinkHandler {
-    static handleURL(url: URL): void {
+export default class DeepLinkHandler {
+    static handleURL(url: string): void {
         try {
-            const components = url.pathname;
-            console.log(`[deeplink] handling url: ${url.toString()}`);
+            console.log(`[deeplink] handling url: ${url}`);
 
-            switch (components) {
+            let path = '';
+            if (url.includes('://')) {
+                // For URL scheme format like "dev.timothyw.patapp://redirect"
+                const parts = url.split('://');
+                if (parts.length > 1) path = '/' + parts[1];
+            } else {
+                console.log(`[deeplink] Handling full URL: ${url}`);
+                const urlObject = new URL(url);
+                path = urlObject.pathname;
+            }
+
+            console.log(`[deeplink] extracted path: ${path}`);
+
+            switch (path) {
+                case '/':
+                    router.replace(`/(tabs)/${ConfigState.getState().getFirstPanel()}`);
+                    break;
                 case '/redirect':
-                    console.log('[deeplink] handling redirect');
-                    // Implement redirect handling
+                    router.replace(`/(redirects)/verify-success`);
                     break;
                 default:
-                    console.log(`[deeplink] unhandled path: ${components}`);
-                    break;
+                    console.log(`[deeplink] unhandled path: ${path}`);
+                    return;
             }
+
+            console.log('[deeplink] handled redirect');
         } catch (error) {
             console.error('[deeplink] error handling URL:', error);
         }
     }
 
-    static initialize(): void {
+    static initialize() {
         // Handle deep links when the app is already open
-        Linking.addEventListener('url', ({ url }) => {
+        const subscription = Linking.addEventListener('url', ({ url }) => {
             if (url) {
-                DeepLinkHandler.handleURL(new URL(url));
+                console.log('[deeplink] received url event:', url);
+                DeepLinkHandler.handleURL(url);
             }
         });
 
         // Handle deep links when the app is opened from a link
         Linking.getInitialURL().then((url) => {
             if (url) {
-                DeepLinkHandler.handleURL(new URL(url));
+                console.log('[deeplink] received initial url:', url);
+                DeepLinkHandler.handleURL(url);
+            } else {
+                console.log('[deeplink] no initial url');
             }
+        }).catch(err => {
+            console.error('[deeplink] error getting initial url:', err);
         });
+
+        return () => {
+            subscription.remove();
+        };
     }
 }
-
-export default DeepLinkHandler;

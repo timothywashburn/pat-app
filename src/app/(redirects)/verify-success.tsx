@@ -9,7 +9,8 @@ const VerifySuccess: React.FC = () => {
 
     const handleReturnToApp = () => {
         try {
-            Linking.openURL('pat.timothyw.dev://');
+            Linking.openURL('dev.timothyw.patapp://');
+            console.log("opening url: dev.timothyw.patapp://")
         } catch (err) {
             console.log('cannot open url:', err);
         }
@@ -24,7 +25,7 @@ const VerifySuccess: React.FC = () => {
                             <Ionicons
                                 name="checkmark-circle"
                                 size={48}
-                                color={getColor("success") || "green"}
+                                color={getColor("success") || "green"} // TODO: fix after adding success colors
                             />
                         </View>
                     </View>
