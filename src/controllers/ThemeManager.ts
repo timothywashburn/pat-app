@@ -14,10 +14,16 @@ type ThemeColors = {
     "on-secondary": string;
     "secondary-container": string;
     "on-secondary-container": string;
+    "success": string,
+    "on-success": string,
+    "success-container": string,
+    "on-success-container": string,
     "error": string;
     "on-error": string;
     "error-container": string;
     "on-error-container": string;
+    "warning": string;
+    "on-warning": string;
     "background": string;
     "on-background": string;
     "on-background-variant": string;

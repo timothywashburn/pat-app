@@ -21,11 +21,11 @@ const VerifySuccess: React.FC = () => {
             <View className="flex-1 items-center justify-center p-4">
                 <View className="bg-surface rounded-lg shadow p-8 w-full max-w-md items-center">
                     <View className="mb-6">
-                        <View className="rounded-full bg-green-100 p-3">
+                        <View className="rounded-full bg-success-container p-3">
                             <Ionicons
                                 name="checkmark-circle"
                                 size={48}
-                                color={getColor("success") || "green"} // TODO: fix after adding success colors
+                                color={getColor("on-success-container")}
                             />
                         </View>
                     </View>

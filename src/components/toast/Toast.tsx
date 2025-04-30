@@ -16,16 +16,16 @@ interface ToastProps {
 
 const toastColorScheme = {
     success: {
-        background: 'bg-green-500',
-        text: 'text-white',
+        background: 'bg-success',
+        text: 'text-on-success',
     },
     error: {
         background: 'bg-error',
         text: 'text-on-error',
     },
     warning: {
-        background: 'bg-yellow-500',
-        text: 'text-white',
+        background: 'bg-warning',
+        text: 'text-on-warning',
     },
     info: {
         background: 'bg-primary',
