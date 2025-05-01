@@ -29,6 +29,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
       [
         "expo-splash-screen",
         {
@@ -42,7 +43,13 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-secure-store"
+      [
+        "expo-notifications",
+        {
+          "color": "#ff00ff",
+          "defaultChannel": "default"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
