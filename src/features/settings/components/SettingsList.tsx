@@ -86,7 +86,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
                     <TouchableOpacity
                         onPress={handleAddItem}
                         disabled={newItem.trim() === ''}
-                        className={`p-1 ${newItem.trim() === '' ? 'opacity-50' : ''}`}
+                        className={`p-1 ${newItem.trim() === '' ? 'opacity-40' : ''}`}
                     >
                         <Ionicons name="add-circle" size={24} color={getColor("primary")} />
                     </TouchableOpacity>

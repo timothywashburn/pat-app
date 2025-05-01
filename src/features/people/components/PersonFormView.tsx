@@ -184,7 +184,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                         <ActivityIndicator size="small" color={getColor("primary")} />
                     ) : (
                         <Text
-                            className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
+                            className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-40' : ''}`}
                         >
                             {isEditMode ? 'Save' : 'Add'}
                         </Text>

@@ -176,7 +176,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                         <ActivityIndicator size="small" color={getColor("primary")} />
                     ) : (
                         <Text
-                            className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-50' : ''}`}
+                            className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-40' : ''}`}
                         >
                             {isEditMode ? 'Save' : 'Add'}
                         </Text>
@@ -190,7 +190,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
             {/* Web Date Picker Modal */}
             {Platform.OS === 'web' && showDatePicker && (
-                <View className="absolute z-10 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+                <View className="absolute z-10 w-full h-full bg-black bg-opacity-60 flex items-center justify-center">
                     <WebDateTimePicker
                         date={date}
                         onDateChange={handleWebDateChange}

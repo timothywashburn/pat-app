@@ -192,7 +192,7 @@ export default function InboxPanel() {
                     onSubmitEditing={handleAddThought}
                 />
                 <TouchableOpacity
-                    className={`bg-primary rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-50' : ''}`}
+                    className={`bg-primary rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-40' : ''}`}
                     onPress={handleAddThought}
                     disabled={newThought.trim() === '' || isLoading}
                 >
