@@ -12,7 +12,7 @@ import { ToastProvider, useToast } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, View } from "react-native";
-import { useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
+import { useConfigStore } from "@/src/features/settings/controllers/DataStore";
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({

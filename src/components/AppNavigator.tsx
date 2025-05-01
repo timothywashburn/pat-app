@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { usePathname, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '@/src/features/auth/controllers/AuthState';
 import { View } from 'react-native';
-import { useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
+import { useConfigStore } from "@/src/features/settings/controllers/DataStore";
 
 function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLayout?: () => void }) {
     const router = useRouter();

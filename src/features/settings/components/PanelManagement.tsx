@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Panel, PanelType } from "@timothyw/pat-common";
-import { panelInfo, useConfigStore } from "@/src/features/settings/controllers/ConfigStore";
+import { panelInfo, useConfigStore } from "@/src/features/settings/controllers/DataStore";
 
 interface PanelManagementProps {
     editMode: boolean;
@@ -13,9 +13,9 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
     editMode,
 }) => {
     const { getColor } = useTheme();
-    const { config, updateConfig } = useConfigStore();
+    const { data, updateConfig } = useConfigStore();
 
-    const panels = config?.iosApp.panels || [];
+    const panels = data?.config.panels || [];
     const visiblePanels: Panel[] = panels.filter(p => p.visible);
     const hiddenPanels: Panel[] = panels.filter(p => !p.visible);
 
@@ -29,7 +29,7 @@ export const PanelManagement: React.FC<PanelManagementProps> = ({
             });
 
             await updateConfig({
-                iosApp: {
+                config: {
                     panels: updatedPanels
                 }
             });

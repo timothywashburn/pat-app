@@ -2,12 +2,7 @@ import { create } from 'zustand';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import { Ionicons } from "@expo/vector-icons";
-import {
-    GetUserConfigResponse, PanelType,
-    UpdateUserConfigRequest,
-    UpdateUserConfigResponse,
-    UserConfig
-} from "@timothyw/pat-common";
+import { GetUserResponse, PanelType, UpdateUserRequest, UpdateUserResponse, UserData } from "@timothyw/pat-common";
 
 export const panelInfo: Record<PanelType, { icon: keyof typeof Ionicons.glyphMap; title: string }> = {
     agenda: { icon: 'calendar', title: 'Agenda' },
@@ -18,24 +13,24 @@ export const panelInfo: Record<PanelType, { icon: keyof typeof Ionicons.glyphMap
     dev: { icon: 'code-slash', title: 'Dev' },
 };
 
-interface ConfigState {
-    config: UserConfig;
+interface DataState {
+    data: UserData;
     isLoaded: boolean;
 
     loadConfig: () => Promise<void>;
-    updateConfig: (partialConfig: UpdateUserConfigRequest) => Promise<void>;
+    updateConfig: (partialConfig: UpdateUserRequest) => Promise<void>;
 
     getFirstPanel: () => PanelType;
 }
 
-export const useConfigStore = create<ConfigState>((set, get) => ({
-    config: null as unknown as UserConfig,
+export const useConfigStore = create<DataState>((set, get) => ({
+    data: null as unknown as UserData,
     isLoaded: false,
 
     loadConfig: async () => {
-        const { config, isLoaded } = get();
+        const { data, isLoaded } = get();
 
-        if (config && isLoaded) {
+        if (data && isLoaded) {
             return;
         }
 
@@ -43,14 +38,14 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
             const authToken = AuthState.getState().authToken;
             if (!authToken) throw new Error('No auth token');
 
-            const response = await NetworkManager.shared.perform<undefined, GetUserConfigResponse>({
-                endpoint: '/api/account/config',
+            const response = await NetworkManager.shared.perform<undefined, GetUserResponse>({
+                endpoint: '/api/account',
                 method: HTTPMethod.GET,
                 token: authToken,
             });
 
             set({
-                config: response.user,
+                data: response.user,
                 isLoaded: true,
             });
 
@@ -61,22 +56,22 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
         }
     },
 
-    updateConfig: async (partialConfig: UpdateUserConfigRequest) => {
+    updateConfig: async (partialConfig: UpdateUserRequest) => {
         try {
             const authToken = AuthState.getState().authToken;
             if (!authToken) {
                 throw new Error('No auth token');
             }
 
-            const response = await NetworkManager.shared.perform<UpdateUserConfigRequest, UpdateUserConfigResponse>({
-                endpoint: '/api/account/config',
+            const response = await NetworkManager.shared.perform<UpdateUserRequest, UpdateUserResponse>({
+                endpoint: '/api/account',
                 method: HTTPMethod.PUT,
                 body: partialConfig,
                 token: authToken,
             });
 
             set({
-                config: response.user,
+                data: response.user,
             });
 
             console.log('config updated');
@@ -87,8 +82,8 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
     },
 
     getFirstPanel: () => {
-        const { config } = get();
-        return config?.iosApp.panels.find(panel => panel.visible)?.type ?? PanelType.AGENDA;
+        const { data } = get();
+        return data?.config.panels.find(panel => panel.visible)?.type ?? PanelType.AGENDA;
     }
 }));
 
