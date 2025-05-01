@@ -43,6 +43,9 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     const [newPropertyValue, setNewPropertyValue] = useState('');
     const [newNote, setNewNote] = useState('');
 
+    // For editing existing properties and notes
+    // No separate editing state needed with direct editing
+
     const personManager = PersonManager.getInstance();
 
     if (!isPresented) {
@@ -118,7 +121,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
             value: newPropertyValue,
         };
 
-        setProperties([...properties, newProp]);
+        setProperties([newProp, ...properties]);  // Add to beginning of array
         setNewPropertyKey('');
         setNewPropertyValue('');
     };
@@ -134,7 +137,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
             updatedAt: now,
         };
 
-        setNotes([...notes, newNoteItem]);
+        setNotes([newNoteItem, ...notes]);  // Add to beginning of array
         setNewNote('');
     };
 
@@ -144,6 +147,19 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
 
     const deleteNote = (id: string) => {
         setNotes(notes.filter(note => note.id !== id));
+    };
+
+    const updatePropertyValue = (id: string, newValue: string) => {
+        setProperties(properties.map(prop =>
+            prop.id === id ? { ...prop, value: newValue } : prop
+        ));
+    };
+
+    const updateNoteContent = (id: string, newContent: string) => {
+        const now = new Date();
+        setNotes(notes.map(note =>
+            note.id === id ? { ...note, content: newContent, updatedAt: now } : note
+        ));
     };
 
     return (
@@ -196,23 +212,8 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 <View className="mb-5">
                     <Text className="text-on-background text-base font-medium mb-2">Properties</Text>
 
-                    {properties.map(property => (
-                        <View key={property.id} className="bg-surface border border-outline flex-row items-center mb-2 p-2.5 rounded-lg">
-                            <View className="flex-1">
-                                <Text className="text-on-surface-variant text-xs">{property.key}</Text>
-                                <Text className="text-on-surface text-base">{property.value}</Text>
-                            </View>
-
-                            <TouchableOpacity
-                                onPress={() => deleteProperty(property.id)}
-                                className="p-2"
-                            >
-                                <Ionicons name="trash-outline" size={18} color={getColor("error")} />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-
-                    <View className="flex-row items-center mt-3">
+                    {/* Add new property section */}
+                    <View className="flex-row items-center mb-3">
                         <View className="flex-1 flex-row">
                             <View className="flex-1 mr-2">
                                 <Text className="text-on-background text-xs mb-1">Key</Text>
@@ -240,40 +241,47 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                         <TouchableOpacity
                             onPress={addProperty}
                             disabled={!newPropertyKey || !newPropertyValue}
-                            className="ml-2 self-end mb-1"
+                            className={`ml-2 self-end mb-1 ${(!newPropertyKey || !newPropertyValue) ? 'opacity-40' : ''}`}
                         >
                             <Ionicons
                                 name="add-circle"
                                 size={24}
-                                color={(!newPropertyKey || !newPropertyValue) ? getColor("unknown") : getColor("primary")}
+                                color={getColor("primary")}
                             />
                         </TouchableOpacity>
                     </View>
+
+                    {properties.map(property => (
+                        <View key={property.id} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
+                            <View className="flex-row items-center">
+                                <View className="flex-1">
+                                    <Text className="text-on-surface-variant text-xs">{property.key}</Text>
+                                    <TextInput
+                                        className="text-on-surface text-base"
+                                        value={property.value}
+                                        onChangeText={(newValue) => updatePropertyValue(property.id, newValue)}
+                                        placeholder="Property Value"
+                                        placeholderTextColor={getColor("on-surface-variant")}
+                                    />
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => deleteProperty(property.id)}
+                                    className="p-2"
+                                >
+                                    <Ionicons name="trash-outline" size={18} color={getColor("error")} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ))}
+
                 </View>
 
                 {/* Notes Section */}
                 <View className="mb-5">
                     <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
 
-                    {notes.map(note => (
-                        <View key={note.id} className="bg-surface border border-outline flex-row items-center mb-2 p-2.5 rounded-lg">
-                            <View className="flex-1">
-                                <Text className="text-on-surface text-base mb-1">{note.content}</Text>
-                                <Text className="text-on-surface-variant text-xs">
-                                    {new Date(note.updatedAt).toLocaleDateString()}
-                                </Text>
-                            </View>
-
-                            <TouchableOpacity
-                                onPress={() => deleteNote(note.id)}
-                                className="p-2"
-                            >
-                                <Ionicons name="trash-outline" size={18} color={getColor("error")} />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-
-                    <View className="flex-row items-center mt-3">
+                    {/* Add new note section */}
+                    <View className="flex-row items-center mb-3">
                         <TextInput
                             className="bg-surface text-on-surface flex-1 border border-outline rounded-lg p-2 min-h-[60px]"
                             value={newNote}
@@ -286,15 +294,41 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                         <TouchableOpacity
                             onPress={addNote}
                             disabled={!newNote}
-                            className="ml-2 p-1"
+                            className={`ml-2 p-1 ${(!newPropertyKey || !newPropertyValue) ? 'opacity-40' : ''}`}
                         >
                             <Ionicons
                                 name="add-circle"
                                 size={24}
-                                color={!newNote ? getColor("unknown") : getColor("primary")}
+                                color={getColor("primary")}
                             />
                         </TouchableOpacity>
                     </View>
+
+                    {notes.map(note => (
+                        <View key={note.id} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
+                            <View className="flex-row items-center">
+                                <View className="flex-1">
+                                    <TextInput
+                                        className="text-on-surface text-base mb-1"
+                                        value={note.content}
+                                        onChangeText={(newContent) => updateNoteContent(note.id, newContent)}
+                                        placeholder="Note content"
+                                        placeholderTextColor={getColor("on-surface-variant")}
+                                        multiline
+                                    />
+                                    <Text className="text-on-surface-variant text-xs">
+                                        {new Date(note.updatedAt).toLocaleDateString()}
+                                    </Text>
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => deleteNote(note.id)}
+                                    className="p-2"
+                                >
+                                    <Ionicons name="trash-outline" size={18} color={getColor("error")} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ))}
                 </View>
 
                 {/* Delete button for edit mode */}
