@@ -4,6 +4,11 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import { View, Text, Platform } from 'react-native';
 import { moduleInfo, useDataStore } from "@/src/features/settings/controllers/DataStore";
 import WebHeader from '@/src/components/WebHeader';
+import AgendaPanel from "@/src/app/(tabs)/agenda";
+import TasksPanel from "@/src/app/(tabs)/tasks";
+import { createMaterialTopTabNavigator } from "@/src/components/navigator/navigators/createMaterialTopTabNavigator";
+
+const Tab = createMaterialTopTabNavigator();
 
 type TabBarIconProps = {
     color: string;
@@ -20,6 +25,23 @@ export default function TabsLayout() {
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
                 <Text style={{ color: getColor('on-background') }}>No modules enabled</Text>
             </View>
+        );
+    }
+
+    if (true) {
+        return (
+            <Tab.Navigator>
+                {/*<Tab.Screen name="Home" component={HomeScreen} />*/}
+                {/*<Tab.Screen name="Profile" component={ProfileScreen} />*/}
+                <Tab.Screen
+                    name="agenda"
+                    component={AgendaPanel}
+                />
+                <Tab.Screen
+                    name="tasks"
+                    component={TasksPanel}
+                />
+            </Tab.Navigator>
         );
     }
 
