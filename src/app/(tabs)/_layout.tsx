@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Platform, Text, View } from 'react-native';
@@ -17,6 +18,11 @@ export default function TabsLayout() {
     const { getColor } = useTheme();
     const { data } = useDataStore();
     const isWeb = Platform.OS === 'web';
+    const [navigationKey, setNavigationKey] = useState("initial");
+
+    useEffect(() => {
+        setNavigationKey(`nav-key-${Date.now()}`);
+    }, [data]);
 
     if (data?.config.modules.length === 0) {
         return (
@@ -30,6 +36,7 @@ export default function TabsLayout() {
         <View className="flex-1">
             {isWeb && <WebHeader modules={data?.config.modules} />}
             <Tab.Navigator
+                key={navigationKey} // TODO: temporary patch
                 tabBarPosition="bottom"
                 screenOptions={{
                     tabBarActiveTintColor: getColor("primary"),
