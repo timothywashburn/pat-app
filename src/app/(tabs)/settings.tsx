@@ -10,7 +10,7 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useDataStore } from "@/src/features/settings/controllers/DataStore";
 
-export default function SettingsScreen() {
+export default function SettingsPanel() {
     const { getColor, colorScheme } = useTheme();
     const { errorToast } = useToast();
     const { logout, userInfo } = useAuthStore();

@@ -1,12 +1,10 @@
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { View, Text, Platform } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { moduleInfo, useDataStore } from "@/src/features/settings/controllers/DataStore";
 import WebHeader from '@/src/components/WebHeader';
-import AgendaPanel from "@/src/app/(tabs)/agenda";
-import TasksPanel from "@/src/app/(tabs)/tasks";
-import { createMaterialTopTabNavigator } from "@/src/components/navigator/navigators/createMaterialTopTabNavigator";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { ModuleType } from "@timothyw/pat-common";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -28,55 +26,50 @@ export default function TabsLayout() {
         );
     }
 
-    if (true) {
-        return (
-            <Tab.Navigator>
-                {/*<Tab.Screen name="Home" component={HomeScreen} />*/}
-                {/*<Tab.Screen name="Profile" component={ProfileScreen} />*/}
-                <Tab.Screen
-                    name="agenda"
-                    component={AgendaPanel}
-                />
-                <Tab.Screen
-                    name="tasks"
-                    component={TasksPanel}
-                />
-            </Tab.Navigator>
-        );
-    }
-
     return (
         <View className="flex-1">
             {isWeb && <WebHeader modules={data?.config.modules} />}
-            <Tabs
+            <Tab.Navigator
+                tabBarPosition="bottom"
                 screenOptions={{
-                    headerShown: false,
                     tabBarActiveTintColor: getColor("primary"),
                     tabBarInactiveTintColor: getColor("on-surface"),
                     tabBarStyle: {
                         backgroundColor: getColor("surface"),
                         display: isWeb ? 'none' : 'flex',
-                    }
+                        height: 80
+                    },
+                    tabBarIndicatorStyle: {
+                        top: 0,
+                        bottom: undefined,
+                    },
+                    tabBarLabelStyle: {
+                        fontSize: 11,
+                        marginLeft: 0,
+                        marginRight: 0,
+                        paddingBottom: 20
+                    },
                 }}
             >
                 {data?.config.modules.map((module) => {
+                    if (!module.visible && module.type != ModuleType.SETTINGS) return;
                     const moduleType = module.type;
-                    const { icon, title } = moduleInfo[moduleType];
+                    const { getComponent, icon, title } = moduleInfo[moduleType];
                     return (
-                        <Tabs.Screen
+                        <Tab.Screen
                             key={moduleType}
                             name={moduleType}
+                            component={getComponent}
                             options={{
                                 title: title,
-                                href: module.visible || module.type == "settings" ? undefined : null,
-                                tabBarIcon: ({ color, size }: TabBarIconProps) => (
-                                    <Ionicons name={icon} size={size} color={color} />
+                                tabBarIcon: ({ color }) => (
+                                    <Ionicons name={icon} size={24} color={color} />
                                 ),
                             }}
                         />
                     );
                 })}
-            </Tabs>
+            </Tab.Navigator>
         </View>
     );
 }

@@ -4,7 +4,6 @@ import {
     Alert,
     FlatList,
     RefreshControl,
-    SafeAreaView,
     Text,
     TextInput,
     TouchableOpacity,
@@ -16,6 +15,7 @@ import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/Though
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import { useToast } from "@/src/components/toast/ToastContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function InboxPanel() {
     const { getColor } = useTheme();
