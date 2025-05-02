@@ -1,6 +1,6 @@
 import { Linking } from 'react-native';
 import { router } from 'expo-router';
-import { ConfigState, useConfigStore } from "@/src/features/settings/controllers/DataStore";
+import { ConfigState, useDataStore } from "@/src/features/settings/controllers/DataStore";
 
 export default class DeepLinkHandler {
     static handleURL(url: string): void {
@@ -22,7 +22,7 @@ export default class DeepLinkHandler {
 
             switch (path) {
                 case '/':
-                    router.replace(`/(tabs)/${ConfigState.getState().getFirstPanel()}`);
+                    router.replace(`/(tabs)/${ConfigState.getState().getFirstModule()}`);
                     break;
                 case '/redirect':
                     router.replace(`/(redirects)/verify-success`);

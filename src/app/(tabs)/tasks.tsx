@@ -21,8 +21,8 @@ export default function TasksPanel() {
             />
 
             <View className="flex-1 items-center justify-center p-5">
-                <Text className="text-on-background text-2xl font-bold mb-5">Tasks Panel</Text>
-                <Text className="text-on-background-variant">This will be the Tasks panel for managing tasks</Text>
+                <Text className="text-on-background text-2xl font-bold mb-5">Tasks Module</Text>
+                <Text className="text-on-background-variant">This will be the Tasks module for managing tasks</Text>
             </View>
         </SafeAreaView>
     );

@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { View, Text, Platform } from 'react-native';
-import { panelInfo, useConfigStore } from "@/src/features/settings/controllers/DataStore";
+import { moduleInfo, useDataStore } from "@/src/features/settings/controllers/DataStore";
 import WebHeader from '@/src/components/WebHeader';
 
 type TabBarIconProps = {
@@ -12,20 +12,20 @@ type TabBarIconProps = {
 
 export default function TabsLayout() {
     const { getColor } = useTheme();
-    const { data } = useConfigStore();
+    const { data } = useDataStore();
     const isWeb = Platform.OS === 'web';
 
-    if (data?.config.panels.length === 0) {
+    if (data?.config.modules.length === 0) {
         return (
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
-                <Text style={{ color: getColor('on-background') }}>No panels configured</Text>
+                <Text style={{ color: getColor('on-background') }}>No modules enabled</Text>
             </View>
         );
     }
 
     return (
         <View className="flex-1">
-            {isWeb && <WebHeader panels={data?.config.panels} />}
+            {isWeb && <WebHeader modules={data?.config.modules} />}
             <Tabs
                 screenOptions={{
                     headerShown: false,
@@ -37,16 +37,16 @@ export default function TabsLayout() {
                     }
                 }}
             >
-                {data?.config.panels.map((panel) => {
-                    const panelType = panel.type;
-                    const { icon, title } = panelInfo[panelType];
+                {data?.config.modules.map((module) => {
+                    const moduleType = module.type;
+                    const { icon, title } = moduleInfo[moduleType];
                     return (
                         <Tabs.Screen
-                            key={panelType}
-                            name={panelType}
+                            key={moduleType}
+                            name={moduleType}
                             options={{
                                 title: title,
-                                href: panel.visible || panel.type == "settings" ? undefined : null,
+                                href: module.visible || module.type == "settings" ? undefined : null,
                                 tabBarIcon: ({ color, size }: TabBarIconProps) => (
                                     <Ionicons name={icon} size={size} color={color} />
                                 ),

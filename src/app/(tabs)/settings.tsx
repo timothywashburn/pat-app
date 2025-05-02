@@ -5,10 +5,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
-import { PanelManagement } from '@/src/features/settings/components/PanelManagement';
+import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from "@/src/components/toast/ToastContext";
-import { useConfigStore } from "@/src/features/settings/controllers/DataStore";
+import { useDataStore } from "@/src/features/settings/controllers/DataStore";
 
 export default function SettingsScreen() {
     const { getColor, colorScheme } = useTheme();
@@ -16,7 +16,7 @@ export default function SettingsScreen() {
     const { logout, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
 
-    const { data } = useConfigStore();
+    const { data } = useDataStore();
     const [itemCategories, setItemCategories] = useState(data.config.agenda.itemCategories);
     const [itemTypes, setItemTypes] = useState(data.config.agenda.itemTypes);
     const [propertyKeys, setPropertyKeys] = useState(data.config.people.propertyKeys);
@@ -40,7 +40,7 @@ export default function SettingsScreen() {
 
             <ScrollView className="flex-1">
                 <View className="p-4">
-                    <PanelManagement
+                    <ModuleManagement
                         editMode={editMode}
                     />
 

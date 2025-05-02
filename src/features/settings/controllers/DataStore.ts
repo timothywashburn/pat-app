@@ -2,9 +2,15 @@ import { create } from 'zustand';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import { Ionicons } from "@expo/vector-icons";
-import { GetUserResponse, PanelType, UpdateUserRequest, UpdateUserResponse, UserData } from "@timothyw/pat-common";
+import {
+    GetUserResponse,
+    ModuleType,
+    UpdateUserRequest,
+    UpdateUserResponse,
+    UserData
+} from "@timothyw/pat-common";
 
-export const panelInfo: Record<PanelType, { icon: keyof typeof Ionicons.glyphMap; title: string }> = {
+export const moduleInfo: Record<ModuleType, { icon: keyof typeof Ionicons.glyphMap; title: string }> = {
     agenda: { icon: 'calendar', title: 'Agenda' },
     inbox: { icon: 'mail', title: 'Inbox' },
     tasks: { icon: 'list', title: 'Tasks' },
@@ -20,10 +26,10 @@ interface DataState {
     loadConfig: () => Promise<void>;
     updateConfig: (partialConfig: UpdateUserRequest) => Promise<void>;
 
-    getFirstPanel: () => PanelType;
+    getFirstModule: () => ModuleType;
 }
 
-export const useConfigStore = create<DataState>((set, get) => ({
+export const useDataStore = create<DataState>((set, get) => ({
     data: null as unknown as UserData,
     isLoaded: false,
 
@@ -81,11 +87,11 @@ export const useConfigStore = create<DataState>((set, get) => ({
         }
     },
 
-    getFirstPanel: () => {
+    getFirstModule: () => {
         const { data } = get();
-        return data?.config.panels.find(panel => panel.visible)?.type ?? PanelType.AGENDA;
+        return data?.config.modules.find(module => module.visible)?.type ?? ModuleType.AGENDA;
     }
 }));
 
-export const setConfigState = useConfigStore.setState;
-export const ConfigState = useConfigStore;
+export const setDataState = useDataStore.setState;
+export const DataState = useDataStore;

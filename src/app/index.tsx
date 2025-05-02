@@ -1,9 +1,9 @@
 import { Redirect } from 'expo-router';
 import { useAuthStore } from '@/src/features/auth/controllers/AuthState';
-import { useConfigStore } from "@/src/features/settings/controllers/DataStore";
+import { useDataStore } from "@/src/features/settings/controllers/DataStore";
 
 export default function Index() {
-    const { getFirstPanel } = useConfigStore();
+    const { getFirstModule } = useDataStore();
 
-    return <Redirect href={`/(tabs)/${getFirstPanel()}`} />;
+    return <Redirect href={`/(tabs)/${getFirstModule()}`} />;
 }

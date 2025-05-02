@@ -2,28 +2,28 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, usePathname } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { panelInfo } from "@/src/features/settings/controllers/DataStore";
-import { Panel } from "@timothyw/pat-common";
+import { moduleInfo } from "@/src/features/settings/controllers/DataStore";
+import { Module } from "@timothyw/pat-common";
 
 type WebHeaderProps = {
-    panels: Panel[];
+    modules: Module[];
 }
 
-export default function WebHeader({ panels }: WebHeaderProps) {
+export default function WebHeader({ modules }: WebHeaderProps) {
     const { getColor } = useTheme();
     const pathname = usePathname();
 
     return (
         <View className="bg-surface flex-row h-16 items-center justify-center border-b border-on-surface-variant">
-            {panels.map((panel) => {
-                if (!panel.visible && panel.type !== "settings") return null;
+            {modules.map((module) => {
+                if (!module.visible && module.type !== "settings") return null;
 
-                const panelType = panel.type;
-                const { icon, title } = panelInfo[panelType];
-                const isActive = pathname.includes(panelType);
+                const moduleType = module.type;
+                const { icon, title } = moduleInfo[moduleType];
+                const isActive = pathname.includes(moduleType);
 
                 return (
-                    <Link key={panelType} href={`/${panelType}`} asChild>
+                    <Link key={moduleType} href={`/${moduleType}`} asChild>
                         <Pressable>
                             <View className="flex-row items-center px-4 h-full">
                                 <Ionicons

@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import { usePathname, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '@/src/features/auth/controllers/AuthState';
 import { View } from 'react-native';
-import { useConfigStore } from "@/src/features/settings/controllers/DataStore";
+import { useDataStore } from "@/src/features/settings/controllers/DataStore";
 
 function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLayout?: () => void }) {
     const router = useRouter();
     const segments = useSegments();
     const pathname = usePathname();
     const { isAuthenticated, isLoading, userInfo } = useAuthStore();
-    const { getFirstPanel } = useConfigStore();
+    const { getFirstModule } = useDataStore();
 
     const isInAuthGroup = segments[0] === '(auth)';
     const isVerifyPage = pathname === '/verify';
@@ -31,7 +31,7 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
         if (isAuthenticated) {
             if (isEmailVerified) {
                 if (isInAuthGroup) {
-                    router.replace(`/(tabs)/${getFirstPanel()}`);
+                    router.replace(`/(tabs)/${getFirstModule()}`);
                 }
             } else {
                 if (!isVerifyPage) {
@@ -44,7 +44,7 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
             }
         }
 
-    }, [isAuthenticated, isLoading, userInfo?.isEmailVerified, segments, router, getFirstPanel]);
+    }, [isAuthenticated, isLoading, userInfo?.isEmailVerified, segments, router, getFirstModule]);
 
     return (
         <View style={{ flex: 1 }} onLayout={onLayout}>
