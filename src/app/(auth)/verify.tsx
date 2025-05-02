@@ -4,6 +4,7 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from '@/src/components/toast/ToastContext';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function VerifyEmailScreen() {
     const { getColor } = useTheme();
@@ -25,7 +26,7 @@ export default function VerifyEmailScreen() {
     };
 
     return (
-        <View className="bg-background flex-1 p-5 justify-center items-center">
+        <SafeAreaView className="bg-background flex-1 p-5 justify-center items-center">
             <Ionicons
                 name="mail-outline"
                 size={60}
@@ -64,6 +65,6 @@ export default function VerifyEmailScreen() {
                     Sign Out
                 </Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 }

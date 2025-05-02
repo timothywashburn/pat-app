@@ -4,6 +4,7 @@ import { Link, Redirect, useRouter } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from '@/src/components/toast/ToastContext';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
     const { getColor } = useTheme();
@@ -31,7 +32,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <View className="bg-background flex-1 p-5 justify-center">
+        <SafeAreaView className="bg-background flex-1 p-5 justify-center">
             <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Welcome to PAT</Text>
             <Text className="text-on-background-variant text-base mb-8 text-center">Sign in to continue</Text>
 
@@ -74,6 +75,6 @@ export default function LoginScreen() {
                     </TouchableOpacity>
                 </Link>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }

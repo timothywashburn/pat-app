@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SafeAreaView, Text, View, TouchableOpacity, Platform, ActivityIndicator, Linking } from 'react-native';
+import { Text, View, TouchableOpacity, Platform, ActivityIndicator, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';

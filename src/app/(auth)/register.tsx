@@ -4,6 +4,7 @@ import { Link, Redirect } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from '@/src/components/toast/ToastContext';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
     const { getColor } = useTheme();
@@ -39,7 +40,7 @@ export default function RegisterScreen() {
     };
 
     return (
-        <View className="bg-background flex-1 p-5 justify-center">
+        <SafeAreaView className="bg-background flex-1 p-5 justify-center">
             <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Create Account</Text>
             <Text className="text-on-background-variant text-base mb-8 text-center">Sign up to get started</Text>
 
@@ -99,6 +100,6 @@ export default function RegisterScreen() {
                     </TouchableOpacity>
                 </Link>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
