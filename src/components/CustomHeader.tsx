@@ -26,7 +26,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
     return (
         <View className="bg-surface border-b border-surface">
-            <View className="h-15 flex-row items-center justify-between px-4">
+            <View className="h-14 flex-row items-center justify-between px-4">
                 <View className="flex-1 items-start">
                     <TouchableOpacity
                         onPress={() => {
