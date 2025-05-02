@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/src/controllers/ThemeManager';
@@ -9,17 +9,62 @@ import { ModuleManagement } from '@/src/features/settings/components/ModuleManag
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useDataStore } from "@/src/features/settings/controllers/DataStore";
+import { Module } from "@timothyw/pat-common";
 
 export default function SettingsPanel() {
     const { getColor, colorScheme } = useTheme();
-    const { errorToast } = useToast();
+    const { errorToast, successToast } = useToast();
     const { logout, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const { data } = useDataStore();
-    const [itemCategories, setItemCategories] = useState(data.config.agenda.itemCategories);
-    const [itemTypes, setItemTypes] = useState(data.config.agenda.itemTypes);
-    const [propertyKeys, setPropertyKeys] = useState(data.config.people.propertyKeys);
+    const { data, updateConfig } = useDataStore();
+
+    // Local state for tracking changes
+    const [localItemCategories, setLocalItemCategories] = useState(data.config.agenda.itemCategories);
+    const [localItemTypes, setLocalItemTypes] = useState(data.config.agenda.itemTypes);
+    const [localPropertyKeys, setLocalPropertyKeys] = useState(data.config.people.propertyKeys);
+    const [localModules, setLocalModules] = useState(data.config.modules);
+
+    // Reset local state when entering/exiting edit mode
+    useEffect(() => {
+        if (editMode) {
+            // Initialize with current values when entering edit mode
+            setLocalItemCategories([...data.config.agenda.itemCategories]);
+            setLocalItemTypes([...data.config.agenda.itemTypes]);
+            setLocalPropertyKeys([...data.config.people.propertyKeys]);
+            setLocalModules([...data.config.modules]);
+        }
+    }, [editMode, data]);
+
+    const handleSaveChanges = async () => {
+        setIsSaving(true);
+        try {
+            await updateConfig({
+                config: {
+                    agenda: {
+                        itemCategories: localItemCategories,
+                        itemTypes: localItemTypes
+                    },
+                    people: {
+                        propertyKeys: localPropertyKeys
+                    },
+                    modules: localModules
+                }
+            });
+            successToast("Settings saved successfully");
+            setEditMode(false);
+        } catch (error) {
+            console.log(`failed to save settings: ${error}`)
+            errorToast(`Failed to save settings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const updateLocalModules = (updatedModules: Module[]) => {
+        setLocalModules(updatedModules);
+    };
 
     return (
         <SafeAreaView className="bg-background flex-1">
@@ -29,12 +74,24 @@ export default function SettingsPanel() {
                 title="Settings"
                 showAddButton={false}
                 trailing={() => (
-                    <Text
-                        className="text-primary text-base"
-                        onPress={() => setEditMode(!editMode)}
-                    >
-                        {editMode ? 'Done' : 'Edit'}
-                    </Text>
+                    <View className="flex-row">
+                        {editMode && (
+                            <TouchableOpacity
+                                onPress={handleSaveChanges}
+                                disabled={isSaving}
+                                className="mr-4"
+                            >
+                                <Text className="text-primary text-base">
+                                    {isSaving ? 'Saving...' : 'Save'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                        <TouchableOpacity onPress={() => setEditMode(!editMode)}>
+                            <Text className={`text-base ${editMode ? "text-error" : "text-primary"}`}>
+                                {editMode ? 'Cancel' : 'Edit'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
             />
 
@@ -42,14 +99,16 @@ export default function SettingsPanel() {
                 <View className="p-4">
                     <ModuleManagement
                         editMode={editMode}
+                        modules={editMode ? localModules : data.config.modules}
+                        onUpdateModules={updateLocalModules}
                     />
 
                     <View className="h-px bg-surface my-4" />
 
                     <SettingsList
                         title="Item Categories"
-                        items={itemCategories}
-                        onUpdateItems={async (): Promise<void> => {}}
+                        items={editMode ? localItemCategories : data.config.agenda.itemCategories}
+                        onUpdateItems={(updatedItems) => setLocalItemCategories(updatedItems)}
                         editMode={editMode}
                     />
 
@@ -57,8 +116,8 @@ export default function SettingsPanel() {
 
                     <SettingsList
                         title="Item Types"
-                        items={itemTypes}
-                        onUpdateItems={async (): Promise<void> => {}}
+                        items={editMode ? localItemTypes : data.config.agenda.itemTypes}
+                        onUpdateItems={(updatedItems) => setLocalItemTypes(updatedItems)}
                         editMode={editMode}
                     />
 
@@ -66,8 +125,8 @@ export default function SettingsPanel() {
 
                     <SettingsList
                         title="Property Keys"
-                        items={propertyKeys}
-                        onUpdateItems={async (): Promise<void> => {}}
+                        items={editMode ? localPropertyKeys : data.config.people.propertyKeys}
+                        onUpdateItems={(updatedItems) => setLocalPropertyKeys(updatedItems)}
                         editMode={editMode}
                     />
 
@@ -81,7 +140,7 @@ export default function SettingsPanel() {
                     )}
 
                     <Text
-                        className="text-unknown text-base font-bold text-center py-3"
+                        className="text-error text-base font-bold text-center py-3"
                         onPress={() => logout()}
                     >
                         Sign Out

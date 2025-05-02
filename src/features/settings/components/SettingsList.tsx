@@ -6,7 +6,7 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 interface SettingsListProps {
     title: string;
     items: string[];
-    onUpdateItems: (updatedItems: string[]) => Promise<void>;
+    onUpdateItems: (updatedItems: string[]) => void;
     editMode: boolean;
 }
 
@@ -19,40 +19,18 @@ export const SettingsList: React.FC<SettingsListProps> = ({
     const { getColor } = useTheme();
     const [newItem, setNewItem] = useState('');
 
-    const handleAddItem = async () => {
+    const handleAddItem = () => {
         if (newItem.trim() === '') return;
 
-        try {
-            const updatedItems = [...items, newItem.trim()];
-            await onUpdateItems(updatedItems);
-            setNewItem('');
-        } catch (error) {
-            console.log(`failed to add item: ${error}`);
-            Alert.alert('Error', `Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
+        const updatedItems = [...items, newItem.trim()];
+        onUpdateItems(updatedItems);
+        setNewItem('');
     };
 
-    const handleDeleteItem = async (itemToDelete: string) => {
-        Alert.alert(
-            `Delete ${title.slice(0, -1)}`,
-            `Are you sure you want to delete '${itemToDelete}'?`,
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            const updatedItems = items.filter(item => item !== itemToDelete);
-                            await onUpdateItems(updatedItems);
-                        } catch (error) {
-                            console.log(`failed to delete item: ${error}`);
-                            Alert.alert('Error', `Failed to delete item: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                        }
-                    }
-                }
-            ]
-        );
+    const handleDeleteItem = (itemToDelete: string) => {
+        const updatedItems = items.filter(item => item !== itemToDelete);
+        onUpdateItems(updatedItems);
+        console.log(`item ${itemToDelete} marked for deletion`)
     };
 
     return (

@@ -3,40 +3,34 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Module, ModuleType } from "@timothyw/pat-common";
-import { moduleInfo, useDataStore } from "@/src/features/settings/controllers/DataStore";
+import { moduleInfo } from "@/src/features/settings/controllers/DataStore";
 
 interface ModuleManagementProps {
     editMode: boolean;
+    modules: Module[];
+    onUpdateModules: (updatedModules: Module[]) => void;
 }
 
 export const ModuleManagement: React.FC<ModuleManagementProps> = ({
     editMode,
+    modules,
+    onUpdateModules
 }) => {
     const { getColor } = useTheme();
-    const { data, updateConfig } = useDataStore();
 
-    const modules = data?.config.modules || [];
     const visibleModules: Module[] = modules.filter(module => module.visible);
     const hiddenModules: Module[] = modules.filter(module => !module.visible);
 
-    const toggleModuleVisibility = async (moduleType: ModuleType, visible: boolean) => {
-        try {
-            const updatedModules: Module[] = modules.map(module => {
-                if (module.type === moduleType) {
-                    return { ...module, visible };
-                }
-                return module;
-            });
+    const toggleModuleVisibility = (moduleType: ModuleType, visible: boolean) => {
+        const updatedModules: Module[] = modules.map(module => {
+            if (module.type === moduleType) {
+                return { ...module, visible };
+            }
+            return module;
+        });
 
-            await updateConfig({
-                config: {
-                    modules: updatedModules
-                }
-            });
-            console.log(`module ${moduleType} visibility toggled to ${visible}`)
-        } catch (error) {
-            console.error(`failed to toggle module visibility: ${error}`);
-        }
+        onUpdateModules(updatedModules);
+        console.log(`module ${moduleType} visibility toggled to ${visible}`)
     };
 
     const sections = [
