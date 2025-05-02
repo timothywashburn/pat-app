@@ -158,7 +158,7 @@ export default function DevPanel() {
             <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
             <CustomHeader
-                title="Tasks"
+                title="Dev"
                 showAddButton
                 onAddTapped={() => {
                     console.log('add task tapped')
