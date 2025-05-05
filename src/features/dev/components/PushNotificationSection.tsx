@@ -5,6 +5,8 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import DevPanelSection from './DevPanelSection';
+import { UpdateUserRequest } from '@timothyw/pat-common';
+import { DataState } from "@/src/features/settings/controllers/DataStore";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -83,22 +85,24 @@ async function registerForPushNotificationsAsync() {
 
 const PushNotificationSection = () => {
     const { getColor } = useTheme();
-    const [expoPushToken, setExpoPushToken] = useState<string>('');
+    const { data } = DataState();
+    const [expoPushToken, setExpoPushToken] = useState<string>('ExponentPushToken[TEMP_TOKEN]');
     const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined);
-    const notificationListener = useRef<Notifications.Subscription>();
-    const responseListener = useRef<Notifications.Subscription>();
+    const notificationListener = useRef<Notifications.EventSubscription>();
+    const responseListener = useRef<Notifications.EventSubscription>();
     const [isRegistering, setIsRegistering] = useState(false);
     const [isSending, setIsSending] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         notificationListener.current = Notifications.addNotificationReceivedListener(notificationReceived => {
-            console.log('notification received')
+            console.log('notification received');
             setNotification(notificationReceived);
         });
 
         responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log('notification response')
-            console.log(response)
+            console.log('notification response');
+            console.log(response);
         });
 
         return () => {
@@ -136,6 +140,47 @@ const PushNotificationSection = () => {
                 alert(`Failed to send notification: ${error}`);
             } finally {
                 setIsSending(false);
+            }
+        } else {
+            alert('Valid push token not available');
+        }
+    };
+
+    const handleSaveDevice = async () => {
+        if (expoPushToken && !expoPushToken.startsWith('Error:')) {
+            setIsSaving(true);
+            try {
+                // Get current devices
+                const currentDevices = data?.sandbox?.devices || [];
+
+                // Check if token already exists
+                const tokenExists = currentDevices.some(device => device.pushToken === expoPushToken);
+                if (tokenExists) {
+                    alert('This device is already registered');
+                    setIsSaving(false);
+                    return;
+                }
+
+                // Create new device object
+                const newDevice = { pushToken: expoPushToken };
+
+                // Create update request
+                const updateRequest: UpdateUserRequest = {
+                    sandbox: {
+                        ...(data.sandbox || {}),
+                        devices: [...currentDevices, newDevice]
+                    }
+                };
+
+                await DataState.getState().updateConfig(updateRequest);
+                console.log('device added')
+                alert('Device registered successfully');
+            } catch (error) {
+                console.log('error saving device:')
+                console.log(error)
+                alert(`Failed to save device: ${error}`);
+            } finally {
+                setIsSaving(false);
             }
         } else {
             alert('Valid push token not available');
@@ -184,6 +229,22 @@ const PushNotificationSection = () => {
                     <ActivityIndicator color={getColor("on-primary")} />
                 ) : (
                     <Text className="text-on-primary text-base font-semibold">Send Test Notification</Text>
+                )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                className={`h-[50px] rounded-lg justify-center items-center mt-2.5 ${
+                    isSaving || !expoPushToken || expoPushToken.startsWith('Error:')
+                        ? "bg-error"
+                        : "bg-success"
+                }`}
+                onPress={handleSaveDevice}
+                disabled={isSaving || !expoPushToken || expoPushToken.startsWith('Error:')}
+            >
+                {isSaving ? (
+                    <ActivityIndicator color={getColor("on-success")} />
+                ) : (
+                    <Text className="text-on-success text-base font-semibold">Save as Device</Text>
                 )}
             </TouchableOpacity>
         </DevPanelSection>

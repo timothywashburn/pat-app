@@ -1,11 +1,12 @@
-import React from 'react';
-import { Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
+import DevicesSection from "@/src/features/dev/components/DevicesSection";
 
 export default function DevPanel() {
     const { colorScheme } = useTheme();
@@ -22,15 +23,18 @@ export default function DevPanel() {
                 }}
             />
 
-            <View className="flex-1 p-5">
+            <ScrollView className="flex-1 p-5">
                 <View className="items-center mb-10">
                     <Text className="text-on-background text-2xl font-bold mb-5">Dev Panel</Text>
                     <Text className="text-on-background-variant">For various development things</Text>
                 </View>
 
                 <PushNotificationSection />
+                <DevicesSection />
                 <DeepLinkSection />
-            </View>
+
+                <View className="h-10" />
+            </ScrollView>
         </SafeAreaView>
     );
 }
