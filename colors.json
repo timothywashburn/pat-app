@@ -26,8 +26,7 @@
     "on-surface-variant": "#2D3748",
     "outline": "#8193b1",
     "outline-variant": "#c0c9d8",
-    "unknown": "#ff0000",
-    "test": "#ff00ff"
+    "unknown": "#ff00ff"
   },
   "dark": {
     "primary": "#625fff",
@@ -56,7 +55,6 @@
     "on-surface-variant": "#9AA1B0",
     "outline": "#656e81",
     "outline-variant": "#383d48",
-    "unknown": "#ff0000",
-    "test": "#ff00ff"
+    "unknown": "#ff00ff"
   }
 }

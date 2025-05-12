@@ -33,7 +33,6 @@ type ThemeColors = {
     "outline": string;
     "outline-variant": string;
     "unknown": string;
-    "test": string;
 }
 
 interface CustomTheme extends Theme {
