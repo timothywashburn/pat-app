@@ -96,6 +96,11 @@ export default function AgendaPanel() {
         loadItems();
     };
 
+    const handleItemUpdated = () => {
+        loadItems();
+        handleDetailDismiss();
+    };
+
     const filteredItems = agendaItems
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
@@ -185,6 +190,7 @@ export default function AgendaPanel() {
                     isPresented={showingDetailView}
                     onDismiss={handleDetailDismiss}
                     onEditRequest={handleEditRequest}
+                    onItemUpdated={handleItemUpdated}
                 />
             )}
         </SafeAreaView>
