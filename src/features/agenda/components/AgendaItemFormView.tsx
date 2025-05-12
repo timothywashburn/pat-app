@@ -48,6 +48,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const [name, setName] = useState(existingItem?.name || initialName);
     const [date, setDate] = useState<Date | undefined>(existingItem?.date || getTonight());
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
     const [notes, setNotes] = useState(existingItem?.notes || '');
     const [urgent, setUrgent] = useState(existingItem?.urgent || false);
     const [category, setCategory] = useState<string | undefined>(existingItem?.category);
@@ -138,12 +139,36 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     };
 
     const handleDateChange = (event: any, selectedDate?: Date) => {
+        if (event.type === 'dismissed') {
+            if (Platform.OS === 'android') {
+                setShowDatePicker(false);
+                setShowTimePicker(false);
+            } else {
+                setShowDatePicker(false);
+            }
+            return;
+        }
+
         const currentDate = selectedDate || date || getTonight();
 
-        setShowDatePicker(Platform.OS === 'ios');
-        if (selectedDate) {
-            setDate(selectedDate);
+        if (Platform.OS === 'android') {
+            if (showDatePicker) {
+                if (date) {
+                    const hours = date.getHours();
+                    const minutes = date.getMinutes();
+                    currentDate.setHours(hours, minutes, 0, 0);
+                }
+
+                setShowDatePicker(false);
+                setShowTimePicker(true);
+            } else if (showTimePicker) {
+                setShowTimePicker(false);
+            }
+        } else {
+            setShowDatePicker(false);
         }
+
+        setDate(currentDate);
     };
 
     const handleWebDateChange = (selectedDate: Date) => {
@@ -250,10 +275,31 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                         )}
                     </View>
 
-                    {Platform.OS !== 'web' && showDatePicker && (
+                    {/* iOS Date Time Picker */}
+                    {Platform.OS === 'ios' && showDatePicker && (
                         <DateTimePicker
                             value={date || getTonight()}
                             mode="datetime"
+                            display="default"
+                            onChange={handleDateChange}
+                        />
+                    )}
+
+                    {/* Android Date Picker */}
+                    {Platform.OS === 'android' && showDatePicker && (
+                        <DateTimePicker
+                            value={date || getTonight()}
+                            mode="date"
+                            display="default"
+                            onChange={handleDateChange}
+                        />
+                    )}
+
+                    {/* Android Time Picker */}
+                    {Platform.OS === 'android' && showTimePicker && (
+                        <DateTimePicker
+                            value={date || getTonight()}
+                            mode="time"
                             display="default"
                             onChange={handleDateChange}
                         />
