@@ -184,7 +184,7 @@ export default function InboxPanel() {
 
             <View className="flex-row p-4 py-2 items-center">
                 <TextInput
-                    className="bg-surface flex-1 border border-outline rounded-lg p-2.5 mr-2"
+                    className="bg-surface text-on-surface flex-1 border border-outline rounded-lg p-2.5 mr-2"
                     placeholder="Add a thought..."
                     placeholderTextColor={getColor("on-surface-variant")}
                     value={newThought}
