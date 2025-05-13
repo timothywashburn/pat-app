@@ -31,8 +31,8 @@
   "dark": {
     "primary": "#625fff",
     "on-primary": "#ffffff",
-    "primary-container": "#a5a3ff",
-    "on-primary-container": "#625fff",
+    "primary-container": "#cdccff",
+    "on-primary-container": "#4b47ff",
     "secondary": "#5d5d73",
     "on-secondary": "#ffffff",
     "secondary-container": "#e2e0f9",
