@@ -6,42 +6,40 @@ interface TimePickerProps {
     onTimeSelected: (date: Date) => void;
 }
 
-// Input component specifically for time digit entry
 interface TimeInputProps {
     value: string;
     maxValue: number;
-    maxLength: number;
     onChangeText: (text: string) => void;
     onComplete?: () => void;
     placeholder?: string;
-    inputRef?: React.RefObject<any>; // Fixed typing
+    inputRef?: React.RefObject<any>;
 }
 
 const TimeInput: React.FC<TimeInputProps> = ({
     value,
     maxValue,
-    maxLength,
     onChangeText,
     onComplete,
     placeholder = "00",
     inputRef
 }) => {
     const handleChange = (text: string) => {
-        // Only allow digits
         if (!/^\d*$/.test(text)) return;
+        if (text.length > 2) return;
 
-        // Limit to maxLength
-        if (text.length > maxLength) return;
-
-        // Validate the value doesn't exceed maxValue
         const numValue = parseInt(text || "0", 10);
         if (numValue > maxValue) return;
 
         onChangeText(text);
 
-        // Auto-advance to next field when this field is complete
-        if (text.length === maxLength && onComplete) {
-            onComplete();
+        if (text.length === 2 && onComplete) onComplete();
+    };
+
+    const handleFocus = (event: any) => {
+        if (event && event.target) {
+            setTimeout(() => {
+                event.target.select();
+            }, 10);
         }
     };
 
@@ -50,15 +48,17 @@ const TimeInput: React.FC<TimeInputProps> = ({
             ref={inputRef}
             value={value}
             onChangeText={handleChange}
+            onFocus={handleFocus}
             keyboardType="number-pad"
-            maxLength={maxLength}
+            maxLength={2}
             placeholder={placeholder}
             className="bg-surface text-on-background w-12 h-12 text-center text-xl border-b-2 border-primary-container focus:border-primary mx-1"
+            selectTextOnFocus={true}
         />
     );
 };
 
-const TimePicker: React.FC<TimePickerProps> = ({
+const WebTimePicker: React.FC<TimePickerProps> = ({
     selectedDate,
     onTimeSelected
 }) => {
@@ -119,12 +119,10 @@ const TimePicker: React.FC<TimePickerProps> = ({
     return (
         <View className="p-6 items-center">
             <View className="flex-row items-center justify-center py-4">
-                {/* Time inputs in a row with colon separator */}
                 <View className="flex-row items-center">
                     <TimeInput
                         value={hoursStr}
                         maxValue={23}
-                        maxLength={2}
                         onChangeText={setHoursStr}
                         onComplete={focusMinutes}
                         inputRef={hoursInputRef}
@@ -135,7 +133,6 @@ const TimePicker: React.FC<TimePickerProps> = ({
                     <TimeInput
                         value={minutesStr}
                         maxValue={59}
-                        maxLength={2}
                         onChangeText={setMinutesStr}
                         inputRef={minutesInputRef}
                     />
@@ -167,4 +164,4 @@ const TimePicker: React.FC<TimePickerProps> = ({
     );
 };
 
-export default TimePicker;
+export default WebTimePicker;

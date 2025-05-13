@@ -6,33 +6,28 @@ interface DatePickerProps {
     onDateSelected: (date: Date) => void;
 }
 
-// Custom month names
 const MONTHS = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-// Custom day names
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// Get days in a specific month
 const getDaysInMonth = (year: number, month: number): number => {
     return new Date(year, month + 1, 0).getDate();
 };
 
-// Get the first day of the month (0-6, where 0 is Sunday)
 const getFirstDayOfMonth = (year: number, month: number): number => {
     return new Date(year, month, 1).getDay();
 };
 
-const DatePicker: React.FC<DatePickerProps> = ({
+const WebDatePicker: React.FC<DatePickerProps> = ({
     selectedDate,
     onDateSelected
 }) => {
     const [currentMonth, setCurrentMonth] = React.useState(selectedDate.getMonth());
     const [currentYear, setCurrentYear] = React.useState(selectedDate.getFullYear());
 
-    // Navigate to previous month
     const goToPrevMonth = () => {
         if (currentMonth === 0) {
             setCurrentMonth(11);
@@ -42,7 +37,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
         }
     };
 
-    // Navigate to next month
     const goToNextMonth = () => {
         if (currentMonth === 11) {
             setCurrentMonth(0);
@@ -52,7 +46,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
         }
     };
 
-    // Select a day from the calendar
     const selectDay = (day: number | null) => {
         if (day === null) return;
 
@@ -63,7 +56,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
         onDateSelected(newDate);
     };
 
-    // Check if a day is today
     const isToday = (day: number | null) => {
         if (day === null) return false;
 
@@ -73,7 +65,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
             currentYear === today.getFullYear();
     };
 
-    // Check if a day is selected
     const isSelected = (day: number | null) => {
         if (day === null) return false;
 
@@ -82,7 +73,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
             currentYear === selectedDate.getFullYear();
     };
 
-    // Generate calendar grid with weeks
     const generateCalendarWeeks = () => {
         const daysInMonth = getDaysInMonth(currentYear, currentMonth);
         const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
@@ -90,27 +80,19 @@ const DatePicker: React.FC<DatePickerProps> = ({
         const weeks = [];
         let week = [];
 
-        // Add empty cells for days before the first day of month
-        for (let i = 0; i < firstDay; i++) {
-            week.push(null);
-        }
+        for (let i = 0; i < firstDay; i++) week.push(null);
 
-        // Add days of the month
         for (let day = 1; day <= daysInMonth; day++) {
             week.push(day);
 
-            // Start a new week after Saturday
             if (week.length === 7) {
                 weeks.push([...week]);
                 week = [];
             }
         }
 
-        // If we have remaining days, pad until end of week and add
         if (week.length > 0) {
-            while (week.length < 7) {
-                week.push(null);
-            }
+            while (week.length < 7) week.push(null);
             weeks.push(week);
         }
 
@@ -173,4 +155,4 @@ const DatePicker: React.FC<DatePickerProps> = ({
     );
 };
 
-export default DatePicker;
+export default WebDatePicker;
