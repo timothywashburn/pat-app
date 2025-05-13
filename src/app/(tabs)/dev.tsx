@@ -13,8 +13,6 @@ export default function DevPanel() {
 
     return (
         <SafeAreaView className="bg-background flex-1">
-            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-
             <CustomHeader
                 title="Dev"
                 showAddButton

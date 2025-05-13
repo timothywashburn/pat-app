@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, Theme } from "@react-navigation/native";
 import { useColorScheme } from "nativewind";
 
 import themeData from '@/colors.json';
+import { Appearance, Platform } from "react-native";
 export const lightColors = themeData.light;
 export const darkColors = themeData.dark;
 
@@ -39,13 +40,15 @@ interface CustomTheme extends Theme {
     colors: Theme['colors'] & ThemeColors;
 }
 
-type ColorSchemeType = 'light' | 'dark';
+type ThemeMode = 'light' | 'dark';
 
 class ThemeManager {
     static shared = new ThemeManager();
 
     private lightTheme: CustomTheme;
     private darkTheme: CustomTheme;
+
+    public override: ThemeMode | undefined;
 
     constructor() {
         this.lightTheme = {
@@ -65,28 +68,36 @@ class ThemeManager {
         };
     }
 
-    getTheme(colorScheme: ColorSchemeType): CustomTheme {
+    getTheme(colorScheme: ThemeMode): CustomTheme {
         return colorScheme === 'dark' ? this.darkTheme : this.lightTheme;
     }
 
-    // getColor(colorName: keyof ThemeColors, colorScheme: ColorSchemeType): string {
-    //     const theme = this.getTheme(colorScheme);
-    //     return theme.colors[colorName];
-    // }
+    setTheme = (theme: ThemeMode) => {
+        this.override = theme;
+        if (Platform.OS === 'web') {
+            if (typeof document !== 'undefined') {
+                document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+                document.documentElement.classList.toggle('light-mode', theme === 'light');
+            }
+        } else {
+            Appearance.setColorScheme(theme);
+        }
+    }
 }
 
 export const useTheme = () => {
-    const { colorScheme } = useColorScheme();
+    let { colorScheme } = useColorScheme();
     const themeManager = ThemeManager.shared;
-    const currentColorScheme = (colorScheme || 'light') as ColorSchemeType;
-    const theme = themeManager.getTheme(currentColorScheme);
+    if (themeManager.override) colorScheme = themeManager.override;
+    const theme = themeManager.getTheme(colorScheme as ThemeMode);
 
     return {
         theme,
         getColor: (colorName: keyof ThemeColors) => {
             return theme.colors[colorName];
         },
-        colorScheme: currentColorScheme,
+        setTheme: themeManager.setTheme,
+        colorScheme,
     };
 };
 

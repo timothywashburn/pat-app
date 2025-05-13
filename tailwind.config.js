@@ -22,9 +22,13 @@ module.exports = {
 
             addBase({
                 ':root': lightColors,
+                // Base media query for system preference
                 '@media (prefers-color-scheme: dark)': {
                     ':root': darkColors
-                }
+                },
+                // Override class that takes precedence over media query
+                '.light-mode': lightColors,
+                '.dark-mode': darkColors
             });
         }
     ],

@@ -1,17 +1,12 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 
 export default function TasksPanel() {
-    const { colorScheme } = useTheme();
 
     return (
         <SafeAreaView className="bg-background flex-1">
-            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-
             <CustomHeader
                 title="Tasks"
                 showAddButton

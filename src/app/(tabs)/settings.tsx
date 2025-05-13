@@ -68,8 +68,6 @@ export default function SettingsPanel() {
 
     return (
         <SafeAreaView className="bg-background flex-1">
-            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-
             <CustomHeader
                 title="Settings"
                 showAddButton={false}

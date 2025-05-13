@@ -2,13 +2,13 @@ import "@/global.css"
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useAuthStore, setAuthState } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
 import { useTheme } from "@/src/controllers/ThemeManager";
-import { ToastProvider, useToast } from "@/src/components/toast/ToastContext";
+import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, View } from "react-native";
@@ -21,10 +21,12 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
-    const { theme, colorScheme, getColor } = useTheme();
+    const { theme, colorScheme, getColor, setTheme } = useTheme();
     const initializeAuth = useAuthStore(state => state.initializeAuth);
     const { isAuthenticated, isLoading, userInfo } = useAuthStore();
     const { isLoaded, loadConfig } = useDataStore();
+
+    // setTheme('light');
 
     useEffect(() => {
         // TODO: handle case where use effect is called twice; figure out a better way to do this
