@@ -413,8 +413,8 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                             className="bg-error flex-row items-center justify-center rounded-lg p-3"
                             onPress={handleDelete}
                         >
+                            <Text className="text-on-error text-base font-semibold mr-2">Delete Item</Text>
                             <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
-                            <Text className="text-on-error text-base font-semibold ml-2">Delete Item</Text>
                         </TouchableOpacity>
                     </View>
                 )}

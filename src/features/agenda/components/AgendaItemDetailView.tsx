@@ -139,10 +139,10 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                         className="bg-surface border border-outline flex-row items-center justify-center rounded-lg p-3 mt-2"
                         onPress={onEditRequest}
                     >
-                        <Ionicons name="create-outline" size={20} color={getColor("primary")} />
-                        <Text className="text-primary text-base font-semibold ml-2">
+                        <Text className="text-primary text-base font-semibold mr-2">
                             Edit Item
                         </Text>
+                        <Ionicons name="create-outline" size={20} color={getColor("primary")} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -154,14 +154,14 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                             <ActivityIndicator size="small" color={getColor("on-primary")} />
                         ) : (
                             <>
+                                <Text className="text-on-primary text-base font-semibold mr-2">
+                                    {item.completed ? "Mark as Incomplete" : "Mark as Complete"}
+                                </Text>
                                 <Ionicons
                                     name={item.completed ? "refresh-circle" : "checkmark-circle"}
                                     size={20}
                                     color={getColor("on-primary")}
                                 />
-                                <Text className="text-on-primary text-base font-semibold ml-2">
-                                    {item.completed ? "Mark as Incomplete" : "Mark as Complete"}
-                                </Text>
                             </>
                         )}
                     </TouchableOpacity>

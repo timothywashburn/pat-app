@@ -62,8 +62,8 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                             className="flex-1 py-3 flex-row items-center justify-center"
                             onPress={onMoveToAgenda}
                         >
+                            <Text className="text-primary mr-2 font-medium">Agenda</Text>
                             <Ionicons name="calendar-outline" size={16} color={getColor("primary")} />
-                            <Text className="text-primary ml-2 font-medium">Agenda</Text>
                         </TouchableOpacity>
 
                         <View className="w-px h-full bg-outline-variant" />
@@ -72,8 +72,8 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                             className="flex-1 py-3 flex-row items-center justify-center"
                             onPress={onMoveToTasks}
                         >
+                            <Text className="text-primary mr-2 font-medium">Tasks</Text>
                             <Ionicons name="checkbox-outline" size={16} color={getColor("primary")} />
-                            <Text className="text-primary ml-2 font-medium">Tasks</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -84,8 +84,8 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                             className="flex-1 py-3 flex-row items-center justify-center"
                             onPress={onEdit}
                         >
+                            <Text className="text-primary mr-2 font-medium">Edit</Text>
                             <Ionicons name="pencil-outline" size={16} color={getColor("primary")} />
-                            <Text className="text-primary ml-2 font-medium">Edit</Text>
                         </TouchableOpacity>
 
                         <View className="w-px h-full bg-outline-variant" />
@@ -94,8 +94,8 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                             className="flex-1 py-3 flex-row items-center justify-center"
                             onPress={onDelete}
                         >
+                            <Text className="text-error mr-2 font-medium">Delete</Text>
                             <Ionicons name="trash-outline" size={16} color={getColor("error")} />
-                            <Text className="text-error ml-2 font-medium">Delete</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

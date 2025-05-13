@@ -338,8 +338,8 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                             className="bg-error flex-row items-center justify-center rounded-lg p-3"
                             onPress={handleDelete}
                         >
+                            <Text className="text-on-error text-base font-semibold mr-2">Delete Person</Text>
                             <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
-                            <Text className="text-on-error text-base font-semibold ml-2">Delete Person</Text>
                         </TouchableOpacity>
                     </View>
                 )}

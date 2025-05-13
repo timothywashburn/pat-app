@@ -89,10 +89,10 @@ const PersonDetailView: React.FC<PersonDetailViewProps> = ({
                         className="bg-primary flex-row items-center justify-center rounded-lg p-3"
                         onPress={onEditRequest}
                     >
-                        <Ionicons name="create-outline" size={20} color={getColor("on-primary")} />
-                        <Text className="text-on-primary text-base font-semibold ml-2">
+                        <Text className="text-on-primary text-base font-semibold mr-2">
                             Edit Person
                         </Text>
+                        <Ionicons name="create-outline" size={20} color={getColor("on-primary")} />
                     </TouchableOpacity>
                 </View>
 
