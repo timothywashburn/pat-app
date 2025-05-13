@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
-    FlatList,
+    FlatList, LayoutAnimation,
     RefreshControl,
     Text,
     TextInput,
@@ -25,6 +24,7 @@ export default function InboxPanel() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [newThought, setNewThought] = useState('');
     const [selectedThought, setSelectedThought] = useState<Thought | null>(null);
+    const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
     const [editingThought, setEditingThought] = useState<Thought | null>(null);
     const [editedContent, setEditedContent] = useState('');
     const [showingCreateAgendaForm, setShowingCreateAgendaForm] = useState(false);
@@ -102,6 +102,7 @@ export default function InboxPanel() {
         try {
             await thoughtManager.deleteThought(id);
             setThoughts(thoughtManager.thoughts);
+            setExpandedThoughtId(null);
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to delete thought';
             errorToast(errorMsg);
@@ -109,11 +110,7 @@ export default function InboxPanel() {
     };
 
     const showTasksWIPAlert = () => {
-        Alert.alert(
-            'In Development',
-            'This feature has not been implemented yet.',
-            [{ text: 'OK' }]
-        );
+        errorToast('This feature has not been implemented yet');
     };
 
     const handleAgendaFormDismiss = () => {
@@ -128,50 +125,36 @@ export default function InboxPanel() {
         }
     };
 
-    const handleShowActionSheet = (thought: Thought) => {
+    const toggleThoughtExpansion = (thought: Thought) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+        if (expandedThoughtId === thought.id) {
+            setExpandedThoughtId(null);
+        } else {
+            setExpandedThoughtId(thought.id);
+            setSelectedThought(thought);
+        }
+    };
+
+    const handleMoveToAgenda = (thought: Thought) => {
         setSelectedThought(thought);
-        Alert.alert(
-            'Choose Action',
-            'What would you like to do with this thought?',
-            [
-                {
-                    text: 'Move to Agenda',
-                    onPress: () => {
-                        setShowingCreateAgendaForm(true);
-                    }
-                },
-                {
-                    text: 'Move to Tasks (WIP)',
-                    onPress: showTasksWIPAlert
-                },
-                {
-                    text: 'Edit',
-                    onPress: () => {
-                        setEditingThought(thought);
-                        setEditedContent(thought.content);
-                    }
-                },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: () => {
-                        Alert.alert(
-                            'Delete Thought',
-                            'Are you sure you want to delete this thought?',
-                            [
-                                { text: 'Cancel', style: 'cancel' },
-                                {
-                                    text: 'Delete',
-                                    style: 'destructive',
-                                    onPress: () => handleDeleteThought(thought.id)
-                                }
-                            ]
-                        );
-                    }
-                },
-                { text: 'Cancel', style: 'cancel' }
-            ]
-        );
+        setShowingCreateAgendaForm(true);
+        setExpandedThoughtId(null);
+    };
+
+    const handleMoveToTasks = () => {
+        showTasksWIPAlert();
+        setExpandedThoughtId(null);
+    };
+
+    const handleStartEdit = (thought: Thought) => {
+        setEditingThought(thought);
+        setEditedContent(thought.content);
+        setExpandedThoughtId(null);
+    };
+
+    const handleConfirmDelete = (thought: Thought) => {
+        handleDeleteThought(thought.id);
     };
 
     return (
@@ -216,13 +199,25 @@ export default function InboxPanel() {
                 <FlatList
                     data={thoughts}
                     renderItem={({ item }) => (
-                        <TouchableOpacity onPress={() => handleShowActionSheet(item)}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                if (!editingThought || editingThought.id !== item.id) {
+                                    toggleThoughtExpansion(item);
+                                }
+                            }}
+                            activeOpacity={0.8}
+                        >
                             <ThoughtView
                                 thought={item}
                                 isEditing={editingThought?.id === item.id}
+                                isExpanded={expandedThoughtId === item.id}
                                 editedContent={editedContent}
                                 onChangeEditContent={setEditedContent}
                                 onCommitEdit={handleEditThought}
+                                onMoveToAgenda={() => handleMoveToAgenda(item)}
+                                onMoveToTasks={handleMoveToTasks}
+                                onEdit={() => handleStartEdit(item)}
+                                onDelete={() => handleConfirmDelete(item)}
                             />
                         </TouchableOpacity>
                     )}
