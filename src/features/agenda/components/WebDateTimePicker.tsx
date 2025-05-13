@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import DatePicker from './DatePicker';
+import TimePicker from './TimePicker';
 
 interface WebDateTimePickerProps {
     date: Date | undefined;
@@ -13,79 +14,69 @@ const WebDateTimePicker: React.FC<WebDateTimePickerProps> = ({
     onDateChange,
     onDismiss
 }) => {
-    const { getColor } = useTheme();
     const currentDate = date || new Date();
+    const [selectedDate, setSelectedDate] = useState(currentDate);
+    const [currentView, setCurrentView] = useState<'date' | 'time'>('date');
 
-    const formatDateForInput = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-
-        return `${year}-${month}-${day}`;
+    // Handle date selection from DatePicker
+    const handleDateSelected = (newDate: Date) => {
+        setSelectedDate(newDate);
     };
 
-    const formatTimeForInput = (date: Date): string => {
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-
-        return `${hours}:${minutes}`;
+    // Handle time selection from TimePicker
+    const handleTimeSelected = (newDate: Date) => {
+        setSelectedDate(newDate);
     };
 
-    const handleWebDateChange = (e: any) => {
-        const newDate = new Date(e.target.value);
-        if (!isNaN(newDate.getTime())) {
-            newDate.setHours(currentDate.getHours(), currentDate.getMinutes());
-            onDateChange(newDate);
-        }
-    };
-
-    const handleWebTimeChange = (e: any) => {
-        const [hours, minutes] = e.target.value.split(':').map(Number);
-        const newDate = new Date(currentDate);
-        newDate.setHours(hours, minutes);
-        onDateChange(newDate);
+    // Apply the selected date and time
+    const handleDone = () => {
+        onDateChange(selectedDate);
+        onDismiss();
     };
 
     return (
-        <View className="bg-surface rounded-lg p-4 w-5/6 max-w-md">
-            <Text className="text-on-background text-lg font-medium mb-4 text-center">Select Date & Time</Text>
+        <View className="bg-surface rounded-lg shadow-lg w-80 max-w-full">
+            {/* Header tabs */}
+            <View className="flex-row border-b border-outline">
+                <TouchableOpacity
+                    onPress={() => setCurrentView('date')}
+                    className={`flex-1 py-3 items-center ${currentView === 'date' ? 'border-b-2 border-primary' : ''}`}
+                >
+                    <Text className={`font-medium ${currentView === 'date' ? 'text-primary' : 'text-on-background-variant'}`}>
+                        Date
+                    </Text>
+                </TouchableOpacity>
 
-            <View className="flex-row justify-between mb-4">
-                <View className="flex-1 mr-2">
-                    <Text className="text-on-background text-base font-medium mb-2">Date</Text>
-                    <input
-                        type="date"
-                        value={formatDateForInput(currentDate)}
-                        onChange={handleWebDateChange}
-                        className="bg-surface text-on-surface w-full p-3 border border-outline rounded-lg"
-                    />
-                </View>
-
-                <View className="flex-1 ml-2">
-                    <Text className="text-on-background text-base font-medium mb-2">Time</Text>
-                    <input
-                        type="time"
-                        value={formatTimeForInput(currentDate)}
-                        onChange={handleWebTimeChange}
-                        className="bg-surface text-on-surface w-full p-3 border border-outline rounded-lg"
-                    />
-                </View>
+                <TouchableOpacity
+                    onPress={() => setCurrentView('time')}
+                    className={`flex-1 py-3 items-center ${currentView === 'time' ? 'border-b-2 border-primary' : ''}`}
+                >
+                    <Text className={`font-medium ${currentView === 'time' ? 'text-primary' : 'text-on-background-variant'}`}>
+                        Time
+                    </Text>
+                </TouchableOpacity>
             </View>
 
-            {/* Buttons */}
-            <View className="flex-row justify-between mt-4">
+            {/* Main content */}
+            {currentView === 'date'
+                ? <DatePicker selectedDate={selectedDate} onDateSelected={handleDateSelected} />
+                : <TimePicker selectedDate={selectedDate} onTimeSelected={handleTimeSelected} />
+            }
+
+            {/* Footer buttons */}
+            <View className="flex-row justify-between p-4 border-t border-outline">
                 <TouchableOpacity
                     onPress={onDismiss}
                     className="bg-error rounded-lg px-4 py-2"
                 >
-                    <Text className="text-white">Cancel</Text>
+                    <Text className="text-on-error">Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={onDismiss}
+                    onPress={handleDone}
                     className="bg-primary rounded-lg px-4 py-2"
                 >
-                    <Text className="text-white">Done</Text>
+                    <Text className="text-on-primary">Done</Text>
                 </TouchableOpacity>
             </View>
         </View>

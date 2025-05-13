@@ -213,16 +213,16 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                 <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
             )}
 
-            {/* Web Date Picker Modal */}
-            {Platform.OS === 'web' && showDatePicker && (
-                <View className="absolute z-10 w-full h-full bg-black bg-opacity-60 flex items-center justify-center">
-                    <WebDateTimePicker
-                        date={date}
-                        onDateChange={handleWebDateChange}
-                        onDismiss={() => setShowDatePicker(false)}
-                    />
-                </View>
-            )}
+            {/*/!* Web Date Picker Modal *!/*/}
+            {/*{Platform.OS === 'web' && showDatePicker && (*/}
+            {/*    <View className="absolute z-10 w-full h-full bg-black bg-opacity-60 flex items-center justify-center">*/}
+            {/*        <WebDateTimePicker*/}
+            {/*            date={date}*/}
+            {/*            onDateChange={handleWebDateChange}*/}
+            {/*            onDismiss={() => setShowDatePicker(false)}*/}
+            {/*        />*/}
+            {/*    </View>*/}
+            {/*)}*/}
 
             <ScrollView className="flex-1 p-4">
                 <View className="mb-5">
