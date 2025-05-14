@@ -66,7 +66,7 @@ jobs:
             --non-interactive
 
       - name: Create service account file
-        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > service-account.json
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > service-account-google-play.json
 
       - name: Upload app
         run: |

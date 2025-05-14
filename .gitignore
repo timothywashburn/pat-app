@@ -6,7 +6,8 @@ ios/
 android/
 .env*.local
 .DS_Store
-service-account.json
+service-account*.json
+google-services.json
 ignore-*.*
 
 # Expo
