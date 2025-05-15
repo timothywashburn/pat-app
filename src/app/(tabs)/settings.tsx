@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
@@ -10,9 +8,9 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useDataStore } from "@/src/features/settings/controllers/DataStore";
 import { Module } from "@timothyw/pat-common";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function SettingsPanel() {
-    const { getColor, colorScheme } = useTheme();
     const { errorToast, successToast } = useToast();
     const { logout, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
@@ -67,84 +65,86 @@ export default function SettingsPanel() {
     };
 
     return (
-        <SafeAreaView className="bg-background flex-1">
-            <CustomHeader
-                title="Settings"
-                showAddButton={false}
-                trailing={() => (
-                    <View className="flex-row">
-                        {editMode && (
-                            <TouchableOpacity
-                                onPress={handleSaveChanges}
-                                disabled={isSaving}
-                                className="mr-4"
-                            >
-                                <Text className="text-primary text-base">
-                                    {isSaving ? 'Saving...' : 'Save'}
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaView className="bg-background flex-1">
+                <CustomHeader
+                    title="Settings"
+                    showAddButton={false}
+                    trailing={() => (
+                        <View className="flex-row">
+                            {editMode && (
+                                <TouchableOpacity
+                                    onPress={handleSaveChanges}
+                                    disabled={isSaving}
+                                    className="mr-4"
+                                >
+                                    <Text className="text-primary text-base">
+                                        {isSaving ? 'Saving...' : 'Save'}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity onPress={() => setEditMode(!editMode)}>
+                                <Text className={`text-base ${editMode ? "text-error" : "text-primary"}`}>
+                                    {editMode ? 'Cancel' : 'Edit'}
                                 </Text>
                             </TouchableOpacity>
-                        )}
-                        <TouchableOpacity onPress={() => setEditMode(!editMode)}>
-                            <Text className={`text-base ${editMode ? "text-error" : "text-primary"}`}>
-                                {editMode ? 'Cancel' : 'Edit'}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
-
-            <ScrollView className="flex-1">
-                <View className="p-4">
-                    <ModuleManagement
-                        editMode={editMode}
-                        modules={editMode ? localModules : data.config.modules}
-                        onUpdateModules={updateLocalModules}
-                    />
-
-                    <View className="h-px bg-surface my-4" />
-
-                    <SettingsList
-                        title="Item Categories"
-                        items={editMode ? localItemCategories : data.config.agenda.itemCategories}
-                        onUpdateItems={(updatedItems) => setLocalItemCategories(updatedItems)}
-                        editMode={editMode}
-                    />
-
-                    <View className="h-px bg-surface my-4" />
-
-                    <SettingsList
-                        title="Item Types"
-                        items={editMode ? localItemTypes : data.config.agenda.itemTypes}
-                        onUpdateItems={(updatedItems) => setLocalItemTypes(updatedItems)}
-                        editMode={editMode}
-                    />
-
-                    <View className="h-px bg-surface my-4" />
-
-                    <SettingsList
-                        title="Property Keys"
-                        items={editMode ? localPropertyKeys : data.config.people.propertyKeys}
-                        onUpdateItems={(updatedItems) => setLocalPropertyKeys(updatedItems)}
-                        editMode={editMode}
-                    />
-
-                    {userInfo && (
-                        <View className="bg-surface w-full p-4 rounded-lg mt-5 mb-5">
-                            <Text className="text-on-surface text-base font-bold mb-2.5">User Info</Text>
-                            <Text className="text-on-surface">Name: {userInfo.name}</Text>
-                            <Text className="text-on-surface">Email: {userInfo.email}</Text>
-                            <Text className="text-on-surface">Email Verified: {userInfo.isEmailVerified ? 'Yes' : 'No'}</Text>
                         </View>
                     )}
+                />
 
-                    <Text
-                        className="text-error text-base font-bold text-center py-3"
-                        onPress={() => logout()}
-                    >
-                        Sign Out
-                    </Text>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                <ScrollView className="flex-1">
+                    <View className="p-4">
+                        <ModuleManagement
+                            editMode={editMode}
+                            modules={editMode ? localModules : data.config.modules}
+                            onUpdateModules={updateLocalModules}
+                        />
+
+                        <View className="h-px bg-surface my-4" />
+
+                        <SettingsList
+                            title="Item Categories"
+                            items={editMode ? localItemCategories : data.config.agenda.itemCategories}
+                            onUpdateItems={(updatedItems) => setLocalItemCategories(updatedItems)}
+                            editMode={editMode}
+                        />
+
+                        <View className="h-px bg-surface my-4" />
+
+                        <SettingsList
+                            title="Item Types"
+                            items={editMode ? localItemTypes : data.config.agenda.itemTypes}
+                            onUpdateItems={(updatedItems) => setLocalItemTypes(updatedItems)}
+                            editMode={editMode}
+                        />
+
+                        <View className="h-px bg-surface my-4" />
+
+                        <SettingsList
+                            title="Property Keys"
+                            items={editMode ? localPropertyKeys : data.config.people.propertyKeys}
+                            onUpdateItems={(updatedItems) => setLocalPropertyKeys(updatedItems)}
+                            editMode={editMode}
+                        />
+
+                        {userInfo && (
+                            <View className="bg-surface w-full p-4 rounded-lg mt-5 mb-5">
+                                <Text className="text-on-surface text-base font-bold mb-2.5">User Info</Text>
+                                <Text className="text-on-surface">Name: {userInfo.name}</Text>
+                                <Text className="text-on-surface">Email: {userInfo.email}</Text>
+                                <Text className="text-on-surface">Email Verified: {userInfo.isEmailVerified ? 'Yes' : 'No'}</Text>
+                            </View>
+                        )}
+
+                        <Text
+                            className="text-error text-base font-bold text-center py-3"
+                            onPress={() => logout()}
+                        >
+                            Sign Out
+                        </Text>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+        </GestureHandlerRootView>
     );
 }
