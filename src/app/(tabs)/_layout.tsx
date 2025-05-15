@@ -9,11 +9,6 @@ import { ModuleType } from "@timothyw/pat-common";
 
 const Tab = createMaterialTopTabNavigator();
 
-type TabBarIconProps = {
-    color: string;
-    size: number;
-};
-
 export default function TabsLayout() {
     const { getColor } = useTheme();
     const { data } = useDataStore();
@@ -56,6 +51,7 @@ export default function TabsLayout() {
                         marginRight: 0,
                         paddingBottom: 20
                     },
+                    tabBarPressColor: 'transparent',
                 }}
             >
                 {data?.config.modules.map((module) => {
