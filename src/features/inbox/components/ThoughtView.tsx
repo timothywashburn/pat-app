@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TextInput, View, TouchableOpacity, Animated } from 'react-native';
+import { Text, TextInput, View, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Thought } from '../controllers/ThoughtManager';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,35 +32,32 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
     const { getColor } = useTheme();
 
     return (
-        <View className={`w-full bg-surface rounded-lg mb-3 overflow-hidden`}>
+        <View
+            className={`w-full bg-surface rounded-lg mb-3 overflow-hidden ${isEditing ? 'border-2 border-primary' : ''}`}
+            style={isEditing ? { borderColor: getColor("primary") } : {}}
+        >
             <View className="p-4">
                 {isEditing ? (
-                    <View className="flex-row">
-                        <TextInput
-                            className="text-base border border-primary rounded-lg p-2 flex-1 mr-2"
-                            value={editedContent}
-                            onChangeText={onChangeEditContent}
-                            autoFocus
-                            multiline
-                        />
-                        <TouchableOpacity
-                            className="bg-primary rounded-lg px-3 justify-center"
-                            onPress={onCommitEdit}
-                        >
-                            <Text className="text-on-primary font-bold">Save</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TextInput
+                        className="text-base text-on-surface"
+                        value={editedContent}
+                        onChangeText={onChangeEditContent}
+                        autoFocus
+                        multiline
+                        style={{ padding: 0 }}
+                    />
                 ) : (
                     <Text className="text-on-surface text-base">{thought.content}</Text>
                 )}
             </View>
 
-            {isExpanded && !isEditing && (
+            {isExpanded && (
                 <View className="border-t border-outline-variant bg-surface-container">
                     <View className="flex-row flex-wrap">
                         <TouchableOpacity
-                            className="flex-1 py-3 flex-row items-center justify-center"
+                            className={`flex-1 py-3 flex-row items-center justify-center ${isEditing ? 'opacity-40' : ''}`}
                             onPress={onMoveToAgenda}
+                            disabled={isEditing}
                         >
                             <Text className="text-primary mr-2 font-medium">Agenda</Text>
                             <Ionicons name="calendar-outline" size={16} color={getColor("primary")} />
@@ -69,8 +66,9 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                         <View className="w-px h-full bg-outline-variant" />
 
                         <TouchableOpacity
-                            className="flex-1 py-3 flex-row items-center justify-center"
+                            className={`flex-1 py-3 flex-row items-center justify-center ${isEditing ? 'opacity-40' : ''}`}
                             onPress={onMoveToTasks}
+                            disabled={isEditing}
                         >
                             <Text className="text-primary mr-2 font-medium">Tasks</Text>
                             <Ionicons name="checkbox-outline" size={16} color={getColor("primary")} />
@@ -80,23 +78,43 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                     <View className="h-px w-full bg-outline-variant" />
 
                     <View className="flex-row flex-wrap">
-                        <TouchableOpacity
-                            className="flex-1 py-3 flex-row items-center justify-center"
-                            onPress={onEdit}
-                        >
-                            <Text className="text-primary mr-2 font-medium">Edit</Text>
-                            <Ionicons name="pencil-outline" size={16} color={getColor("primary")} />
-                        </TouchableOpacity>
+                        {isEditing ? (
+                            <TouchableOpacity
+                                className="flex-1 py-3 flex-row items-center justify-center"
+                                onPress={onCommitEdit}
+                            >
+                                <Text className="text-primary mr-2 font-medium">Save</Text>
+                                <Ionicons name="checkmark-outline" size={16} color={getColor("primary")} />
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                className="flex-1 py-3 flex-row items-center justify-center"
+                                onPress={onEdit}
+                            >
+                                <Text className="text-primary mr-2 font-medium">Edit</Text>
+                                <Ionicons name="pencil-outline" size={16} color={getColor("primary")} />
+                            </TouchableOpacity>
+                        )}
 
                         <View className="w-px h-full bg-outline-variant" />
 
-                        <TouchableOpacity
-                            className="flex-1 py-3 flex-row items-center justify-center"
-                            onPress={onDelete}
-                        >
-                            <Text className="text-error mr-2 font-medium">Delete</Text>
-                            <Ionicons name="trash-outline" size={16} color={getColor("error")} />
-                        </TouchableOpacity>
+                        {isEditing ? (
+                            <TouchableOpacity
+                                className="flex-1 py-3 flex-row items-center justify-center"
+                                onPress={onDelete}
+                            >
+                                <Text className="text-error mr-2 font-medium">Cancel</Text>
+                                <Ionicons name="close-outline" size={16} color={getColor("error")} />
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                className="flex-1 py-3 flex-row items-center justify-center"
+                                onPress={onDelete}
+                            >
+                                <Text className="text-error mr-2 font-medium">Delete</Text>
+                                <Ionicons name="trash-outline" size={16} color={getColor("error")} />
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             )}

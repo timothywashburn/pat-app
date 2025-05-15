@@ -95,6 +95,7 @@ export default function InboxPanel() {
             errorToast(errorMsg);
         } finally {
             setEditingThought(null);
+            // Keep the expandedThoughtId as is (don't collapse the menu after saving)
         }
     };
 
@@ -128,6 +129,11 @@ export default function InboxPanel() {
     const toggleThoughtExpansion = (thought: Thought) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
+        // If there's an active edit, cancel it when clicking on a different thought
+        if (editingThought && editingThought.id !== thought.id) {
+            setEditingThought(null);
+        }
+
         if (expandedThoughtId === thought.id) {
             setExpandedThoughtId(null);
         } else {
@@ -150,11 +156,17 @@ export default function InboxPanel() {
     const handleStartEdit = (thought: Thought) => {
         setEditingThought(thought);
         setEditedContent(thought.content);
-        setExpandedThoughtId(null);
+        // Keep the menu expanded when editing starts
+        setExpandedThoughtId(thought.id);
     };
 
     const handleConfirmDelete = (thought: Thought) => {
-        handleDeleteThought(thought.id);
+        // If in edit mode, treat delete action as cancel edit
+        if (editingThought && editingThought.id === thought.id) {
+            setEditingThought(null);
+        } else {
+            handleDeleteThought(thought.id);
+        }
     };
 
     return (
