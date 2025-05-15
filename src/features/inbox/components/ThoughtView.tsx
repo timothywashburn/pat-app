@@ -59,7 +59,7 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                             onPress={onMoveToAgenda}
                             disabled={isEditing}
                         >
-                            <Text className="text-primary mr-2 font-medium">Agenda</Text>
+                            <Text className="text-primary mr-2 font-medium">To Agenda</Text>
                             <Ionicons name="calendar-outline" size={16} color={getColor("primary")} />
                         </TouchableOpacity>
 
@@ -70,7 +70,7 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                             onPress={onMoveToTasks}
                             disabled={isEditing}
                         >
-                            <Text className="text-primary mr-2 font-medium">Tasks</Text>
+                            <Text className="text-primary mr-2 font-medium">To Tasks</Text>
                             <Ionicons name="checkbox-outline" size={16} color={getColor("primary")} />
                         </TouchableOpacity>
                     </View>
@@ -89,10 +89,10 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                         ) : (
                             <TouchableOpacity
                                 className="flex-1 py-3 flex-row items-center justify-center"
-                                onPress={onEdit}
+                                onPress={onDelete}
                             >
-                                <Text className="text-primary mr-2 font-medium">Edit</Text>
-                                <Ionicons name="pencil-outline" size={16} color={getColor("primary")} />
+                                <Text className="text-error mr-2 font-medium">Delete</Text>
+                                <Ionicons name="trash-outline" size={16} color={getColor("error")} />
                             </TouchableOpacity>
                         )}
 
@@ -109,10 +109,10 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                         ) : (
                             <TouchableOpacity
                                 className="flex-1 py-3 flex-row items-center justify-center"
-                                onPress={onDelete}
+                                onPress={onEdit}
                             >
-                                <Text className="text-error mr-2 font-medium">Delete</Text>
-                                <Ionicons name="trash-outline" size={16} color={getColor("error")} />
+                                <Text className="text-primary mr-2 font-medium">Edit</Text>
+                                <Ionicons name="pencil-outline" size={16} color={getColor("primary")} />
                             </TouchableOpacity>
                         )}
                     </View>
