@@ -1,0 +1,17 @@
+.idea/
+__tests__/
+coverage/
+node_modules/
+ios/
+android/
+.env*.local
+.DS_Store
+service-account*.json
+ignore-*.*
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+/build-*.*
