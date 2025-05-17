@@ -12,7 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function SettingsPanel() {
     const { errorToast, successToast } = useToast();
-    const { logout, userInfo } = useAuthStore();
+    const { signOut, userInfo } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -138,7 +138,7 @@ export default function SettingsPanel() {
 
                         <Text
                             className="text-error text-base font-bold text-center py-3"
-                            onPress={() => logout()}
+                            onPress={() => signOut()}
                         >
                             Sign Out
                         </Text>

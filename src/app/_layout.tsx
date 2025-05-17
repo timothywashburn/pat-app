@@ -51,7 +51,7 @@ export default function RootLayout() {
                     loadConfig();
                 } catch (error) {
                     console.error('settings load error:', error);
-                    useAuthStore.getState().logout();
+                    useAuthStore.getState().signOut();
                 }
             };
 

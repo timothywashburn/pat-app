@@ -40,7 +40,7 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
             }
         } else {
             if (!isInAuthGroup || isVerifyPage) {
-                router.replace('/(auth)/login');
+                router.replace('/(auth)/sign-in');
             }
         }
 

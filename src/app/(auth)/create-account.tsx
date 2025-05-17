@@ -6,7 +6,7 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function RegisterScreen() {
+export default function CreateAccountScreen() {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const [name, setName] = useState('test'); // TODO: DEV
@@ -15,9 +15,9 @@ export default function RegisterScreen() {
     const [confirmPassword, setConfirmPassword] = useState('test'); // TODO: DEV
     const [isLoading, setIsLoading] = useState(false);
 
-    const { register } = useAuthStore();
+    const { createAccount } = useAuthStore();
 
-    const handleRegister = async () => {
+    const handleCreateAccount = async () => {
         if (!name || !email || !password || !confirmPassword) {
             errorToast('Please fill out all fields');
             return;
@@ -31,9 +31,9 @@ export default function RegisterScreen() {
         setIsLoading(true);
 
         try {
-            await register(name, email, password);
+            await createAccount(name, email, password);
         } catch (error) {
-            errorToast(error instanceof Error ? error.message : 'Failed to register');
+            errorToast(error instanceof Error ? error.message : 'Failed to create an account');
         } finally {
             setIsLoading(false);
         }
@@ -42,7 +42,7 @@ export default function RegisterScreen() {
     return (
         <SafeAreaView className="bg-background flex-1 p-5 justify-center">
             <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Create Account</Text>
-            <Text className="text-on-background-variant text-base mb-8 text-center">Sign up to get started</Text>
+            <Text className="text-on-background-variant text-base mb-8 text-center">Create an account to get started</Text>
 
             <TextInput
                 className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg mb-4 px-3 text-base"
@@ -82,19 +82,19 @@ export default function RegisterScreen() {
 
             <TouchableOpacity
                 className="bg-primary h-[50px] rounded-lg justify-center items-center mt-2.5"
-                onPress={handleRegister}
+                onPress={handleCreateAccount}
                 disabled={isLoading}
             >
                 {isLoading ? (
                     <ActivityIndicator color={getColor("on-primary")} />
                 ) : (
-                    <Text className="text-on-primary text-base font-semibold">Register</Text>
+                    <Text className="text-on-primary text-base font-semibold">Create Account</Text>
                 )}
             </TouchableOpacity>
 
             <View className="flex-row justify-center mt-5">
-                <Text className="text-on-background-variant">Already have an account? </Text>
-                <Link href="/(auth)/login" asChild>
+                <Text className="text-on-background-variant">Already have an account?</Text>
+                <Link href="/(auth)/sign-in" asChild>
                     <TouchableOpacity>
                         <Text className="text-primary font-semibold">Sign In</Text>
                     </TouchableOpacity>

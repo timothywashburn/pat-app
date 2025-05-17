@@ -6,15 +6,15 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function LoginScreen() {
+export default function SignInScreen() {
     const { getColor } = useTheme();
     const [email, setEmail] = useState('trwisinthehouse@gmail.com'); // TODO: DEV
     const [password, setPassword] = useState('pass'); // TODO: DEV
     const [isLoading, setIsLoading] = useState(false);
     const { errorToast } = useToast();
-    const { login } = useAuthStore();
+    const { signIn } = useAuthStore();
 
-    const handleLogin = async () => {
+    const handleSignIn = async () => {
         if (!email || !password) {
             errorToast('Please enter both email and password');
             return;
@@ -23,7 +23,7 @@ export default function LoginScreen() {
         setIsLoading(true);
 
         try {
-            await login(email, password);
+            await signIn(email, password);
         } catch (error) {
             errorToast(error instanceof Error ? error.message : 'Failed to sign in');
         } finally {
@@ -33,8 +33,8 @@ export default function LoginScreen() {
 
     return (
         <SafeAreaView className="bg-background flex-1 p-5 justify-center">
-            <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Welcome to PAT</Text>
-            <Text className="text-on-background-variant text-base mb-8 text-center">Sign in to continue</Text>
+            <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Pat</Text>
+            <Text className="text-on-background-variant text-base mb-8 text-center">Your personal planner and tracker.</Text>
 
             <TextInput
                 className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg mb-4 px-3 text-base"
@@ -57,7 +57,7 @@ export default function LoginScreen() {
 
             <TouchableOpacity
                 className="bg-primary h-[50px] rounded-lg justify-center items-center mt-2.5"
-                onPress={handleLogin}
+                onPress={handleSignIn}
                 disabled={isLoading}
             >
                 {isLoading ? (
@@ -69,9 +69,9 @@ export default function LoginScreen() {
 
             <View className="flex-row justify-center mt-5">
                 <Text className="text-on-background-variant">Don't have an account? </Text>
-                <Link href="/(auth)/register" asChild>
+                <Link href="/(auth)/create-account" asChild>
                     <TouchableOpacity>
-                        <Text className="text-primary font-semibold">Register</Text>
+                        <Text className="text-primary font-semibold">Create an account</Text>
                     </TouchableOpacity>
                 </Link>
             </View>

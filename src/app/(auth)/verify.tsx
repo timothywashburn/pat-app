@@ -10,7 +10,7 @@ export default function VerifyEmailScreen() {
     const { getColor } = useTheme();
     const { successToast, errorToast } = useToast();
     const [isResending, setIsResending] = useState(false);
-    const { resendVerificationEmail, logout } = useAuthStore();
+    const { resendVerificationEmail, signOut } = useAuthStore();
 
     const handleResendVerification = async () => {
         setIsResending(true);
@@ -59,7 +59,7 @@ export default function VerifyEmailScreen() {
 
             <TouchableOpacity
                 className="mt-5 py-2.5"
-                onPress={logout}
+                onPress={signOut}
             >
                 <Text className="text-red-500 font-semibold text-base">
                     Sign Out

@@ -4,11 +4,11 @@ import NetworkManager, { HTTPMethod } from '../../../services/NetworkManager';
 import SecureStorage from '../../../services/SecureStorage';
 import {
     AuthTokens,
-    LoginRequest,
-    LoginResponse, RefreshAuthRequest,
+    SignInRequest,
+    SignInResponse, RefreshAuthRequest,
     RefreshAuthResponse,
-    RegisterRequest,
-    RegisterResponse, ResendVerificationResponse
+    CreateAccountRequest,
+    CreateAccountResponse, ResendVerificationResponse
 } from "@timothyw/pat-common";
 
 interface AuthState {
@@ -18,11 +18,11 @@ interface AuthState {
     authToken: string | null;
 
     initializeAuth: () => Promise<void>;
-    login: (email: string, password: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
+    signIn: (email: string, password: string) => Promise<void>;
+    createAccount: (name: string, email: string, password: string) => Promise<void>;
     resendVerificationEmail: () => Promise<void>;
     refreshAuth: () => Promise<void>;
-    logout: () => void;
+    signOut: () => void;
     updateUserInfo: (update: (userInfo: UserInfo) => void) => void;
 }
 
@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     set({isAuthenticated: true});
                 } catch (error) {
                     console.log('auth refresh failed, signing out', error);
-                    get().logout();
+                    get().signOut();
                 }
             }
         } catch (error) {
@@ -56,12 +56,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    login: async (email: string, password: string) => {
+    signIn: async (email: string, password: string) => {
         console.log(`signing in with email (${process.env.EXPO_PUBLIC_API_URL}): ${email}`);
 
         try {
             const request = {
-                endpoint: '/api/auth/login',
+                endpoint: '/api/auth/sign-in',
                 method: HTTPMethod.POST,
                 body: {
                     email,
@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 },
             };
 
-            const response = await NetworkManager.shared.perform<LoginRequest, LoginResponse>(request);
+            const response = await NetworkManager.shared.perform<SignInRequest, SignInResponse>(request);
 
             if (!response.tokenData ||!response.authData || !response.user) {
                 throw new Error(AuthError.INVALID_RESPONSE);
@@ -101,17 +101,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
-    register: async (name: string, email: string, password: string) => {
+    createAccount: async (name: string, email: string, password: string) => {
         try {
             const request = {
-                endpoint: '/api/auth/register',
+                endpoint: '/api/auth/create-account',
                 method: HTTPMethod.POST,
                 body: {name, email, password},
             };
 
-            await NetworkManager.shared.perform<RegisterRequest, RegisterResponse>(request);
+            await NetworkManager.shared.perform<CreateAccountRequest, CreateAccountResponse>(request);
 
-            await get().login(email, password);
+            await get().signIn(email, password);
         } catch (error) {
             console.error('account registration failed:', error);
             throw error;
@@ -172,11 +172,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             });
         } catch (error) {
             console.error('auth refresh failed:', error);
-            get().logout();
+            get().signOut();
         }
     },
 
-    logout: () => {
+    signOut: () => {
         SecureStorage.shared.clearStoredAuth();
 
         set({
