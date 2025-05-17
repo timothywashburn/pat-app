@@ -13,6 +13,8 @@ Notifications.setNotificationHandler({
         shouldShowAlert: true,
         shouldPlaySound: true,
         shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
     }),
 });
 
@@ -88,8 +90,8 @@ const PushNotificationSection = () => {
     const { data } = DataState();
     const [expoPushToken, setExpoPushToken] = useState<string>('ExponentPushToken[TEMP_TOKEN]');
     const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined);
-    const notificationListener = useRef<Notifications.EventSubscription>();
-    const responseListener = useRef<Notifications.EventSubscription>();
+    const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+    const responseListener = useRef<Notifications.EventSubscription | null>(null);
     const [isRegistering, setIsRegistering] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
