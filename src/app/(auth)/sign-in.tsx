@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Link, Redirect, useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from '@/src/components/toast/ToastContext';
@@ -32,48 +32,54 @@ export default function SignInScreen() {
     };
 
     return (
-        <SafeAreaView className="bg-background flex-1 p-5 justify-center">
-            <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Pat</Text>
-            <Text className="text-on-background-variant text-base mb-8 text-center">Your personal planner and tracker.</Text>
+        <SafeAreaView className="bg-background flex-1 justify-center">
+            <View className="max-w-lg w-full mx-auto px-5">
+                <Text className="text-on-background text-3xl font-bold mb-2.5 text-center">Pat</Text>
+                <Text className="text-on-background-variant text-base mb-8 text-center">Your personal planner and tracker.</Text>
 
-            <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg mb-4 px-3 text-base"
-                placeholder="Email"
-                placeholderTextColor={getColor("on-surface-variant")}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-            />
+                <View className="mb-4">
+                    <TextInput
+                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                        placeholder="Email"
+                        placeholderTextColor={getColor("on-surface-variant")}
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                    />
+                </View>
 
-            <TextInput
-                className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg mb-4 px-3 text-base"
-                placeholder="Password"
-                placeholderTextColor={getColor("on-surface-variant")}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
+                <View className="mb-4">
+                    <TextInput
+                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                        placeholder="Password"
+                        placeholderTextColor={getColor("on-surface-variant")}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                    />
+                </View>
 
-            <TouchableOpacity
-                className="bg-primary h-[50px] rounded-lg justify-center items-center mt-2.5"
-                onPress={handleSignIn}
-                disabled={isLoading}
-            >
-                {isLoading ? (
-                    <ActivityIndicator color={getColor("on-primary")} />
-                ) : (
-                    <Text className="text-on-primary text-base font-semibold">Sign In</Text>
-                )}
-            </TouchableOpacity>
+                <TouchableOpacity
+                    className="bg-primary h-[50px] rounded-lg justify-center items-center mt-2.5"
+                    onPress={handleSignIn}
+                    disabled={isLoading}
+                >
+                    {isLoading ? (
+                        <ActivityIndicator color={getColor("on-primary")} />
+                    ) : (
+                        <Text className="text-on-primary text-base font-semibold">Sign In</Text>
+                    )}
+                </TouchableOpacity>
 
-            <View className="flex-row justify-center mt-5">
-                <Text className="text-on-background-variant">Don't have an account? </Text>
-                <Link href="/(auth)/create-account" asChild>
-                    <TouchableOpacity>
-                        <Text className="text-primary font-semibold">Create an account</Text>
-                    </TouchableOpacity>
-                </Link>
+                <View className="flex-row justify-center mt-5">
+                    <Text className="text-on-background-variant">Don't have an account? </Text>
+                    <Link href="/(auth)/create-account" asChild>
+                        <TouchableOpacity>
+                            <Text className="text-primary font-semibold">Create an account</Text>
+                        </TouchableOpacity>
+                    </Link>
+                </View>
             </View>
         </SafeAreaView>
     );
