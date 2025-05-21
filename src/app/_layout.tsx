@@ -13,6 +13,7 @@ import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, View } from "react-native";
 import { useDataStore } from "@/src/features/settings/controllers/DataStore";
+import { Logger } from "@/src/features/dev/components/Logger";
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
@@ -29,15 +30,26 @@ export default function RootLayout() {
     // setTheme('light');
 
     useEffect(() => {
+        Logger.info('startup', 'application starting');
+        Logger.warn('startup', 'application starting');
+        Logger.debug('startup', 'application starting');
+        Logger.error('startup', 'application starting');
+
         // TODO: handle case where use effect is called twice; figure out a better way to do this
         async function initialize() {
             try {
+                Logger.info('startup', 'initializing authentication');
                 await initializeAuth();
+                Logger.info('startup', 'authentication initialized successfully');
+
+                Logger.info('startup', 'initializing deep links');
                 DeepLinkHandler.initialize();
+                Logger.info('startup', 'deep links initialized successfully');
+
                 // await new Promise(resolve => setTimeout(resolve, 1000));
                 setAuthState({ isLoading: false });
             } catch (error) {
-                console.error('initialization error:', error);
+                Logger.error('startup', 'authentication initialization failed', error);
             }
         }
 
@@ -48,9 +60,11 @@ export default function RootLayout() {
         if (isAuthenticated && userInfo?.isEmailVerified && !isLoaded) {
             const load = async () => {
                 try {
+                    Logger.info('startup', 'loading app configuration');
                     loadConfig();
+                    Logger.info('startup', 'configuration loaded successfully');
                 } catch (error) {
-                    console.error('settings load error:', error);
+                    Logger.error('startup', 'failed to load configuration', error);
                     useAuthStore.getState().signOut();
                 }
             };
@@ -63,16 +77,28 @@ export default function RootLayout() {
         const socketService = SocketService.shared;
 
         if (isAuthenticated) {
+            Logger.info('startup', 'connecting to socket service');
             socketService.connect();
         } else {
+            Logger.info('startup', 'disconnecting from socket service');
             socketService.disconnect();
         }
 
-        return () => socketService.disconnect();
+        return () => {
+            Logger.info('startup', 'cleaning up socket connection');
+            socketService.disconnect();
+        };
     }, [isAuthenticated]);
+
+    useEffect(() => {
+        Logger.info('startup', `authentication state: ${isAuthenticated ? 'authenticated' : 'unauthenticated'}`, {
+            isEmailVerified: userInfo?.isEmailVerified
+        });
+    }, [isAuthenticated, userInfo?.isEmailVerified]);
 
     const onLayoutRootView = useCallback(async () => {
         if (!isLoading) {
+            Logger.info('startup', 'hiding splash screen');
             await SplashScreen.hideAsync();
         }
     }, [isLoading]);
@@ -86,6 +112,13 @@ export default function RootLayout() {
             </View>
         );
     }
+
+    Logger.info('startup', 'rendering root layout', {
+        isAuthenticated,
+        colorScheme,
+        isEmailVerified: userInfo?.isEmailVerified,
+        isLoaded
+    });
 
     return (
         <ToastProvider>

@@ -1,16 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
 import DevicesSection from "@/src/features/dev/components/DevicesSection";
+import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
 
 export default function DevPanel() {
-    const { colorScheme } = useTheme();
-
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
@@ -27,6 +24,7 @@ export default function DevPanel() {
                     <Text className="text-on-background-variant">For various development things</Text>
                 </View>
 
+                <LogViewerSection />
                 <PushNotificationSection />
                 <DevicesSection />
                 <DeepLinkSection />
