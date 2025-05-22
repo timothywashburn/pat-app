@@ -48,7 +48,9 @@ export default function RootLayout() {
                 DeepLinkHandler.initialize();
                 Logger.info('startup', 'deep links initialized successfully');
 
-                // await new Promise(resolve => setTimeout(resolve, 1000));
+                Logger.info('startup', 'starting timout');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                Logger.info('startup', 'stopping timout');
                 setAuthState({ isLoading: false });
             } catch (error) {
                 Logger.error('startup', 'authentication initialization failed', error);
@@ -144,11 +146,12 @@ export default function RootLayout() {
     // if (showDebugView) return renderDebugView();
 
     if (isLoading || !isLoaded) {
-        return (
-            <View onLayout={onLayoutRootView} className="flex-1 justify-center items-center p-5">
-                <ActivityIndicator size="large" color={getColor("primary")} />
-            </View>
-        );
+        return renderDebugView();
+        // return (
+        //     <View onLayout={onLayoutRootView} className="flex-1 justify-center items-center p-5">
+        //         <ActivityIndicator size="large" color={getColor("primary")} />
+        //     </View>
+        // );
     }
 
     Logger.info('startup', 'rendering root layout', {
