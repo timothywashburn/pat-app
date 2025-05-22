@@ -11,10 +11,11 @@ import { useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useDataStore } from "@/src/features/settings/controllers/DataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
