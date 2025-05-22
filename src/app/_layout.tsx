@@ -141,7 +141,7 @@ export default function RootLayout() {
         );
     }
 
-    if (showDebugView) return renderDebugView();
+    // if (showDebugView) return renderDebugView();
 
     if (isAuthenticated && userInfo?.isEmailVerified && !isLoaded) {
         return (
