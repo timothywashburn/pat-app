@@ -2,7 +2,7 @@ import "@/global.css"
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuthStore, setAuthState } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
@@ -11,9 +11,10 @@ import { useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, View } from "react-native";
+import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useDataStore } from "@/src/features/settings/controllers/DataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
+import LogViewer from "@/src/features/dev/components/LogViewer";
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
@@ -26,6 +27,7 @@ export default function RootLayout() {
     const initializeAuth = useAuthStore(state => state.initializeAuth);
     const { isAuthenticated, isLoading, userInfo } = useAuthStore();
     const { isLoaded, loadConfig } = useDataStore();
+    const [showDebugView, setShowDebugView] = useState(true);
 
     // setTheme('light');
 
@@ -33,7 +35,6 @@ export default function RootLayout() {
         Logger.info('startup', 'application starting');
         Logger.warn('startup', 'application starting');
         Logger.debug('startup', 'application starting');
-        Logger.error('startup', 'application starting');
 
         // TODO: handle case where use effect is called twice; figure out a better way to do this
         async function initialize() {
@@ -96,14 +97,50 @@ export default function RootLayout() {
         });
     }, [isAuthenticated, userInfo?.isEmailVerified]);
 
-    const onLayoutRootView = useCallback(async () => {
-        if (!isLoading) {
-            Logger.info('startup', 'hiding splash screen');
-            await SplashScreen.hideAsync();
-        }
-    }, [isLoading]);
+    const closeDebugView = () => {
+        setShowDebugView(false);
+        console.log("debug view closed");
+    };
 
-    if (isLoading) return null;
+    const onLayoutRootView = useCallback(async () => {
+        Logger.info('startup', 'hiding splash screen');
+        await SplashScreen.hideAsync();
+    }, []);
+
+    const renderDebugView = () => {
+        return (
+            <SafeAreaView onLayout={onLayoutRootView} className="flex-1 bg-background">
+                <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+
+                {/* Header with close button */}
+                <View className="flex-row justify-between items-center p-4 border-b border-outline-variant/20">
+                    <View className="flex-1">
+                        <Text className="text-xl font-bold text-on-background">
+                            App Debug View
+                        </Text>
+                        <Text className="text-sm text-on-surface-variant">
+                            Startup logs and debugging information
+                        </Text>
+                    </View>
+                    <TouchableOpacity
+                        className="px-3 py-1.5 rounded-lg bg-primary ml-4"
+                        onPress={closeDebugView}
+                    >
+                        <Text className="text-on-primary font-medium">Close</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View className="flex-1 p-4">
+                    <LogViewer
+                        category="startup"
+                        showControls={true}
+                    />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (showDebugView) return renderDebugView();
 
     if (isAuthenticated && userInfo?.isEmailVerified && !isLoaded) {
         return (

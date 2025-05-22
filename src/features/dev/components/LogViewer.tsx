@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { Logger, LogEntry, LogLevel } from './Logger';
 
@@ -30,8 +30,9 @@ const LogViewer: React.FC<LogViewerProps> = ({
     const [isPaused, setIsPaused] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
     const flatListRef = useRef<FlatList>(null);
+    const updateTimeoutRef = useRef<number | null>(null);
 
-    const loadLogs = () => {
+    const loadLogs = useCallback(() => {
         if (isPaused) return;
 
         const filteredLogs = Logger.getLogs().filter(log => {
@@ -41,25 +42,39 @@ const LogViewer: React.FC<LogViewerProps> = ({
         });
 
         setLogs(filteredLogs);
+    }, [levelFilter, isPaused, category]);
 
-        if (autoScroll && filteredLogs.length > 0) {
-            setTimeout(() => {
+    useEffect(() => {
+        if (autoScroll && logs.length > 0) {
+            const timer = setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
+            }, 50);
+            return () => clearTimeout(timer);
         }
-    };
+    }, [logs, autoScroll]);
 
     useEffect(() => {
         loadLogs();
 
-        const removeListener = Logger.addChangeListener(() => {
-            loadLogs();
-        });
+        const handleLogChange = () => {
+            if (updateTimeoutRef.current) {
+                clearTimeout(updateTimeoutRef.current);
+            }
+
+            updateTimeoutRef.current = setTimeout(() => {
+                loadLogs();
+            }, 0);
+        };
+
+        const removeListener = Logger.addChangeListener(handleLogChange);
 
         return () => {
+            if (updateTimeoutRef.current) {
+                clearTimeout(updateTimeoutRef.current);
+            }
             removeListener();
         };
-    }, [levelFilter, isPaused, category, autoScroll]);
+    }, [loadLogs]);
 
     const renderLogItem = ({ item }: { item: LogEntry }) => {
         const logColor = getLogLevelColor(item.level);
@@ -107,33 +122,51 @@ const LogViewer: React.FC<LogViewerProps> = ({
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}.${date.getMilliseconds().toString().padStart(3, '0')}`;
     };
 
-    const clearLogs = () => {
+    const clearLogs = useCallback(() => {
         Logger.clearLogs();
         console.log("logs cleared");
-    };
+    }, []);
 
-    const toggleLevel = (level: LogLevel) => {
+    const toggleLevel = useCallback((level: LogLevel) => {
         setLevelFilter(prev => ({
             ...prev,
             [level]: !prev[level]
         }));
-    };
+    }, []);
 
-    const togglePause = () => {
-        setIsPaused(!isPaused);
-        console.log(`log updates ${isPaused ? 'resumed' : 'paused'}`);
-    };
+    const togglePause = useCallback(() => {
+        setIsPaused(prev => {
+            const newPaused = !prev;
+            console.log(`log updates ${prev ? 'resumed' : 'paused'}`);
+            return newPaused;
+        });
+    }, []);
 
-    const toggleAutoScroll = () => {
-        setAutoScroll(!autoScroll);
-        console.log(`auto scroll ${!autoScroll ? 'enabled' : 'disabled'}`);
+    const toggleAutoScroll = useCallback(() => {
+        setAutoScroll(prev => {
+            const newAutoScroll = !prev;
+            console.log(`auto scroll ${newAutoScroll ? 'enabled' : 'disabled'}`);
+            return newAutoScroll;
+        });
+    }, []);
 
-        if (!autoScroll && logs.length > 0) {
-            setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 500);
+    const handleScrollBeginDrag = useCallback(() => {
+        if (autoScroll) {
+            setAutoScroll(false);
         }
-    };
+    }, [autoScroll]);
+
+    const handleContentSizeChange = useCallback(() => {
+        if (autoScroll && logs.length > 0) {
+            flatListRef.current?.scrollToEnd({ animated: false });
+        }
+    }, [autoScroll, logs.length]);
+
+    const handleLayout = useCallback(() => {
+        if (autoScroll && logs.length > 0) {
+            flatListRef.current?.scrollToEnd({ animated: false });
+        }
+    }, [autoScroll, logs.length]);
 
     const containerStyle = maxHeight ? { maxHeight } : { flex: 1 };
 
@@ -208,21 +241,9 @@ const LogViewer: React.FC<LogViewerProps> = ({
                     renderItem={renderLogItem}
                     keyExtractor={(item, index) => `log-${index}-${item.timestamp.getTime()}`}
                     className="px-2"
-                    onScrollBeginDrag={() => {
-                        if (autoScroll) {
-                            setAutoScroll(false);
-                        }
-                    }}
-                    onContentSizeChange={() => {
-                        if (autoScroll) {
-                            flatListRef.current?.scrollToEnd({ animated: false });
-                        }
-                    }}
-                    onLayout={() => {
-                        if (autoScroll) {
-                            flatListRef.current?.scrollToEnd({ animated: false });
-                        }
-                    }}
+                    onScrollBeginDrag={handleScrollBeginDrag}
+                    onContentSizeChange={handleContentSizeChange}
+                    onLayout={handleLayout}
                 />
             )}
         </View>
