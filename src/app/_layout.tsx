@@ -145,6 +145,11 @@ export default function RootLayout() {
 
     // if (showDebugView) return renderDebugView();
 
+    Logger.info('startup', 'before root layout', {
+        isLoading,
+        isLoaded,
+    })
+
     if (isLoading || !isLoaded) {
         return renderDebugView();
         // return (
