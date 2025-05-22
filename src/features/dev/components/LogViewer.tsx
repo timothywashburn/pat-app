@@ -1,7 +1,6 @@
-// LogViewer.tsx - with proper console ordering (newest at bottom)
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import { Logger, LogEntry, LogLevel } from './Logger'; // Adjust import path as needed
+import { Logger, LogEntry, LogLevel } from './Logger';
 
 interface LogViewerProps {
     maxHeight?: number;
@@ -33,21 +32,17 @@ const LogViewer: React.FC<LogViewerProps> = ({
     const flatListRef = useRef<FlatList>(null);
 
     const loadLogs = () => {
-        if (isPaused) return; // Don't update if paused
+        if (isPaused) return;
 
         const filteredLogs = Logger.getLogs().filter(log => {
-            // Filter by selected log levels
             if (!levelFilter[log.level]) return false;
-            // Filter by tag if specified
             if (category && log.category !== category) return false;
             return true;
         });
 
         setLogs(filteredLogs);
 
-        // Scroll to bottom if auto-scroll is enabled
         if (autoScroll && filteredLogs.length > 0) {
-            // Use setTimeout to ensure this runs after render
             setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
             }, 100);
@@ -55,15 +50,12 @@ const LogViewer: React.FC<LogViewerProps> = ({
     };
 
     useEffect(() => {
-        // Load logs immediately on mount or filter change
         loadLogs();
 
-        // Set up listener for log changes
         const removeListener = Logger.addChangeListener(() => {
             loadLogs();
         });
 
-        // Clean up listener on unmount
         return () => {
             removeListener();
         };
@@ -103,11 +95,11 @@ const LogViewer: React.FC<LogViewerProps> = ({
 
     const getLogLevelColor = (level: LogLevel): string => {
         switch (level) {
-            case 'debug': return '#9e9e9e'; // unknown for now
-            case 'info': return '#625fff';  // primary
-            case 'warn': return '#efb100';  // warning
-            case 'error': return '#BA1A1A'; // error
-            default: return '#1A1D21';      // on-background
+            case 'debug': return '#9e9e9e';
+            case 'info': return '#625fff';
+            case 'warn': return '#efb100';
+            case 'error': return '#BA1A1A';
+            default: return '#1A1D21';
         }
     };
 
@@ -136,15 +128,13 @@ const LogViewer: React.FC<LogViewerProps> = ({
         setAutoScroll(!autoScroll);
         console.log(`auto scroll ${!autoScroll ? 'enabled' : 'disabled'}`);
 
-        // If enabling auto-scroll, immediately scroll to bottom
         if (!autoScroll && logs.length > 0) {
             setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
+            }, 500);
         }
     };
 
-    // Apply container style with optional maxHeight
     const containerStyle = maxHeight ? { maxHeight } : { flex: 1 };
 
     return (
@@ -214,17 +204,15 @@ const LogViewer: React.FC<LogViewerProps> = ({
             ) : (
                 <FlatList
                     ref={flatListRef}
-                    data={logs} // Chronological order (oldest to newest)
+                    data={logs}
                     renderItem={renderLogItem}
                     keyExtractor={(item, index) => `log-${index}-${item.timestamp.getTime()}`}
                     className="px-2"
                     onScrollBeginDrag={() => {
-                        // Optional: Automatically disable auto-scroll when user manually scrolls
                         if (autoScroll) {
                             setAutoScroll(false);
                         }
                     }}
-                    // Initial scroll to end for first render
                     onContentSizeChange={() => {
                         if (autoScroll) {
                             flatListRef.current?.scrollToEnd({ animated: false });

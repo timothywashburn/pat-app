@@ -1,22 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
-import LogViewer from './LogViewer'; // Adjust import path as needed
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { View, Text, TouchableOpacity, Modal, SafeAreaView, StatusBar } from 'react-native';
+import LogViewer from './LogViewer';
 import DevPanelSection from './DevPanelSection';
 
 const LogViewerSection: React.FC = () => {
-    const { getColor } = useTheme();
     const [modalVisible, setModalVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     const openLogViewer = () => {
-        setIsLoading(true);
         setModalVisible(true);
         console.log("log viewer opened");
-        // Simulate loading logs
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 300);
     };
 
     const closeLogViewer = () => {
@@ -27,17 +19,10 @@ const LogViewerSection: React.FC = () => {
     return (
         <DevPanelSection title="Application Logs">
             <TouchableOpacity
-                className={`h-[50px] rounded-lg justify-center items-center mt-2.5 ${
-                    isLoading ? "bg-error" : "bg-primary"
-                }`}
+                className={`bg-primary h-[50px] rounded-lg justify-center items-center mt-2.5`}
                 onPress={openLogViewer}
-                disabled={isLoading}
             >
-                {isLoading ? (
-                    <ActivityIndicator color={getColor("on-primary")} />
-                ) : (
-                    <Text className="text-on-primary text-base font-semibold">View Application Logs</Text>
-                )}
+                <Text className="text-on-primary text-base font-semibold">View Application Logs</Text>
             </TouchableOpacity>
 
             <Modal

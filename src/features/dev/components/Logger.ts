@@ -9,16 +9,13 @@ export interface LogEntry {
     data?: any;
 }
 
-// Define a type for our change listeners
 type LogChangeListener = () => void;
 
 export class Logger {
     private static logs: LogEntry[] = [];
     private static MAX_LOGS = 1000;
-    // Array to store log change listeners
     private static listeners: LogChangeListener[] = [];
 
-    // Static methods with category as the first parameter
     static debug(category: LogCategory, message: string, data?: any): void {
         Logger.log('debug', category, message, data);
     }
@@ -50,7 +47,6 @@ export class Logger {
 
     static clearLogs(): void {
         Logger.logs = [];
-        // Notify listeners that logs have changed
         Logger.notifyListeners();
     }
 
@@ -62,17 +58,14 @@ export class Logger {
         });
     }
 
-    // Add a listener that will be called when logs change
     static addChangeListener(listener: LogChangeListener): () => void {
         Logger.listeners.push(listener);
 
-        // Return a function to remove this listener
         return () => {
             Logger.listeners = Logger.listeners.filter(l => l !== listener);
         };
     }
 
-    // Notify all listeners that the logs have changed
     private static notifyListeners(): void {
         Logger.listeners.forEach(listener => listener());
     }
@@ -91,14 +84,11 @@ export class Logger {
             Logger.logs.shift();
         }
 
-        // Notify listeners that logs have changed
         Logger.notifyListeners();
 
-        // Format for console output
         const timestamp = Logger.formatTimestamp(entry.timestamp);
         const prefix = `[${timestamp}] [${category}]`;
 
-        // Log to console based on level
         switch (level) {
             case 'debug':
                 console.log(prefix, message, data !== undefined ? data : '');
