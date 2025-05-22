@@ -17,11 +17,11 @@ import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-SplashScreen.preventAutoHideAsync();
-SplashScreen.setOptions({
-    duration: 1000,
-    fade: true,
-});
+// SplashScreen.preventAutoHideAsync();
+// SplashScreen.setOptions({
+//     duration: 1000,
+//     fade: true,
+// });
 
 export default function RootLayout() {
     const { theme, colorScheme, getColor, setTheme } = useTheme();
@@ -143,7 +143,7 @@ export default function RootLayout() {
 
     // if (showDebugView) return renderDebugView();
 
-    if (isAuthenticated && userInfo?.isEmailVerified && !isLoaded) {
+    if (isLoading || !isLoaded) {
         return (
             <View onLayout={onLayoutRootView} className="flex-1 justify-center items-center p-5">
                 <ActivityIndicator size="large" color={getColor("primary")} />
