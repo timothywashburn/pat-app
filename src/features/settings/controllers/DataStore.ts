@@ -16,7 +16,11 @@ import PeoplePanel from "@/src/app/(tabs)/people";
 import SettingsPanel from "@/src/app/(tabs)/settings";
 import DevPanel from "@/src/app/(tabs)/dev";
 
-export const moduleInfo: Record<ModuleType, { getComponent: () => React.JSX.Element; icon: keyof typeof Ionicons.glyphMap; title: string }> = {
+export const moduleInfo: Record<ModuleType, {
+    getComponent: () => React.JSX.Element;
+    icon: keyof typeof Ionicons.glyphMap;
+    title: string
+}> = {
     agenda: { getComponent: AgendaPanel, icon: 'calendar', title: 'Agenda' },
     inbox: { getComponent: InboxPanel, icon: 'mail', title: 'Inbox' },
     tasks: { getComponent: TasksPanel, icon: 'list', title: 'Tasks' },
@@ -26,71 +30,60 @@ export const moduleInfo: Record<ModuleType, { getComponent: () => React.JSX.Elem
 };
 
 interface DataState {
-    data: UserData;
+    data: UserData | null;
     isLoaded: boolean;
 
     loadConfig: () => Promise<void>;
     updateConfig: (partialConfig: UpdateUserRequest) => Promise<void>;
-
     getFirstModule: () => ModuleType;
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
-    data: null as unknown as UserData,
+    data: null,
     isLoaded: false,
 
     loadConfig: async () => {
-        const { data, isLoaded } = get();
-
-        if (data && isLoaded) {
+        if (get().isLoaded) {
+            console.log('config already loaded, skipping');
             return;
         }
 
-        try {
-            const authToken = AuthState.getState().authToken;
-            if (!authToken) throw new Error('No auth token');
-
-            const response = await NetworkManager.shared.perform<undefined, GetUserResponse>({
-                endpoint: '/api/account',
-                method: HTTPMethod.GET,
-                token: authToken,
-            });
-
-            set({
-                data: response.user,
-                isLoaded: true,
-            });
-
-            console.log('config loaded');
-        } catch (error) {
-            console.error('failed to load config:', error);
-            throw error;
+        const authToken = AuthState.getState().authToken;
+        if (!authToken) {
+            throw new Error('no auth token available');
         }
+
+        console.log('loading user config');
+
+        const response = await NetworkManager.shared.perform<undefined, GetUserResponse>({
+            endpoint: '/api/account',
+            method: HTTPMethod.GET,
+            token: authToken,
+        });
+
+        set({
+            data: response.user,
+            isLoaded: true,
+        });
+
+        console.log('config loaded successfully');
     },
 
     updateConfig: async (partialConfig: UpdateUserRequest) => {
-        try {
-            const authToken = AuthState.getState().authToken;
-            if (!authToken) {
-                throw new Error('No auth token');
-            }
-
-            const response = await NetworkManager.shared.perform<UpdateUserRequest, UpdateUserResponse>({
-                endpoint: '/api/account',
-                method: HTTPMethod.PUT,
-                body: partialConfig,
-                token: authToken,
-            });
-
-            set({
-                data: response.user,
-            });
-
-            console.log('config updated');
-        } catch (error) {
-            console.error('failed to update config:', error);
-            throw error;
+        const authToken = AuthState.getState().authToken;
+        if (!authToken) {
+            throw new Error('no auth token available');
         }
+
+        const response = await NetworkManager.shared.perform<UpdateUserRequest, UpdateUserResponse>({
+            endpoint: '/api/account',
+            method: HTTPMethod.PUT,
+            body: partialConfig,
+            token: authToken,
+        });
+
+        set({ data: response.user });
+        console.log('config updated successfully');
     },
 
     getFirstModule: () => {
