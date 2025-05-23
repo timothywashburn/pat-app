@@ -61,6 +61,11 @@ export default function RootLayout() {
     }, []);
 
     useEffect(() => {
+        Logger.info('startup', 'deciding whether to load configuration', {
+            isAuthenticated,
+            userInfo,
+            isLoaded
+        });
         if (isAuthenticated && userInfo?.isEmailVerified && !isLoaded) {
             const load = async () => {
                 try {
@@ -75,30 +80,25 @@ export default function RootLayout() {
 
             load();
         }
-    }, [isAuthenticated, userInfo?.isEmailVerified, isLoaded]);
+    // }, [isAuthenticated, userInfo?.isEmailVerified, isLoaded]);
+    }, [isAuthenticated, userInfo, isLoaded]);
 
     useEffect(() => {
         const socketService = SocketService.shared;
 
         if (isAuthenticated) {
-            Logger.info('startup', 'connecting to socket service');
+            // Logger.info('startup', 'connecting to socket service');
             socketService.connect();
         } else {
-            Logger.info('startup', 'disconnecting from socket service');
+            // Logger.info('startup', 'disconnecting from socket service');
             socketService.disconnect();
         }
 
         return () => {
-            Logger.info('startup', 'cleaning up socket connection');
+            // Logger.info('startup', 'cleaning up socket connection');
             socketService.disconnect();
         };
     }, [isAuthenticated]);
-
-    useEffect(() => {
-        Logger.info('startup', `authentication state: ${isAuthenticated ? 'authenticated' : 'unauthenticated'}`, {
-            isEmailVerified: userInfo?.isEmailVerified
-        });
-    }, [isAuthenticated, userInfo?.isEmailVerified]);
 
     const closeDebugView = () => {
         setShowDebugView(false);
