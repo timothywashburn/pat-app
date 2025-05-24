@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 type BootStage = 'initializing' | 'auth-ready' | 'loading-user-data' | 'ready' | 'error';
 
 // Toggle this to show dev terminal instead of normal boot
-const DEV_MODE = false;
+const DEV_MODE = true;
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
