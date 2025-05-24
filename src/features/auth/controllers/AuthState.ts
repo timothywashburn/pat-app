@@ -12,6 +12,7 @@ import {
     CreateAccountResponse,
     ResendVerificationResponse
 } from "@timothyw/pat-common";
+import { Logger } from "@/src/features/dev/components/Logger";
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -33,23 +34,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     authToken: null,
 
     initializeAuth: async () => {
+        Logger.debug('auth', 'call to SecureStorage.shared.getUserInfo()');
         const userInfo = await SecureStorage.shared.getUserInfo();
         if (userInfo) {
+            Logger.debug('auth', 'userInfo found in storage', userInfo);
             set({ userInfo });
         }
 
+        Logger.debug('auth', 'call to SecureStorage.shared.getTokens()');
         const tokens = await SecureStorage.shared.getTokens();
         if (!tokens?.refreshToken) {
+            Logger.debug('auth', 'no tokens found in storage');
             return;
         }
 
+        Logger.debug('auth', 'tokens found in storage', tokens);
         set({ authToken: tokens.accessToken });
 
         try {
+            Logger.debug('auth', 'attempting to refresh auth');
             await get().refreshAuth();
+            Logger.debug('auth', 'auth refresh successful');
             set({ isAuthenticated: true });
             console.log('auth restored from storage');
         } catch (error) {
+            Logger.error('auth', 'auth refresh failed', error);
             console.log('stored auth invalid, clearing');
             get().signOut();
         }
