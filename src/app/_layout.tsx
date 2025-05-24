@@ -7,7 +7,7 @@ import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
-import { useTheme } from "@/src/controllers/ThemeManager";
+import { CustomThemeProvider, useTheme } from "@/src/controllers/ThemeManager"; // Updated import
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
@@ -28,7 +28,8 @@ SplashScreen.setOptions({
     fade: true,
 });
 
-export default function RootLayout() {
+// Separate component that uses the theme context
+const AppContent: React.FC = () => {
     const { theme, colorScheme } = useTheme();
     const { isAuthenticated, userInfo, initializeAuth } = useAuthStore();
     const { isLoaded, loadUserData } = useDataStore();
@@ -170,5 +171,13 @@ export default function RootLayout() {
                 </AppNavigator>
             </ThemeProvider>
         </ToastProvider>
+    );
+};
+
+export default function RootLayout() {
+    return (
+        <CustomThemeProvider>
+            <AppContent />
+        </CustomThemeProvider>
     );
 }
