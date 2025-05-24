@@ -18,7 +18,6 @@ interface LogLevelFilter {
 const LogViewer: React.FC<LogViewerProps> = ({
     maxHeight,
     showControls = true,
-    category
 }) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [levelFilter, setLevelFilter] = useState<LogLevelFilter>({
@@ -37,12 +36,11 @@ const LogViewer: React.FC<LogViewerProps> = ({
 
         const filteredLogs = Logger.getLogs().filter(log => {
             if (!levelFilter[log.level]) return false;
-            if (category && log.category !== category) return false;
             return true;
         });
 
         setLogs(filteredLogs);
-    }, [levelFilter, isPaused, category]);
+    }, [levelFilter, isPaused]);
 
     useEffect(() => {
         if (autoScroll && logs.length > 0) {

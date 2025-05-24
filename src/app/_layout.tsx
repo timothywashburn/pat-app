@@ -133,7 +133,6 @@ const AppContent: React.FC = () => {
 
                 <View className="flex-1 p-4">
                     <LogViewer
-                        category="startup"
                         showControls={true}
                     />
                 </View>
