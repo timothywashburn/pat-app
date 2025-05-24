@@ -37,10 +37,8 @@ export default function RootLayout() {
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_MODE);
 
     useEffect(() => {
-        if (!showDevTerminal) {
-            bootApp();
-        }
-    }, [showDevTerminal]);
+        bootApp();
+    }, []);
 
     useEffect(() => {
         const socketService = SocketService.shared;
