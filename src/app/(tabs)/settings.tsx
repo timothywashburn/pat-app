@@ -6,7 +6,7 @@ import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
 import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
 import { useToast } from "@/src/components/toast/ToastContext";
-import { useDataStore } from "@/src/features/settings/controllers/DataStore";
+import { useDataStore } from "@/src/features/settings/controllers/UserDataStore";
 import { Module } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -16,7 +16,7 @@ export default function SettingsPanel() {
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const { data, updateConfig } = useDataStore();
+    const { data, updateUserData } = useDataStore();
 
     // Local state for tracking changes
     const [localItemCategories, setLocalItemCategories] = useState(data.config.agenda.itemCategories);
@@ -38,7 +38,7 @@ export default function SettingsPanel() {
     const handleSaveChanges = async () => {
         setIsSaving(true);
         try {
-            await updateConfig({
+            await updateUserData({
                 config: {
                     agenda: {
                         itemCategories: localItemCategories,

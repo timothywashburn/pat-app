@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import DevPanelSection from './DevPanelSection';
 import { UpdateUserRequest } from '@timothyw/pat-common';
-import { DataState } from "@/src/features/settings/controllers/DataStore";
+import { DataState } from "@/src/features/settings/controllers/UserDataStore";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -174,7 +174,7 @@ const PushNotificationSection = () => {
                     }
                 };
 
-                await DataState.getState().updateConfig(updateRequest);
+                await DataState.getState().updateUserData(updateRequest);
                 console.log('device added')
                 alert('Device registered successfully');
             } catch (error) {

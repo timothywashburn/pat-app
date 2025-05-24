@@ -17,7 +17,7 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 import WebDateTimePicker from './WebDateTimePicker';
-import { useDataStore } from "@/src/features/settings/controllers/DataStore";
+import { useDataStore } from "@/src/features/settings/controllers/UserDataStore";
 
 interface AgendaItemFormViewProps {
     isPresented: boolean;
@@ -57,8 +57,8 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const { data } = useDataStore();
-    const categories = data?.config.agenda.itemCategories;
-    const types = data?.config.agenda.itemTypes;
+    const categories = data.config.agenda.itemCategories;
+    const types = data.config.agenda.itemTypes;
 
     const agendaManager = AgendaManager.getInstance();
 

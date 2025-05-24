@@ -29,22 +29,30 @@ export const moduleInfo: Record<ModuleType, {
     dev: { getComponent: DevPanel, icon: 'code-slash', title: 'Dev' },
 };
 
-interface DataState {
-    data: UserData | null;
-    isLoaded: boolean;
-
-    loadConfig: () => Promise<void>;
-    updateConfig: (partialConfig: UpdateUserRequest) => Promise<void>;
-    getFirstModule: () => ModuleType;
+export enum UserAuthState {
+    NOT_AUTHENTICATED = 'not_authenticated',
+    AUTHENTICATED_NO_EMAIL = 'authenticated_no_email',
+    FULLY_AUTHENTICATED = 'fully_authenticated'
 }
 
-export const useDataStore = create<DataState>((set, get) => ({
-    data: null,
+interface UserDataState {
+    data: UserData;
+    isLoaded: boolean;
+
+    loadUserData: () => Promise<void>;
+    updateUserData: (partialUserData: UpdateUserRequest) => Promise<void>;
+    getFirstModule: () => ModuleType;
+    getUserAuthState: () => UserAuthState;
+    canRenderTabs: () => boolean;
+}
+
+export const useDataStore = create<UserDataState>((set, get) => ({
+    data: null as never,
     isLoaded: false,
 
-    loadConfig: async () => {
+    loadUserData: async () => {
         if (get().isLoaded) {
-            console.log('config already loaded, skipping');
+            console.log('user data already loaded, skipping');
             return;
         }
 
@@ -53,7 +61,7 @@ export const useDataStore = create<DataState>((set, get) => ({
             throw new Error('no auth token available');
         }
 
-        console.log('loading user config');
+        console.log('loading user data');
 
         const response = await NetworkManager.shared.perform<undefined, GetUserResponse>({
             endpoint: '/api/account',
@@ -66,10 +74,10 @@ export const useDataStore = create<DataState>((set, get) => ({
             isLoaded: true,
         });
 
-        console.log('config loaded successfully');
+        console.log('data loaded successfully');
     },
 
-    updateConfig: async (partialConfig: UpdateUserRequest) => {
+    updateUserData: async (partialData: UpdateUserRequest) => {
         const authToken = AuthState.getState().authToken;
         if (!authToken) {
             throw new Error('no auth token available');
@@ -78,17 +86,39 @@ export const useDataStore = create<DataState>((set, get) => ({
         const response = await NetworkManager.shared.perform<UpdateUserRequest, UpdateUserResponse>({
             endpoint: '/api/account',
             method: HTTPMethod.PUT,
-            body: partialConfig,
+            body: partialData,
             token: authToken,
         });
 
         set({ data: response.user });
-        console.log('config updated successfully');
+        console.log('user data updated successfully');
     },
 
     getFirstModule: () => {
         const { data } = get();
-        return data?.config.modules.find(module => module.visible)?.type ?? ModuleType.AGENDA;
+        if (!data?.config?.modules) {
+            console.log('no data available for getFirstModule, defaulting to agenda');
+            return ModuleType.AGENDA;
+        }
+        return data.config.modules.find(module => module.visible)?.type ?? ModuleType.AGENDA;
+    },
+
+    getUserAuthState: () => {
+        const authState = AuthState.getState();
+
+        if (!authState.isAuthenticated) {
+            return UserAuthState.NOT_AUTHENTICATED;
+        }
+
+        if (!authState.userInfo?.isEmailVerified) {
+            return UserAuthState.AUTHENTICATED_NO_EMAIL;
+        }
+
+        return UserAuthState.FULLY_AUTHENTICATED;
+    },
+
+    canRenderTabs: () => {
+        return get().getUserAuthState() === UserAuthState.FULLY_AUTHENTICATED;
     }
 }));
 

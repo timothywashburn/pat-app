@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Platform, Text, View } from 'react-native';
-import { moduleInfo, useDataStore } from "@/src/features/settings/controllers/DataStore";
+import { moduleInfo, useDataStore } from "@/src/features/settings/controllers/UserDataStore";
 import WebHeader from '@/src/components/WebHeader';
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { ModuleType } from "@timothyw/pat-common";
@@ -11,6 +11,7 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function TabsLayout() {
     const { getColor } = useTheme();
+    const { canRenderTabs } = useDataStore();
     const { data } = useDataStore();
     const isWeb = Platform.OS === 'web';
     const [navigationKey, setNavigationKey] = useState("initial");
@@ -19,7 +20,9 @@ export default function TabsLayout() {
         setNavigationKey(`nav-key-${Date.now()}`);
     }, [data]);
 
-    if (data?.config.modules.length === 0) {
+    if (!canRenderTabs()) return;
+
+    if (data.config.modules.length === 0) {
         return (
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
                 <Text style={{ color: getColor('on-background') }}>No modules enabled</Text>
@@ -54,7 +57,7 @@ export default function TabsLayout() {
                     tabBarPressColor: 'transparent',
                 }}
             >
-                {data?.config.modules.map((module) => {
+                {data.config.modules.map((module) => {
                     if (!module.visible && module.type != ModuleType.SETTINGS) return;
                     const moduleType = module.type;
                     const { getComponent, icon, title } = moduleInfo[moduleType];

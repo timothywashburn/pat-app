@@ -2,7 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, usePathname } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { moduleInfo } from "@/src/features/settings/controllers/DataStore";
+import { moduleInfo } from "@/src/features/settings/controllers/UserDataStore";
 import { Module } from "@timothyw/pat-common";
 
 type WebHeaderProps = {

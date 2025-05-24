@@ -12,12 +12,12 @@ import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
-import { useDataStore } from "@/src/features/settings/controllers/DataStore";
+import { useDataStore } from "@/src/features/settings/controllers/UserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type BootStage = 'initializing' | 'auth-ready' | 'loading-config' | 'ready' | 'error';
+type BootStage = 'initializing' | 'auth-ready' | 'loading-user-data' | 'ready' | 'error';
 
 // Toggle this to show dev terminal instead of normal boot
 const DEV_MODE = false;
@@ -31,7 +31,7 @@ SplashScreen.setOptions({
 export default function RootLayout() {
     const { theme, colorScheme } = useTheme();
     const { isAuthenticated, userInfo, initializeAuth } = useAuthStore();
-    const { isLoaded, loadConfig } = useDataStore();
+    const { isLoaded, loadUserData } = useDataStore();
     const [bootStage, setBootStage] = useState<BootStage>('initializing');
     const [bootError, setBootError] = useState<string | null>(null);
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_MODE);
@@ -70,19 +70,19 @@ export default function RootLayout() {
             setBootStage('auth-ready');
 
             const currentAuthState = useAuthStore.getState();
-            Logger.info('startup', 'checking auth state for config loading', {
+            Logger.info('startup', 'checking auth state for user data loading', {
                 isAuthenticated: currentAuthState.isAuthenticated,
                 isEmailVerified: currentAuthState.userInfo?.isEmailVerified,
                 isLoaded
             });
 
             if (currentAuthState.isAuthenticated && currentAuthState.userInfo?.isEmailVerified && !isLoaded) {
-                setBootStage('loading-config');
-                Logger.info('startup', 'loading app configuration');
-                await loadConfig();
-                Logger.info('startup', 'configuration loaded successfully');
+                setBootStage('loading-user-data');
+                Logger.info('startup', 'loading user data');
+                await loadUserData();
+                Logger.info('startup', 'user data loaded successfully');
             } else {
-                Logger.info('startup', 'skipping config load', {
+                Logger.info('startup', 'skipping user data load', {
                     reason: !currentAuthState.isAuthenticated ? 'not authenticated' :
                         !currentAuthState.userInfo?.isEmailVerified ? 'email not verified' :
                             isLoaded ? 'already loaded' : 'unknown'

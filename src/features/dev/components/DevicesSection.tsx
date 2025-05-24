@@ -3,7 +3,7 @@ import { Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import DevPanelSection from './DevPanelSection';
 import { UpdateUserRequest } from '@timothyw/pat-common';
-import { DataState } from "@/src/features/settings/controllers/DataStore";
+import { DataState } from "@/src/features/settings/controllers/UserDataStore";
 
 const DevicesSection = () => {
     const { getColor } = useTheme();
@@ -23,7 +23,7 @@ const DevicesSection = () => {
                 }
             };
 
-            await DataState.getState().updateConfig(updateRequest);
+            await DataState.getState().updateUserData(updateRequest);
             console.log('all devices cleared')
         } catch (error) {
             console.log('error clearing devices:')
