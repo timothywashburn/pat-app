@@ -1,4 +1,5 @@
 import PatConfig from '@/src/controllers/PatConfig';
+import { Logger } from "@/src/features/dev/components/Logger";
 
 export enum HTTPMethod {
     GET = 'GET',
@@ -43,7 +44,14 @@ class NetworkManager {
     }
 
     async perform<ReqData = never, ResData = never>(request: NetworkRequest<ReqData>): Promise<ResData> {
+        Logger.debug('network', 'performing request', {
+            endpoint: request.endpoint,
+            method: request.method,
+            body: request.body,
+            token: request.token,
+        });
         const url = `${this.baseURL}${request.endpoint}`;
+        Logger.debug('network', 'request URL', url);
 
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
@@ -60,8 +68,14 @@ class NetworkManager {
         };
 
         try {
+            Logger.debug('network', 'fetching');
             const response = await fetch(url, options);
+            Logger.debug('network', 'fetch completed', {
+                status: response.status,
+                statusText: response.statusText,
+            });
             const data = await response.json();
+            Logger.debug('network', 'response data', data);
 
             if (!data.success) {
                 throw new NetworkError(
@@ -72,6 +86,11 @@ class NetworkManager {
 
             return data.data;
         } catch (error) {
+            Logger.error('network', 'request failed', {
+                endpoint: request.endpoint,
+                method: request.method,
+                error: error instanceof Error ? error.message : String(error),
+            });
             if (error instanceof NetworkError) {
                 throw error;
             }
