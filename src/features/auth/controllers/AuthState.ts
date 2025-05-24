@@ -123,21 +123,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     refreshAuth: async () => {
-        Logger.debug('auth', 'refreshing auth token');
         const tokens = await SecureStorage.shared.getTokens();
         if (!tokens?.refreshToken) {
-            Logger.error('auth', 'no refresh token found, cannot refresh auth');
             throw new Error(AuthError.REFRESH_FAILED);
         }
 
-        Logger.debug('auth', 'refresh token found, proceeding with refresh');
         const response = await NetworkManager.shared.perform<RefreshAuthRequest, RefreshAuthResponse>({
             endpoint: '/api/auth/refresh',
             method: HTTPMethod.POST,
             body: { refreshToken: tokens.refreshToken },
         });
-
-        Logger.debug('auth', 'refresh response received', response);
 
         if (!response.tokenData || !response.authData) {
             throw new Error(AuthError.INVALID_RESPONSE);
@@ -148,14 +143,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             refreshToken: response.tokenData.refreshToken,
         };
 
-        Logger.debug('auth', 'updating tokens and user info in storage');
         await SecureStorage.shared.saveTokens(newTokens);
-        Logger.debug('auth', 'tokens saved successfully');
         set({
             authToken: newTokens.accessToken,
             isAuthenticated: true
         });
-        Logger.debug('auth', 'auth refresh completed successfully');
     },
 
     signOut: () => {
