@@ -126,7 +126,7 @@ const AppContent: React.FC = () => {
 
     if (showDevTerminal) return renderDevTerminal();
 
-    if (authStoreStatus === AuthStoreStatus.NOT_INITIALIZED || userDataStoreStatus === UserDataStoreStatus.NOT_LOADED) {
+    if (authStoreStatus === AuthStoreStatus.NOT_INITIALIZED) {
         return (
             <View
                 onLayout={hidesplash}

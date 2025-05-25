@@ -28,15 +28,15 @@ export default function TabsLayout() {
 
     if (authStoreStatus != AuthStoreStatus.FULLY_AUTHENTICATED) return (
         <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
-            <Text style={{ color: getColor('on-background') }}>Loading Auth...</Text>
             <ActivityIndicator size="large" color={getColor('primary')} />
+            <Text style={{ color: getColor('on-background') }}>Loading Auth...</Text>
         </View>
     );
 
     if (userDataStoreStatus != UserDataStoreStatus.LOADED) return (
         <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
-            <Text style={{ color: getColor('on-background') }}>Loading User Data...</Text>
             <ActivityIndicator size="large" color={getColor('primary')} />
+            <Text style={{ color: getColor('on-background') }}>Loading User Data...</Text>
         </View>
     );
 
