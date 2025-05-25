@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
+import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";

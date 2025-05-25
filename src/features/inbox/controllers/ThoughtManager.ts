@@ -1,5 +1,4 @@
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
-import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import {
     CreateThoughtRequest,
     CreateThoughtResponse, DeleteThoughtResponse,
@@ -30,17 +29,10 @@ class ThoughtManager {
     }
 
     async loadThoughts(): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            console.log('loadThoughts: no auth token');
-            return;
-        }
-
         try {
-            const response = await NetworkManager.shared.perform<undefined, GetThoughtsResponse>({
+            const response = await NetworkManager.shared.performAuthenticated<undefined, GetThoughtsResponse>({
                 endpoint: '/api/thoughts',
                 method: HTTPMethod.GET,
-                token: authToken,
             });
 
             if (!response.thoughts || !Array.isArray(response.thoughts)) {
@@ -58,17 +50,11 @@ class ThoughtManager {
     }
 
     async createThought(content: string): Promise<Thought> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         try {
-            const response = await NetworkManager.shared.perform<CreateThoughtRequest, CreateThoughtResponse>({
+            const response = await NetworkManager.shared.performAuthenticated<CreateThoughtRequest, CreateThoughtResponse>({
                 endpoint: '/api/thoughts',
                 method: HTTPMethod.POST,
                 body: { content },
-                token: authToken,
             });
 
             if (!response.thought) {
@@ -89,17 +75,11 @@ class ThoughtManager {
     }
 
     async updateThought(id: string, content: string): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         try {
-            await NetworkManager.shared.perform<UpdateThoughtRequest, UpdateThoughtResponse>({
+            await NetworkManager.shared.performAuthenticated<UpdateThoughtRequest, UpdateThoughtResponse>({
                 endpoint: `/api/thoughts/${id}`,
                 method: HTTPMethod.PUT,
                 body: { content },
-                token: authToken,
             });
 
             // Refresh thoughts list
@@ -111,19 +91,12 @@ class ThoughtManager {
     }
 
     async deleteThought(id: string): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         try {
-            await NetworkManager.shared.perform<undefined, DeleteThoughtResponse>({
+            await NetworkManager.shared.performAuthenticated<undefined, DeleteThoughtResponse>({
                 endpoint: `/api/thoughts/${id}`,
                 method: HTTPMethod.DELETE,
-                token: authToken,
             });
 
-            // Refresh thoughts list
             await this.loadThoughts();
         } catch (error) {
             console.error('Failed to delete thought:', error);

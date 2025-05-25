@@ -1,5 +1,4 @@
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
-import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import { AgendaItem } from "@/src/features/agenda/models";
 import {
     CompleteItemRequest, CompleteItemResponse,
@@ -29,17 +28,10 @@ export class AgendaManager {
     }
 
     async loadAgendaItems(): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            console.log('loadAgendaItems: no auth token')
-            return;
-        }
-
         try {
-            const response = await NetworkManager.shared.perform<undefined, GetItemsResponse>({
+            const response = await NetworkManager.shared.performAuthenticated<undefined, GetItemsResponse>({
                 endpoint: '/api/items',
                 method: HTTPMethod.GET,
-                token: authToken,
             }) as GetItemsResponse;
 
             if (!response.items || !Array.isArray(response.items)) {
@@ -72,11 +64,6 @@ export class AgendaManager {
         category?: string;
         type?: string;
     }): Promise<AgendaItem> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         const body: CreateItemRequest = {
             name: params.name,
             notes: params.notes || '',
@@ -96,11 +83,10 @@ export class AgendaManager {
         }
 
         try {
-            const response = await NetworkManager.shared.perform<CreateItemRequest, CreateItemResponse>({
+            const response = await NetworkManager.shared.performAuthenticated<CreateItemRequest, CreateItemResponse>({
                 endpoint: '/api/items',
                 method: HTTPMethod.POST,
                 body,
-                token: authToken,
             });
 
             if (!response.item) {
@@ -138,11 +124,6 @@ export class AgendaManager {
             type?: string;
         }
     ): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         const body: UpdateItemRequest = {};
 
         if (updates.name !== undefined) {
@@ -170,11 +151,10 @@ export class AgendaManager {
         }
 
         try {
-            await NetworkManager.shared.perform<UpdateItemRequest, UpdateItemResponse>({
+            await NetworkManager.shared.performAuthenticated<UpdateItemRequest, UpdateItemResponse>({
                 endpoint: `/api/items/${id}`,
                 method: HTTPMethod.PUT,
                 body,
-                token: authToken,
             });
 
             // Refresh the list
@@ -186,17 +166,11 @@ export class AgendaManager {
     }
 
     async setCompleted(id: string, completed: boolean): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         try {
-            await NetworkManager.shared.perform<CompleteItemRequest, CompleteItemResponse>({
+            await NetworkManager.shared.performAuthenticated<CompleteItemRequest, CompleteItemResponse>({
                 endpoint: `/api/items/${id}/complete`,
                 method: HTTPMethod.PUT,
                 body: {completed},
-                token: authToken,
             });
 
             // Refresh the list
@@ -208,16 +182,10 @@ export class AgendaManager {
     }
 
     async deleteAgendaItem(id: string): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         try {
-            await NetworkManager.shared.perform<undefined, DeleteItemResponse>({
+            await NetworkManager.shared.performAuthenticated<undefined, DeleteItemResponse>({
                 endpoint: `/api/items/${id}`,
                 method: HTTPMethod.DELETE,
-                token: authToken,
             });
 
             // Refresh the list

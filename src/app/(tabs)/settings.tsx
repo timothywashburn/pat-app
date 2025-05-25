@@ -4,19 +4,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
-import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
+import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
-import { useDataStore } from "@/src/features/settings/controllers/UserDataStore";
+import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 import { Module } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function SettingsPanel() {
     const { errorToast, successToast } = useToast();
-    const { signOut, userInfo } = useAuthStore();
+    const { signOut, authData } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const { data, updateUserData } = useDataStore();
+    const { data, updateUserData } = useUserDataStore();
 
     // Local state for tracking changes
     const [localItemCategories, setLocalItemCategories] = useState(data.config.agenda.itemCategories);
@@ -127,12 +127,10 @@ export default function SettingsPanel() {
                             editMode={editMode}
                         />
 
-                        {userInfo && (
+                        {authData && (
                             <View className="bg-surface w-full p-4 rounded-lg mt-5 mb-5">
                                 <Text className="text-on-surface text-base font-bold mb-2.5">User Info</Text>
-                                <Text className="text-on-surface">Name: {userInfo.name}</Text>
-                                <Text className="text-on-surface">Email: {userInfo.email}</Text>
-                                <Text className="text-on-surface">Email Verified: {userInfo.isEmailVerified ? 'Yes' : 'No'}</Text>
+                                <Text className="text-on-surface">Email: {authData.email}</Text>
                             </View>
                         )}
 

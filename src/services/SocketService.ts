@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
 import PatConfig from '@/src/controllers/PatConfig';
-import { AuthState } from '@/src/features/auth/controllers/AuthState';
+import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
 
 interface SocketMessage<T> {
     type: string;
@@ -37,9 +37,9 @@ class SocketService {
             }
         }
 
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            console.log('socket connection skipped: no auth token');
+        const authTokens = useAuthStore.getState().authTokens;
+        if (!authTokens) {
+            console.log('socket connection skipped: no auth tokens');
             return;
         }
 
@@ -54,9 +54,9 @@ class SocketService {
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 5000,
-            query: { token: authToken },
+            query: { token: authTokens.accessToken },
             extraHeaders: {
-                'Authorization': `Bearer ${authToken}`
+                'Authorization': `Bearer ${authTokens.accessToken}`
             }
         });
 
@@ -147,11 +147,9 @@ class SocketService {
         switch (type) {
             case 'emailVerified':
                 console.log(`socket handling emailVerified for user: ${userId}`);
-                AuthState.getState().updateUserInfo((userInfo) => {
-                    if (userInfo) {
-                        userInfo.isEmailVerified = true;
-                    }
-                    return userInfo;
+                useAuthStore.getState().updateAuthData((authData) => {
+                    if (authData) authData.emailVerified = true;
+                    return authData;
                 });
                 break;
             default:

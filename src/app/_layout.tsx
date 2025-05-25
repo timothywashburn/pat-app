@@ -3,24 +3,21 @@ import "@/global.css"
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
-import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
+import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
-import { CustomThemeProvider, useTheme } from "@/src/controllers/ThemeManager"; // Updated import
+import { CustomThemeProvider, useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
-import { useDataStore } from "@/src/features/settings/controllers/UserDataStore";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { UserDataStoreStatus, useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type BootStage = 'initializing' | 'auth-ready' | 'loading-user-data' | 'ready' | 'error';
-
-// Toggle this to show dev terminal instead of normal boot
-const DEV_MODE = true;
+const DEV_BOOT = false;
 
 SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({
@@ -28,77 +25,64 @@ SplashScreen.setOptions({
     fade: true,
 });
 
-// Separate component that uses the theme context
 const AppContent: React.FC = () => {
     const { theme, colorScheme } = useTheme();
-    const { isAuthenticated, userInfo, initializeAuth } = useAuthStore();
-    const { isLoaded, loadUserData } = useDataStore();
-    const [bootStage, setBootStage] = useState<BootStage>('initializing');
-    const [bootError, setBootError] = useState<string | null>(null);
-    const [showDevTerminal, setShowDevTerminal] = useState(DEV_MODE);
-
-    useEffect(() => {
-        bootApp();
-    }, []);
+    const { authStoreStatus, initializeAuth } = useAuthStore();
+    const { userDataStoreStatus, loadUserData } = useUserDataStore();
+    const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
 
     useEffect(() => {
         const socketService = SocketService.shared;
 
-        if (isAuthenticated) {
+        if (authStoreStatus == AuthStoreStatus.FULLY_AUTHENTICATED) {
             socketService.connect();
         } else {
             socketService.disconnect();
         }
 
         return () => socketService.disconnect();
-    }, [isAuthenticated]);
+    }, [authStoreStatus]);
 
-    const bootApp = async () => {
-        try {
-            console.log('starting boot sequence');
-            Logger.info('startup', 'application starting');
+    useEffect(() => {
+        Logger.debug('startup', 'deciding whether to initialize auth', {
+            authStoreStatus,
+        });
 
-            setBootStage('initializing');
-            Logger.info('startup', 'initializing authentication');
-            await initializeAuth();
-            Logger.info('startup', 'authentication initialized successfully');
-
-            Logger.info('startup', 'initializing deep links');
-            DeepLinkHandler.initialize();
-            Logger.info('startup', 'deep links initialized successfully');
-            setBootStage('auth-ready');
-
-            const currentAuthState = useAuthStore.getState();
-            Logger.info('startup', 'checking auth state for user data loading', {
-                isAuthenticated: currentAuthState.isAuthenticated,
-                isEmailVerified: currentAuthState.userInfo?.isEmailVerified,
-                isLoaded
+        if (authStoreStatus === AuthStoreStatus.NOT_INITIALIZED) {
+            Logger.debug('startup', 'initializing auth');
+            initializeAuth().then(() => {
+                Logger.debug('startup', 'auth initialized successfully');
+            }).catch((error) => {
+                Logger.error('startup', 'failed to initialize auth', error);
             });
-
-            if (currentAuthState.isAuthenticated && currentAuthState.userInfo?.isEmailVerified && !isLoaded) {
-                setBootStage('loading-user-data');
-                Logger.info('startup', 'loading user data');
-                await loadUserData();
-                Logger.info('startup', 'user data loaded successfully');
-            } else {
-                Logger.info('startup', 'skipping user data load', {
-                    reason: !currentAuthState.isAuthenticated ? 'not authenticated' :
-                        !currentAuthState.userInfo?.isEmailVerified ? 'email not verified' :
-                            isLoaded ? 'already loaded' : 'unknown'
-                });
-            }
-
-            setBootStage('ready');
-            Logger.info('startup', 'boot sequence complete');
-            console.log('boot sequence complete');
-
-        } catch (error) {
-            console.error('boot sequence failed:', error);
-            Logger.error('startup', 'boot sequence failed', error);
-            setBootError(error instanceof Error ? error.message : 'unknown error');
-            setBootStage('error');
         }
-    };
+
+    }, [authStoreStatus]);
+
+    useEffect(() => {
+        Logger.debug('startup', 'deciding whether to initialize deep links', {
+            authStoreStatus,
+        });
+
+        if (authStoreStatus !== AuthStoreStatus.NOT_INITIALIZED) {
+            Logger.debug('startup', 'initializing deep links');
+            DeepLinkHandler.initialize();
+            Logger.debug('startup', 'deep links initialized successfully');
+        }
+    }, [authStoreStatus]);
+
+    useEffect(() => {
+        Logger.debug('startup', 'deciding whether to load user data', {
+            authStoreStatus,
+            userDataStoreStatus,
+        });
+
+        if (authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED &&
+            userDataStoreStatus === UserDataStoreStatus.NOT_LOADED) {
+            Logger.debug('startup', 'loading user data');
+            loadUserData().then();
+        }
+    }, [authStoreStatus, userDataStoreStatus]);
 
     const hidesplash = useCallback(async () => {
         await SplashScreen.hideAsync();
@@ -142,18 +126,18 @@ const AppContent: React.FC = () => {
 
     if (showDevTerminal) return renderDevTerminal();
 
-    if (bootStage !== 'ready') {
+    if (authStoreStatus === AuthStoreStatus.NOT_INITIALIZED || userDataStoreStatus === UserDataStoreStatus.NOT_LOADED) {
         return (
             <View
                 onLayout={hidesplash}
                 className="flex-1 justify-center items-center bg-background"
             >
                 <ActivityIndicator size="large" />
-                {bootError && (
-                    <View className="mt-4 px-4">
-                        <Text className="text-red-500 text-center">{bootError}</Text>
-                    </View>
-                )}
+                <Text className="mt-4 text-on-background">
+                    {authStoreStatus === AuthStoreStatus.NOT_INITIALIZED
+                        ? "Initializing authentication..."
+                        : "Loading user data..."}
+                </Text>
             </View>
         );
     }

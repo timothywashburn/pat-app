@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Link } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { useAuthStore } from "@/src/features/auth/controllers/AuthState";
+import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 

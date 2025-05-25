@@ -1,6 +1,6 @@
 import { Linking } from 'react-native';
 import { router } from 'expo-router';
-import { DataState } from "@/src/features/settings/controllers/UserDataStore";
+import { DataState } from "@/src/features/settings/controllers/useUserDataStore";
 
 export default class DeepLinkHandler {
     static handleURL(url: string): void {

@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import DevPanelSection from './DevPanelSection';
 import { UpdateUserRequest } from '@timothyw/pat-common';
-import { DataState } from "@/src/features/settings/controllers/UserDataStore";
+import { DataState } from "@/src/features/settings/controllers/useUserDataStore";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({

@@ -1,7 +1,79 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { AuthTokens } from "@timothyw/pat-common";
 
-// Define a fallback storage for web environments
+/**
+ * Wrapper around Expo SecureStore for storing sensitive information
+ * with fallback to localStorage for web environments
+ */
+class SecureStorage {
+    private static instance: SecureStorage;
+    private tokenService = 'dev.timothyw.patapp';
+
+    private constructor() {
+    }
+
+    public static get shared(): SecureStorage {
+        if (!SecureStorage.instance) {
+            SecureStorage.instance = new SecureStorage();
+        }
+        return SecureStorage.instance;
+    }
+
+    private getKey(key: string): string {
+        return `${this.tokenService}.${key}`;
+    }
+
+    async getTokens(): Promise<AuthTokens | null> {
+        try {
+            const key = this.getKey('tokens');
+            let tokens;
+
+            if (Platform.OS === 'web') {
+                tokens = await WebStorage.getItem(key);
+            } else {
+                tokens = await SecureStore.getItemAsync(key);
+            }
+
+            return tokens ? JSON.parse(tokens) : null;
+        } catch (error) {
+            console.error('Failed to get tokens:', error);
+            return null;
+        }
+    }
+
+    async saveTokens(authTokens: AuthTokens): Promise<void> {
+        try {
+            const key = this.getKey('tokens');
+            const value = JSON.stringify(authTokens);
+
+            if (Platform.OS === 'web') {
+                await WebStorage.setItem(key, value);
+            } else {
+                await SecureStore.setItemAsync(key, value);
+            }
+        } catch (error) {
+            console.error('Failed to save tokens:', error);
+            throw error;
+        }
+    }
+
+    async clearStoredAuth(): Promise<void> {
+        try {
+            const tokenKey = this.getKey('tokens');
+
+            if (Platform.OS === 'web') {
+                await WebStorage.removeItem(tokenKey);
+            } else {
+                await SecureStore.deleteItemAsync(tokenKey);
+            }
+        } catch (error) {
+            console.error('Failed to clear auth data:', error);
+            throw error;
+        }
+    }
+}
+
 class WebStorage {
     private static getLocalStorage(): Storage | null {
         if (typeof window !== 'undefined' && window.localStorage) {
@@ -29,115 +101,6 @@ class WebStorage {
         const localStorage = WebStorage.getLocalStorage();
         if (localStorage) {
             localStorage.removeItem(key);
-        }
-    }
-}
-
-/**
- * Wrapper around Expo SecureStore for storing sensitive information
- * with fallback to localStorage for web environments
- */
-class SecureStorage {
-    private static instance: SecureStorage;
-    private tokenService = 'dev.timothyw.patapp';
-
-    private constructor() {
-    }
-
-    public static get shared(): SecureStorage {
-        if (!SecureStorage.instance) {
-            SecureStorage.instance = new SecureStorage();
-        }
-        return SecureStorage.instance;
-    }
-
-    private getKey(key: string): string {
-        return `${this.tokenService}.${key}`;
-    }
-
-    async saveTokens(tokens: { accessToken: string; refreshToken: string }): Promise<void> {
-        try {
-            const key = this.getKey('tokens');
-            const value = JSON.stringify(tokens);
-
-            if (Platform.OS === 'web') {
-                await WebStorage.setItem(key, value);
-            } else {
-                await SecureStore.setItemAsync(key, value);
-            }
-        } catch (error) {
-            console.error('Failed to save tokens:', error);
-            throw error;
-        }
-    }
-
-    async getTokens(): Promise<{ accessToken: string; refreshToken: string } | null> {
-        try {
-            const key = this.getKey('tokens');
-            let tokens;
-
-            if (Platform.OS === 'web') {
-                tokens = await WebStorage.getItem(key);
-            } else {
-                tokens = await SecureStore.getItemAsync(key);
-            }
-
-            return tokens ? JSON.parse(tokens) : null;
-        } catch (error) {
-            console.error('Failed to get tokens:', error);
-            return null;
-        }
-    }
-
-    async saveUserInfo(userInfo: any): Promise<void> {
-        try {
-            const key = this.getKey('userInfo');
-            const value = JSON.stringify(userInfo);
-
-            if (Platform.OS === 'web') {
-                await WebStorage.setItem(key, value);
-            } else {
-                await SecureStore.setItemAsync(key, value);
-            }
-        } catch (error) {
-            console.error('Failed to save user info:', error);
-            throw error;
-        }
-    }
-
-    async getUserInfo(): Promise<any | null> {
-        try {
-            const key = this.getKey('userInfo');
-            let userInfo;
-
-            if (Platform.OS === 'web') {
-                userInfo = await WebStorage.getItem(key);
-            } else {
-                userInfo = await SecureStore.getItemAsync(key);
-            }
-
-            return userInfo ? JSON.parse(userInfo) : null;
-        } catch (error) {
-            console.error('Failed to get user info:', error);
-            return null;
-        }
-    }
-
-    async clearStoredAuth(): Promise<void> {
-        try {
-            const tokenKey = this.getKey('tokens');
-            const userInfoKey = this.getKey('userInfo');
-
-            if (Platform.OS === 'web') {
-                await WebStorage.removeItem(tokenKey);
-                await WebStorage.removeItem(userInfoKey);
-            } else {
-                await SecureStore.deleteItemAsync(tokenKey);
-                await SecureStore.deleteItemAsync(userInfoKey);
-            }
-        } catch (error) {
-            console.error('Failed to clear auth data:', error);
-            throw error;
         }
     }
 }

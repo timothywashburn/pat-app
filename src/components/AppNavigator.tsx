@@ -1,50 +1,36 @@
 import React, { useEffect } from 'react';
 import { usePathname, useRouter, useSegments } from 'expo-router';
-import { useAuthStore } from '@/src/features/auth/controllers/AuthState';
+import { AuthStoreStatus, useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
 import { View } from 'react-native';
-import { useDataStore } from "@/src/features/settings/controllers/UserDataStore";
+import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { Logger } from "@/src/features/dev/components/Logger";
 
 function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLayout?: () => void }) {
     const router = useRouter();
     const segments = useSegments();
     const pathname = usePathname();
-    const { isAuthenticated, isLoading, userInfo } = useAuthStore();
-    const { getFirstModule } = useDataStore();
-
-    const isInAuthGroup = segments[0] === '(auth)';
-    const isVerifyPage = pathname === '/verify';
+    const { authStoreStatus } = useAuthStore();
+    const { getFirstModule } = useUserDataStore();
 
     useEffect(() => {
-        console.log('navigation state changed', {
-            isAuthenticated,
-            isLoading,
-            isEmailVerified: userInfo?.isEmailVerified,
-            currentSegment: segments[0]
+        Logger.debug('unclassified', 'navigation state changed', {
+            authStoreStatus,
+            segments,
+            pathname,
         });
 
-        if (isLoading) {
-            return;
+        const isInAuthGroup = segments[0] === '(auth)';
+        const isVerifyPage = pathname === '/verify';
+
+        if (authStoreStatus == AuthStoreStatus.FULLY_AUTHENTICATED) {
+            if (isInAuthGroup) router.replace(`/(tabs)/${getFirstModule()}`);
+        } else if (authStoreStatus == AuthStoreStatus.AUTHENTICATED_NO_EMAIL) {
+            if (!isVerifyPage) router.replace('/(auth)/verify');
+        } else if (authStoreStatus == AuthStoreStatus.NOT_AUTHENTICATED) {
+            if (!isInAuthGroup) router.replace('/(auth)/sign-in');
         }
 
-        const isEmailVerified = userInfo?.isEmailVerified === true;
-
-        if (isAuthenticated) {
-            if (isEmailVerified) {
-                if (isInAuthGroup) {
-                    router.replace(`/(tabs)/${getFirstModule()}`);
-                }
-            } else {
-                if (!isVerifyPage) {
-                    router.replace('/(auth)/verify');
-                }
-            }
-        } else {
-            if (!isInAuthGroup || isVerifyPage) {
-                router.replace('/(auth)/sign-in');
-            }
-        }
-
-    }, [isAuthenticated, isLoading, userInfo?.isEmailVerified, segments, router, getFirstModule]);
+    }, [authStoreStatus, segments, router, getFirstModule]);
 
     return (
         <View style={{ flex: 1 }} onLayout={onLayout}>

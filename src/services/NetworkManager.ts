@@ -1,4 +1,5 @@
 import PatConfig from '@/src/controllers/PatConfig';
+import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 
 export enum HTTPMethod {
     GET = 'GET',
@@ -11,7 +12,6 @@ export interface NetworkRequest<ReqData> {
     endpoint: string;
     method: HTTPMethod;
     body?: ReqData;
-    token?: string;
 }
 
 export class NetworkError extends Error {
@@ -42,16 +42,31 @@ class NetworkManager {
         return NetworkManager.instance;
     }
 
-    async perform<ReqData = never, ResData = never>(request: NetworkRequest<ReqData>): Promise<ResData> {
+    async performAuthenticated<ReqData = never, ResData = never>(
+        request: NetworkRequest<ReqData>
+    ): Promise<ResData> {
+        const authTokens = useAuthStore.getState().authTokens;
+        if (!authTokens) {
+            console.log('loadPeople: no auth tokens');
+            throw new NetworkError('Could not perform authenticated request: no auth tokens available');
+        }
+        return this.perform<ReqData, ResData>(request, authTokens.accessToken);
+    }
+
+    async performUnauthenticated<ReqData = never, ResData = never>(
+        request: NetworkRequest<ReqData>
+    ): Promise<ResData> {
+        return this.perform<ReqData, ResData>(request, null);
+    }
+
+    private async perform<ReqData = never, ResData = never>(request: NetworkRequest<ReqData>, token: string | null = null): Promise<ResData> {
         const url = `${this.baseURL}${request.endpoint}`;
 
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
         };
 
-        if (request.token) {
-            headers['Authorization'] = `Bearer ${request.token}`;
-        }
+        if (token) headers['Authorization'] = `Bearer ${token}`;
 
         const options: RequestInit = {
             method: request.method,

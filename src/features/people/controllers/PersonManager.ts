@@ -1,6 +1,5 @@
 import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
-import { AuthState } from '@/src/features/auth/controllers/AuthState';
 import {
     CreatePersonRequest,
     CreatePersonResponse, DeletePersonResponse,
@@ -27,17 +26,10 @@ export class PersonManager {
     }
 
     async loadPeople(): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            console.log('loadPeople: no auth token')
-            return;
-        }
-
         try {
-            const response = await NetworkManager.shared.perform<undefined, GetPeopleResponse>({
+            const response = await NetworkManager.shared.performAuthenticated<undefined, GetPeopleResponse>({
                 endpoint: '/api/people',
                 method: HTTPMethod.GET,
-                token: authToken,
             });
 
             if (!response.people || !Array.isArray(response.people)) {
@@ -72,11 +64,6 @@ export class PersonManager {
         properties: PersonProperty[] = [],
         notes: PersonNote[] = []
     ): Promise<Person> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         const body = {
             name,
             properties: properties.map(prop => ({
@@ -89,11 +76,10 @@ export class PersonManager {
         };
 
         try {
-            const response = await NetworkManager.shared.perform<CreatePersonRequest, CreatePersonResponse>({
+            const response = await NetworkManager.shared.performAuthenticated<CreatePersonRequest, CreatePersonResponse>({
                 endpoint: '/api/people',
                 method: HTTPMethod.POST,
                 body,
-                token: authToken,
             });
 
             if (!response.person) {
@@ -122,11 +108,6 @@ export class PersonManager {
         properties: PersonProperty[],
         notes: PersonNote[]
     ): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         const body = {
             name,
             properties: properties.map(prop => ({
@@ -139,11 +120,10 @@ export class PersonManager {
         };
 
         try {
-            await NetworkManager.shared.perform<UpdatePersonRequest, UpdatePersonResponse>({
+            await NetworkManager.shared.performAuthenticated<UpdatePersonRequest, UpdatePersonResponse>({
                 endpoint: `/api/people/${id}`,
                 method: HTTPMethod.PUT,
                 body,
-                token: authToken,
             });
 
             // Refresh the list
@@ -155,16 +135,10 @@ export class PersonManager {
     }
 
     async deletePerson(id: string): Promise<void> {
-        const authToken = AuthState.getState().authToken;
-        if (!authToken) {
-            throw new Error('Not authenticated');
-        }
-
         try {
-            await NetworkManager.shared.perform<undefined, DeletePersonResponse>({
+            await NetworkManager.shared.performAuthenticated<undefined, DeletePersonResponse>({
                 endpoint: `/api/people/${id}`,
                 method: HTTPMethod.DELETE,
-                token: authToken,
             });
 
             // Refresh the list

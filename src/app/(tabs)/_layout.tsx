@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { Platform, Text, View } from 'react-native';
-import { moduleInfo, useDataStore } from "@/src/features/settings/controllers/UserDataStore";
+import { ActivityIndicator, Platform, Text, View } from 'react-native';
+import {
+    moduleInfo,
+    UserDataStoreStatus,
+    useUserDataStore
+} from "@/src/features/settings/controllers/useUserDataStore";
 import WebHeader from '@/src/components/WebHeader';
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { ModuleType } from "@timothyw/pat-common";
+import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function TabsLayout() {
     const { getColor } = useTheme();
-    const { canRenderTabs } = useDataStore();
-    const { data } = useDataStore();
+    const { authStoreStatus } = useAuthStore();
+    const { userDataStoreStatus } = useUserDataStore();
+    const { data } = useUserDataStore();
     const isWeb = Platform.OS === 'web';
     const [navigationKey, setNavigationKey] = useState("initial");
 
@@ -20,7 +26,19 @@ export default function TabsLayout() {
         setNavigationKey(`nav-key-${Date.now()}`);
     }, [data]);
 
-    if (!canRenderTabs()) return;
+    if (authStoreStatus != AuthStoreStatus.FULLY_AUTHENTICATED) return (
+        <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
+            <Text style={{ color: getColor('on-background') }}>Loading Auth...</Text>
+            <ActivityIndicator size="large" color={getColor('primary')} />
+        </View>
+    );
+
+    if (userDataStoreStatus != UserDataStoreStatus.LOADED) return (
+        <View className="flex-1 justify-center items-center" style={{ backgroundColor: getColor('background') }}>
+            <Text style={{ color: getColor('on-background') }}>Loading User Data...</Text>
+            <ActivityIndicator size="large" color={getColor('primary')} />
+        </View>
+    );
 
     if (data.config.modules.length === 0) {
         return (

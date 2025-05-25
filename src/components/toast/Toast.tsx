@@ -45,7 +45,7 @@ export const Toast: React.FC<ToastProps> = ({
 }) => {
     const opacity = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(position === 'top' ? -20 : 20)).current;
-    const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const animationTimeoutRef = useRef<number | null>(null);
 
     useEffect(() => {
         // Show animation

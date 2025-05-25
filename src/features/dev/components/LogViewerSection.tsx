@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StatusBar } from 'react-native';
 import LogViewer from './LogViewer';
 import DevPanelSection from './DevPanelSection';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LogViewerSection: React.FC = () => {
     const [modalVisible, setModalVisible] = useState(false);
