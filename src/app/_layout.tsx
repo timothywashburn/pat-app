@@ -6,12 +6,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
-import { ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider, useFocusEffect } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, AppState, Text, TouchableOpacity, View } from "react-native";
 import { UserDataStoreStatus, useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
@@ -34,7 +34,7 @@ const AppContent: React.FC = () => {
     useEffect(() => {
         const socketService = SocketService.shared;
 
-        if (authStoreStatus == AuthStoreStatus.FULLY_AUTHENTICATED) {
+        if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL || authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
             socketService.connect();
         } else {
             socketService.disconnect();
@@ -77,7 +77,7 @@ const AppContent: React.FC = () => {
             userDataStoreStatus,
         });
 
-        if (authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED &&
+        if ((authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL || authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) &&
             userDataStoreStatus === UserDataStoreStatus.NOT_LOADED) {
             Logger.debug('startup', 'loading user data');
             loadUserData().then();

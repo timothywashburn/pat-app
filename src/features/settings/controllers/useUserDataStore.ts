@@ -6,7 +6,7 @@ import {
     ModuleType,
     UpdateUserRequest,
     UpdateUserResponse,
-    UserData
+    UserData, UserId
 } from "@timothyw/pat-common";
 import AgendaPanel from "@/src/app/(tabs)/agenda";
 import InboxPanel from "@/src/app/(tabs)/inbox";
@@ -39,6 +39,7 @@ export enum UserDataStoreStatus {
 interface UserDataState {
     userDataStoreStatus: UserDataStoreStatus;
 
+    id: UserId;
     data: UserData;
 
     loadUserData: () => Promise<void>;
@@ -49,6 +50,7 @@ interface UserDataState {
 export const useUserDataStore = create<UserDataState>((set, get) => ({
     userDataStoreStatus: UserDataStoreStatus.NOT_LOADED,
 
+    id: null as never,
     data: null as never,
 
     loadUserData: async () => {

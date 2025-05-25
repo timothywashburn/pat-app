@@ -2,16 +2,14 @@ import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
 import PatConfig from '@/src/controllers/PatConfig';
 import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
-
-interface SocketMessage<T> {
-    type: string;
-    userId: string;
-    data: T;
-}
-
-interface HeartbeatData {
-    timestamp: number;
-}
+import {
+    ClientVerifyEmailResponseData,
+    ServerHeartbeatData,
+    SocketMessage,
+    SocketMessageType,
+    UserId
+} from "@timothyw/pat-common";
+import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 
 class SocketService {
     private static instance: SocketService;
@@ -92,13 +90,13 @@ class SocketService {
         };
     }
 
-    private emit<T>(event: string, data: T): void {
+    private emit<T>(type: SocketMessageType, data: T): void {
         if (!this.socket || !this.isConnected) {
-            console.log(`socket emit failed: not connected, event: ${event}`);
+            console.log(`socket emit failed: not connected, event: ${type}`);
             return;
         }
 
-        this.socket.emit(event, data);
+        this.socket.emit(type, data);
     }
 
     private setupHandlers(): void {
@@ -135,45 +133,60 @@ class SocketService {
         });
     }
 
-    private handleIncomingMessage(messageData: any): void {
-        if (!messageData || typeof messageData !== 'object' || !messageData.type) {
-            console.log(`socket malformed message: ${JSON.stringify(messageData)}`);
+    private updateConnectionState(connected: boolean): void {
+        this.isConnected = connected;
+    }
+
+    private handleIncomingMessage(message: SocketMessage<unknown>): void {
+        if (!message || typeof message !== 'object' || !message.type) {
+            console.log(`socket malformed message: ${JSON.stringify(message)}`);
             return;
         }
 
-        const { type, userId, data } = messageData;
+        const { type, userId } = message;
         console.log(`socket handling message type: ${type}`);
 
         switch (type) {
-            case 'emailVerified':
-                console.log(`socket handling emailVerified for user: ${userId}`);
-                useAuthStore.getState().updateAuthData((authData) => {
-                    if (authData) authData.emailVerified = true;
-                    return authData;
-                });
+            case SocketMessageType.CLIENT_VERIFY_EMAIL_RESPONSE:
+                let data = message.data as ClientVerifyEmailResponseData;
+                console.log(`socket handling emailVerified for user ${userId}: ${data.emailVerified}`);
+                if (data.emailVerified) {
+                    useAuthStore.getState().updateAuthData((authData) => {
+                        if (authData) authData.emailVerified = true;
+                        return authData;
+                    });
+                }
                 break;
             default:
                 console.log(`socket unhandled message type: ${type}`);
         }
 
-        // Notify all listeners for this event type
         const listeners = this.listeners.get(type) || [];
-        listeners.forEach(callback => callback(messageData));
-    }
-
-    private updateConnectionState(connected: boolean): void {
-        this.isConnected = connected;
+        listeners.forEach(callback => callback(message));
     }
 
     private sendHeartbeat(): void {
-        const heartbeat: SocketMessage<HeartbeatData> = {
-            type: 'heartbeat',
-            userId: '',
+        const userId: UserId = useUserDataStore.getState().data._id;
+        const heartbeat: SocketMessage<ServerHeartbeatData> = {
+            type: SocketMessageType.SERVER_HEARTBEAT,
+            userId: userId,
             data: { timestamp: Date.now() }
         };
 
         console.log(`socket sending heartbeat: ${JSON.stringify(heartbeat)}`);
-        this.emit('heartbeat', heartbeat);
+        this.emit(SocketMessageType.SERVER_HEARTBEAT, heartbeat);
+    }
+
+    public sendVerifyEmailCheck(): void {
+        const userId: UserId = useUserDataStore.getState().data._id;
+        const verifyEmailCheck: SocketMessage<{}> = {
+            type: SocketMessageType.SERVER_VERIFY_EMAIL_CHECK,
+            userId,
+            data: {}
+        };
+
+        console.log(`socket sending verify email check: ${JSON.stringify(verifyEmailCheck)}`);
+        this.emit(SocketMessageType.SERVER_VERIFY_EMAIL_CHECK, verifyEmailCheck);
     }
 }
 
@@ -192,10 +205,8 @@ export function useSocketConnection() {
             setIsConnected(false);
         });
 
-        // Connect on component mount
         socketService.connect();
 
-        // Disconnect on component unmount
         return () => {
             unsubscribe();
             disconnectUnsubscribe();

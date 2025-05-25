@@ -138,6 +138,11 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
         const updatedUserInfo = { ...authData };
         update(updatedUserInfo);
 
+        // TODO: this is terrible code
+        if (!authData.emailVerified && updatedUserInfo.emailVerified) {
+            set({ authStoreStatus: AuthStoreStatus.FULLY_AUTHENTICATED });
+        }
+
         set({ authData: updatedUserInfo });
     },
 }));

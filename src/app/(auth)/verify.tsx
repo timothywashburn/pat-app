@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAppFocus } from "@/src/hooks/useAppFocus";
+import SocketService from "@/src/services/SocketService";
 
 export default function VerifyEmailScreen() {
     const { getColor } = useTheme();
     const { successToast, errorToast } = useToast();
     const [isResending, setIsResending] = useState(false);
     const { resendVerificationEmail, signOut } = useAuthStore();
+
+    useAppFocus(
+        useCallback(() => {
+            SocketService.shared.sendVerifyEmailCheck();
+        }, [])
+    );
 
     const handleResendVerification = async () => {
         setIsResending(true);
