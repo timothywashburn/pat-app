@@ -8,8 +8,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignInScreen() {
     const { getColor } = useTheme();
-    const [email, setEmail] = useState('trwisinthehouse@gmail.com'); // TODO: DEV
-    const [password, setPassword] = useState('pass'); // TODO: DEV
+    const [email, setEmail] = useState(__DEV__ ? 'trwisinthehouse@gmail.com' : '');
+    const [password, setPassword] = useState(__DEV__ ? 'pass' : '');
     const [isLoading, setIsLoading] = useState(false);
     const { errorToast } = useToast();
     const { signIn } = useAuthStore();

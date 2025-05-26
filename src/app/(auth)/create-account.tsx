@@ -9,10 +9,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CreateAccountScreen() {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const [name, setName] = useState('test'); // TODO: DEV
-    const [email, setEmail] = useState('test@test.com'); // TODO: DEV
-    const [password, setPassword] = useState('test'); // TODO: DEV
-    const [confirmPassword, setConfirmPassword] = useState('test'); // TODO: DEV
+    const [name, setName] = useState(__DEV__ ? 'test' : '');
+    const [email, setEmail] = useState(__DEV__ ? 'test@test.com' : '');
+    const [password, setPassword] = useState(__DEV__ ? 'test' : '');
+    const [confirmPassword, setConfirmPassword] = useState(__DEV__ ? 'test' : '');
     const [isLoading, setIsLoading] = useState(false);
 
     const { createAccount } = useAuthStore();
