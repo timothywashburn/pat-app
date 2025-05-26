@@ -1,21 +1,16 @@
 {
-  // This section enables Universal Links
   "applinks": {
     "apps": [],
     "details": [
       {
-        // Syntax: "<APPLE_TEAM_ID>.<BUNDLE_ID>"
         "appID": "2MSZNNJ354.dev.timothyw.patapp",
-        // All paths that should support redirecting.
         "paths": ["/app"]
       }
     ]
   },
-  // This section enables Apple Handoff
   "activitycontinuation": {
     "apps": ["2MSZNNJ354.dev.timothyw.patapp"]
   },
-  // This section enable Shared Web Credentials
   "webcredentials": {
     "apps": ["2MSZNNJ354.dev.timothyw.patapp"]
   }
