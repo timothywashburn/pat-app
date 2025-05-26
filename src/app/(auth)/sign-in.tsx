@@ -46,6 +46,8 @@ export default function SignInScreen() {
                         onChangeText={setEmail}
                         autoCapitalize="none"
                         keyboardType="email-address"
+                        returnKeyType="go"
+                        onSubmitEditing={handleSignIn}
                     />
                 </View>
 
@@ -57,6 +59,8 @@ export default function SignInScreen() {
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
+                        returnKeyType="go"
+                        onSubmitEditing={handleSignIn}
                     />
                 </View>
 

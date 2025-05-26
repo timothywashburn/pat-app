@@ -52,6 +52,8 @@ export default function CreateAccountScreen() {
                         placeholderTextColor={getColor("on-surface-variant")}
                         value={name}
                         onChangeText={setName}
+                        returnKeyType="go"
+                        onSubmitEditing={handleCreateAccount}
                     />
                 </View>
 
@@ -64,6 +66,8 @@ export default function CreateAccountScreen() {
                         onChangeText={setEmail}
                         autoCapitalize="none"
                         keyboardType="email-address"
+                        returnKeyType="go"
+                        onSubmitEditing={handleCreateAccount}
                     />
                 </View>
 
@@ -75,6 +79,8 @@ export default function CreateAccountScreen() {
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
+                        returnKeyType="go"
+                        onSubmitEditing={handleCreateAccount}
                     />
                 </View>
 
@@ -86,6 +92,8 @@ export default function CreateAccountScreen() {
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         secureTextEntry
+                        returnKeyType="go"
+                        onSubmitEditing={handleCreateAccount}
                     />
                 </View>
 
