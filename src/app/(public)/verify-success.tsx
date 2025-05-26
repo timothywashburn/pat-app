@@ -3,73 +3,32 @@ import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { Logger } from "@/src/features/dev/components/Logger";
+import * as Linking from 'expo-linking';
 
 const VerifySuccess: React.FC = () => {
     const { getColor } = useTheme();
 
-    const handleReturnToApp = () => {
-        const deepLinkUrl = 'dev.timothyw.patapp://';
-        const appStoreUrl = 'https://apps.apple.com/app/your-app'; // Replace with actual
-        const playStoreUrl = 'https://play.google.com/store/apps/details?id=your.package.name'; // Replace with actual
+    const handleReturnToApp = async () => {
+        try {
+            const universalLinkUrl = 'https://pat.timothyw.dev/app'; // Replace with your domain
 
-        if (Platform.OS === 'web') {
-            console.log("attempting deep link from web browser");
+            console.log("attempting to open universal link:", universalLinkUrl);
 
-            // Detect mobile browser
-            Logger.debug('unclassified', 'navigator.userAgent', navigator.userAgent);
-            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-
-            if (isMobile) {
-                // Create a hidden iframe to attempt the deep link
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = deepLinkUrl;
-                document.body.appendChild(iframe);
-
-                // Set a timeout to redirect to app store if deep link fails
-                const timeout = setTimeout(() => {
-                    console.log("deep link failed, redirecting to app store");
-                    document.body.removeChild(iframe);
-
-                    if (isIOS) {
-                        window.location.href = appStoreUrl;
-                    } else if (isAndroid) {
-                        // For Android, try intent URL first
-                        const intentUrl = `intent://open#Intent;scheme=dev.timothyw.patapp;package=com.yourpackage.name;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end`;
-                        window.location.href = intentUrl;
-                    } else {
-                        window.location.href = playStoreUrl;
-                    }
-                }, 2500);
-
-                // Clear timeout if page loses focus (app likely opened)
-                const handleVisibilityChange = () => {
-                    if (document.hidden) {
-                        console.log("page hidden, deep link likely succeeded");
-                        clearTimeout(timeout);
-                        document.removeEventListener('visibilitychange', handleVisibilityChange);
-                    }
-                };
-
-                document.addEventListener('visibilitychange', handleVisibilityChange);
-
-                // Also clear on page blur
-                const handleBlur = () => {
-                    console.log("page blurred, deep link likely succeeded");
-                    clearTimeout(timeout);
-                    window.removeEventListener('blur', handleBlur);
-                };
-
-                window.addEventListener('blur', handleBlur);
-
+            if (Platform.OS === 'web') {
+                // For web, directly navigate to the universal link
+                // This will either open your app (if installed) or go to your website
+                window.location.href = universalLinkUrl;
             } else {
-                // Desktop browser - show instructions or redirect to web app
-                console.log("desktop browser detected");
-                alert('Please open this on your mobile device or download our app from the app store.');
+                // For native platforms, use expo-linking
+                const canOpen = await Linking.canOpenURL(universalLinkUrl);
+                if (canOpen) {
+                    await Linking.openURL(universalLinkUrl);
+                } else {
+                    console.log("cannot open universal link");
+                }
             }
+        } catch (err) {
+            console.log('error opening universal link:', err);
         }
     };
 

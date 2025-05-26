@@ -13,7 +13,10 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "dev.timothyw.patapp"
+      "bundleIdentifier": "dev.timothyw.patapp",
+      "associatedDomains": [
+        "applinks:pat.timothyw.dev"
+      ]
     },
     "android": {
       "googleServicesFile": "./google-services.json",
