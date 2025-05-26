@@ -15,7 +15,8 @@
       },
       "bundleIdentifier": "dev.timothyw.patapp",
       "associatedDomains": [
-        "applinks:pat.timothyw.dev"
+        "applinks:pat.timothyw.dev",
+        "applinks:dev-timothyw-patapp.ngrok.io"
       ]
     },
     "android": {
