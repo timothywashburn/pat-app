@@ -25,7 +25,7 @@ export default class DeepLinkHandler {
                     router.replace(`/(tabs)/${DataState.getState().getFirstModule()}`);
                     break;
                 case '/redirect':
-                    router.replace(`/(redirects)/verify-success`);
+                    router.replace(`/(public)/verify-success`);
                     break;
                 default:
                     console.log(`[deeplink] unhandled path: ${path}`);

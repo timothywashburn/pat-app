@@ -20,7 +20,10 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
         });
 
         const isInAuthGroup = segments[0] === '(auth)';
+        const isInPublicGroup = segments[0] === '(public)';
         const isVerifyPage = pathname === '/verify';
+
+        if (isInPublicGroup) return;
 
         if (authStoreStatus == AuthStoreStatus.FULLY_AUTHENTICATED) {
             if (isInAuthGroup) router.replace(`/(tabs)/${getFirstModule()}`);
