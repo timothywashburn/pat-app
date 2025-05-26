@@ -128,7 +128,6 @@ class SocketService {
         });
 
         this.socket.on('message', (data) => {
-            console.log(`socket received message: ${JSON.stringify(data)}`);
             this.handleIncomingMessage(data);
         });
     }
@@ -147,6 +146,9 @@ class SocketService {
         console.log(`socket handling message type: ${type}`);
 
         switch (type) {
+            case SocketMessageType.CLIENT_HEARTBEAT_ACK:
+                // TODO: Handle checking heartbeat ack for api status
+                break;
             case SocketMessageType.CLIENT_VERIFY_EMAIL_RESPONSE:
                 let data = message.data as ClientVerifyEmailResponseData;
                 console.log(`socket handling emailVerified for user ${userId}: ${data.emailVerified}`);
