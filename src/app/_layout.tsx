@@ -16,6 +16,8 @@ import { UserDataStoreStatus, useUserDataStore } from "@/src/features/settings/c
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { NetworkError } from "expo-router/build/rsc/router/errors";
+import { Ionicons } from "@expo/vector-icons";
 
 const DEV_BOOT = false;
 
@@ -30,6 +32,7 @@ const AppContent: React.FC = () => {
     const { authStoreStatus, initializeAuth } = useAuthStore();
     const { userDataStoreStatus, loadUserData } = useUserDataStore();
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
+    const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
 
     useEffect(() => {
         const socketService = SocketService.shared;
@@ -93,6 +96,23 @@ const AppContent: React.FC = () => {
         console.log("dev terminal closed");
     };
 
+    const handleRefresh = async () => {
+        if (isRetryingRefresh) return;
+
+        setIsRetryingRefresh(true);
+        console.log("retrying authentication initialization");
+
+        try {
+            await initializeAuth();
+            console.log("authentication retry successful");
+        } catch (error) {
+            console.log("authentication retry failed");
+            Logger.error('startup', 'failed to retry auth initialization', error);
+        } finally {
+            setIsRetryingRefresh(false);
+        }
+    };
+
     const renderDevTerminal = () => {
         return (
             <SafeAreaView onLayout={hidesplash} className="flex-1 bg-background">
@@ -138,6 +158,35 @@ const AppContent: React.FC = () => {
                         ? "Initializing authentication..."
                         : "Loading user data..."}
                 </Text>
+            </View>
+        );
+    } else if (authStoreStatus === AuthStoreStatus.SERVER_ERROR) {
+        return (
+            <View
+                onLayout={hidesplash}
+                className="flex-1 justify-center items-center bg-background px-8"
+            >
+                <Ionicons name="close-circle-outline" size={64} color="gray" />
+                <Text className="mt-4 text-on-background text-center text-lg">
+                    A server error occurred
+                </Text>
+                <Text className="mt-2 text-on-surface-variant text-center">
+                    Unable to connect to the server. Please check your internet connection and try again (or the server could just be down).
+                </Text>
+                <TouchableOpacity
+                    className="mt-6 px-6 py-3 rounded-lg bg-primary flex-row items-center"
+                    onPress={handleRefresh}
+                    disabled={isRetryingRefresh}
+                >
+                    {isRetryingRefresh ? (
+                        <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+                    ) : (
+                        <Ionicons name="refresh-outline" size={20} color="white" style={{ marginRight: 8 }} />
+                    )}
+                    <Text className="text-on-primary font-medium">
+                        {isRetryingRefresh ? "Retrying..." : "Try Again"}
+                    </Text>
+                </TouchableOpacity>
             </View>
         );
     }

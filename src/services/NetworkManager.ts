@@ -15,12 +15,11 @@ export interface NetworkRequest<ReqData> {
 }
 
 export class NetworkError extends Error {
-    code: number;
+    status: number;
 
-    constructor(message: string, code: number = -1) {
+    constructor(message: string, status: number) {
         super(message);
-        this.name = 'NetworkError';
-        this.code = code;
+        this.status = status;
     }
 }
 
@@ -46,10 +45,7 @@ class NetworkManager {
         request: NetworkRequest<ReqData>
     ): Promise<ResData> {
         const authTokens = useAuthStore.getState().authTokens;
-        if (!authTokens) {
-            console.log('loadPeople: no auth tokens');
-            throw new NetworkError('Could not perform authenticated request: no auth tokens available');
-        }
+        if (!authTokens) throw new Error('could not perform authenticated request: no auth tokens available');
         return this.perform<ReqData, ResData>(request, authTokens.accessToken);
     }
 
@@ -74,27 +70,25 @@ class NetworkManager {
             body: request.body ? JSON.stringify(request.body) : undefined,
         };
 
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            if (response.status >= 500) throw new NetworkError('api server error', response.status);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error('api returned non-json response:', contentType);
+            throw new Error('api server returned unexpected response format');
+        }
+
         try {
-            const response = await fetch(url, options);
             const data = await response.json();
-
-            if (!data.success) {
-                throw new NetworkError(
-                    data.error || 'Unknown error occurred',
-                    response.status
-                );
-            }
-
+            if (!data.success) throw new Error(data.error || 'unknown error occurred');
             return data.data;
-        } catch (error) {
-            if (error instanceof NetworkError) {
-                throw error;
-            }
-
-            console.error('Network request failed:', error);
-            throw new NetworkError(
-                error instanceof Error ? error.message : 'Network request failed'
-            );
+        } catch (jsonError) {
+            console.error('json parse error:', jsonError);
+            throw new Error('invalid json response from server');
         }
     }
 }

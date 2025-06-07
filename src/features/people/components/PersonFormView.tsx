@@ -212,7 +212,6 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 <View className="mb-5">
                     <Text className="text-on-background text-base font-medium mb-2">Properties</Text>
 
-                    {/* Add new property section */}
                     <View className="flex-row items-center mb-3">
                         <View className="flex-1 flex-row">
                             <View className="flex-1 mr-2">
@@ -280,7 +279,6 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 <View className="mb-5">
                     <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
 
-                    {/* Add new note section */}
                     <View className="flex-row items-center mb-3">
                         <TextInput
                             className="bg-surface text-on-surface flex-1 border border-outline rounded-lg p-2 min-h-[60px]"
@@ -294,7 +292,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                         <TouchableOpacity
                             onPress={addNote}
                             disabled={!newNote}
-                            className={`ml-2 p-1 ${(!newPropertyKey || !newPropertyValue) ? 'opacity-40' : ''}`}
+                            className={`ml-2 p-1 ${(!newNote) ? 'opacity-40' : ''}`}
                         >
                             <Ionicons
                                 name="add-circle"
