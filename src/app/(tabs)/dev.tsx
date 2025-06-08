@@ -6,11 +6,13 @@ import PushNotificationSection from "@/src/features/dev/components/PushNotificat
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
 import DevicesSection from "@/src/features/dev/components/DevicesSection";
 import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
+import { ModuleType } from "@timothyw/pat-common";
 
-export default function DevPanel() {
+export const DevPanel: React.FC = () => {
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
+                moduleType={ModuleType.DEV}
                 title="Dev"
                 showAddButton
                 onAddTapped={() => {
@@ -34,3 +36,5 @@ export default function DevPanel() {
         </SafeAreaView>
     );
 }
+
+export default DevPanel;

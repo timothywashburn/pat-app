@@ -3,8 +3,12 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import HamburgerMenu from './HamburgerMenu';
+import { useModuleContext } from "@/src/components/ModuleContext";
+import { ModuleType } from "@timothyw/pat-common";
+import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 
 interface CustomHeaderProps {
+    moduleType: ModuleType;
     title: string;
     showAddButton?: boolean;
     onAddTapped?: () => void;
@@ -12,9 +16,11 @@ interface CustomHeaderProps {
     isFilterActive?: boolean;
     onFilterTapped?: () => void;
     trailing?: () => React.ReactNode;
+    isModuleView?: boolean;
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
+    moduleType,
     title,
     showAddButton = false,
     onAddTapped,
@@ -22,21 +28,34 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     isFilterActive = false,
     onFilterTapped,
     trailing,
+    isModuleView,
 }) => {
     const { getColor } = useTheme();
     const [menuVisible, setMenuVisible] = useState(false);
+    const { hideActiveModule } = useModuleContext();
+    const { isModuleVisible } = useUserDataStore();
 
     return (
         <>
             <View className="bg-surface border-b border-surface">
                 <View className="h-14 flex-row items-center justify-between px-4">
-                    <View className="flex-1 items-start">
-                        <TouchableOpacity
-                            onPress={() => setMenuVisible(true)}
-                        >
-                            <Ionicons name="menu" size={24} color={getColor("on-surface")} />
-                        </TouchableOpacity>
-                    </View>
+                    {isModuleVisible(moduleType) ? (
+                        <View className="flex-1 items-start">
+                            <TouchableOpacity
+                                onPress={() => setMenuVisible(true)}
+                            >
+                                <Ionicons name="menu" size={24} color={getColor("on-surface")} />
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View className="flex-1 items-start">
+                            <TouchableOpacity
+                                onPress={() => hideActiveModule()}
+                            >
+                                <Ionicons name="arrow-back" size={24} color={getColor("on-surface")} />
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
                     <Text className="text-on-surface text-lg font-bold flex-2 text-center">{title}</Text>
 

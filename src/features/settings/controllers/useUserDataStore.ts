@@ -8,27 +8,14 @@ import {
     UpdateUserResponse,
     UserData, UserId
 } from "@timothyw/pat-common";
-import AgendaPanel from "@/src/app/(tabs)/agenda";
-import InboxPanel from "@/src/app/(tabs)/inbox";
-import TasksPanel from "@/src/app/(tabs)/tasks";
-import PeoplePanel from "@/src/app/(tabs)/people";
-import SettingsPanel from "@/src/app/(tabs)/settings";
-import DevPanel from "@/src/app/(tabs)/dev";
+// import { AgendaPanel } from "@/src/app/(tabs)/agenda";
+// import InboxPanel from "@/src/app/(tabs)/inbox";
+// import TasksPanel from "@/src/app/(tabs)/tasks";
+// import PeoplePanel from "@/src/app/(tabs)/people";
+// import SettingsPanel from "@/src/app/(tabs)/settings";
+// import DevPanel from "@/src/app/(tabs)/dev";
 import { Logger } from "@/src/features/dev/components/Logger";
 import React from "react";
-
-export const moduleInfo: Record<ModuleType, {
-    getComponent: () => React.JSX.Element;
-    icon: keyof typeof Ionicons.glyphMap;
-    title: string
-}> = {
-    agenda: { getComponent: AgendaPanel, icon: 'calendar', title: 'Agenda' },
-    inbox: { getComponent: InboxPanel, icon: 'mail', title: 'Inbox' },
-    tasks: { getComponent: TasksPanel, icon: 'list', title: 'Tasks' },
-    people: { getComponent: PeoplePanel, icon: 'people', title: 'People' },
-    settings: { getComponent: SettingsPanel, icon: 'settings', title: 'Settings' },
-    dev: { getComponent: DevPanel, icon: 'code-slash', title: 'Dev' },
-};
 
 export enum UserDataStoreStatus {
     NOT_LOADED = 'not_loaded',
@@ -45,6 +32,7 @@ interface UserDataState {
     loadUserData: () => Promise<void>;
     updateUserData: (partialUserData: UpdateUserRequest) => Promise<void>;
     getFirstModule: () => ModuleType;
+    isModuleVisible: (moduleType: ModuleType) => boolean;
 }
 
 export const useUserDataStore = create<UserDataState>((set, get) => ({
@@ -99,6 +87,15 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
             return ModuleType.AGENDA;
         }
         return data.config.modules.find(module => module.visible)?.type ?? ModuleType.AGENDA;
+    },
+
+    isModuleVisible: (moduleType: ModuleType) => {
+        const { data } = get();
+        if (!data?.config?.modules) {
+            return true;
+        }
+        const module = data.config.modules.find(m => m.type === moduleType);
+        return module?.visible ?? false;
     },
 }));
 

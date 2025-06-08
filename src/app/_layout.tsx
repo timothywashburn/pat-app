@@ -6,18 +6,18 @@ import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
-import { ThemeProvider, useFocusEffect } from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/controllers/ThemeManager";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, AppState, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { UserDataStoreStatus, useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { NetworkError } from "expo-router/build/rsc/router/errors";
 import { Ionicons } from "@expo/vector-icons";
+import { ModuleProvider } from "@/src/components/ModuleContext";
 
 const DEV_BOOT = false;
 
@@ -192,17 +192,19 @@ const AppContent: React.FC = () => {
     }
 
     return (
-        <ToastProvider>
-            <ThemeProvider value={theme}>
-                <AppNavigator onLayout={hidesplash}>
-                    <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                    <Stack screenOptions={{ header: () => null }}>
-                        <Stack.Screen name="(auth)" />
-                        <Stack.Screen name="(tabs)" />
-                    </Stack>
-                </AppNavigator>
-            </ThemeProvider>
-        </ToastProvider>
+        <ModuleProvider>
+            <ToastProvider>
+                <ThemeProvider value={theme}>
+                    <AppNavigator onLayout={hidesplash}>
+                        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                        <Stack screenOptions={{ header: () => null }}>
+                            <Stack.Screen name="(auth)" />
+                            <Stack.Screen name="(tabs)" />
+                        </Stack>
+                    </AppNavigator>
+                </ThemeProvider>
+            </ToastProvider>
+        </ModuleProvider>
     );
 };
 

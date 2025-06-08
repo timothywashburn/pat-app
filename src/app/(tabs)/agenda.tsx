@@ -11,8 +11,9 @@ import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 import { useToast } from "@/src/components/toast/ToastContext";
+import { ModuleType } from "@timothyw/pat-common";
 
-export default function AgendaPanel() {
+export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -114,6 +115,7 @@ export default function AgendaPanel() {
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
+                moduleType={ModuleType.AGENDA}
                 title="Agenda"
                 showAddButton
                 onAddTapped={handleAddItem}
@@ -196,3 +198,5 @@ export default function AgendaPanel() {
         </SafeAreaView>
     );
 }
+
+export default AgendaPanel;

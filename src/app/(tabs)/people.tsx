@@ -11,8 +11,9 @@ import PersonItemView from "@/src/features/people/components/PersonItemView";
 import PersonFormView from "@/src/features/people/components/PersonFormView";
 import PersonDetailView from "@/src/features/people/components/PersonDetailView";
 import { useToast } from "@/src/components/toast/ToastContext";
+import { ModuleType } from "@timothyw/pat-common";
 
-export default function PeoplePanel() {
+export const PeoplePanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const [people, setPeople] = useState<Person[]>([]);
@@ -98,6 +99,7 @@ export default function PeoplePanel() {
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
+                moduleType={ModuleType.PEOPLE}
                 title="People"
                 showAddButton
                 onAddTapped={handleAddPerson}
@@ -175,3 +177,5 @@ export default function PeoplePanel() {
         </SafeAreaView>
     );
 }
+
+export default PeoplePanel;

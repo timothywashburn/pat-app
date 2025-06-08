@@ -7,10 +7,11 @@ import { ModuleManagement } from '@/src/features/settings/components/ModuleManag
 import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
-import { Module } from "@timothyw/pat-common";
+import { Module, ModuleType } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ModuleProps } from "@/src/app/(tabs)/_layout";
 
-export default function SettingsPanel() {
+export const SettingsPanel: React.FC = () => {
     const { errorToast, successToast } = useToast();
     const { signOut, authData } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
@@ -68,6 +69,7 @@ export default function SettingsPanel() {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaView className="bg-background flex-1">
                 <CustomHeader
+                    moduleType={ModuleType.SETTINGS}
                     title="Settings"
                     showAddButton={false}
                     trailing={() => (
@@ -146,3 +148,5 @@ export default function SettingsPanel() {
         </GestureHandlerRootView>
     );
 }
+
+export default SettingsPanel;

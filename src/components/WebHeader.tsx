@@ -2,8 +2,8 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, usePathname } from 'expo-router';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { moduleInfo } from "@/src/features/settings/controllers/useUserDataStore";
 import { Module } from "@timothyw/pat-common";
+import { moduleInfo } from "@/src/components/ModuleInfo";
 
 type WebHeaderProps = {
     modules: Module[];

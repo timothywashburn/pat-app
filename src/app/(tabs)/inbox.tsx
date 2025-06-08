@@ -15,8 +15,9 @@ import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ModuleType } from "@timothyw/pat-common";
 
-export default function InboxPanel() {
+export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const [thoughts, setThoughts] = useState<Thought[]>([]);
@@ -172,6 +173,7 @@ export default function InboxPanel() {
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
+                moduleType={ModuleType.INBOX}
                 title="Inbox"
                 showAddButton={true}
                 onAddTapped={() => setShowingCreateAgendaForm(true)}
@@ -256,3 +258,5 @@ export default function InboxPanel() {
         </SafeAreaView>
     );
 }
+
+export default InboxPanel;
