@@ -28,7 +28,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     isFilterActive = false,
     onFilterTapped,
     trailing,
-    isModuleView,
 }) => {
     const { getColor } = useTheme();
     const [menuVisible, setMenuVisible] = useState(false);
