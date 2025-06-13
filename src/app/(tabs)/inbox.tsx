@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/ThoughtManager';
@@ -42,6 +43,13 @@ export const InboxPanel: React.FC = () => {
         loadThoughts();
         loadTaskLists();
     }, []);
+
+    // Refresh task lists when tab is focused (e.g., after creating task list in tasks tab)
+    useFocusEffect(
+        React.useCallback(() => {
+            loadTaskLists();
+        }, [])
+    );
 
     const loadThoughts = async () => {
         if (isRefreshing) return;
