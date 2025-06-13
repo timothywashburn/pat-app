@@ -13,6 +13,9 @@ import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/ThoughtManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
+import TaskFormView from '@/src/features/tasks/components/TaskFormView';
+import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
+import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ModuleType } from "@timothyw/pat-common";
@@ -29,11 +32,15 @@ export const InboxPanel: React.FC = () => {
     const [editingThought, setEditingThought] = useState<Thought | null>(null);
     const [editedContent, setEditedContent] = useState('');
     const [showingCreateAgendaForm, setShowingCreateAgendaForm] = useState(false);
+    const [showingCreateTaskForm, setShowingCreateTaskForm] = useState(false);
+    const [taskLists, setTaskLists] = useState<TaskListWithTasks[]>([]);
 
     const thoughtManager = ThoughtManager.getInstance();
+    const taskManager = TaskManager.getInstance();
 
     useEffect(() => {
         loadThoughts();
+        loadTaskLists();
     }, []);
 
     const loadThoughts = async () => {
@@ -49,6 +56,16 @@ export const InboxPanel: React.FC = () => {
             errorToast(errorMsg);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const loadTaskLists = async () => {
+        try {
+            await taskManager.loadTaskLists();
+            setTaskLists(taskManager.taskListsWithTasks);
+        } catch (error) {
+            console.error('Failed to load task lists:', error);
+            // Don't show error toast here since this is background loading
         }
     };
 
@@ -111,17 +128,28 @@ export const InboxPanel: React.FC = () => {
         }
     };
 
-    const showTasksWIPAlert = () => {
-        errorToast('This feature has not been implemented yet');
-    };
 
     const handleAgendaFormDismiss = () => {
         setShowingCreateAgendaForm(false);
         setSelectedThought(null);
     };
 
+    const handleTaskFormDismiss = () => {
+        setShowingCreateTaskForm(false);
+        setSelectedThought(null);
+    };
+
     const handleItemCreated = () => {
         if (selectedThought) {
+            handleDeleteThought(selectedThought.id);
+            setSelectedThought(null);
+        }
+    };
+
+    const handleTaskCreated = async () => {
+        if (selectedThought) {
+            // Reload task lists to get fresh data (this will update any TaskManager instance)
+            await loadTaskLists();
             handleDeleteThought(selectedThought.id);
             setSelectedThought(null);
         }
@@ -149,8 +177,15 @@ export const InboxPanel: React.FC = () => {
         setExpandedThoughtId(null);
     };
 
-    const handleMoveToTasks = () => {
-        showTasksWIPAlert();
+    const handleMoveToTasks = (thought: Thought) => {
+        if (taskLists.length === 0) {
+            errorToast('No task lists available. Create a task list first in the Tasks tab.');
+            setExpandedThoughtId(null);
+            return;
+        }
+        
+        setSelectedThought(thought);
+        setShowingCreateTaskForm(true);
         setExpandedThoughtId(null);
     };
 
@@ -229,7 +264,7 @@ export const InboxPanel: React.FC = () => {
                                 onChangeEditContent={setEditedContent}
                                 onCommitEdit={handleEditThought}
                                 onMoveToAgenda={() => handleMoveToAgenda(item)}
-                                onMoveToTasks={handleMoveToTasks}
+                                onMoveToTasks={() => handleMoveToTasks(item)}
                                 onEdit={() => handleStartEdit(item)}
                                 onDelete={() => handleConfirmDelete(item)}
                             />
@@ -255,6 +290,17 @@ export const InboxPanel: React.FC = () => {
                 initialName={selectedThought?.content || ''}
                 isEditMode={false}
             />
+
+            {showingCreateTaskForm && (
+                <TaskFormView
+                    isPresented={showingCreateTaskForm}
+                    onDismiss={handleTaskFormDismiss}
+                    onTaskSaved={handleTaskCreated}
+                    taskLists={taskLists}
+                    initialName={selectedThought?.content || ''}
+                    isEditMode={false}
+                />
+            )}
         </SafeAreaView>
     );
 }
