@@ -58,9 +58,12 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             await get().refreshAuth();
             Logger.debug('auth', 'auth refresh successful');
         } catch (error) {
+            if (error instanceof NetworkError && error.status == 401) {
+                Logger.debug('auth', 'refresh failed (401 unauthorized), signing out');
+                get().signOut();
+                return;
+            }
             Logger.error('auth', 'auth refresh failed', error);
-            return; // TODO: only sign out if token is invalid
-            get().signOut();
         }
     },
 
@@ -137,6 +140,8 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             if (error instanceof NetworkError && error.status >= 500) {
                 set({ authStoreStatus: AuthStoreStatus.SERVER_ERROR });
                 throw new Error(AuthError.SERVER_ERROR);
+            } else if (error instanceof NetworkError) {
+                throw error;
             }
             throw new Error(AuthError.REFRESH_FAILED);
         }

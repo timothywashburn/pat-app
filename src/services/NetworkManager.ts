@@ -55,7 +55,10 @@ class NetworkManager {
         return this.perform<ReqData, ResData>(request, null);
     }
 
-    private async perform<ReqData = never, ResData = never>(request: NetworkRequest<ReqData>, token: string | null = null): Promise<ResData> {
+    private async perform<ReqData = never, ResData = never>(
+        request: NetworkRequest<ReqData>,
+        token: string | null = null
+    ): Promise<ResData> {
         const url = `${this.baseURL}${request.endpoint}`;
 
         const headers: HeadersInit = {
@@ -72,24 +75,29 @@ class NetworkManager {
 
         const response = await fetch(url, options);
 
+        const contentType = response.headers.get('content-type');
+        const isJSON = contentType && contentType.includes('application/json');
+        const data = isJSON ? await response.json().catch((jsonError) => {
+            console.error('json parse error:', jsonError);
+            throw new Error('invalid json response from server');
+        }) : null;
+
         if (!response.ok) {
-            if (response.status >= 500) throw new NetworkError('api server error', response.status);
+            const message = data?.error || response.statusText || 'unknown error occurred';
+            console.error(`API request failed: ${response.status} ${message}`);
+            throw new NetworkError(message, response.status);
         }
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
+        if (!isJSON) {
             console.error('api returned non-json response:', contentType);
             throw new Error('api server returned unexpected response format');
         }
 
-        try {
-            const data = await response.json();
-            if (!data.success) throw new Error(data.error || 'unknown error occurred');
-            return data.data;
-        } catch (jsonError) {
-            console.error('json parse error:', jsonError);
-            throw new Error('invalid json response from server');
+        if (!data.success) {
+            throw new Error(data.error || 'unknown error occurred');
         }
+
+        return data.data;
     }
 }
 
