@@ -26,6 +26,8 @@
     "on-surface-variant": "#2D3748",
     "outline": "#8193b1",
     "outline-variant": "#c0c9d8",
+    "divider": "#c0c9d8",
+    "divider-variant": "#e0e4eb",
     "unknown": "#ff00ff"
   },
   "dark": {
@@ -55,6 +57,8 @@
     "on-surface-variant": "#9AA1B0",
     "outline": "#656e81",
     "outline-variant": "#383d48",
+    "divider": "#000000",
+    "divider-variant": "#16181d",
     "unknown": "#ff00ff"
   }
 }

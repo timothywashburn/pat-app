@@ -33,6 +33,7 @@ type ThemeColors = {
     "on-surface-variant": string;
     "outline": string;
     "outline-variant": string;
+    "divider": string;
     "unknown": string;
 }
 

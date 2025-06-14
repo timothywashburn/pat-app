@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,10 +12,12 @@ import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType } from "@timothyw/pat-common";
+import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 
 export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
+    const { width } = useWindowDimensions();
     const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -30,6 +32,8 @@ export const AgendaPanel: React.FC = () => {
     const [showingDetailView, setShowingDetailView] = useState(false);
 
     const agendaManager = AgendaManager.getInstance();
+
+    const isTableView = width >= 768;
 
     useEffect(() => {
         loadItems();
@@ -112,6 +116,47 @@ export const AgendaPanel: React.FC = () => {
             return 0;
         });
 
+    const renderTableContent = () => (
+        <View className="bg-surface rounded-xl overflow-hidden">
+            <TableHeader />
+            <FlatList
+                data={filteredItems}
+                renderItem={({ item }) => (
+                    <AgendaItemCard
+                        item={item}
+                        onPress={handleItemSelect}
+                        isTableView={true}
+                    />
+                )}
+                keyExtractor={item => item.id}
+                scrollEnabled={false}
+            />
+        </View>
+    );
+
+    const renderCardContent = () => (
+        <FlatList
+            data={filteredItems}
+            renderItem={({ item }) => (
+                <AgendaItemCard
+                    item={item}
+                    onPress={handleItemSelect}
+                    isTableView={false}
+                />
+            )}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{ padding: 16 }}
+            refreshControl={
+                <RefreshControl
+                    refreshing={isRefreshing}
+                    onRefresh={handleRefresh}
+                    colors={[getColor("primary")]}
+                    tintColor={getColor("primary")}
+                />
+            }
+        />
+    );
+
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
@@ -146,25 +191,25 @@ export const AgendaPanel: React.FC = () => {
                     </TouchableOpacity>
                 </View>
             ) : (
-                <FlatList
-                    data={filteredItems}
-                    renderItem={({ item }) => (
-                        <AgendaItemCard
-                            item={item}
-                            onPress={handleItemSelect}
+                <View className={isTableView ? "p-6" : ""}>
+                    {isTableView ? (
+                        <FlatList
+                            data={[filteredItems]} // Wrap in array to render single item
+                            renderItem={() => renderTableContent()}
+                            keyExtractor={() => "table"}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={isRefreshing}
+                                    onRefresh={handleRefresh}
+                                    colors={[getColor("primary")]}
+                                    tintColor={getColor("primary")}
+                                />
+                            }
                         />
+                    ) : (
+                        renderCardContent()
                     )}
-                    keyExtractor={item => item.id}
-                    contentContainerStyle={{ padding: 16 }}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefreshing}
-                            onRefresh={handleRefresh}
-                            colors={[getColor("primary")]}
-                            tintColor={getColor("primary")}
-                        />
-                    }
-                />
+                </View>
             )}
 
             {/* Create new item view */}
