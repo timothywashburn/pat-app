@@ -28,10 +28,10 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
         return rate.toFixed(1);
     };
 
-    const getStreakInfo = (): string => {
-        // For now, just show basic stats
-        const { completedDays, totalDays } = habit.stats;
-        return `${completedDays}/${totalDays} days`;
+    const getCompletionsInfo = (): string => {
+        const { completedDays, totalDays, excusedDays } = habit.stats;
+        const adjustedTotal = totalDays - excusedDays;
+        return `${completedDays}/${adjustedTotal} Completions`;
     };
 
     return (
@@ -78,10 +78,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                 
                 <View className="items-end">
                     <Text className="text-primary text-lg font-bold">
-                        {formatCompletionRate(habit.stats.completionRate)}%
-                    </Text>
-                    <Text className="text-on-surface-variant text-xs">
-                        {getStreakInfo()}
+                        {getCompletionsInfo()}
                     </Text>
                 </View>
             </View>
@@ -89,11 +86,16 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
             {/* Time remaining indicator */}
             {(() => {
                 const timeRemaining = getTimeRemainingUntilRollover(habit.rolloverTime);
+                const getBarColor = () => {
+                    if (timeRemaining.isOverdue) return 'bg-error';
+                    if (timeRemaining.percentage >= 80) return 'bg-error';
+                    return 'bg-primary';
+                };
                 return (
                     <View className="flex-row items-center">
-                        <View className="flex-1 bg-surface-variant rounded-full h-2 mr-3">
+                        <View className="flex-1 bg-outline-variant rounded-full h-2 mr-3">
                             <View 
-                                className={`rounded-full h-2 ${timeRemaining.isOverdue ? 'bg-error' : timeRemaining.totalMinutes < 60 ? 'bg-warning' : 'bg-on-surface-variant'}`}
+                                className={`rounded-full h-2 ${getBarColor()}`}
                                 style={{ width: `${timeRemaining.percentage}%` }}
                             />
                         </View>
@@ -109,17 +111,19 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                 const activeDate = getActiveHabitDate(habit);
                 const currentEntry = habit.entries.find(entry => entry.date === activeDate);
                 
-                const formatDateDisplay = (date: Date): string => {
-                    if (isToday(date)) return 'Today';
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    if (isYesterday(yesterday)) {
-                        return 'Yesterday';
-                    }
-                    return date.toLocaleDateString('en-US', {
-                        month: 'short', 
+                const getDateInfo = (date: Date) => {
+                    const dateStr = date.toLocaleDateString('en-US', {
+                        month: 'numeric', 
                         day: 'numeric' 
                     });
+                    
+                    if (isToday(date)) {
+                        return { dateStr, dayLabel: 'Today', dayColorClass: 'text-primary' };
+                    }
+                    if (isYesterday(date)) {
+                        return { dateStr, dayLabel: 'Yesterday', dayColorClass: 'text-warning' };
+                    }
+                    return { dateStr, dayLabel: null, dayColorClass: null };
                 };
                 
                 const handleMarkHabit = async (status: HabitEntryStatus) => {
@@ -135,48 +139,40 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                 
                 return (
                     <View className="mt-3 pt-3 border-t border-surface-variant">
-                        <Text className="text-on-surface-variant text-xs text-center mb-2">
-                            Mark for {formatDateDisplay(activeDate)}
-                            {currentEntry && (
-                                <Text className="text-on-surface"> • Currently: {
-                                    currentEntry.status === HabitEntryStatus.COMPLETED ? 'Completed' :
-                                    currentEntry.status === HabitEntryStatus.EXCUSED ? 'Excused' : 'Missed'
-                                }</Text>
-                            )}
-                        </Text>
+                        <View className="flex-row items-center justify-center mb-2">
+                            {(() => {
+                                const dateInfo = getDateInfo(activeDate);
+                                return (
+                                    <View className="flex-row items-center">
+                                        <Text className="text-xs text-on-surface-variant">
+                                            For {dateInfo.dateStr}
+                                            {dateInfo.dayLabel && (
+                                                <Text> (</Text>
+                                            )}
+                                        </Text>
+                                        {dateInfo.dayLabel && (
+                                            <Text className={`text-xs ${dateInfo.dayColorClass}`}>
+                                                {dateInfo.dayLabel}
+                                            </Text>
+                                        )}
+                                        {dateInfo.dayLabel && (
+                                            <Text className="text-xs text-on-surface-variant">)</Text>
+                                        )}
+                                        {currentEntry && (
+                                            <Text className="text-on-surface text-xs"> • Currently: {
+                                                currentEntry.status === HabitEntryStatus.COMPLETED ? 'Completed' :
+                                                currentEntry.status === HabitEntryStatus.EXCUSED ? 'Excused' : 'Missed'
+                                            }</Text>
+                                        )}
+                                    </View>
+                                );
+                            })()}
+                        </View>
                         
                         <View className="flex-row">
-                            {/* Complete button */}
+                            {/* Excuse button - moved first */}
                             <TouchableOpacity
                                 className={`flex-1 rounded-md py-2 mr-2 ${
-                                    currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                        ? 'bg-primary' 
-                                        : 'bg-surface-variant border border-primary'
-                                }`}
-                                onPress={() => handleMarkHabit(HabitEntryStatus.COMPLETED)}
-                            >
-                                <View className="flex-row items-center justify-center">
-                                    <Ionicons
-                                        name={currentEntry?.status === HabitEntryStatus.COMPLETED ? "checkmark-circle" : "checkmark-circle-outline"}
-                                        size={16}
-                                        color={currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                            ? getColor('on-primary') 
-                                            : getColor('primary')
-                                        }
-                                    />
-                                    <Text className={`text-sm font-medium ml-1 ${
-                                        currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                            ? 'text-on-primary' 
-                                            : 'text-primary'
-                                    }`}>
-                                        Complete
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                            
-                            {/* Excuse button */}
-                            <TouchableOpacity
-                                className={`flex-1 rounded-md py-2 ${
                                     currentEntry?.status === HabitEntryStatus.EXCUSED 
                                         ? 'bg-warning' 
                                         : 'bg-surface-variant border border-warning'
@@ -201,40 +197,39 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                                     </Text>
                                 </View>
                             </TouchableOpacity>
+                            
+                            {/* Complete button - moved second */}
+                            <TouchableOpacity
+                                className={`flex-1 rounded-md py-2 ${
+                                    currentEntry?.status === HabitEntryStatus.COMPLETED 
+                                        ? 'bg-primary' 
+                                        : 'bg-surface-variant border border-primary'
+                                }`}
+                                onPress={() => handleMarkHabit(HabitEntryStatus.COMPLETED)}
+                            >
+                                <View className="flex-row items-center justify-center">
+                                    <Ionicons
+                                        name={currentEntry?.status === HabitEntryStatus.COMPLETED ? "checkmark-circle" : "checkmark-circle-outline"}
+                                        size={16}
+                                        color={currentEntry?.status === HabitEntryStatus.COMPLETED 
+                                            ? getColor('on-primary') 
+                                            : getColor('primary')
+                                        }
+                                    />
+                                    <Text className={`text-sm font-medium ml-1 ${
+                                        currentEntry?.status === HabitEntryStatus.COMPLETED 
+                                            ? 'text-on-primary' 
+                                            : 'text-primary'
+                                    }`}>
+                                        Complete
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 );
             })()}
             
-            {/* Quick stats */}
-            <View className="flex-row justify-between mt-3 pt-3 border-t border-surface-variant">
-                <View className="items-center">
-                    <Text className="text-primary text-sm font-semibold">
-                        {habit.stats.completedDays}
-                    </Text>
-                    <Text className="text-on-surface-variant text-xs">
-                        Completed
-                    </Text>
-                </View>
-                
-                <View className="items-center">
-                    <Text className="text-warning text-sm font-semibold">
-                        {habit.stats.excusedDays}
-                    </Text>
-                    <Text className="text-on-surface-variant text-xs">
-                        Excused
-                    </Text>
-                </View>
-                
-                <View className="items-center">
-                    <Text className="text-error text-sm font-semibold">
-                        {habit.stats.missedDays}
-                    </Text>
-                    <Text className="text-on-surface-variant text-xs">
-                        Missed
-                    </Text>
-                </View>
-            </View>
         </TouchableOpacity>
     );
 };

@@ -61,7 +61,7 @@ export class HabitManager {
             {
                 id: 'habit-1',
                 name: 'Morning Exercise',
-                description: 'Go for a 30-minute run or workout',
+                description: 'Go for a 30-minute run or workout\nShower\nEat\nGo to School',
                 frequency: HabitFrequency.DAILY,
                 rolloverTime: '06:00',
                 createdAt: new Date('2024-01-01'),
