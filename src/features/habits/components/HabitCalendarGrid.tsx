@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import { HabitEntry, HabitEntryStatus, HabitWithEntries } from '@/src/features/habits/models';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import { fromDateString, Habit, HabitEntry } from "@timothyw/pat-common";
+import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 
 interface HabitCalendarGridProps {
-    habit: HabitWithEntries;
+    habit: Habit;
     selectedYear?: number; // Which year to show (default current year)
     viewMode?: 'weeks' | 'year'; // 'weeks' shows last 52 weeks, 'year' shows specific year
 }
@@ -27,7 +28,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     // Calculate available years based on habit creation date
     useEffect(() => {
-        const habitStartYear = habit.createdAt.getFullYear();
+        const habitStartYear = fromDateString(habit.createdAt).getFullYear();
         const currentYearNum = new Date().getFullYear();
         const years = [];
         for (let year = currentYearNum; year >= habitStartYear; year--) {
@@ -84,7 +85,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     const entryMap = new Map<string, HabitEntry>();
     habit.entries.forEach(entry => {
-        const key = entry.date.toISOString().split('T')[0];
+        const key = fromDateString(entry.date).toISOString().split('T')[0];
         entryMap.set(key, entry);
     });
     const getEntry = (date: Date): HabitEntry | undefined => {
@@ -94,7 +95,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     // Helper function to get display text for a date
     const getDateDisplayText = (date: Date, entry?: HabitEntry): string => {
-        const isBeforeCreation = date < habit.createdAt;
+        const isBeforeCreation = date < fromDateString(habit.createdAt);
         
         if (isBeforeCreation) {
             return `Habit not created yet on ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
@@ -102,9 +103,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
         
         const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         
-        if (!entry || entry.status === HabitEntryStatus.MISSED) {
-            return `Habit missed on ${formattedDate}`;
-        }
+        if (!entry) return `Habit missed on ${formattedDate}`;
         
         switch (entry.status) {
             case HabitEntryStatus.COMPLETED:
@@ -117,12 +116,8 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     };
 
     const getSquareBorderStyle = (date: Date, entry?: HabitEntry) => {
-        const isBeforeCreation = date < habit.createdAt;
-        
-        if (isBeforeCreation || !entry || entry.status === HabitEntryStatus.MISSED) {
-            return 'border border-outline-variant';
-        }
-        
+        const isBeforeCreation = date < fromDateString(habit.createdAt);
+        if (isBeforeCreation || !entry) return 'border border-outline-variant';
         return '';
     };
 
@@ -136,8 +131,6 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                 return 'bg-primary';
             case HabitEntryStatus.EXCUSED:
                 return 'bg-warning';
-            case HabitEntryStatus.MISSED:
-                return 'bg-background';
             default:
                 return 'bg-background';
         }
@@ -146,14 +139,12 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     // Get opacity for a specific date (to show intensity like GitHub)
     const getSquareOpacity = (date: Date): number => {
         const entry = getEntry(date);
-        // console.log(`Checking date: ${date.toLocaleDateString()} - Entry: ${entry ? entry.status : 'none'}`);
 
-        if (date < habit.createdAt) return 0.15;
-        if (!entry || entry.status === HabitEntryStatus.MISSED) return 0.3;
+        if (date < fromDateString(habit.createdAt)) return 0.15;
+        if (!entry) return 0.3;
         return 1.0;
     };
 
-    // Group all grid dates into weeks with visibility info
     interface Day {
         date: Date;
         visible: boolean;

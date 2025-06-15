@@ -1,26 +1,11 @@
-export interface TaskList {
-    id: string;
-    name: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import { TaskData, TaskListData } from "@timothyw/pat-common";
 
-export interface Task {
-    id: string;
-    name: string;
-    notes?: string;
-    completed: boolean;
-    taskListId: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface TaskListWithTasks extends TaskList {
-    tasks: Task[];
+export interface TaskListWithTasks extends TaskListData {
+    tasks: TaskData[];
 }
 
 // Utility function for consistent task sorting across all views
-export const sortTasks = (tasks: Task[]): Task[] => {
+export const sortTasks = (tasks: TaskData[]): TaskData[] => {
     return tasks.sort((a, b) => {
         // Sort incomplete tasks first, then completed tasks
         if (a.completed !== b.completed) {

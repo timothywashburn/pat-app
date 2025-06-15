@@ -12,13 +12,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
-import { Task, TaskListWithTasks } from '@/src/features/tasks/models';
+import { TaskListWithTasks } from '@/src/features/tasks/models';
+import { TaskData, TaskListId } from "@timothyw/pat-common";
 
 interface TaskFormViewProps {
     isPresented: boolean;
     onDismiss: () => void;
     onTaskSaved?: () => void;
-    existingTask?: Task;
+    existingTask?: TaskData;
     taskLists: TaskListWithTasks[];
     defaultTaskListId?: string;
     initialName?: string;
@@ -40,8 +41,8 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
 
     const [name, setName] = useState(existingTask?.name || initialName);
     const [notes, setNotes] = useState(existingTask?.notes || '');
-    const [selectedTaskListId, setSelectedTaskListId] = useState(
-        existingTask?.taskListId || defaultTaskListId || (taskLists[0]?.id || '')
+    const [selectedTaskListId, setSelectedTaskListId] = useState<TaskListId>(
+        existingTask?.taskListId || defaultTaskListId || (taskLists[0]?._id || '')
     );
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -134,13 +135,13 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
         } else {
             setName(initialName);
             setNotes('');
-            setSelectedTaskListId(defaultTaskListId || (taskLists[0]?.id || ''));
+            setSelectedTaskListId(defaultTaskListId || (taskLists[0]?._id || ''));
         }
         setErrorMessage(null);
         onDismiss();
     };
 
-    const selectedTaskList = taskLists.find(list => list.id === selectedTaskListId);
+    const selectedTaskList = taskLists.find(list => list._id === selectedTaskListId);
 
     return (
         <View
@@ -227,19 +228,19 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
                         <View className="bg-surface border border-outline rounded-lg">
                             {taskLists.map((taskList, index) => (
                                 <TouchableOpacity
-                                    key={taskList.id}
+                                    key={taskList._id}
                                     className={`flex-row items-center justify-between p-3 ${
                                         index < taskLists.length - 1 ? 'border-b border-outline' : ''
                                     }`}
-                                    onPress={() => setSelectedTaskListId(taskList.id)}
+                                    onPress={() => setSelectedTaskListId(taskList._id)}
                                 >
                                     <Text className="text-on-surface text-base flex-1">
                                         {taskList.name}
                                     </Text>
                                     <Ionicons
-                                        name={selectedTaskListId === taskList.id ? 'radio-button-on' : 'radio-button-off'}
+                                        name={selectedTaskListId === taskList._id ? 'radio-button-on' : 'radio-button-off'}
                                         size={20}
-                                        color={selectedTaskListId === taskList.id ? getColor('primary') : getColor('on-surface-variant')}
+                                        color={selectedTaskListId === taskList._id ? getColor('primary') : getColor('on-surface-variant')}
                                     />
                                 </TouchableOpacity>
                             ))}

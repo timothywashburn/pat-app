@@ -1,24 +1,25 @@
-import { 
-    Habit, 
-    HabitEntry, 
-    HabitWithEntries, 
-    HabitFrequency, 
-    HabitEntryStatus,
-    calculateHabitStats,
-    getDateRange,
+import {
     getTodayDate,
-    getYesterdayDate
+    getYesterdayDate, isSameDay
 } from '@/src/features/habits/models';
+import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
+import {
+    CreateHabitRequest,
+    CreateHabitResponse,
+    UpdateHabitRequest,
+    UpdateHabitResponse,
+    GetHabitsResponse,
+    DeleteHabitResponse,
+    CreateHabitEntryRequest,
+    CreateHabitEntryResponse, Habit, toDateString, HabitEntry, fromDateString
+} from '@timothyw/pat-common';
+import { HabitEntryStatus, HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
 
 export class HabitManager {
     private static instance: HabitManager;
     private _habits: Habit[] = [];
-    private _habitEntries: HabitEntry[] = [];
-    private _habitsWithEntries: HabitWithEntries[] = [];
 
-    private constructor() {
-        this.initializeMockData();
-    }
+    private constructor() {}
 
     static getInstance(): HabitManager {
         if (!HabitManager.instance) {
@@ -31,155 +32,22 @@ export class HabitManager {
         return [...this._habits];
     }
 
-    get habitEntries(): HabitEntry[] {
-        return [...this._habitEntries];
-    }
-
-    get habitsWithEntries(): HabitWithEntries[] {
-        return [...this._habitsWithEntries];
-    }
-
-    // ===========================================
-    // MOCK DATA GENERATION (REMOVE WHEN API IS READY)
-    // ===========================================
-    
-    private initializeMockData(): void {
-        console.log('HabitManager: Initializing with mock data');
-        
-        // Create mock habits
-        this._habits = this.generateMockHabits();
-        
-        // Create mock entries for each habit
-        this._habitEntries = this.generateMockEntries(this._habits);
-        
-        // Combine habits with their entries and stats
-        this.updateHabitsWithEntries();
-    }
-
-    private generateMockHabits(): Habit[] {
-        const mockHabits: Habit[] = [
-            {
-                id: 'habit-1',
-                name: 'Morning Exercise',
-                description: 'Go for a 30-minute run or workout\nShower\nEat\nGo to School',
-                frequency: HabitFrequency.DAILY,
-                rolloverTime: '06:00',
-                createdAt: new Date('2024-01-01'),
-                updatedAt: new Date('2024-01-01')
-            },
-            {
-                id: 'habit-2',
-                name: 'Read for 20 minutes',
-                description: 'Read a book or article for personal development',
-                frequency: HabitFrequency.DAILY,
-                rolloverTime: '00:00',
-                createdAt: new Date('2024-01-15'),
-                updatedAt: new Date('2024-01-15')
-            },
-            {
-                id: 'habit-3',
-                name: 'Meditate',
-                description: 'Practice mindfulness for 10 minutes',
-                frequency: HabitFrequency.DAILY,
-                rolloverTime: '22:00',
-                createdAt: new Date('2024-02-01'),
-                updatedAt: new Date('2024-02-01')
-            }
-        ];
-
-        return mockHabits;
-    }
-
-    // Simple deterministic pseudo-random number generator (seeded)
-    private seededRandom(seed: number): () => number {
-        seed += 4;
-        let x = Math.sin(seed) * 10000;
-        return () => {
-            x = Math.sin(x) * 10000;
-            return x - Math.floor(x);
-        };
-    }
-
-    private generateMockEntries(habits: Habit[]): HabitEntry[] {
-        const entries: HabitEntry[] = [];
-        const today = new Date();
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() - 365); // Last 365 days
-
-        habits.forEach((habit, habitIndex) => {
-            const habitStartDate = habit.createdAt > startDate ? habit.createdAt : startDate;
-            const dateRange = getDateRange(habitStartDate, today);
-
-            // Create a deterministic seed based on habit ID
-            const habitSeed = habit.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            const random = this.seededRandom(habitSeed);
-
-            dateRange.forEach((date, index) => {
-                // Use deterministic random for consistent results
-                let status: HabitEntryStatus;
-                const randomValue = random();
-                
-                // Different habits have different success patterns
-                let completionRate = 0.7; // Default 70%
-                let excuseRate = 0.1; // Default 10%
-                
-                if (habitIndex === 0) { // Morning Exercise - slightly lower completion
-                    completionRate = 0.65;
-                    excuseRate = 0.15;
-                } else if (habitIndex === 1) { // Reading - higher completion
-                    completionRate = 0.75;
-                    excuseRate = 0.08;
-                } else if (habitIndex === 2) { // Meditation - moderate completion
-                    completionRate = 0.68;
-                    excuseRate = 0.12;
-                }
-                
-                if (randomValue < completionRate) {
-                    status = HabitEntryStatus.COMPLETED;
-                } else if (randomValue < completionRate + excuseRate) {
-                    status = HabitEntryStatus.EXCUSED;
-                } else {
-                    status = HabitEntryStatus.MISSED;
-                }
-                
-                entries.push({
-                    id: `${habit.id}-${date}`,
-                    habitId: habit.id,
-                    date: date,
-                    status: status,
-                    completedAt: status === HabitEntryStatus.COMPLETED ? date : undefined,
-                    excusedAt: status === HabitEntryStatus.EXCUSED ? date : undefined,
-                    createdAt: date,
-                    updatedAt: date
-                });
-            });
-        });
-
-        return entries;
-    }
-
-    // ===========================================
-    // END MOCK DATA GENERATION
-    // ===========================================
-
-    private updateHabitsWithEntries(): void {
-        this._habitsWithEntries = this._habits.map(habit => {
-            const entries = this._habitEntries.filter(entry => entry.habitId === habit.id);
-            const stats = calculateHabitStats(entries);
-            
-            return {
-                ...habit,
-                entries: entries.sort((a, b) => b.date.getTime() - a.date.getTime()),
-                stats
-            };
-        });
-    }
-
-    // Public API methods (these will call actual API endpoints later)
     async loadHabits(): Promise<void> {
-        // TODO: Replace with actual API call
-        console.log('HabitManager: Loading habits (using mock data)');
-        this.initializeMockData();
+        try {
+            const response = await NetworkManager.shared.performAuthenticated<undefined, GetHabitsResponse>({
+                endpoint: '/api/habits',
+                method: HTTPMethod.GET,
+            });
+
+            if (!response.habits || !Array.isArray(response.habits)) {
+                throw new Error('Invalid response format');
+            }
+
+            this._habits = response.habits;
+        } catch (error) {
+            console.error('Failed to load habits:', error);
+            throw error;
+        }
     }
 
     async createHabit(params: {
@@ -188,21 +56,38 @@ export class HabitManager {
         frequency?: HabitFrequency;
         rolloverTime?: string;
     }): Promise<Habit> {
-        // TODO: Replace with actual API call
-        const newHabit: Habit = {
-            id: `habit-${Date.now()}`,
+        const body: CreateHabitRequest = {
             name: params.name,
             description: params.description,
-            frequency: params.frequency || HabitFrequency.DAILY,
-            rolloverTime: params.rolloverTime || '00:00',
-            createdAt: new Date(),
-            updatedAt: new Date()
+            frequency: 'daily', // API only supports daily for now
+            rolloverTime: params.rolloverTime || '00:00'
         };
 
-        this._habits.push(newHabit);
-        this.updateHabitsWithEntries();
-        
-        return newHabit;
+        try {
+            const response = await NetworkManager.shared.performAuthenticated<CreateHabitRequest, CreateHabitResponse>({
+                endpoint: '/api/habits',
+                method: HTTPMethod.POST,
+                body
+            });
+
+            if (!response.habit) {
+                throw new Error('Invalid response format');
+            }
+
+            // Refresh habits list
+            await this.loadHabits();
+
+            // Find the newly created habit
+            const newHabit = this._habits.find(h => h._id === response.habit._id);
+            if (!newHabit) {
+                throw new Error('Failed to create habit');
+            }
+
+            return newHabit;
+        } catch (error) {
+            console.error('Failed to create habit:', error);
+            throw error;
+        }
     }
 
     async updateHabit(id: string, updates: {
@@ -211,70 +96,93 @@ export class HabitManager {
         frequency?: HabitFrequency;
         rolloverTime?: string;
     }): Promise<void> {
-        // TODO: Replace with actual API call
-        const habitIndex = this._habits.findIndex(h => h.id === id);
-        if (habitIndex === -1) {
-            throw new Error('Habit not found');
+        const body: UpdateHabitRequest = {};
+
+        if (updates.name !== undefined) {
+            body.name = updates.name;
+        }
+        if (updates.description !== undefined) {
+            body.description = updates.description;
+        }
+        if (updates.frequency !== undefined) {
+            body.frequency = 'daily'; // API only supports daily for now
+        }
+        if (updates.rolloverTime !== undefined) {
+            body.rolloverTime = updates.rolloverTime;
         }
 
-        this._habits[habitIndex] = {
-            ...this._habits[habitIndex],
-            ...updates,
-            updatedAt: new Date()
-        };
+        try {
+            await NetworkManager.shared.performAuthenticated<UpdateHabitRequest, UpdateHabitResponse>({
+                endpoint: `/api/habits/${id}`,
+                method: HTTPMethod.PUT,
+                body
+            });
 
-        this.updateHabitsWithEntries();
+            // Refresh habits list
+            await this.loadHabits();
+        } catch (error) {
+            console.error('Failed to update habit:', error);
+            throw error;
+        }
     }
 
     async deleteHabit(id: string): Promise<void> {
-        // TODO: Replace with actual API call
-        this._habits = this._habits.filter(h => h.id !== id);
-        this._habitEntries = this._habitEntries.filter(e => e.habitId !== id);
-        this.updateHabitsWithEntries();
+        try {
+            await NetworkManager.shared.performAuthenticated<undefined, DeleteHabitResponse>({
+                endpoint: `/api/habits/${id}`,
+                method: HTTPMethod.DELETE
+            });
+
+            // Refresh habits list
+            await this.loadHabits();
+        } catch (error) {
+            console.error('Failed to delete habit:', error);
+            throw error;
+        }
     }
 
     async markHabitEntry(habitId: string, date: Date, status: HabitEntryStatus): Promise<void> {
-        // TODO: Replace with actual API call
-        const existingEntryIndex = this._habitEntries.findIndex(
-            e => e.habitId === habitId && e.date === date
-        );
+        const body: CreateHabitEntryRequest = {
+            date: toDateString(date),
+            status
+        };
 
-        const now = new Date();
-        
-        if (existingEntryIndex !== -1) {
-            // Update existing entry
-            this._habitEntries[existingEntryIndex] = {
-                ...this._habitEntries[existingEntryIndex],
-                status,
-                completedAt: status === HabitEntryStatus.COMPLETED ? now : undefined,
-                excusedAt: status === HabitEntryStatus.EXCUSED ? now : undefined,
-                updatedAt: now
-            };
-        } else {
-            // Create new entry
-            const newEntry: HabitEntry = {
-                id: `${habitId}-${date}`,
-                habitId,
-                date,
-                status,
-                completedAt: status === HabitEntryStatus.COMPLETED ? now : undefined,
-                excusedAt: status === HabitEntryStatus.EXCUSED ? now : undefined,
-                createdAt: now,
-                updatedAt: now
-            };
-            
-            this._habitEntries.push(newEntry);
+        try {
+            await NetworkManager.shared.performAuthenticated<CreateHabitEntryRequest, CreateHabitEntryResponse>({
+                endpoint: `/api/habits/${habitId}/entries`,
+                method: HTTPMethod.POST,
+                body
+            });
+
+            await this.loadHabits();
+        } catch (error) {
+            console.error('Failed to mark habit entry:', error);
+            throw error;
         }
-
-        this.updateHabitsWithEntries();
     }
 
-    getHabitById(id: string): HabitWithEntries | undefined {
-        return this._habitsWithEntries.find(h => h.id === id);
+    async deleteHabitEntry(habitId: string, date: Date): Promise<void> {
+        try {
+            await NetworkManager.shared.performAuthenticated<undefined, DeleteHabitResponse>({
+                endpoint: `/api/habits/${habitId}/entries/${date}`,
+                method: HTTPMethod.DELETE
+            });
+
+            await this.loadHabits();
+        } catch (error) {
+            console.error('Failed to delete habit entry:', error);
+            throw error;
+        }
+    }
+
+    getHabitById(id: string): Habit | undefined {
+        return this._habits.find(h => h._id === id);
     }
 
     getHabitEntryByDate(habitId: string, date: Date): HabitEntry | undefined {
-        return this._habitEntries.find(e => e.habitId === habitId && e.date === date);
+        const habit = this.getHabitById(habitId);
+        if (!habit) return undefined;
+        return habit.entries.find(e => isSameDay(fromDateString(e.date), date));
     }
 
     getTodayEntry(habitId: string): HabitEntry | undefined {

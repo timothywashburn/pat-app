@@ -2,15 +2,15 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
-    HabitWithEntries,
     getTimeRemainingUntilRollover,
     formatTimeRemaining,
     getActiveHabitDate,
-    HabitEntryStatus,
     isToday, isYesterday
 } from '@/src/features/habits/models';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
+import { HabitWithEntries } from '@timothyw/pat-common/dist/types/models/habit-data';
+import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 
 interface HabitCardProps {
     habit: HabitWithEntries;
@@ -128,9 +128,11 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                 
                 const handleMarkHabit = async (status: HabitEntryStatus) => {
                     try {
-                        // If clicking the currently selected status, deselect it (mark as missed)
-                        const targetStatus = currentEntry?.status === status ? HabitEntryStatus.MISSED : status;
-                        await habitManager.markHabitEntry(habit.id, activeDate, targetStatus);
+                        if (currentEntry?.status === status) {
+                            await habitManager.deleteHabitEntry(habit._id, activeDate);
+                        } else {
+                            await habitManager.markHabitEntry(habit._id, activeDate, status);
+                        }
                         onHabitUpdated?.();
                     } catch (error) {
                         console.error('Failed to mark habit:', error);

@@ -12,7 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
-import { Habit, HabitFrequency } from '@/src/features/habits/models';
+import { Habit } from "@timothyw/pat-common";
+import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
 
 interface HabitFormViewProps {
     isPresented: boolean;
@@ -70,7 +71,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
             };
 
             if (isEditMode && existingHabit) {
-                await habitManager.updateHabit(existingHabit.id, habitData);
+                await habitManager.updateHabit(existingHabit._id, habitData);
             } else {
                 await habitManager.createHabit(habitData);
             }
@@ -107,7 +108,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await habitManager.deleteHabit(existingHabit.id);
+                            await habitManager.deleteHabit(existingHabit._id);
                             onHabitSaved?.();
                             onDismiss();
                         } catch (error) {

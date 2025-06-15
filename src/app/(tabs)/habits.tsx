@@ -2,24 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '@/src/components/CustomHeader';
-import { ModuleType } from "@timothyw/pat-common";
+import { Habit, ModuleType } from "@timothyw/pat-common";
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
-import { HabitWithEntries } from '@/src/features/habits/models';
 import HabitCard from '@/src/features/habits/components/HabitCard';
 import HabitFormView from '@/src/features/habits/components/HabitFormView';
 import HabitDetailView from '@/src/features/habits/components/HabitDetailView';
-import DayEntryModal from '@/src/features/habits/components/DayEntryModal';
 
 export const HabitsPanel: React.FC = () => {
-    const [habits, setHabits] = useState<HabitWithEntries[]>([]);
+    const [habits, setHabits] = useState<Habit[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showHabitForm, setShowHabitForm] = useState(false);
-    const [editingHabit, setEditingHabit] = useState<HabitWithEntries | null>(null);
+    const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
     const [showHabitDetail, setShowHabitDetail] = useState(false);
-    const [selectedHabit, setSelectedHabit] = useState<HabitWithEntries | null>(null);
-    const [showDayEntry, setShowDayEntry] = useState(false);
-    const [dayEntryHabit, setDayEntryHabit] = useState<HabitWithEntries | null>(null);
-    const [dayEntryDate, setDayEntryDate] = useState<string | undefined>(undefined);
+    const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
 
     useEffect(() => {
         loadHabits();
@@ -30,7 +25,7 @@ export const HabitsPanel: React.FC = () => {
             setIsLoading(true);
             const manager = HabitManager.getInstance();
             await manager.loadHabits();
-            setHabits(manager.habitsWithEntries);
+            setHabits(manager.habits);
         } catch (error) {
             console.error('Failed to load habits:', error);
         } finally {
@@ -43,17 +38,17 @@ export const HabitsPanel: React.FC = () => {
         setShowHabitForm(true);
     };
 
-    const handleEditHabit = (habit: HabitWithEntries) => {
+    const handleEditHabit = (habit: Habit) => {
         setEditingHabit(habit);
         setShowHabitForm(true);
     };
 
-    const handleHabitPress = (habit: HabitWithEntries) => {
+    const handleHabitPress = (habit: Habit) => {
         setSelectedHabit(habit);
         setShowHabitDetail(true);
     };
 
-    const handleEditHabitFromDetail = (habit: HabitWithEntries) => {
+    const handleEditHabitFromDetail = (habit: Habit) => {
         setShowHabitDetail(false);
         setEditingHabit(habit);
         setShowHabitForm(true);
@@ -72,12 +67,6 @@ export const HabitsPanel: React.FC = () => {
     const handleCloseDetail = () => {
         setShowHabitDetail(false);
         setSelectedHabit(null);
-    };
-
-    const handleCloseDayEntry = () => {
-        setShowDayEntry(false);
-        setDayEntryHabit(null);
-        setDayEntryDate(undefined);
     };
 
     const handleHabitUpdated = () => {
@@ -112,7 +101,7 @@ export const HabitsPanel: React.FC = () => {
                         
                         {habits.map((habit, index) => (
                             <HabitCard
-                                key={habit.id}
+                                key={habit._id}
                                 habit={habit}
                                 onPress={handleHabitPress}
                                 onEditPress={handleEditHabit}
@@ -137,14 +126,6 @@ export const HabitsPanel: React.FC = () => {
                 onDismiss={handleCloseDetail}
                 habit={selectedHabit}
                 onEditPress={handleEditHabitFromDetail}
-                onHabitUpdated={handleHabitUpdated}
-            />
-
-            <DayEntryModal
-                isPresented={showDayEntry}
-                onDismiss={handleCloseDayEntry}
-                habit={dayEntryHabit}
-                selectedDate={dayEntryDate}
                 onHabitUpdated={handleHabitUpdated}
             />
         </SafeAreaView>

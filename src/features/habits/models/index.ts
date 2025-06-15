@@ -1,66 +1,21 @@
-export enum HabitFrequency {
-    DAILY = 'daily',
-    WEEKLY = 'weekly',
-    EVERY_N_DAYS = 'every_n_days',
-    WEEKDAYS_ONLY = 'weekdays_only',
-    CUSTOM = 'custom'
-}
-
-export enum HabitEntryStatus {
-    COMPLETED = 'completed',
-    EXCUSED = 'excused',
-    MISSED = 'missed'
-}
-
-export interface Habit {
-    id: string;
-    name: string;
-    description?: string;
-    frequency: HabitFrequency;
-    rolloverTime: string; // "HH:MM" format (24-hour)
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface HabitEntry {
-    id: string;
-    habitId: string;
-    date: Date;
-    status: HabitEntryStatus;
-    completedAt?: Date;
-    excusedAt?: Date;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export interface HabitStats {
-    totalDays: number;
-    completedDays: number;
-    excusedDays: number;
-    missedDays: number;
-    completionRate: number; // 0-100 percentage
-    completionRateExcludingExcused: number; // 0-100 percentage
-}
-
-export interface HabitWithEntries extends Habit {
-    entries: HabitEntry[];
-    stats: HabitStats;
-}
+import {
+    HabitData,
+    HabitEntryData,
+    HabitEntryStatus,
+    HabitStats
+} from "@timothyw/pat-common/src/types/models/habit-data";
+import { fromDateString, Habit } from "@timothyw/pat-common";
 
 export const parseDate = (dateString: string): Date => {
     return new Date(dateString + 'T00:00:00');
 };
 
-export const calculateHabitStats = (entries: HabitEntry[]): HabitStats => {
-    const totalDays = entries.length;
-    const completedDays = entries.filter(entry => entry.status === HabitEntryStatus.COMPLETED).length;
-    const excusedDays = entries.filter(entry => entry.status === HabitEntryStatus.EXCUSED).length;
-    const missedDays = entries.filter(entry => entry.status === HabitEntryStatus.MISSED).length;
-    
-    const completionRate = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
-    const completionRateExcludingExcused = (totalDays - excusedDays) > 0 
-        ? (completedDays / (totalDays - excusedDays)) * 100 
-        : 0;
+export const calculateHabitStats = (habit: Habit): HabitStats => {
+    const completedDays = habit.entries.filter(entry => entry.status === HabitEntryStatus.COMPLETED).length;
+    const excusedDays = habit.entries.filter(entry => entry.status === HabitEntryStatus.EXCUSED).length;
+    const totalDays = getDaysBetweenInclusive(fromDateString(habit.createdAt), getTodayDate());
+    const missedDays = totalDays - completedDays - excusedDays;
+    const completionRate = completedDays / (totalDays - excusedDays) * 100;
 
     return {
         totalDays,
@@ -68,7 +23,6 @@ export const calculateHabitStats = (entries: HabitEntry[]): HabitStats => {
         excusedDays,
         missedDays,
         completionRate,
-        completionRateExcludingExcused
     };
 };
 
@@ -85,6 +39,17 @@ export const getDateRange = (startDate: Date, endDate: Date): Date[] => {
     return dates;
 };
 
+export const getDaysBetweenInclusive = (startDate: Date, endDate: Date): number => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    const diffMs = Math.abs(end.getTime() - start.getTime());
+    return Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+}
+
 export const getTodayDate = (): Date => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -96,6 +61,12 @@ export const getYesterdayDate = (): Date => {
     yesterday.setDate(yesterday.getDate() - 1);
     return yesterday;
 };
+
+export const isSameDay = (date1: Date, date2: Date): boolean => {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+}
 
 export const isToday = (date: Date): boolean => {
     const today = new Date();

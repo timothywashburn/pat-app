@@ -1,5 +1,4 @@
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
-import { Task, TaskList, TaskListWithTasks } from '@/src/features/tasks/models';
 import {
     CreateTaskRequest,
     CreateTaskResponse,
@@ -12,12 +11,14 @@ import {
     CreateTaskListResponse,
     UpdateTaskListRequest,
     UpdateTaskListResponse,
-    GetTaskListsResponse, TaskListId
+    GetTaskListsResponse, TaskListId, TaskListData
 } from '@timothyw/pat-common';
+import { Task } from "react-native";
+import { TaskListWithTasks } from "@/src/features/tasks/models";
 
 export class TaskManager {
     private static instance: TaskManager;
-    private _taskLists: TaskList[] = [];
+    private _taskLists: TaskListData[] = [];
     private _tasks: Task[] = [];
     private _taskListsWithTasks: TaskListWithTasks[] = [];
 
@@ -30,7 +31,7 @@ export class TaskManager {
         return TaskManager.instance;
     }
 
-    get taskLists(): TaskList[] {
+    get taskLists(): TaskListData[] {
         return [...this._taskLists];
     }
 
@@ -99,11 +100,11 @@ export class TaskManager {
     private updateTaskListsWithTasks(): void {
         this._taskListsWithTasks = this._taskLists.map(taskList => ({
             ...taskList,
-            tasks: this._tasks.filter(task => task.taskListId === taskList.id),
+            tasks: this._tasks.filter(task => task.taskListId === taskList._id),
         }));
     }
 
-    async createTaskList(name: string): Promise<TaskList> {
+    async createTaskList(name: string): Promise<TaskListData> {
         const body: CreateTaskListRequest = { name };
 
         try {
@@ -117,7 +118,7 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
-            const taskList: TaskList = {
+            const taskList: TaskListData = {
                 id: response.taskList.id,
                 name: response.taskList.name,
                 createdAt: new Date(response.taskList.createdAt),

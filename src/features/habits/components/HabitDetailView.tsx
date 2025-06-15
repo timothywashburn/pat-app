@@ -8,15 +8,17 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { HabitWithEntries, formatTimeRemaining, getTimeRemainingUntilRollover, HabitEntryStatus, getTodayDate, getYesterdayDate } from '@/src/features/habits/models';
+import { formatTimeRemaining, getTimeRemainingUntilRollover, getTodayDate, getYesterdayDate } from '@/src/features/habits/models';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import HabitCalendarGrid from './HabitCalendarGrid';
+import { fromDateString, Habit } from "@timothyw/pat-common";
+import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 
 interface HabitDetailViewProps {
     isPresented: boolean;
     onDismiss: () => void;
-    habit: HabitWithEntries | null;
-    onEditPress?: (habit: HabitWithEntries) => void;
+    habit: Habit | null;
+    onEditPress?: (habit: Habit) => void;
     onHabitUpdated?: () => void;
 }
 
@@ -119,13 +121,15 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                             const todayDate = getTodayDate();
                             const yesterdayDate = getYesterdayDate();
                             const targetDate = selectedDay === 'today' ? todayDate : yesterdayDate;
-                            const currentEntry = habit.entries.find(entry => entry.date === targetDate);
+                            const currentEntry = habit.entries.find(entry => fromDateString(entry.date) === targetDate);
                             
                             const handleMarkHabit = async (status: HabitEntryStatus) => {
                                 try {
-                                    const targetStatus = currentEntry?.status === status ? HabitEntryStatus.MISSED : status;
-                                    await habitManager.markHabitEntry(habit.id, targetDate, targetStatus);
-                                    onHabitUpdated?.();
+                                    if (currentEntry?.status === status) {
+                                        await habitManager.deleteHabitEntry(habit._id, targetDate);
+                                    } else {
+                                        await habitManager.markHabitEntry(habit._id, targetDate, status);
+                                    }
                                 } catch (error) {
                                     console.error('Failed to mark habit:', error);
                                 }
@@ -307,7 +311,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                             <View className="flex-row justify-between">
                                 <Text className="text-on-surface-variant">Created</Text>
                                 <Text className="text-on-surface">
-                                    {habit.createdAt.toLocaleDateString()}
+                                    {fromDateString(habit.createdAt).toLocaleDateString()}
                                 </Text>
                             </View>
                             
