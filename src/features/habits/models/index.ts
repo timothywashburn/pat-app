@@ -25,7 +25,7 @@ export interface Habit {
 export interface HabitEntry {
     id: string;
     habitId: string;
-    date: string; // YYYY-MM-DD format
+    date: Date;
     status: HabitEntryStatus;
     completedAt?: Date;
     excusedAt?: Date;
@@ -46,11 +46,6 @@ export interface HabitWithEntries extends Habit {
     entries: HabitEntry[];
     stats: HabitStats;
 }
-
-// Utility functions
-export const formatDate = (date: Date): string => {
-    return date.toISOString().split('T')[0];
-};
 
 export const parseDate = (dateString: string): Date => {
     return new Date(dateString + 'T00:00:00');
@@ -77,34 +72,43 @@ export const calculateHabitStats = (entries: HabitEntry[]): HabitStats => {
     };
 };
 
-export const getDateRange = (startDate: Date, endDate: Date): string[] => {
-    const dates: string[] = [];
+export const getDateRange = (startDate: Date, endDate: Date): Date[] => {
+    const dates: Date[] = [];
     const currentDate = new Date(startDate);
+    currentDate.setHours(0, 0, 0, 0);
     
     while (currentDate <= endDate) {
-        dates.push(formatDate(currentDate));
+        dates.push(new Date(currentDate));
         currentDate.setDate(currentDate.getDate() + 1);
     }
     
     return dates;
 };
 
-export const getTodayDate = (): string => {
-    return formatDate(new Date());
+export const getTodayDate = (): Date => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
 };
 
-export const getYesterdayDate = (): string => {
-    const yesterday = new Date();
+export const getYesterdayDate = (): Date => {
+    const yesterday = getTodayDate();
     yesterday.setDate(yesterday.getDate() - 1);
-    return formatDate(yesterday);
+    return yesterday;
 };
 
-export const isToday = (dateString: string): boolean => {
-    return dateString === getTodayDate();
+export const isToday = (date: Date): boolean => {
+    const today = new Date();
+    return date.getFullYear() === today.getFullYear() &&
+           date.getMonth() === today.getMonth() &&
+           date.getDate() === today.getDate();
 };
 
-export const isYesterday = (dateString: string): boolean => {
-    return dateString === getYesterdayDate();
+export const isYesterday = (date: Date): boolean => {
+    const yesterday = getYesterdayDate();
+    return date.getFullYear() === yesterday.getFullYear() &&
+           date.getMonth() === yesterday.getMonth() &&
+           date.getDate() === yesterday.getDate();
 };
 
 // Date utilities for rollover time
@@ -118,11 +122,11 @@ export const shouldRolloverToNextDay = (rolloverTime: string): boolean => {
     return now >= rolloverDate;
 };
 
-export const getActiveHabitDate = (habit: Habit): string => {
+export const getActiveHabitDate = (habit: Habit): Date => {
     const shouldRollover = shouldRolloverToNextDay(habit.rolloverTime);
     
     if (shouldRollover) {
-        return getTodayDate();
+        return new Date();
     } else {
         return getYesterdayDate();
     }

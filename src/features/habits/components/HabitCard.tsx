@@ -1,7 +1,14 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { HabitWithEntries, getTimeRemainingUntilRollover, formatTimeRemaining, getActiveHabitDate, HabitEntryStatus } from '@/src/features/habits/models';
+import {
+    HabitWithEntries,
+    getTimeRemainingUntilRollover,
+    formatTimeRemaining,
+    getActiveHabitDate,
+    HabitEntryStatus,
+    isToday, isYesterday
+} from '@/src/features/habits/models';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 
@@ -101,20 +108,15 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
             {(() => {
                 const activeDate = getActiveHabitDate(habit);
                 const currentEntry = habit.entries.find(entry => entry.date === activeDate);
-                const today = new Date().toISOString().split('T')[0];
-                const isToday = activeDate === today;
                 
-                const formatDateDisplay = (date: string): string => {
-                    const dateObj = new Date(date + 'T00:00:00');
-                    if (date === today) {
-                        return 'Today';
-                    }
+                const formatDateDisplay = (date: Date): string => {
+                    if (isToday(date)) return 'Today';
                     const yesterday = new Date();
                     yesterday.setDate(yesterday.getDate() - 1);
-                    if (date === yesterday.toISOString().split('T')[0]) {
+                    if (isYesterday(yesterday)) {
                         return 'Yesterday';
                     }
-                    return dateObj.toLocaleDateString('en-US', { 
+                    return date.toLocaleDateString('en-US', {
                         month: 'short', 
                         day: 'numeric' 
                     });

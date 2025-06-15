@@ -5,7 +5,6 @@ import {
     HabitFrequency, 
     HabitEntryStatus,
     calculateHabitStats,
-    formatDate,
     getDateRange,
     getTodayDate,
     getYesterdayDate
@@ -142,18 +141,16 @@ export class HabitManager {
                 } else {
                     status = HabitEntryStatus.MISSED;
                 }
-
-                const entryDate = new Date(date + 'T10:00:00');
                 
                 entries.push({
                     id: `${habit.id}-${date}`,
                     habitId: habit.id,
                     date: date,
                     status: status,
-                    completedAt: status === HabitEntryStatus.COMPLETED ? entryDate : undefined,
-                    excusedAt: status === HabitEntryStatus.EXCUSED ? entryDate : undefined,
-                    createdAt: entryDate,
-                    updatedAt: entryDate
+                    completedAt: status === HabitEntryStatus.COMPLETED ? date : undefined,
+                    excusedAt: status === HabitEntryStatus.EXCUSED ? date : undefined,
+                    createdAt: date,
+                    updatedAt: date
                 });
             });
         });
@@ -172,7 +169,7 @@ export class HabitManager {
             
             return {
                 ...habit,
-                entries: entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+                entries: entries.sort((a, b) => b.date.getTime() - a.date.getTime()),
                 stats
             };
         });
@@ -236,7 +233,7 @@ export class HabitManager {
         this.updateHabitsWithEntries();
     }
 
-    async markHabitEntry(habitId: string, date: string, status: HabitEntryStatus): Promise<void> {
+    async markHabitEntry(habitId: string, date: Date, status: HabitEntryStatus): Promise<void> {
         // TODO: Replace with actual API call
         const existingEntryIndex = this._habitEntries.findIndex(
             e => e.habitId === habitId && e.date === date
@@ -276,7 +273,7 @@ export class HabitManager {
         return this._habitsWithEntries.find(h => h.id === id);
     }
 
-    getHabitEntryByDate(habitId: string, date: string): HabitEntry | undefined {
+    getHabitEntryByDate(habitId: string, date: Date): HabitEntry | undefined {
         return this._habitEntries.find(e => e.habitId === habitId && e.date === date);
     }
 

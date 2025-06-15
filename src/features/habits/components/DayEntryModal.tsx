@@ -11,8 +11,8 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import { 
     HabitWithEntries, 
     HabitEntry, 
-    HabitEntryStatus, 
-    getTodayDate, 
+    HabitEntryStatus,
+    getTodayDate,
     getYesterdayDate,
     getActiveHabitDate,
     formatTimeRemaining,
@@ -24,7 +24,7 @@ interface DayEntryModalProps {
     isPresented: boolean;
     onDismiss: () => void;
     habit: HabitWithEntries | null;
-    selectedDate?: string; // If provided, edit this specific date
+    selectedDate?: Date;
     onHabitUpdated?: () => void;
 }
 
@@ -59,18 +59,17 @@ const DayEntryModal: React.FC<DayEntryModalProps> = ({
     const currentEntry = habit.entries.find(entry => entry.date === targetDate);
 
     // Helper function to format date display
-    const formatDateDisplay = (date: string): string => {
-        const dateObj = new Date(date + 'T00:00:00');
+    const formatDateDisplay = (date: Date): string => {
         if (date === todayDate) {
-            return `Today (${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
+            return `Today (${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
         } else if (date === yesterdayDate) {
-            return `Yesterday (${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
+            return `Yesterday (${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
         } else {
-            return dateObj.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                month: 'short', 
+            return date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
                 day: 'numeric',
-                year: dateObj.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
             });
         }
     };
@@ -156,7 +155,7 @@ const DayEntryModal: React.FC<DayEntryModalProps> = ({
                                             ? getColor('primary')
                                             : currentEntry.status === HabitEntryStatus.EXCUSED
                                             ? getColor('warning')
-                                            : getColor('surface-variant')
+                                            : getColor('unknown') // was surface-variant
                                     }}
                                 />
                                 <Text className="text-on-surface text-sm font-medium">

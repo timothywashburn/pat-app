@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Text, TouchableOpacity, View, ScrollView, Alert, useWindowDimensions } from 'react-native';
-import { HabitWithEntries, HabitEntry, HabitEntryStatus, getDateRange, formatDate } from '@/src/features/habits/models';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { HabitEntry, HabitEntryStatus, HabitWithEntries } from '@/src/features/habits/models';
 import { useTheme } from '@/src/controllers/ThemeManager';
 
 interface HabitCalendarGridProps {
@@ -36,56 +36,71 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
         setAvailableYears(years);
     }, [habit.createdAt]);
 
-    // Calculate date range based on view mode
-    let startDate: Date, endDate: Date;
+    let gridStartDate: Date, gridEndDate: Date, filterStartDate: Date, filterEndDate: Date;
     
     if (currentViewMode === 'weeks') {
-        // Last 52 weeks
-        endDate = new Date();
-        startDate = new Date(endDate);
-        startDate.setDate(endDate.getDate() - (52 * 7 - 1));
+        const today = new Date();
+
+        // start from first day of current week, one year ago
+        filterStartDate = new Date(today);
+        filterStartDate.setFullYear(today.getFullYear() - 1);
+        while (filterStartDate.getDay() !== 0) {
+            const previousDay = new Date(filterStartDate);
+            previousDay.setDate(previousDay.getDate() - 1);
+            if (previousDay.getMonth() !== filterStartDate.getMonth()) break;
+            filterStartDate = previousDay;
+        }
+
+        filterEndDate = new Date();
+
+        // Sunday of the week containing filterStartDate
+        gridStartDate = new Date(filterStartDate);
+        gridStartDate.setDate(gridStartDate.getDate() - gridStartDate.getDay());
         
-        // Adjust start date to begin on a Sunday (like GitHub)
-        const startDayOfWeek = startDate.getDay();
-        if (startDayOfWeek !== 0) { // If not Sunday
-            startDate.setDate(startDate.getDate() - startDayOfWeek);
+        // Grid end should cover today + complete the week
+        gridEndDate = new Date(today);
+        const endDayOfWeek = gridEndDate.getDay();
+        if (endDayOfWeek !== 6) { // If not Saturday, go to next Saturday
+            gridEndDate.setDate(gridEndDate.getDate() + (6 - endDayOfWeek));
         }
     } else {
-        // Specific year
-        startDate = new Date(currentYear, 0, 1); // Jan 1
-        endDate = new Date(currentYear, 11, 31); // Dec 31
+        filterStartDate = new Date(currentYear, 0, 1);
+        filterEndDate = new Date(currentYear, 11, 31);
         
-        // Adjust to start on Sunday for the week containing Jan 1
-        const startDayOfWeek = startDate.getDay();
+        // Grid starts from Sunday of week containing Jan 1
+        gridStartDate = new Date(filterStartDate);
+        const startDayOfWeek = gridStartDate.getDay();
         if (startDayOfWeek !== 0) {
-            startDate.setDate(startDate.getDate() - startDayOfWeek);
+            gridStartDate.setDate(gridStartDate.getDate() - startDayOfWeek);
         }
         
-        // Adjust end to end on Saturday for the week containing Dec 31
-        const endDayOfWeek = endDate.getDay();
+        // Grid ends at Saturday of week containing Dec 31
+        gridEndDate = new Date(filterEndDate);
+        const endDayOfWeek = gridEndDate.getDay();
         if (endDayOfWeek !== 6) {
-            endDate.setDate(endDate.getDate() + (6 - endDayOfWeek));
+            gridEndDate.setDate(gridEndDate.getDate() + (6 - endDayOfWeek));
         }
     }
 
-    const dateRange = getDateRange(startDate, endDate);
-    
-    // Create a map of entries for quick lookup
     const entryMap = new Map<string, HabitEntry>();
     habit.entries.forEach(entry => {
-        entryMap.set(entry.date, entry);
+        const key = entry.date.toISOString().split('T')[0];
+        entryMap.set(key, entry);
     });
+    const getEntry = (date: Date): HabitEntry | undefined => {
+        const key = date.toISOString().split('T')[0];
+        return entryMap.get(key);
+    }
 
     // Helper function to get display text for a date
-    const getDateDisplayText = (date: string, entry?: HabitEntry): string => {
-        const dateObj = new Date(date + 'T00:00:00');
-        const isBeforeCreation = dateObj < habit.createdAt;
+    const getDateDisplayText = (date: Date, entry?: HabitEntry): string => {
+        const isBeforeCreation = date < habit.createdAt;
         
         if (isBeforeCreation) {
-            return `Habit not created yet on ${dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+            return `Habit not created yet on ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
         }
         
-        const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         
         if (!entry || entry.status === HabitEntryStatus.MISSED) {
             return `Habit missed on ${formattedDate}`;
@@ -101,75 +116,79 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
         }
     };
 
-    // Helper function to get border style for clear squares
-    const getSquareBorderStyle = (date: string, entry?: HabitEntry) => {
-        const dateObj = new Date(date + 'T00:00:00');
-        const isBeforeCreation = dateObj < habit.createdAt;
+    const getSquareBorderStyle = (date: Date, entry?: HabitEntry) => {
+        const isBeforeCreation = date < habit.createdAt;
         
-        if (isBeforeCreation) {
-            return {}; // No border for before creation
+        if (isBeforeCreation || !entry || entry.status === HabitEntryStatus.MISSED) {
+            return 'border border-outline-variant';
         }
         
-        if (!entry || entry.status === HabitEntryStatus.MISSED) {
-            return {
-                borderWidth: 1,
-                borderColor: getColor('outline'),
-            };
-        }
-        
-        return {}; // No border for completed/excused
+        return '';
     };
 
-    // Get color for a specific date
-    const getSquareColor = (date: string): string => {
-        const entry = entryMap.get(date);
+    const getSquareColorClass = (date: Date): string => {
+        const entry = getEntry(date);
         
-        // Check if this date is before the habit was created
-        const dateObj = new Date(date + 'T00:00:00');
-        if (dateObj < habit.createdAt) {
-            return getColor('surface-variant'); // Light gray for before habit creation
-        }
-        
-        if (!entry) {
-            return getColor('background'); // Clear for no entry (missed)
-        }
+        if (!entry) return 'bg-background';
         
         switch (entry.status) {
             case HabitEntryStatus.COMPLETED:
-                return getColor('primary');
+                return 'bg-primary';
             case HabitEntryStatus.EXCUSED:
-                return getColor('warning');
+                return 'bg-warning';
             case HabitEntryStatus.MISSED:
-                return getColor('background');
+                return 'bg-background';
             default:
-                return getColor('background');
+                return 'bg-background';
         }
     };
 
     // Get opacity for a specific date (to show intensity like GitHub)
-    const getSquareOpacity = (date: string): number => {
-        const entry = entryMap.get(date);
-        const dateObj = new Date(date + 'T00:00:00');
-        
-        // Before habit creation
-        if (dateObj < habit.createdAt) {
-            return 0.1;
-        }
-        
-        if (!entry || entry.status === HabitEntryStatus.MISSED) {
-            return 0.1;
-        }
-        
-        return 1.0; // Full opacity for completed/excused
+    const getSquareOpacity = (date: Date): number => {
+        const entry = getEntry(date);
+        // console.log(`Checking date: ${date.toLocaleDateString()} - Entry: ${entry ? entry.status : 'none'}`);
+
+        if (date < habit.createdAt) return 0.15;
+        if (!entry || entry.status === HabitEntryStatus.MISSED) return 0.3;
+        return 1.0;
     };
 
-    // Group dates into weeks
-    const weeks: string[][] = [];
-    for (let i = 0; i < dateRange.length; i += 7) {
-        weeks.push(dateRange.slice(i, i + 7));
+    // Group all grid dates into weeks with visibility info
+    interface Day {
+        date: Date;
+        visible: boolean;
     }
 
-    // Month labels
+    const createWeeksFromDateRange = (startDate: Date, endDate: Date, filterStart: Date, filterEnd: Date): Day[][] => {
+        const weeks: Day[][] = [];
+        let currentDate = new Date(startDate);
+        currentDate.setHours(0, 0, 0, 0);
+        
+        while (currentDate <= endDate) {
+            const week: Day[] = [];
+
+            const weekStart = new Date(currentDate);
+            weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+
+            for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+                const dayDate = new Date(weekStart);
+                dayDate.setDate(weekStart.getDate() + dayOffset);
+
+                if (dayDate >= startDate && dayDate <= endDate) {
+                    const visible = dayDate >= filterStart && dayDate <= filterEnd;
+                    week.push({ date: dayDate, visible });
+                }
+            }
+            
+            if (week.length > 0) weeks.push(week);
+            currentDate.setDate(currentDate.getDate() + 7 - currentDate.getDay());
+        }
+        
+        return weeks;
+    };
+
+    const weeks = createWeeksFromDateRange(gridStartDate, gridEndDate, filterStartDate, filterEndDate);
+
     const getMonthLabels = (): { month: string; weekIndex: number }[] => {
         const labels: { month: string; weekIndex: number }[] = [];
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
@@ -179,25 +198,25 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
         let lastShownYear = -1;
         
         weeks.forEach((week, weekIndex) => {
-            const firstDayOfWeek = new Date(week[0] + 'T00:00:00');
-            const monthIndex = firstDayOfWeek.getMonth();
-            const yearIndex = firstDayOfWeek.getFullYear();
+            // Find first visible day in week to determine month
+            const firstVisibleDay = week.find(day => day.visible);
+            if (!firstVisibleDay) return; // Skip weeks with no visible days
+
+            const monthIndex = firstVisibleDay.date.getMonth();
+            const yearIndex = firstVisibleDay.date.getFullYear();
             
-            // Check if any day in this week is the first few days of a new month
-            const hasEarlyDaysOfMonth = week.some(date => {
-                const dayDate = new Date(date + 'T00:00:00');
-                return dayDate.getMonth() === monthIndex && dayDate.getDate() <= 7;
+            // Check if this week contains early days of the month (1-7)
+            const hasEarlyDaysOfMonth = week.some(day => {
+                if (!day.visible) return false;
+                return day.date.getMonth() === monthIndex && day.date.getDate() <= 7;
             });
             
-            // Show month label if:
-            // 1. This week contains early days of a month AND
-            // 2. We haven't shown this month+year combination yet AND  
-            // 3. Either it's the first week OR we have reasonable spacing (at least 3 weeks)
+            // Always show month for first week, or when month changes with sufficient spacing
             const monthYearKey = `${monthIndex}-${yearIndex}`;
             const lastMonthYearKey = `${lastShownMonth}-${lastShownYear}`;
             
-            if (hasEarlyDaysOfMonth && 
-                monthYearKey !== lastMonthYearKey && 
+            if (hasEarlyDaysOfMonth &&
+                monthYearKey !== lastMonthYearKey &&
                 (weekIndex === 0 || weekIndex - (labels[labels.length - 1]?.weekIndex || 0) >= 3)) {
                 labels.push({
                     month: monthNames[monthIndex],
@@ -213,22 +232,6 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     const monthLabels = getMonthLabels();
     const isTablet = width >= 768;
-
-    // Scroll to current day on mount
-    useEffect(() => {
-        if (scrollViewRef.current && currentViewMode === 'weeks') {
-            // Find the current day's position
-            const today = new Date().toISOString().split('T')[0];
-            const todayIndex = dateRange.findIndex(date => date === today);
-            if (todayIndex !== -1) {
-                const weekIndex = Math.floor(todayIndex / 7);
-                const scrollPosition = Math.max(0, weekIndex * (squareSize + gapSize) - 100);
-                setTimeout(() => {
-                    scrollViewRef.current?.scrollTo({ x: scrollPosition, animated: false });
-                }, 100);
-            }
-        }
-    }, [currentViewMode, dateRange]);
 
     return (
         <View className="bg-surface rounded-lg p-4">
@@ -249,7 +252,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                             <Text className={`text-sm ${
                                 currentViewMode === 'weeks' ? 'text-on-primary' : 'text-on-surface-variant'
                             }`}>
-                                Last 52 weeks
+                                Last year
                             </Text>
                         </TouchableOpacity>
                         
@@ -277,7 +280,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                 ) : (
                     <Text className="text-on-surface-variant text-sm">
                         {currentViewMode === 'weeks' 
-                            ? 'Last 52 weeks' 
+                            ? 'Last year' 
                             : currentYear.toString()}
                     </Text>
                 )}
@@ -297,7 +300,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                                 <Text className={`text-sm ${
                                     currentViewMode === 'weeks' ? 'text-on-primary' : 'text-on-surface-variant'
                                 }`}>
-                                    Last 52 weeks
+                                    Last year
                                 </Text>
                             </TouchableOpacity>
                             
@@ -326,16 +329,15 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                 </View>
             )}
 
-            {/* Calendar container with horizontal scroll */}
             <ScrollView 
                 ref={scrollViewRef}
                 horizontal 
                 showsHorizontalScrollIndicator={false} 
                 className="mb-2"
             >
-                <View style={{ paddingLeft: 16, paddingRight: 16 }}>
+                <View className="px-4">
                     {/* Month labels */}
-                    <View className="flex-row mb-4" style={{ marginLeft: 24, height: 16 }}>
+                    <View className="flex-row mb-4 ml-6 h-4">
                         {monthLabels.map((label) => (
                             <Text 
                                 key={`${label.month}-${label.weekIndex}`}
@@ -352,14 +354,14 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                         ))}
                     </View>
 
-                    {/* Day labels and calendar grid */}
                     <View className="flex-row">
-                        <View style={{ width: 20 }}>
+                        {/* Weekday labels */}
+                        <View className={isTablet ? "w-7.5" : "w-5"}>
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                                <View key={day} style={{ height: squareSize + (index < 6 ? gapSize : 0), justifyContent: 'center' }}>
-                                    {[1, 3, 5].includes(index) && ( // Only show Mon, Wed, Fri to avoid crowding
+                                <View key={day} className="justify-center" style={{ height: squareSize + (index < 6 ? gapSize : 0) }}>
+                                    {[1, 3, 5].includes(index) && (
                                         <Text className="text-on-surface-variant text-xs">
-                                            {day[0]}
+                                            {isTablet ? day : day[0]}
                                         </Text>
                                     )}
                                 </View>
@@ -367,35 +369,40 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                         </View>
 
                         {/* Calendar grid */}
-                        <View style={{ marginLeft: 4 }}>
+                        <View className="ml-1">
                             <View className="flex-row">
                                 {weeks.map((week, weekIndex) => (
-                                    <View key={weekIndex} style={{ marginRight: gapSize }}>
-                                        {week.map((date, dayIndex) => {
-                                            const entry = entryMap.get(date);
+                                    <View key={weekIndex} className="mr-0.5">
+                                        {week.map((day, dayIndex) => {
+                                            const entry = getEntry(day.date);
                                             return (
                                                 <TouchableOpacity
-                                                    key={date}
+                                                    key={day.date.toString()}
+                                                    className={`rounded-sm ${
+                                                        day.visible ? getSquareColorClass(day.date) : 'bg-transparent'
+                                                    } ${
+                                                        day.visible ? getSquareBorderStyle(day.date, entry) : ''
+                                                    }`}
                                                     style={{
                                                         width: squareSize,
                                                         height: squareSize,
-                                                        backgroundColor: getSquareColor(date),
-                                                        opacity: getSquareOpacity(date),
+                                                        opacity: day.visible ? getSquareOpacity(day.date) : 0,
                                                         marginBottom: dayIndex < 6 ? gapSize : 0,
-                                                        borderRadius: 2,
-                                                        ...getSquareBorderStyle(date, entry),
                                                     }}
                                                     onPress={() => {
-                                                        // Show GitHub-style tooltip (read-only)
-                                                        Alert.alert(
-                                                            habit.name,
-                                                            getDateDisplayText(date, entry),
-                                                            [
-                                                                { text: 'OK', style: 'default' }
-                                                            ]
-                                                        );
+                                                        if (day.visible) {
+                                                            // Show GitHub-style tooltip (read-only)
+                                                            Alert.alert(
+                                                                habit.name,
+                                                                getDateDisplayText(day.date, entry),
+                                                                [
+                                                                    { text: 'OK', style: 'default' }
+                                                                ]
+                                                            );
+                                                        }
                                                     }}
-                                                    activeOpacity={0.7}
+                                                    activeOpacity={day.visible ? 0.7 : 1}
+                                                    disabled={!day.visible}
                                                 />
                                             );
                                         })}
@@ -410,51 +417,22 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
             {/* Legend */}
             <View className="mt-3 pt-3 border-t border-surface-variant">
                 <View className="flex-row items-center justify-center">
-                    {/* Missed */}
                     <View className="flex-row items-center mr-4">
-                        <View 
-                            style={{
-                                width: 12,
-                                height: 12,
-                                backgroundColor: getColor('background'),
-                                borderWidth: 1,
-                                borderColor: getColor('outline'),
-                                marginRight: 4,
-                                borderRadius: 2,
-                            }}
-                        />
+                        <View className="w-3 h-3 mr-1 rounded-sm border bg-background border-outline" />
                         <Text className="text-on-surface-variant text-xs">
                             Missed
                         </Text>
                     </View>
-                    
-                    {/* Excused */}
+
                     <View className="flex-row items-center mr-4">
-                        <View 
-                            style={{
-                                width: 12,
-                                height: 12,
-                                backgroundColor: getColor('warning'),
-                                marginRight: 4,
-                                borderRadius: 2,
-                            }}
-                        />
+                        <View className="w-3 h-3 mr-1 rounded-sm bg-warning" />
                         <Text className="text-on-surface-variant text-xs">
                             Excused
                         </Text>
                     </View>
-                    
-                    {/* Completed */}
+
                     <View className="flex-row items-center">
-                        <View 
-                            style={{
-                                width: 12,
-                                height: 12,
-                                backgroundColor: getColor('primary'),
-                                marginRight: 4,
-                                borderRadius: 2,
-                            }}
-                        />
+                        <View className="w-3 h-3 mr-1 rounded-sm bg-primary" />
                         <Text className="text-on-surface-variant text-xs">
                             Completed
                         </Text>

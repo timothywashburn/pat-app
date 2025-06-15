@@ -235,7 +235,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                                                         ? getColor('primary')
                                                         : currentEntry.status === HabitEntryStatus.EXCUSED
                                                         ? getColor('warning')
-                                                        : getColor('surface-variant')
+                                                        : getColor('unknown') // was surface variant
                                                 }}
                                             />
                                             <Text className="text-on-surface text-sm font-medium">
