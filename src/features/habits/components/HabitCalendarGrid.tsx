@@ -1,8 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { fromDateString, Habit, HabitEntry } from "@timothyw/pat-common";
+import { DateString, fromDateString, Habit, HabitEntry } from "@timothyw/pat-common";
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
+import { useToast } from "@/src/components/toast/ToastContext";
+
+// Timezone-aware date utilities for consistent calendar logic
+const dateUtils = {
+    // Convert any date to local calendar date (YYYY-MM-DD format)
+    toLocalDateKey: (date: Date): string => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    },
+    
+    // Parse date string consistently - always treat as local calendar date
+    parseEntryDate: (dateString: DateString): Date => {
+        const parsed = fromDateString(dateString);
+        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+    },
+    
+    // Get today's date as local calendar date (no time component)
+    getToday: (): Date => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        // return new Date(2025, 7, 2);
+    },
+    
+    // Create a local calendar date from year, month, day
+    createLocalDate: (year: number, month: number, day: number): Date => {
+        return new Date(year, month, day);
+    },
+    
+    // Check if two dates represent the same calendar day
+    isSameDay: (date1: Date, date2: Date): boolean => {
+        return dateUtils.toLocalDateKey(date1) === dateUtils.toLocalDateKey(date2);
+    }
+};
 
 interface HabitCalendarGridProps {
     habit: Habit;
@@ -15,7 +50,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     selectedYear,
     viewMode = 'weeks'
 }) => {
-    const { getColor } = useTheme();
+    const { infoToast } = useToast();
     const { width } = useWindowDimensions();
     const scrollViewRef = useRef<ScrollView>(null);
     const [availableYears, setAvailableYears] = useState<number[]>([]);
@@ -37,45 +72,37 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
         setAvailableYears(years);
     }, [habit.createdAt]);
 
+    useEffect(() => {
+        if (currentViewMode === 'weeks' && scrollViewRef.current) {
+            const timeoutId = setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [currentViewMode]);
+
     let gridStartDate: Date, gridEndDate: Date, filterStartDate: Date, filterEndDate: Date;
     
     if (currentViewMode === 'weeks') {
-        const today = new Date();
+        const today = dateUtils.getToday();
 
-        // start from first day of current week, one year ago
-        filterStartDate = new Date(today);
-        filterStartDate.setFullYear(today.getFullYear() - 1);
-        while (filterStartDate.getDay() !== 0) {
-            const previousDay = new Date(filterStartDate);
-            previousDay.setDate(previousDay.getDate() - 1);
-            if (previousDay.getMonth() !== filterStartDate.getMonth()) break;
-            filterStartDate = previousDay;
-        }
+        filterStartDate = new Date(today.getFullYear() - 1, today.getMonth(), 1);
+        filterEndDate = new Date(today);
 
-        filterEndDate = new Date();
-
-        // Sunday of the week containing filterStartDate
-        gridStartDate = new Date(filterStartDate);
-        gridStartDate.setDate(gridStartDate.getDate() - gridStartDate.getDay());
+        gridStartDate = new Date(today);
+        gridStartDate.setDate(today.getDate() - today.getDay() - 7 * 52);
         
-        // Grid end should cover today + complete the week
         gridEndDate = new Date(today);
-        const endDayOfWeek = gridEndDate.getDay();
-        if (endDayOfWeek !== 6) { // If not Saturday, go to next Saturday
-            gridEndDate.setDate(gridEndDate.getDate() + (6 - endDayOfWeek));
-        }
     } else {
-        filterStartDate = new Date(currentYear, 0, 1);
-        filterEndDate = new Date(currentYear, 11, 31);
+        filterStartDate = dateUtils.createLocalDate(currentYear, 0, 1);
+        filterEndDate = dateUtils.createLocalDate(currentYear, 11, 31);
         
-        // Grid starts from Sunday of week containing Jan 1
         gridStartDate = new Date(filterStartDate);
         const startDayOfWeek = gridStartDate.getDay();
         if (startDayOfWeek !== 0) {
             gridStartDate.setDate(gridStartDate.getDate() - startDayOfWeek);
         }
         
-        // Grid ends at Saturday of week containing Dec 31
         gridEndDate = new Date(filterEndDate);
         const endDayOfWeek = gridEndDate.getDay();
         if (endDayOfWeek !== 6) {
@@ -85,19 +112,19 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     const entryMap = new Map<string, HabitEntry>();
     habit.entries.forEach(entry => {
-        const key = fromDateString(entry.date).toISOString().split('T')[0];
+        const entryDate = dateUtils.parseEntryDate(entry.date);
+        const key = dateUtils.toLocalDateKey(entryDate);
         entryMap.set(key, entry);
     });
     const getEntry = (date: Date): HabitEntry | undefined => {
-        const key = date.toISOString().split('T')[0];
+        const key = dateUtils.toLocalDateKey(date);
         return entryMap.get(key);
     }
 
-    // Helper function to get display text for a date
     const getDateDisplayText = (date: Date, entry?: HabitEntry): string => {
-        const isBeforeCreation = date < fromDateString(habit.createdAt);
+        const firstDay = dateUtils.parseEntryDate(habit.createdAt);
         
-        if (isBeforeCreation) {
+        if (dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay)) {
             return `Habit not created yet on ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
         }
         
@@ -116,7 +143,8 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     };
 
     const getSquareBorderStyle = (date: Date, entry?: HabitEntry) => {
-        const isBeforeCreation = date < fromDateString(habit.createdAt);
+        const firstDay = dateUtils.parseEntryDate(habit.createdAt);
+        const isBeforeCreation = dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay);
         if (isBeforeCreation || !entry) return 'border border-outline-variant';
         return '';
     };
@@ -138,9 +166,10 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     // Get opacity for a specific date (to show intensity like GitHub)
     const getSquareOpacity = (date: Date): number => {
+        const firstDay = dateUtils.parseEntryDate(habit.createdAt);
         const entry = getEntry(date);
 
-        if (date < fromDateString(habit.createdAt)) return 0.15;
+        if (dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay)) return 0.15;
         if (!entry) return 0.3;
         return 1.0;
     };
@@ -152,8 +181,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     const createWeeksFromDateRange = (startDate: Date, endDate: Date, filterStart: Date, filterEnd: Date): Day[][] => {
         const weeks: Day[][] = [];
-        let currentDate = new Date(startDate);
-        currentDate.setHours(0, 0, 0, 0);
+        let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
         
         while (currentDate <= endDate) {
             const week: Day[] = [];
@@ -179,6 +207,15 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     };
 
     const weeks = createWeeksFromDateRange(gridStartDate, gridEndDate, filterStartDate, filterEndDate);
+
+    const completedDays = habit.stats.completedDays;
+    const getTitle = (): string => {
+        if (currentViewMode === 'weeks') {
+            return `${completedDays} habit completion${completedDays === 1 ? '' : 's'} in the last year`;
+        } else {
+            return `${completedDays} habit completion${completedDays === 1 ? '' : 's'} in ${currentYear}`;
+        }
+    };
 
     const getMonthLabels = (): { month: string; weekIndex: number }[] => {
         const labels: { month: string; weekIndex: number }[] = [];
@@ -229,7 +266,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
             {/* Header with view mode selection */}
             <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-on-surface text-lg font-semibold">
-                    {habit.name} Activity
+                    {getTitle()}
                 </Text>
                 
                 {isTablet ? (
@@ -268,13 +305,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                             </TouchableOpacity>
                         ))}
                     </View>
-                ) : (
-                    <Text className="text-on-surface-variant text-sm">
-                        {currentViewMode === 'weeks' 
-                            ? 'Last year' 
-                            : currentYear.toString()}
-                    </Text>
-                )}
+                ) : null}
             </View>
             
             {/* Mobile view mode selector */}
@@ -383,13 +414,14 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                                                     onPress={() => {
                                                         if (day.visible) {
                                                             // Show GitHub-style tooltip (read-only)
-                                                            Alert.alert(
-                                                                habit.name,
-                                                                getDateDisplayText(day.date, entry),
-                                                                [
-                                                                    { text: 'OK', style: 'default' }
-                                                                ]
-                                                            );
+                                                            infoToast(`${ getDateDisplayText(day.date, entry) }`);
+                                                            // Alert.alert(
+                                                            //     habit.name,
+                                                            //     getDateDisplayText(day.date, entry),
+                                                            //     [
+                                                            //         { text: 'OK', style: 'default' }
+                                                            //     ]
+                                                            // );
                                                         }
                                                     }}
                                                     activeOpacity={day.visible ? 0.7 : 1}

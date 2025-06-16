@@ -6,6 +6,7 @@ import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 import { fromDateString, Habit } from "@timothyw/pat-common";
 import { isSameDay, isToday, isYesterday } from '@/src/features/habits/models';
+import { useToast } from "@/src/components/toast/ToastContext";
 
 interface HabitActionButtonsProps {
     habit: Habit;
@@ -20,6 +21,7 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
     onHabitUpdated,
     showDateInfo = true
 }) => {
+    const { errorToast } = useToast();
     const { getColor } = useTheme();
     const habitManager = HabitManager.getInstance();
 
@@ -56,6 +58,7 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
             }
             onHabitUpdated?.();
         } catch (error) {
+            if (error instanceof Error) errorToast(error.message);
             console.error('Failed to mark habit:', error);
         }
     };
