@@ -8,6 +8,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import DetailViewHeader from '@/src/components/common/DetailViewHeader';
 import { Person } from "@/src/features/people/models";
 
 interface PersonDetailViewProps {
@@ -35,17 +36,11 @@ const PersonDetailView: React.FC<PersonDetailViewProps> = ({
             className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
-                <TouchableOpacity onPress={onDismiss}>
-                    <Ionicons name="chevron-back" size={24} color={getColor("primary")} />
-                </TouchableOpacity>
-
-                <Text className="text-on-surface text-lg font-bold">Details</Text>
-
-                <TouchableOpacity onPress={onEditRequest}>
-                    <Ionicons name="create-outline" size={24} color={getColor("primary")} />
-                </TouchableOpacity>
-            </View>
+            <DetailViewHeader
+                title="Details"
+                onBack={onDismiss}
+                onEdit={onEditRequest}
+            />
 
             <ScrollView className="flex-1 p-4">
                 <View className="bg-surface rounded-lg p-4 mb-5">

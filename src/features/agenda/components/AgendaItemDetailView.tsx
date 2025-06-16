@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import DetailViewHeader from '@/src/components/common/DetailViewHeader';
 import { AgendaItem } from "@/src/features/agenda/models";
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 
@@ -57,17 +58,11 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
             className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
-                <TouchableOpacity onPress={onDismiss}>
-                    <Ionicons name="chevron-back" size={24} color={getColor("primary")} />
-                </TouchableOpacity>
-
-                <Text className="text-on-surface text-lg font-bold">Details</Text>
-
-                <TouchableOpacity onPress={onEditRequest}>
-                    <Ionicons name="create-outline" size={24} color={getColor("primary")} />
-                </TouchableOpacity>
-            </View>
+            <DetailViewHeader
+                title="Details"
+                onBack={onDismiss}
+                onEdit={onEditRequest}
+            />
 
             {errorMessage && (
                 <Text className="text-error p-4 text-center">{errorMessage}</Text>

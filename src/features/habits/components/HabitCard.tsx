@@ -58,11 +58,9 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                     className="p-2 -m-2"
                     hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
                 >
-                    <Ionicons
-                        name="ellipsis-horizontal"
-                        size={20}
-                        color={getColor('on-surface-variant')}
-                    />
+                    <Text className="text-primary text-base">
+                        Edit
+                    </Text>
                 </TouchableOpacity>
             </View>
             

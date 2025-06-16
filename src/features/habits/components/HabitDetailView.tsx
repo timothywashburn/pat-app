@@ -8,6 +8,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import DetailViewHeader from '@/src/components/common/DetailViewHeader';
 import { formatTimeRemaining, getTimeRemainingUntilRollover, getActiveHabitDate, getPreviousHabitDate } from '@/src/features/habits/models';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import HabitCalendarGrid from './HabitCalendarGrid';
@@ -46,27 +47,11 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
             className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
-                <TouchableOpacity onPress={onDismiss}>
-                    <Ionicons
-                        name="arrow-back"
-                        size={24}
-                        color={getColor('on-surface')}
-                    />
-                </TouchableOpacity>
-
-                <Text className="text-on-surface text-lg font-bold flex-1 text-center">
-                    {habit.name}
-                </Text>
-
-                <TouchableOpacity onPress={() => onEditPress?.(habit)}>
-                    <Ionicons
-                        name="ellipsis-horizontal"
-                        size={24}
-                        color={getColor('on-surface')}
-                    />
-                </TouchableOpacity>
-            </View>
+            <DetailViewHeader
+                title={habit.name}
+                onBack={onDismiss}
+                onEdit={() => onEditPress?.(habit)}
+            />
 
             <ScrollView className="flex-1">
                 {/* Habit Info Section */}

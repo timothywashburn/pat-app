@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import FormViewHeader from '@/src/components/common/FormViewHeader';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskList } from '@/src/features/tasks/models';
 
@@ -117,34 +118,14 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
             className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
-                <TouchableOpacity onPress={handleCancel} disabled={isLoading}>
-                    <Text className="text-primary text-base font-medium">
-                        Cancel
-                    </Text>
-                </TouchableOpacity>
-
-                <Text className="text-on-surface text-lg font-bold">
-                    {isEditMode ? 'Edit List' : 'New List'}
-                </Text>
-
-                <TouchableOpacity 
-                    onPress={handleSaveTaskList} 
-                    disabled={isLoading || !name.trim()}
-                >
-                    {isLoading ? (
-                        <ActivityIndicator size="small" color={getColor("primary")} />
-                    ) : (
-                        <Text 
-                            className={`text-base font-semibold ${
-                                name.trim() ? 'text-primary' : 'text-on-surface-variant'
-                            }`}
-                        >
-                            Save
-                        </Text>
-                    )}
-                </TouchableOpacity>
-            </View>
+            <FormViewHeader
+                title={isEditMode ? 'Edit List' : 'New List'}
+                onCancel={handleCancel}
+                onSave={handleSaveTaskList}
+                isEditMode={isEditMode}
+                isSaveDisabled={!name.trim()}
+                isLoading={isLoading}
+            />
 
             {errorMessage && (
                 <View className="bg-error-container p-4">

@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import FormViewHeader from '@/src/components/common/FormViewHeader';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { TaskData, TaskListId } from "@timothyw/pat-common";
@@ -148,34 +149,14 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
             className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
-                <TouchableOpacity onPress={handleCancel} disabled={isLoading}>
-                    <Text className="text-primary text-base font-medium">
-                        Cancel
-                    </Text>
-                </TouchableOpacity>
-
-                <Text className="text-on-surface text-lg font-bold">
-                    {isEditMode ? 'Edit Task' : 'New Task'}
-                </Text>
-
-                <TouchableOpacity 
-                    onPress={handleSaveTask} 
-                    disabled={isLoading || !name.trim() || !selectedTaskListId}
-                >
-                    {isLoading ? (
-                        <ActivityIndicator size="small" color={getColor("primary")} />
-                    ) : (
-                        <Text 
-                            className={`text-base font-semibold ${
-                                name.trim() && selectedTaskListId ? 'text-primary' : 'text-on-surface-variant'
-                            }`}
-                        >
-                            Save
-                        </Text>
-                    )}
-                </TouchableOpacity>
-            </View>
+            <FormViewHeader
+                title={isEditMode ? 'Edit Task' : 'New Task'}
+                onCancel={handleCancel}
+                onSave={handleSaveTask}
+                isEditMode={isEditMode}
+                isSaveDisabled={!name.trim() || !selectedTaskListId}
+                isLoading={isLoading}
+            />
 
             {errorMessage && (
                 <View className="bg-error-container p-4">

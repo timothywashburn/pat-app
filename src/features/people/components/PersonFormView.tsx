@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import FormViewHeader from '@/src/components/common/FormViewHeader';
 import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
@@ -167,30 +168,15 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
             className="bg-background absolute inset-0 z-50"
             style={{ paddingTop: insets.top }}
         >
-            <View className="bg-surface flex-row justify-between items-center px-4 py-4 border-b border-outline">
-                <TouchableOpacity onPress={onDismiss}>
-                    <Text className="text-error text-base">Cancel</Text>
-                </TouchableOpacity>
-
-                <Text className="text-on-surface text-lg font-bold">
-                    {isEditMode ? 'Edit Person' : 'New Person'}
-                </Text>
-
-                <TouchableOpacity
-                    onPress={handleSavePerson}
-                    disabled={!name.trim() || isLoading}
-                >
-                    {isLoading ? (
-                        <ActivityIndicator size="small" color={getColor("primary")} />
-                    ) : (
-                        <Text
-                            className={`text-primary text-base font-semibold ${!name.trim() ? 'opacity-40' : ''}`}
-                        >
-                            {isEditMode ? 'Save' : 'Add'}
-                        </Text>
-                    )}
-                </TouchableOpacity>
-            </View>
+            <FormViewHeader
+                title={isEditMode ? 'Edit Person' : 'New Person'}
+                onCancel={onDismiss}
+                onSave={handleSavePerson}
+                isEditMode={isEditMode}
+                isSaveDisabled={!name.trim()}
+                isLoading={isLoading}
+                saveText={isEditMode ? 'Save' : 'Add'}
+            />
 
             {errorMessage && (
                 <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
