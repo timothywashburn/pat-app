@@ -53,7 +53,7 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
 
         try {
             if (isEditMode && existingTaskList) {
-                await taskManager.updateTaskList(existingTaskList.id, {
+                await taskManager.updateTaskList(existingTaskList._id, {
                     name: name.trim()
                 });
             } else {
@@ -89,7 +89,7 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await taskManager.deleteTaskList(existingTaskList.id);
+                            await taskManager.deleteTaskList(existingTaskList._id);
                             onTaskListSaved?.();
                             onDismiss();
                         } catch (error) {

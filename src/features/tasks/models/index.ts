@@ -1,5 +1,8 @@
 import { TaskData, TaskListData } from "@timothyw/pat-common";
 
+export type Task = TaskData;
+export type TaskList = TaskListData;
+
 export interface TaskListWithTasks extends TaskListData {
     tasks: TaskData[];
 }

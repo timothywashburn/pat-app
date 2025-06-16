@@ -21,7 +21,7 @@ interface TaskFormViewProps {
     onTaskSaved?: () => void;
     existingTask?: TaskData;
     taskLists: TaskListWithTasks[];
-    defaultTaskListId?: string;
+    defaultTaskListId?: TaskListId;
     initialName?: string;
     isEditMode?: boolean;
 }
@@ -42,7 +42,7 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
     const [name, setName] = useState(existingTask?.name || initialName);
     const [notes, setNotes] = useState(existingTask?.notes || '');
     const [selectedTaskListId, setSelectedTaskListId] = useState<TaskListId>(
-        existingTask?.taskListId || defaultTaskListId || (taskLists[0]?._id || '')
+        existingTask?.taskListId || defaultTaskListId || taskLists[0]?._id!
     );
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -75,7 +75,7 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
             };
 
             if (isEditMode && existingTask) {
-                await taskManager.updateTask(existingTask.id, taskData);
+                await taskManager.updateTask(existingTask._id, taskData);
             } else {
                 await taskManager.createTask({
                     name: name.trim(),
@@ -114,7 +114,7 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await taskManager.deleteTask(existingTask.id);
+                            await taskManager.deleteTask(existingTask._id);
                             onTaskSaved?.();
                             onDismiss();
                         } catch (error) {
@@ -135,7 +135,7 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
         } else {
             setName(initialName);
             setNotes('');
-            setSelectedTaskListId(defaultTaskListId || (taskLists[0]?._id || ''));
+            setSelectedTaskListId(defaultTaskListId || taskLists[0]?._id!);
         }
         setErrorMessage(null);
         onDismiss();

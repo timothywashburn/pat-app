@@ -9,6 +9,7 @@ import CustomHeader from '@/src/components/CustomHeader';
 import { ModuleType } from "@timothyw/pat-common";
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskListWithTasks, Task } from '@/src/features/tasks/models';
+import { TaskListId } from '@timothyw/pat-common';
 import TaskListCard from '@/src/features/tasks/components/TaskListCard';
 import TaskListDetailView from '@/src/features/tasks/components/TaskListDetailView';
 import TaskListFormView from '@/src/features/tasks/components/TaskListFormView';
@@ -32,7 +33,7 @@ export const TasksPanel: React.FC = () => {
     const [showingCreateTaskList, setShowingCreateTaskList] = useState(false);
     const [showingTaskEdit, setShowingTaskEdit] = useState(false);
     const [showingCreateTask, setShowingCreateTask] = useState(false);
-    const [selectedTaskListForNewTask, setSelectedTaskListForNewTask] = useState<string | null>(null);
+    const [selectedTaskListForNewTask, setSelectedTaskListForNewTask] = useState<TaskListId | null>(null);
 
     const taskManager = TaskManager.getInstance();
 
@@ -126,7 +127,7 @@ export const TasksPanel: React.FC = () => {
         loadTaskLists();
     };
 
-    const handleAddTaskToList = (taskListId: string) => {
+    const handleAddTaskToList = (taskListId: TaskListId) => {
         setSelectedTaskListForNewTask(taskListId);
         setShowingCreateTask(true);
     };
@@ -197,7 +198,7 @@ export const TasksPanel: React.FC = () => {
                             onAddTask={handleAddTaskToList}
                         />
                     )}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item._id}
                     contentContainerStyle={{ padding: 16 }}
                     refreshControl={
                         <RefreshControl

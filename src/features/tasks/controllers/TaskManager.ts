@@ -11,10 +11,11 @@ import {
     CreateTaskListResponse,
     UpdateTaskListRequest,
     UpdateTaskListResponse,
-    GetTaskListsResponse, TaskListId, TaskListData
+    GetTaskListsResponse, TaskListId, TaskListData, TaskId
 } from '@timothyw/pat-common';
-import { Task } from "react-native";
+import { Task } from "@/src/features/tasks/models";
 import { TaskListWithTasks } from "@/src/features/tasks/models";
+import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 
 export class TaskManager {
     private static instance: TaskManager;
@@ -54,8 +55,10 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
+            const userId = useUserDataStore.getState().data._id;
             this._taskLists = response.taskLists.map(taskList => ({
-                id: taskList.id,
+                _id: taskList.id,
+                userId: userId,
                 name: taskList.name,
                 createdAt: new Date(taskList.createdAt),
                 updatedAt: new Date(taskList.updatedAt),
@@ -80,8 +83,10 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
+            const userId = useUserDataStore.getState().data._id;
             this._tasks = response.tasks.map(task => ({
-                id: task.id,
+                _id: task.id,
+                userId: userId,
                 name: task.name,
                 notes: task.notes,
                 completed: task.completed,
@@ -118,8 +123,10 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
+            const userId = useUserDataStore.getState().data._id;
             const taskList: TaskListData = {
-                id: response.taskList.id,
+                _id: response.taskList.id,
+                userId: userId,
                 name: response.taskList.name,
                 createdAt: new Date(response.taskList.createdAt),
                 updatedAt: new Date(response.taskList.updatedAt),
@@ -190,8 +197,10 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
+            const userId = useUserDataStore.getState().data._id;
             const task: Task = {
-                id: response.task.id,
+                _id: response.task.id,
+                userId: userId,
                 name: response.task.name,
                 notes: response.task.notes,
                 completed: response.task.completed,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
+import { TaskListId } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import TaskItemCard from './TaskItemCard';
 
@@ -9,7 +10,7 @@ interface TaskListCardProps {
     taskList: TaskListWithTasks;
     onPress: (taskList: TaskListWithTasks) => void;
     onTaskPress: (task: any) => void;
-    onAddTask: (taskListId: string) => void;
+    onAddTask: (taskListId: TaskListId) => void;
 }
 
 const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPress, onAddTask }) => {
@@ -38,7 +39,7 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
     };
 
     const handleAddTask = () => {
-        onAddTask(taskList.id);
+        onAddTask(taskList._id);
     };
 
     const rotateStyle = {
@@ -111,7 +112,7 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                     ) : (
                         sortTasks(taskList.tasks).map((task, index) => (
                                 <TaskItemCard
-                                    key={task.id}
+                                    key={task._id}
                                     task={task}
                                     onPress={onTaskPress}
                                     isLast={index === taskList.tasks.length - 1}

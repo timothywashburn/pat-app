@@ -63,7 +63,7 @@ export default function TabsLayout() {
                 className="flex-1"
                 style={{ backgroundColor: getColor("background") }}
             >
-                <ModuleComponent isModuleView={true}/>
+                <ModuleComponent />
             </View>
         );
     }

@@ -67,7 +67,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await taskManager.deleteTaskList(taskList.id);
+                            await taskManager.deleteTaskList(taskList._id);
                             onTaskListUpdated?.();
                             onDismiss();
                         } catch (error) {
@@ -130,7 +130,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         try {
                             // Delete all completed tasks
                             await Promise.all(
-                                completedTasks.map(task => taskManager.deleteTask(task.id))
+                                completedTasks.map(task => taskManager.deleteTask(task._id))
                             );
                             onTaskListUpdated?.();
                         } catch (error) {
@@ -225,7 +225,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                             ) : (
                                 sortTasks(taskList.tasks).map((task, index) => (
                                         <TaskItemCard
-                                            key={task.id}
+                                            key={task._id}
                                             task={task}
                                             onPress={onTaskPress}
                                             isLast={index === taskList.tasks.length - 1}

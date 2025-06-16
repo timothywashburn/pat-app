@@ -44,7 +44,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await taskManager.setTaskCompleted(task.id, !task.completed);
+            await taskManager.setTaskCompleted(task._id, !task.completed);
             onTaskUpdated?.();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update task');
@@ -70,7 +70,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await taskManager.deleteTask(task.id);
+                            await taskManager.deleteTask(task._id);
                             onTaskUpdated?.();
                             onDismiss();
                         } catch (error) {
