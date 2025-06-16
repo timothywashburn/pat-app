@@ -164,7 +164,7 @@ export class HabitManager {
     async deleteHabitEntry(habitId: string, date: Date): Promise<void> {
         try {
             await NetworkManager.shared.performAuthenticated<undefined, DeleteHabitResponse>({
-                endpoint: `/api/habits/${habitId}/entries/${date}`,
+                endpoint: `/api/habits/${habitId}/entries/${toDateString(date)}`,
                 method: HTTPMethod.DELETE
             });
 

@@ -5,17 +5,17 @@ import {
     getTimeRemainingUntilRollover,
     formatTimeRemaining,
     getActiveHabitDate,
-    isToday, isYesterday
+    isToday, isYesterday, isSameDay
 } from '@/src/features/habits/models';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
-import { HabitWithEntries } from '@timothyw/pat-common/dist/types/models/habit-data';
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
+import { fromDateString, Habit } from "@timothyw/pat-common";
 
 interface HabitCardProps {
-    habit: HabitWithEntries;
-    onPress: (habit: HabitWithEntries) => void;
-    onEditPress: (habit: HabitWithEntries) => void;
+    habit: Habit;
+    onPress: (habit: Habit) => void;
+    onEditPress: (habit: Habit) => void;
     onHabitUpdated?: () => void;
     isLast?: boolean;
 }
@@ -109,7 +109,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
             {/* Quick mark buttons */}
             {(() => {
                 const activeDate = getActiveHabitDate(habit);
-                const currentEntry = habit.entries.find(entry => entry.date === activeDate);
+                const currentEntry = habit.entries.find(entry => isSameDay(fromDateString(entry.date), activeDate));
                 
                 const getDateInfo = (date: Date) => {
                     const dateStr = date.toLocaleDateString('en-US', {
