@@ -103,6 +103,13 @@ export const getActiveHabitDate = (habit: Habit): Date => {
     }
 };
 
+export const getPreviousHabitDate = (habit: Habit): Date => {
+    const activeDate = getActiveHabitDate(habit);
+    const previousDate = new Date(activeDate);
+    previousDate.setDate(previousDate.getDate() - 1);
+    return previousDate;
+};
+
 // Time remaining utilities
 export interface TimeRemaining {
     hours: number;

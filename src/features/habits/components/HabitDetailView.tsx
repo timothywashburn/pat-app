@@ -8,9 +8,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { formatTimeRemaining, getTimeRemainingUntilRollover, getTodayDate, getYesterdayDate } from '@/src/features/habits/models';
+import { formatTimeRemaining, getTimeRemainingUntilRollover, getActiveHabitDate, getPreviousHabitDate } from '@/src/features/habits/models';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import HabitCalendarGrid from './HabitCalendarGrid';
+import HabitActionButtons from './HabitActionButtons';
 import { fromDateString, Habit } from "@timothyw/pat-common";
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 
@@ -31,8 +32,8 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
 }) => {
     const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
-    const [selectedDay, setSelectedDay] = useState<'today' | 'yesterday'>('today');
     const habitManager = HabitManager.getInstance();
+    const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
 
     if (!isPresented || !habit) {
         return null;
@@ -116,158 +117,57 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                             </View>
                         </View>
 
-                        {/* Quick mark buttons */}
+                        {/* Timeframe Toggle and Buttons */}
                         {(() => {
-                            const todayDate = getTodayDate();
-                            const yesterdayDate = getYesterdayDate();
-                            const targetDate = selectedDay === 'today' ? todayDate : yesterdayDate;
-                            const currentEntry = habit.entries.find(entry => fromDateString(entry.date) === targetDate);
+                            const currentDate = getActiveHabitDate(habit);
+                            const previousDate = getPreviousHabitDate(habit);
                             
-                            const handleMarkHabit = async (status: HabitEntryStatus) => {
-                                try {
-                                    if (currentEntry?.status === status) {
-                                        await habitManager.deleteHabitEntry(habit._id, targetDate);
-                                    } else {
-                                        await habitManager.markHabitEntry(habit._id, targetDate, status);
-                                    }
-                                } catch (error) {
-                                    console.error('Failed to mark habit:', error);
-                                }
-                            };
-                            
-                            const getDateInfo = (date: Date) => {
-                                const dateStr = date.toLocaleDateString('en-US', {
-                                    month: 'numeric', 
-                                    day: 'numeric' 
-                                });
-                                
-                                if (date.toDateString() === todayDate.toDateString()) {
-                                    return { dateStr, dayLabel: 'Today', dayColorClass: 'text-primary' };
-                                }
-                                if (date.toDateString() === yesterdayDate.toDateString()) {
-                                    return { dateStr, dayLabel: 'Yesterday', dayColorClass: 'text-warning' };
-                                }
-                                return { dateStr, dayLabel: null, dayColorClass: null };
+                            const handleTimeframeChange = (timeframe: 'current' | 'previous') => {
+                                setSelectedTimeframe(timeframe);
                             };
                             
                             return (
                                 <View className="mt-4">
-                                    {/* Day toggle */}
+                                    {/* Simple Toggle */}
                                     <View className="flex-row bg-surface-variant rounded-lg p-1 mb-4">
                                         <TouchableOpacity
                                             className={`flex-1 py-2 px-3 rounded-md ${
-                                                selectedDay === 'today' ? 'bg-primary' : 'bg-transparent'
+                                                selectedTimeframe === 'current' ? 'bg-primary' : 'bg-transparent'
                                             }`}
-                                            onPress={() => setSelectedDay('today')}
+                                            onPress={() => handleTimeframeChange('current')}
                                         >
                                             <Text className={`text-center text-sm font-medium ${
-                                                selectedDay === 'today' ? 'text-on-primary' : 'text-on-surface-variant'
+                                                selectedTimeframe === 'current' ? 'text-on-primary' : 'text-on-surface-variant'
                                             }`}>
-                                                Today
+                                                Current
                                             </Text>
                                         </TouchableOpacity>
                                         
                                         <TouchableOpacity
                                             className={`flex-1 py-2 px-3 rounded-md ${
-                                                selectedDay === 'yesterday' ? 'bg-primary' : 'bg-transparent'
+                                                selectedTimeframe === 'previous' ? 'bg-primary' : 'bg-transparent'
                                             }`}
-                                            onPress={() => setSelectedDay('yesterday')}
+                                            onPress={() => handleTimeframeChange('previous')}
                                         >
                                             <Text className={`text-center text-sm font-medium ${
-                                                selectedDay === 'yesterday' ? 'text-on-primary' : 'text-on-surface-variant'
+                                                selectedTimeframe === 'previous' ? 'text-on-primary' : 'text-on-surface-variant'
                                             }`}>
-                                                Yesterday
+                                                Previous
                                             </Text>
                                         </TouchableOpacity>
                                     </View>
                                     
-                                    <View className="flex-row items-center justify-center mb-2">
-                                        {(() => {
-                                            const dateInfo = getDateInfo(targetDate);
-                                            return (
-                                                <View className="flex-row items-center">
-                                                    <Text className="text-xs text-on-surface-variant">
-                                                        For {dateInfo.dateStr}
-                                                        {dateInfo.dayLabel && (
-                                                            <Text> (</Text>
-                                                        )}
-                                                    </Text>
-                                                    {dateInfo.dayLabel && (
-                                                        <Text className={`text-xs ${dateInfo.dayColorClass}`}>
-                                                            {dateInfo.dayLabel}
-                                                        </Text>
-                                                    )}
-                                                    {dateInfo.dayLabel && (
-                                                        <Text className="text-xs text-on-surface-variant">)</Text>
-                                                    )}
-                                                    {currentEntry && (
-                                                        <Text className="text-on-surface text-xs"> • Currently: {
-                                                            currentEntry.status === HabitEntryStatus.COMPLETED ? 'Completed' :
-                                                            currentEntry.status === HabitEntryStatus.EXCUSED ? 'Excused' : 'Missed'
-                                                        }</Text>
-                                                    )}
-                                                </View>
-                                            );
-                                        })()}
-                                    </View>
-                                    
-                                    {/* Action buttons */}
-                                    <View className="flex-row">
-                                        {/* Excuse button - moved first */}
-                                        <TouchableOpacity
-                                            className={`flex-1 rounded-md py-2 mr-2 ${
-                                                currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                                    ? 'bg-warning' 
-                                                    : 'bg-surface-variant border border-warning'
-                                            }`}
-                                            onPress={() => handleMarkHabit(HabitEntryStatus.EXCUSED)}
-                                        >
-                                            <View className="flex-row items-center justify-center">
-                                                <Ionicons
-                                                    name={currentEntry?.status === HabitEntryStatus.EXCUSED ? "remove-circle" : "remove-circle-outline"}
-                                                    size={16}
-                                                    color={currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                                        ? getColor('on-warning') 
-                                                        : getColor('warning')
-                                                    }
-                                                />
-                                                <Text className={`text-sm font-medium ml-1 ${
-                                                    currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                                        ? 'text-on-warning' 
-                                                        : 'text-warning'
-                                                }`}>
-                                                    {currentEntry?.status === HabitEntryStatus.EXCUSED ? 'Excused' : 'Excuse'}
-                                                </Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                        
-                                        {/* Complete button - moved second */}
-                                        <TouchableOpacity
-                                            className={`flex-1 rounded-md py-2 ${
-                                                currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                                    ? 'bg-primary' 
-                                                    : 'bg-surface-variant border border-primary'
-                                            }`}
-                                            onPress={() => handleMarkHabit(HabitEntryStatus.COMPLETED)}
-                                        >
-                                            <View className="flex-row items-center justify-center">
-                                                <Ionicons
-                                                    name={currentEntry?.status === HabitEntryStatus.COMPLETED ? "checkmark-circle" : "checkmark-circle-outline"}
-                                                    size={16}
-                                                    color={currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                                        ? getColor('on-primary') 
-                                                        : getColor('primary')
-                                                    }
-                                                />
-                                                <Text className={`text-sm font-medium ml-1 ${
-                                                    currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                                        ? 'text-on-primary' 
-                                                        : 'text-primary'
-                                                }`}>
-                                                    {currentEntry?.status === HabitEntryStatus.COMPLETED ? 'Completed' : 'Complete'}
-                                                </Text>
-                                            </View>
-                                        </TouchableOpacity>
+                                    {/* Action Buttons for Selected Timeframe */}
+                                    <View>
+                                        <Text className="text-on-surface text-lg font-semibold mb-3">
+                                            {selectedTimeframe === 'current' ? 'Current Timeframe' : 'Previous Timeframe'}
+                                        </Text>
+                                        <HabitActionButtons
+                                            habit={habit}
+                                            targetDate={selectedTimeframe === 'current' ? currentDate : previousDate}
+                                            onHabitUpdated={onHabitUpdated}
+                                            showDateInfo={true}
+                                        />
                                     </View>
                                 </View>
                             );

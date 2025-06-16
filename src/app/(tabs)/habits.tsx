@@ -69,8 +69,23 @@ export const HabitsPanel: React.FC = () => {
         setSelectedHabit(null);
     };
 
-    const handleHabitUpdated = () => {
-        loadHabits(); // Reload habits after marking/updating entries
+    const handleHabitUpdated = async () => {
+        try {
+            const manager = HabitManager.getInstance();
+            await manager.loadHabits();
+            const updatedHabits = manager.habits;
+            setHabits(updatedHabits);
+            
+            // If we have a selected habit, update it with fresh data
+            if (selectedHabit) {
+                const updatedSelectedHabit = updatedHabits.find(h => h._id === selectedHabit._id);
+                if (updatedSelectedHabit) {
+                    setSelectedHabit(updatedSelectedHabit);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to update habits:', error);
+        }
     };
 
 

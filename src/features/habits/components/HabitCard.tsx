@@ -4,9 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import {
     getTimeRemainingUntilRollover,
     formatTimeRemaining,
-    getActiveHabitDate,
-    isToday, isYesterday, isSameDay
+    getActiveHabitDate
 } from '@/src/features/habits/models';
+import HabitActionButtons from './HabitActionButtons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
@@ -107,130 +107,14 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
             })()}
 
             {/* Quick mark buttons */}
-            {(() => {
-                const activeDate = getActiveHabitDate(habit);
-                const currentEntry = habit.entries.find(entry => isSameDay(fromDateString(entry.date), activeDate));
-                
-                const getDateInfo = (date: Date) => {
-                    const dateStr = date.toLocaleDateString('en-US', {
-                        month: 'numeric', 
-                        day: 'numeric' 
-                    });
-                    
-                    if (isToday(date)) {
-                        return { dateStr, dayLabel: 'Today', dayColorClass: 'text-primary' };
-                    }
-                    if (isYesterday(date)) {
-                        return { dateStr, dayLabel: 'Yesterday', dayColorClass: 'text-warning' };
-                    }
-                    return { dateStr, dayLabel: null, dayColorClass: null };
-                };
-                
-                const handleMarkHabit = async (status: HabitEntryStatus) => {
-                    try {
-                        if (currentEntry?.status === status) {
-                            await habitManager.deleteHabitEntry(habit._id, activeDate);
-                        } else {
-                            await habitManager.markHabitEntry(habit._id, activeDate, status);
-                        }
-                        onHabitUpdated?.();
-                    } catch (error) {
-                        console.error('Failed to mark habit:', error);
-                    }
-                };
-                
-                return (
-                    <View className="mt-3 pt-3 border-t border-surface-variant">
-                        <View className="flex-row items-center justify-center mb-2">
-                            {(() => {
-                                const dateInfo = getDateInfo(activeDate);
-                                return (
-                                    <View className="flex-row items-center">
-                                        <Text className="text-xs text-on-surface-variant">
-                                            For {dateInfo.dateStr}
-                                            {dateInfo.dayLabel && (
-                                                <Text> (</Text>
-                                            )}
-                                        </Text>
-                                        {dateInfo.dayLabel && (
-                                            <Text className={`text-xs ${dateInfo.dayColorClass}`}>
-                                                {dateInfo.dayLabel}
-                                            </Text>
-                                        )}
-                                        {dateInfo.dayLabel && (
-                                            <Text className="text-xs text-on-surface-variant">)</Text>
-                                        )}
-                                        {currentEntry && (
-                                            <Text className="text-on-surface text-xs"> • Currently: {
-                                                currentEntry.status === HabitEntryStatus.COMPLETED ? 'Completed' :
-                                                currentEntry.status === HabitEntryStatus.EXCUSED ? 'Excused' : 'Missed'
-                                            }</Text>
-                                        )}
-                                    </View>
-                                );
-                            })()}
-                        </View>
-                        
-                        <View className="flex-row">
-                            {/* Excuse button - moved first */}
-                            <TouchableOpacity
-                                className={`flex-1 rounded-md py-2 mr-2 ${
-                                    currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                        ? 'bg-warning' 
-                                        : 'bg-surface-variant border border-warning'
-                                }`}
-                                onPress={() => handleMarkHabit(HabitEntryStatus.EXCUSED)}
-                            >
-                                <View className="flex-row items-center justify-center">
-                                    <Ionicons
-                                        name={currentEntry?.status === HabitEntryStatus.EXCUSED ? "remove-circle" : "remove-circle-outline"}
-                                        size={16}
-                                        color={currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                            ? getColor('on-warning') 
-                                            : getColor('warning')
-                                        }
-                                    />
-                                    <Text className={`text-sm font-medium ml-1 ${
-                                        currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                            ? 'text-on-warning' 
-                                            : 'text-warning'
-                                    }`}>
-                                        Excuse
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                            
-                            {/* Complete button - moved second */}
-                            <TouchableOpacity
-                                className={`flex-1 rounded-md py-2 ${
-                                    currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                        ? 'bg-primary' 
-                                        : 'bg-surface-variant border border-primary'
-                                }`}
-                                onPress={() => handleMarkHabit(HabitEntryStatus.COMPLETED)}
-                            >
-                                <View className="flex-row items-center justify-center">
-                                    <Ionicons
-                                        name={currentEntry?.status === HabitEntryStatus.COMPLETED ? "checkmark-circle" : "checkmark-circle-outline"}
-                                        size={16}
-                                        color={currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                            ? getColor('on-primary') 
-                                            : getColor('primary')
-                                        }
-                                    />
-                                    <Text className={`text-sm font-medium ml-1 ${
-                                        currentEntry?.status === HabitEntryStatus.COMPLETED 
-                                            ? 'text-on-primary' 
-                                            : 'text-primary'
-                                    }`}>
-                                        Complete
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                );
-            })()}
+            <View className="mt-3 pt-3 border-t border-surface-variant">
+                <HabitActionButtons
+                    habit={habit}
+                    targetDate={getActiveHabitDate(habit)}
+                    onHabitUpdated={onHabitUpdated}
+                    showDateInfo={true}
+                />
+            </View>
             
         </TouchableOpacity>
     );
