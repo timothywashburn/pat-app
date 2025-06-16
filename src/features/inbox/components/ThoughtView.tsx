@@ -91,8 +91,8 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                                 className="flex-1 py-3 flex-row items-center justify-center"
                                 onPress={onDelete}
                             >
-                                <Text className="text-error mr-2 font-medium">Delete</Text>
-                                <Ionicons name="trash-outline" size={16} color={getColor("error")} />
+                                <Text className="text-on-error mr-2 font-medium">Delete</Text>
+                                <Ionicons name="trash-outline" size={16} color={getColor("on-error")} />
                             </TouchableOpacity>
                         )}
 
@@ -103,8 +103,8 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
                                 className="flex-1 py-3 flex-row items-center justify-center"
                                 onPress={onDelete}
                             >
-                                <Text className="text-error mr-2 font-medium">Cancel</Text>
-                                <Ionicons name="close-outline" size={16} color={getColor("error")} />
+                                <Text className="text-on-error mr-2 font-medium">Cancel</Text>
+                                <Ionicons name="close-outline" size={16} color={getColor("on-error")} />
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity

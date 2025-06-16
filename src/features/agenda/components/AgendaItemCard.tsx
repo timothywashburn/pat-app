@@ -17,7 +17,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
         return (
             <TouchableOpacity
                 className={`bg-surface border-b border-divider-variant border-l-4 ${
-                    item.urgent ? 'border-l-error' : 'border-l-transparent'
+                    item.urgent ? 'border-l-on-error' : 'border-l-transparent'
                 }`}
                 onPress={() => onPress(item)}
             >
@@ -28,7 +28,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
                                 {item.name}
                             </Text>
                             {item.urgent && (
-                                <Text className="text-error text-xs font-medium">URGENT</Text>
+                                <Text className="text-on-error text-xs font-medium">URGENT</Text>
                             )}
                         </View>
                     </View>
@@ -77,7 +77,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
         return (
             <TouchableOpacity
                 className={`bg-surface rounded-xl p-4 mb-3 border-l-4 ${
-                    item.urgent ? 'border-l-error' : 'border-l-transparent'
+                    item.urgent ? 'border-l-on-error' : 'border-l-transparent'
                 }`}
                 onPress={() => onPress(item)}
             >
@@ -86,9 +86,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
                         {item.name}
                     </Text>
                     {item.urgent && (
-                        <View className="bg-error/15 px-2 py-1 rounded-md">
-                            <Text className="text-error text-xs font-medium">URGENT</Text>
-                        </View>
+                        <Text className="text-on-error text-xs font-medium px-2">URGENT</Text>
                     )}
                 </View>
 

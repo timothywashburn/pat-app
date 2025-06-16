@@ -58,9 +58,11 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                     className="p-2 -m-2"
                     hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
                 >
-                    <Text className="text-primary text-base">
-                        Edit
-                    </Text>
+                    <Ionicons
+                        name="create-outline"
+                        size={20}
+                        color={getColor('primary')}
+                    />
                 </TouchableOpacity>
             </View>
             
