@@ -30,6 +30,7 @@ export const AgendaPanel: React.FC = () => {
     // State for detail view
     const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
     const [showingDetailView, setShowingDetailView] = useState(false);
+    const [editFromDetailView, setEditFromDetailView] = useState(false);
 
     const agendaManager = AgendaManager.getInstance();
 
@@ -77,6 +78,7 @@ export const AgendaPanel: React.FC = () => {
 
     const handleAddItem = () => {
         setShowingCreateForm(true);
+        setEditFromDetailView(false);
     };
 
     const handleItemSelect = (item: AgendaItem) => {
@@ -92,12 +94,22 @@ export const AgendaPanel: React.FC = () => {
     const handleEditRequest = () => {
         setShowingDetailView(false);
         setShowingEditForm(true);
+        setEditFromDetailView(true);
     };
 
     const handleFormDismiss = () => {
         setShowingCreateForm(false);
         setShowingEditForm(false);
-        setSelectedItem(null);
+        
+        if (editFromDetailView) {
+            // Return to detail view if edit was opened from detail
+            setEditFromDetailView(false);
+            setShowingDetailView(true);
+        } else {
+            // Clear selected item and return to list if this was a create form
+            setSelectedItem(null);
+        }
+        
         loadItems();
     };
 

@@ -19,6 +19,7 @@ import { TaskData, TaskListId } from "@timothyw/pat-common";
 interface TaskFormViewProps {
     isPresented: boolean;
     onDismiss: () => void;
+    onCancel?: () => void;
     onTaskSaved?: () => void;
     existingTask?: TaskData;
     taskLists: TaskListWithTasks[];
@@ -30,6 +31,7 @@ interface TaskFormViewProps {
 const TaskFormView: React.FC<TaskFormViewProps> = ({
     isPresented,
     onDismiss,
+    onCancel,
     onTaskSaved,
     existingTask,
     taskLists,
@@ -139,7 +141,14 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
             setSelectedTaskListId(defaultTaskListId || taskLists[0]?._id!);
         }
         setErrorMessage(null);
-        onDismiss();
+        
+        // Use onCancel if provided (for edit mode navigation back to detail view)
+        // Otherwise use onDismiss (for create mode navigation back to list)
+        if (onCancel) {
+            onCancel();
+        } else {
+            onDismiss();
+        }
     };
 
     const selectedTaskList = taskLists.find(list => list._id === selectedTaskListId);

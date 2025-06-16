@@ -18,6 +18,7 @@ import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 interface PersonFormViewProps {
     isPresented: boolean;
     onDismiss: () => void;
+    onCancel?: () => void;
     onPersonSaved?: () => void;
     existingPerson?: Person;
     isEditMode?: boolean;
@@ -26,6 +27,7 @@ interface PersonFormViewProps {
 const PersonFormView: React.FC<PersonFormViewProps> = ({
     isPresented,
     onDismiss,
+    onCancel,
     onPersonSaved,
     existingPerson,
     isEditMode = false
@@ -163,6 +165,28 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         ));
     };
 
+    const handleCancel = () => {
+        // Reset form state if needed
+        if (isEditMode && existingPerson) {
+            setName(existingPerson.name);
+            setProperties(existingPerson.properties || []);
+            setNotes(existingPerson.notes || []);
+        } else {
+            setName('');
+            setProperties([]);
+            setNotes([]);
+        }
+        setErrorMessage(null);
+        
+        // Use onCancel if provided (for edit mode navigation back to detail view)
+        // Otherwise use onDismiss (for create mode navigation back to list)
+        if (onCancel) {
+            onCancel();
+        } else {
+            onDismiss();
+        }
+    };
+
     return (
         <View
             className="bg-background absolute inset-0 z-50"
@@ -170,7 +194,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         >
             <FormViewHeader
                 title={isEditMode ? 'Edit Person' : 'New Person'}
-                onCancel={onDismiss}
+                onCancel={handleCancel}
                 onSave={handleSavePerson}
                 isEditMode={isEditMode}
                 isSaveDisabled={!name.trim()}

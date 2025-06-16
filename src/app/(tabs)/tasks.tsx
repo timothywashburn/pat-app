@@ -123,6 +123,11 @@ export const TasksPanel: React.FC = () => {
         setSelectedTask(null);
     };
 
+    const handleTaskEditCancel = () => {
+        setShowingTaskEdit(false);
+        setShowingTaskDetail(true); // Go back to detail view instead of list
+    };
+
     const handleTaskSaved = () => {
         loadTaskLists();
     };
@@ -151,6 +156,11 @@ export const TasksPanel: React.FC = () => {
         setShowingCreateTaskList(false);
         setShowingTaskListEdit(false);
         setSelectedTaskList(null);
+    };
+
+    const handleTaskListEditCancel = () => {
+        setShowingTaskListEdit(false);
+        setShowingTaskListDetail(true); // Go back to detail view instead of list
     };
 
     const handleTaskListSaved = () => {
@@ -235,6 +245,7 @@ export const TasksPanel: React.FC = () => {
                 <TaskListFormView
                     isPresented={showingTaskListEdit}
                     onDismiss={handleTaskListFormDismiss}
+                    onCancel={handleTaskListEditCancel}
                     onTaskListSaved={handleTaskListSaved}
                     existingTaskList={selectedTaskList}
                     isEditMode={true}
@@ -266,6 +277,7 @@ export const TasksPanel: React.FC = () => {
                 <TaskFormView
                     isPresented={showingTaskEdit}
                     onDismiss={handleTaskFormDismiss}
+                    onCancel={handleTaskEditCancel}
                     onTaskSaved={handleTaskSaved}
                     existingTask={selectedTask}
                     taskLists={taskLists}

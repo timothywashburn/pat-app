@@ -18,6 +18,7 @@ import { TaskList } from '@/src/features/tasks/models';
 interface TaskListFormViewProps {
     isPresented: boolean;
     onDismiss: () => void;
+    onCancel?: () => void;
     onTaskListSaved?: () => void;
     existingTaskList?: TaskList;
     isEditMode?: boolean;
@@ -26,6 +27,7 @@ interface TaskListFormViewProps {
 const TaskListFormView: React.FC<TaskListFormViewProps> = ({
     isPresented,
     onDismiss,
+    onCancel,
     onTaskListSaved,
     existingTaskList,
     isEditMode = false
@@ -110,7 +112,14 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
             setName('');
         }
         setErrorMessage(null);
-        onDismiss();
+        
+        // Use onCancel if provided (for edit mode navigation back to detail view)
+        // Otherwise use onDismiss (for create mode navigation back to list)
+        if (onCancel) {
+            onCancel();
+        } else {
+            onDismiss();
+        }
     };
 
     return (

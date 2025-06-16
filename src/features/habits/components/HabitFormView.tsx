@@ -19,6 +19,7 @@ import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data
 interface HabitFormViewProps {
     isPresented: boolean;
     onDismiss: () => void;
+    onCancel?: () => void;
     onHabitSaved?: () => void;
     existingHabit?: Habit;
     isEditMode?: boolean;
@@ -27,6 +28,7 @@ interface HabitFormViewProps {
 const HabitFormView: React.FC<HabitFormViewProps> = ({
     isPresented,
     onDismiss,
+    onCancel,
     onHabitSaved,
     existingHabit,
     isEditMode = false
@@ -135,7 +137,14 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
             setRolloverTime('00:00');
         }
         setErrorMessage(null);
-        onDismiss();
+        
+        // Use onCancel if provided (for edit mode navigation back to detail view)
+        // Otherwise use onDismiss (for create mode navigation back to list)
+        if (onCancel) {
+            onCancel();
+        } else {
+            onDismiss();
+        }
     };
 
     const frequencyOptions = [

@@ -96,6 +96,11 @@ export const PeoplePanel: React.FC = () => {
         loadPeople();
     };
 
+    const handleEditCancel = () => {
+        setShowingEditForm(false);
+        setShowingDetailView(true); // Go back to detail view instead of list
+    };
+
     return (
         <SafeAreaView className="bg-background flex-1">
             <CustomHeader
@@ -159,6 +164,7 @@ export const PeoplePanel: React.FC = () => {
                 <PersonFormView
                     isPresented={showingEditForm}
                     onDismiss={handleFormDismiss}
+                    onCancel={handleEditCancel}
                     onPersonSaved={loadPeople}
                     existingPerson={selectedPerson}
                     isEditMode={true}

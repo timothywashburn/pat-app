@@ -64,6 +64,11 @@ export const HabitsPanel: React.FC = () => {
         setEditingHabit(null);
     };
 
+    const handleEditCancel = () => {
+        setShowHabitForm(false);
+        setShowHabitDetail(true); // Go back to detail view instead of list
+    };
+
     const handleCloseDetail = () => {
         setShowHabitDetail(false);
         setSelectedHabit(null);
@@ -131,6 +136,7 @@ export const HabitsPanel: React.FC = () => {
             <HabitFormView
                 isPresented={showHabitForm}
                 onDismiss={handleCloseForm}
+                onCancel={editingHabit !== null ? handleEditCancel : undefined}
                 onHabitSaved={handleHabitSaved}
                 existingHabit={editingHabit || undefined}
                 isEditMode={editingHabit !== null}
