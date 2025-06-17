@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { ToastContainer } from './ToastContainer';
 import { ToastType } from './Toast';
-import * as Crypto from 'expo-crypto';
 
 export interface ToastOptions {
     message: string;
@@ -42,7 +41,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     const [toasts, setToasts] = useState<ToastItem[]>([]);
 
     const showToast = useCallback((options: ToastOptions) => {
-        const id = Crypto.randomUUID();
+        const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         const newToast: ToastItem = {
             id,
             message: options.message,

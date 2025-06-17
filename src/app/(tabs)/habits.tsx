@@ -54,7 +54,6 @@ export const HabitsPanel: React.FC = () => {
         setShowHabitForm(true);
     };
 
-
     const handleHabitSaved = () => {
         loadHabits(); // Reload habits after save/delete
     };
