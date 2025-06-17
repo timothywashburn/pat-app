@@ -28,23 +28,11 @@ SplashScreen.setOptions({
 });
 
 const AppContent: React.FC = () => {
-    const { theme, colorScheme } = useTheme();
+    const { theme, colorScheme, getColor } = useTheme();
     const { authStoreStatus, initializeAuth } = useAuthStore();
     const { userDataStoreStatus, loadUserData } = useUserDataStore();
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
     const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
-
-    useEffect(() => {
-        const socketService = SocketService.shared;
-
-        if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL || authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
-            socketService.connect();
-        } else {
-            socketService.disconnect();
-        }
-
-        return () => socketService.disconnect();
-    }, [authStoreStatus]);
 
     useEffect(() => {
         Logger.debug('startup', 'deciding whether to initialize auth', {
@@ -63,18 +51,6 @@ const AppContent: React.FC = () => {
     }, [authStoreStatus]);
 
     useEffect(() => {
-        Logger.debug('startup', 'deciding whether to initialize deep links', {
-            authStoreStatus,
-        });
-
-        if (authStoreStatus !== AuthStoreStatus.NOT_INITIALIZED) {
-            Logger.debug('startup', 'initializing deep links');
-            DeepLinkHandler.initialize();
-            Logger.debug('startup', 'deep links initialized successfully');
-        }
-    }, [authStoreStatus]);
-
-    useEffect(() => {
         Logger.debug('startup', 'deciding whether to load user data', {
             authStoreStatus,
             userDataStoreStatus,
@@ -86,6 +62,30 @@ const AppContent: React.FC = () => {
             loadUserData().then();
         }
     }, [authStoreStatus, userDataStoreStatus]);
+
+    useEffect(() => {
+        const socketService = SocketService.shared;
+
+        if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL || authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
+            socketService.connect();
+        } else {
+            socketService.disconnect();
+        }
+
+        return () => socketService.disconnect();
+    }, [authStoreStatus]);
+
+    useEffect(() => {
+        Logger.debug('startup', 'deciding whether to initialize deep links', {
+            authStoreStatus,
+        });
+
+        if (authStoreStatus !== AuthStoreStatus.NOT_INITIALIZED) {
+            Logger.debug('startup', 'initializing deep links');
+            DeepLinkHandler.initialize();
+            Logger.debug('startup', 'deep links initialized successfully');
+        }
+    }, [authStoreStatus]);
 
     const hidesplash = useCallback(async () => {
         await SplashScreen.hideAsync();
@@ -166,7 +166,7 @@ const AppContent: React.FC = () => {
                 onLayout={hidesplash}
                 className="flex-1 justify-center items-center bg-background px-8"
             >
-                <Ionicons name="close-circle-outline" size={64} color="gray" />
+                <Ionicons name="close-circle-outline" size={64} color={getColor("error")} />
                 <Text className="mt-4 text-on-background text-center text-lg">
                     A server error occurred
                 </Text>
@@ -187,6 +187,21 @@ const AppContent: React.FC = () => {
                         {isRetryingRefresh ? "Retrying..." : "Try Again"}
                     </Text>
                 </TouchableOpacity>
+            </View>
+        );
+    } else if (authStoreStatus === AuthStoreStatus.VERSION_MISMATCH) {
+        return (
+            <View
+                onLayout={hidesplash}
+                className="flex-1 justify-center items-center bg-background px-8"
+            >
+                <Ionicons name="close-circle-outline" size={64} color={getColor("error")} />
+                <Text className="mt-4 text-on-background text-center text-lg">
+                    Version mismatch
+                </Text>
+                <Text className="mt-2 text-on-surface-variant text-center">
+                    Your client needs to be updated
+                </Text>
             </View>
         );
     }

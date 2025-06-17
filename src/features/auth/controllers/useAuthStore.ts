@@ -10,12 +10,13 @@ import {
     RefreshAuthResponse,
     CreateAccountRequest,
     CreateAccountResponse,
-    ResendVerificationResponse, PublicAuthData
+    ResendVerificationResponse, PublicAuthData, VersionResponse
 } from "@timothyw/pat-common";
 import { Logger } from "@/src/features/dev/components/Logger";
 
 export enum AuthStoreStatus {
     NOT_INITIALIZED = 'not_initialized',
+    VERSION_MISMATCH = 'version_mismatch',
     SERVER_ERROR = 'server_error',
     NOT_AUTHENTICATED = 'not_authenticated',
     AUTHENTICATED_NO_EMAIL = 'authenticated_no_email',
@@ -48,10 +49,35 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
         if (!authTokens?.refreshToken) {
             Logger.debug('auth', 'no tokens found in storage');
             get().signOut();
+            // TODO: shouldn't it be setting the status to NOT_AUTHENTICATED?
             return;
         }
 
         set({ authTokens });
+
+        try {
+            const response = await NetworkManager.shared.performUnauthenticated<undefined, VersionResponse>({
+                endpoint: `/api/version?clientVersion=${1}`,
+                method: HTTPMethod.GET,
+            });
+
+            if (response.updateRequired) {
+                set({
+                    authStoreStatus: AuthStoreStatus.VERSION_MISMATCH
+                });
+                return;
+            }
+
+            Logger.info('auth', 'version check successful');
+        } catch (error) {
+            Logger.error('auth', 'version check failed', error);
+            if (error instanceof NetworkError && error.status >= 500) {
+                set({ authStoreStatus: AuthStoreStatus.SERVER_ERROR });
+                throw new Error(AuthError.SERVER_ERROR);
+            }
+
+            throw error;
+        }
 
         try {
             Logger.debug('auth', 'attempting to refresh auth');
