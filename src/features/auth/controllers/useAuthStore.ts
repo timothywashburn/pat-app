@@ -70,8 +70,6 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
     signIn: async (email: string, password: string) => {
         Logger.info('auth', 'signing in with email', email);
 
-        console.log("aasdf");
-
         try {
             const response = await NetworkManager.shared.performUnauthenticated<SignInRequest, SignInResponse>({
                 endpoint: '/api/auth/sign-in',
@@ -93,6 +91,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             if (error instanceof NetworkError && error.status >= 500) {
                 throw new Error(AuthError.SERVER_ERROR);
             }
+            throw error;
         }
     },
 
