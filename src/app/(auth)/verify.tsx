@@ -69,7 +69,7 @@ export default function VerifyEmailScreen() {
                 className="mt-5 py-2.5"
                 onPress={signOut}
             >
-                <Text className="text-red-500 font-semibold text-base">
+                <Text className="text-on-error font-semibold text-base">
                     Sign Out
                 </Text>
             </TouchableOpacity>

@@ -46,7 +46,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
                             onPress={() => handleDeleteItem(item)}
                             className="p-1"
                         >
-                            <Ionicons name="remove-circle" size={24} color={getColor("error")} />
+                            <Ionicons name="remove-circle" size={24} color={getColor("on-error")} />
                         </TouchableOpacity>
                     )}
                 </View>

@@ -86,7 +86,7 @@ export const SettingsPanel: React.FC = () => {
                                 </TouchableOpacity>
                             )}
                             <TouchableOpacity onPress={() => setEditMode(!editMode)}>
-                                <Text className={`text-base ${editMode ? "text-error" : "text-primary"}`}>
+                                <Text className={`text-base ${editMode ? "text-on-error" : "text-primary"}`}>
                                     {editMode ? 'Cancel' : 'Edit'}
                                 </Text>
                             </TouchableOpacity>
@@ -137,7 +137,7 @@ export const SettingsPanel: React.FC = () => {
                         )}
 
                         <Text
-                            className="text-error text-base font-bold text-center py-3"
+                            className="text-on-error text-base font-bold text-center py-3"
                             onPress={() => signOut()}
                         >
                             Sign Out

@@ -277,7 +277,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                                     onPress={() => deleteProperty(property.id)}
                                     className="p-2"
                                 >
-                                    <Ionicons name="trash-outline" size={18} color={getColor("error")} />
+                                    <Ionicons name="trash-outline" size={18} color={getColor("on-error")} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -332,7 +332,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                                     onPress={() => deleteNote(note.id)}
                                     className="p-2"
                                 >
-                                    <Ionicons name="trash-outline" size={18} color={getColor("error")} />
+                                    <Ionicons name="trash-outline" size={18} color={getColor("on-error")} />
                                 </TouchableOpacity>
                             </View>
                         </View>
