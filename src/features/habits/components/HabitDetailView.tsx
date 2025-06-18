@@ -9,7 +9,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import DetailViewHeader from '@/src/components/common/DetailViewHeader';
-import { formatTimeRemaining, getTimeRemainingUntilRollover, getActiveHabitDate, getPreviousHabitDate } from '@/src/features/habits/models';
+import {
+    formatTimeRemaining,
+    getTimeRemainingUntilRollover,
+    getActiveHabitDate,
+    getPreviousHabitDate,
+    fromDateOnlyString
+} from '@/src/features/habits/models';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import HabitCalendarGrid from './HabitCalendarGrid';
 import HabitActionButtons from './HabitActionButtons';
@@ -175,7 +181,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                         <View className="space-y-2">
                             <View className="flex-row justify-between">
                                 <Text className="text-on-surface-variant">Success Rate</Text>
-                                <Text className="text-on-surface">{habit.stats.completionRate.toFixed(1)}%</Text>
+                                <Text className="text-on-surface">{habit.stats.completionRate == -1 ? "-" : habit.stats.completionRate.toFixed(1) + "%"}</Text>
                             </View>
                             
                             <View className="flex-row justify-between">
@@ -196,7 +202,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                             <View className="flex-row justify-between">
                                 <Text className="text-on-surface-variant">Created</Text>
                                 <Text className="text-on-surface">
-                                    {fromDateString(habit.createdAt).toLocaleDateString()}
+                                    {fromDateOnlyString(habit.firstDay).toLocaleDateString()}
                                 </Text>
                             </View>
                             

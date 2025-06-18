@@ -11,7 +11,7 @@ import {
     GetHabitsResponse,
     DeleteHabitResponse,
     CreateHabitEntryRequest,
-    CreateHabitEntryResponse, Habit, toDateString, HabitEntry, fromDateString
+    CreateHabitEntryResponse, Habit, toDateString, HabitEntry, fromDateString, DateOnlyString
 } from '@timothyw/pat-common';
 import { HabitEntryStatus, HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
 
@@ -141,11 +141,13 @@ export class HabitManager {
         }
     }
 
-    async markHabitEntry(habitId: string, date: Date, status: HabitEntryStatus): Promise<void> {
+    async markHabitEntry(habitId: string, date: DateOnlyString, status: HabitEntryStatus): Promise<void> {
         const body: CreateHabitEntryRequest = {
-            date: toDateString(date),
+            date,
             status
         };
+
+        console.log(body.date);
 
         try {
             await NetworkManager.shared.performAuthenticated<CreateHabitEntryRequest, CreateHabitEntryResponse>({
@@ -161,10 +163,10 @@ export class HabitManager {
         }
     }
 
-    async deleteHabitEntry(habitId: string, date: Date): Promise<void> {
+    async deleteHabitEntry(habitId: string, date: DateOnlyString): Promise<void> {
         try {
             await NetworkManager.shared.performAuthenticated<undefined, DeleteHabitResponse>({
-                endpoint: `/api/habits/${habitId}/entries/${toDateString(date)}`,
+                endpoint: `/api/habits/${habitId}/entries/${date}`,
                 method: HTTPMethod.DELETE
             });
 
@@ -179,17 +181,9 @@ export class HabitManager {
         return this._habits.find(h => h._id === id);
     }
 
-    getHabitEntryByDate(habitId: string, date: Date): HabitEntry | undefined {
+    getHabitEntryByDate(habitId: string, date: DateOnlyString): HabitEntry | undefined {
         const habit = this.getHabitById(habitId);
         if (!habit) return undefined;
-        return habit.entries.find(e => isSameDay(fromDateString(e.date), date));
-    }
-
-    getTodayEntry(habitId: string): HabitEntry | undefined {
-        return this.getHabitEntryByDate(habitId, getTodayDate());
-    }
-
-    getYesterdayEntry(habitId: string): HabitEntry | undefined {
-        return this.getHabitEntryByDate(habitId, getYesterdayDate());
+        return habit.entries.find(e => e.date === date);
     }
 }

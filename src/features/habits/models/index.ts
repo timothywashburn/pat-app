@@ -4,7 +4,7 @@ import {
     HabitEntryStatus,
     HabitStats
 } from "@timothyw/pat-common/src/types/models/habit-data";
-import { fromDateString, Habit } from "@timothyw/pat-common";
+import { DateOnlyString, fromDateString, Habit } from "@timothyw/pat-common";
 
 export const parseDate = (dateString: string): Date => {
     return new Date(dateString + 'T00:00:00');
@@ -13,7 +13,7 @@ export const parseDate = (dateString: string): Date => {
 export const calculateHabitStats = (habit: Habit): HabitStats => {
     const completedDays = habit.entries.filter(entry => entry.status === HabitEntryStatus.COMPLETED).length;
     const excusedDays = habit.entries.filter(entry => entry.status === HabitEntryStatus.EXCUSED).length;
-    const totalDays = getDaysBetweenInclusive(fromDateString(habit.createdAt), getTodayDate());
+    const totalDays = getDaysBetweenInclusive(fromDateOnlyString(habit.firstDay), getTodayDate());
     const missedDays = totalDays - completedDays - excusedDays;
     const completionRate = completedDays / (totalDays - excusedDays) * 100;
 
@@ -61,6 +61,18 @@ export const getYesterdayDate = (): Date => {
     yesterday.setDate(yesterday.getDate() - 1);
     return yesterday;
 };
+
+export const toDateOnlyString = (date: Date): DateOnlyString => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}` as DateOnlyString;
+}
+
+export const fromDateOnlyString = (dateString: DateOnlyString): Date => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
 
 export const isSameDay = (date1: Date, date2: Date): boolean => {
     return date1.getFullYear() === date2.getFullYear() &&

@@ -38,6 +38,8 @@ interface UseAuthStore {
     updateAuthData: (update: (authData: PublicAuthData) => void) => void;
 }
 
+const CLIENT_VERSION = 2;
+
 export const useAuthStore = create<UseAuthStore>((set, get) => ({
     authStoreStatus: AuthStoreStatus.NOT_INITIALIZED,
 
@@ -57,7 +59,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
 
         try {
             const response = await NetworkManager.shared.performUnauthenticated<undefined, VersionResponse>({
-                endpoint: `/api/version?clientVersion=${1}`,
+                endpoint: `/api/version?clientVersion=${CLIENT_VERSION}`,
                 method: HTTPMethod.GET,
             });
 

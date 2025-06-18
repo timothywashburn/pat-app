@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
-import { fromDateString, Habit } from "@timothyw/pat-common";
-import { isSameDay, isToday, isYesterday } from '@/src/features/habits/models';
+import { DateOnlyString, fromDateString, Habit } from "@timothyw/pat-common";
+import { isSameDay, isToday, isYesterday, toDateOnlyString } from '@/src/features/habits/models';
 import { useToast } from "@/src/components/toast/ToastContext";
 
 interface HabitActionButtonsProps {
@@ -25,7 +25,8 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
     const { getColor } = useTheme();
     const habitManager = HabitManager.getInstance();
 
-    const currentEntry = habit.entries.find(entry => isSameDay(fromDateString(entry.date), targetDate));
+    const targetDateOnlyString = toDateOnlyString(targetDate);
+    const currentEntry = habit.entries.find(entry => entry.date === targetDateOnlyString);
 
     const getDateInfo = (date: Date) => {
         const dateStr = date.toLocaleDateString('en-US', {
@@ -52,9 +53,9 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
     const handleMarkHabit = async (status: HabitEntryStatus) => {
         try {
             if (currentEntry?.status === status) {
-                await habitManager.deleteHabitEntry(habit._id, targetDate);
+                await habitManager.deleteHabitEntry(habit._id, targetDateOnlyString);
             } else {
-                await habitManager.markHabitEntry(habit._id, targetDate, status);
+                await habitManager.markHabitEntry(habit._id, targetDateOnlyString, status);
             }
             onHabitUpdated?.();
         } catch (error) {
@@ -62,7 +63,6 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
             console.error('Failed to mark habit:', error);
         }
     };
-
 
     return (
         <View>

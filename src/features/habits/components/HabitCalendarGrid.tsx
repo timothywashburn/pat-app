@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { DateString, fromDateString, Habit, HabitEntry } from "@timothyw/pat-common";
+import { DateOnlyString, DateString, fromDateString, Habit, HabitEntry } from "@timothyw/pat-common";
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 import { useToast } from "@/src/components/toast/ToastContext";
+import { fromDateOnlyString } from "@/src/features/habits/models";
 
 // Timezone-aware date utilities for consistent calendar logic
 const dateUtils = {
@@ -13,12 +14,6 @@ const dateUtils = {
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
-    },
-    
-    // Parse date string consistently - always treat as local calendar date
-    parseEntryDate: (dateString: DateString): Date => {
-        const parsed = fromDateString(dateString);
-        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
     },
     
     // Get today's date as local calendar date (no time component)
@@ -63,7 +58,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     // Calculate available years based on habit creation date
     useEffect(() => {
-        const habitStartYear = fromDateString(habit.createdAt).getFullYear();
+        const habitStartYear = fromDateOnlyString(habit.firstDay).getFullYear();
         const currentYearNum = new Date().getFullYear();
         const years = [];
         for (let year = currentYearNum; year >= habitStartYear; year--) {
@@ -112,7 +107,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     const entryMap = new Map<string, HabitEntry>();
     habit.entries.forEach(entry => {
-        const entryDate = dateUtils.parseEntryDate(entry.date);
+        const entryDate = fromDateOnlyString(entry.date);
         const key = dateUtils.toLocalDateKey(entryDate);
         entryMap.set(key, entry);
     });
@@ -122,7 +117,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     }
 
     const getDateDisplayText = (date: Date, entry?: HabitEntry): string => {
-        const firstDay = dateUtils.parseEntryDate(habit.createdAt);
+        const firstDay = fromDateOnlyString(habit.firstDay);
         
         if (dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay)) {
             return `Habit not created yet on ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
@@ -143,7 +138,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     };
 
     const getSquareBorderStyle = (date: Date, entry?: HabitEntry) => {
-        const firstDay = dateUtils.parseEntryDate(habit.createdAt);
+        const firstDay = fromDateOnlyString(habit.firstDay);
         const isBeforeCreation = dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay);
         if (isBeforeCreation || !entry) return 'border border-outline-variant';
         return '';
@@ -166,7 +161,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
 
     // Get opacity for a specific date (to show intensity like GitHub)
     const getSquareOpacity = (date: Date): number => {
-        const firstDay = dateUtils.parseEntryDate(habit.createdAt);
+        const firstDay = fromDateOnlyString(habit.firstDay);
         const entry = getEntry(date);
 
         if (dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay)) return 0.15;
