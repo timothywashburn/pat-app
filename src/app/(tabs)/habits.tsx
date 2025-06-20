@@ -11,10 +11,14 @@ import HabitDetailView from '@/src/features/habits/components/HabitDetailView';
 export const HabitsPanel: React.FC = () => {
     const [habits, setHabits] = useState<Habit[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [showHabitForm, setShowHabitForm] = useState(false);
+    // State for the create/edit form
+    const [showingCreateForm, setShowingCreateForm] = useState(false);
+    const [showingEditForm, setShowingEditForm] = useState(false);
     const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+    // State for detail view
     const [showHabitDetail, setShowHabitDetail] = useState(false);
     const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+    const [editFromDetailView, setEditFromDetailView] = useState(false);
 
     useEffect(() => {
         loadHabits();
@@ -34,13 +38,14 @@ export const HabitsPanel: React.FC = () => {
     };
 
     const handleAddHabit = () => {
-        setEditingHabit(null);
-        setShowHabitForm(true);
+        setShowingCreateForm(true);
+        setEditFromDetailView(false);
     };
 
     const handleEditHabit = (habit: Habit) => {
         setEditingHabit(habit);
-        setShowHabitForm(true);
+        setShowingEditForm(true);
+        setEditFromDetailView(false);
     };
 
     const handleHabitPress = (habit: Habit) => {
@@ -51,21 +56,28 @@ export const HabitsPanel: React.FC = () => {
     const handleEditHabitFromDetail = (habit: Habit) => {
         setShowHabitDetail(false);
         setEditingHabit(habit);
-        setShowHabitForm(true);
+        setShowingEditForm(true);
+        setEditFromDetailView(true);
     };
 
     const handleHabitSaved = () => {
         loadHabits(); // Reload habits after save/delete
     };
 
-    const handleCloseForm = () => {
-        setShowHabitForm(false);
-        setEditingHabit(null);
-    };
-
-    const handleEditCancel = () => {
-        setShowHabitForm(false);
-        setShowHabitDetail(true); // Go back to detail view instead of list
+    const handleFormDismiss = () => {
+        setShowingCreateForm(false);
+        setShowingEditForm(false);
+        
+        if (editFromDetailView) {
+            // Return to detail view if edit was opened from detail
+            setEditFromDetailView(false);
+            setShowHabitDetail(true);
+        } else {
+            // Clear selected habit and return to list if this was a create form
+            setEditingHabit(null);
+        }
+        
+        loadHabits();
     };
 
     const handleCloseDetail = () => {
@@ -132,14 +144,23 @@ export const HabitsPanel: React.FC = () => {
                 )}
             </ScrollView>
 
+            {/* Create new habit view */}
             <HabitFormView
-                isPresented={showHabitForm}
-                onDismiss={handleCloseForm}
-                onCancel={editingHabit !== null ? handleEditCancel : undefined}
+                isPresented={showingCreateForm}
+                onDismiss={handleFormDismiss}
                 onHabitSaved={handleHabitSaved}
-                existingHabit={editingHabit || undefined}
-                isEditMode={editingHabit !== null}
             />
+
+            {/* Edit habit view */}
+            {editingHabit && (
+                <HabitFormView
+                    isPresented={showingEditForm}
+                    onDismiss={handleFormDismiss}
+                    onHabitSaved={handleHabitSaved}
+                    existingHabit={editingHabit}
+                    isEditMode={true}
+                />
+            )}
 
             <HabitDetailView
                 isPresented={showHabitDetail}

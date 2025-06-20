@@ -1,9 +1,8 @@
-import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import {
     CreatePersonRequest,
     CreatePersonResponse, DeletePersonResponse,
-    GetPeopleResponse,
+    GetPeopleResponse, Person, PersonNoteData, PersonNoteId, PersonProperty,
     UpdatePersonRequest, UpdatePersonResponse
 } from "@timothyw/pat-common";
 
@@ -36,43 +35,25 @@ export class PersonManager {
                 throw new Error('Invalid response format');
             }
 
-            const people: Person[] = response.people.map((person: any) => ({
-                id: person.id || person._id,
-                name: person.name,
-                properties: (person.properties || []).map((prop: any) => ({
-                    id: prop.id || String(Math.random()),
-                    key: prop.key,
-                    value: prop.value,
-                })),
-                notes: (person.notes || []).map((note: any) => ({
-                    id: note.id || String(Math.random()),
-                    content: note.content,
-                    createdAt: new Date(note.createdAt),
-                    updatedAt: new Date(note.updatedAt),
-                })),
-            }));
-
-            this._people = people;
+            this._people = response.people;
         } catch (error) {
             console.error('Failed to load people:', error);
             throw error;
         }
     }
 
-    async createPerson(
-        name: string,
-        properties: PersonProperty[] = [],
-        notes: PersonNote[] = []
-    ): Promise<Person> {
+    async createPerson(params: {
+        name: string;
+        properties?: PersonProperty[];
+        notes?: PersonNoteId[];
+    }): Promise<Person> {
         const body = {
-            name,
-            properties: properties.map(prop => ({
+            name: params.name,
+            properties: (params.properties || []).map(prop => ({
                 key: prop.key,
                 value: prop.value,
             })),
-            notes: notes.map(note => ({
-                content: note.content,
-            })),
+            notes: params.notes,
         };
 
         try {
@@ -90,7 +71,7 @@ export class PersonManager {
             await this.loadPeople();
 
             // Find the newly created person
-            const newPerson = this._people.find(p => p.id === response.person.id);
+            const newPerson = this._people.find(p => p._id === response.person._id);
             if (!newPerson) {
                 throw new Error('Failed to create person');
             }
@@ -104,20 +85,30 @@ export class PersonManager {
 
     async updatePerson(
         id: string,
-        name: string,
-        properties: PersonProperty[],
-        notes: PersonNote[]
+        updates: {
+            name?: string;
+            properties?: PersonProperty[];
+            notes?: PersonNoteData[];
+        }
     ): Promise<void> {
-        const body = {
-            name,
-            properties: properties.map(prop => ({
+        const body: any = {};
+
+        if (updates.name !== undefined) {
+            body.name = updates.name;
+        }
+
+        if (updates.properties !== undefined) {
+            body.properties = updates.properties.map(prop => ({
                 key: prop.key,
                 value: prop.value,
-            })),
-            notes: notes.map(note => ({
+            }));
+        }
+
+        if (updates.notes !== undefined) {
+            body.notes = updates.notes.map(note => ({
                 content: note.content,
-            })),
-        };
+            }));
+        }
 
         try {
             await NetworkManager.shared.performAuthenticated<UpdatePersonRequest, UpdatePersonResponse>({

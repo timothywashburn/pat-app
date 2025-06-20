@@ -5,13 +5,12 @@ import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
-import { Person } from "@/src/features/people/models";
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 import PersonItemView from "@/src/features/people/components/PersonItemView";
 import PersonFormView from "@/src/features/people/components/PersonFormView";
 import PersonDetailView from "@/src/features/people/components/PersonDetailView";
 import { useToast } from "@/src/components/toast/ToastContext";
-import { ModuleType } from "@timothyw/pat-common";
+import { ModuleType, Person } from "@timothyw/pat-common";
 
 export const PeoplePanel: React.FC = () => {
     const { getColor } = useTheme();
@@ -139,7 +138,7 @@ export const PeoplePanel: React.FC = () => {
                             <PersonItemView person={item} />
                         </TouchableOpacity>
                     )}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item._id}
                     contentContainerStyle={{ padding: 16 }}
                     refreshControl={
                         <RefreshControl

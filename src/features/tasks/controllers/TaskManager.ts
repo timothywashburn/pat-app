@@ -219,12 +219,7 @@ export class TaskManager {
 
     async updateTask(
         id: string,
-        updates: {
-            name?: string;
-            notes?: string;
-            completed?: boolean;
-            taskListId?: TaskListId;
-        }
+        updates: UpdateTaskRequest
     ): Promise<void> {
         const body: UpdateTaskRequest = {};
 

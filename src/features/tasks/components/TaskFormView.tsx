@@ -73,7 +73,7 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
         try {
             const taskData = {
                 name: name.trim(),
-                notes: notes.trim() || undefined,
+                notes: notes.trim() || null,
                 taskListId: selectedTaskListId,
             };
 

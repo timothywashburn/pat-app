@@ -44,10 +44,16 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                     <Text className="text-on-surface text-lg font-semibold mb-1">
                         {habit.name}
                     </Text>
-                    
+
                     {habit.description && (
                         <Text className="text-on-surface-variant text-sm mb-2">
                             {habit.description}
+                        </Text>
+                    )}
+
+                    {habit.notes && (
+                        <Text className="text-on-surface-variant text-sm mb-2">
+                            {habit.notes}
                         </Text>
                     )}
                 </View>

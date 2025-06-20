@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { Person } from "@/src/features/people/models";
+import { Person } from "@timothyw/pat-common";
 
 interface PersonDetailViewProps {
     person: Person;
@@ -51,7 +51,7 @@ const PersonDetailView: React.FC<PersonDetailViewProps> = ({
                             <Text className="text-on-background text-base font-medium mb-2">Properties</Text>
                             <View className="flex-col gap-2">
                                 {person.properties.map(property => (
-                                    <View key={property.id} className="bg-surface border border-outline rounded-lg p-3">
+                                    <View key={property.key} className="bg-surface border border-outline rounded-lg p-3">
                                         <Text className="text-xs text-on-surface-variant">{property.key}</Text>
                                         <Text className="text-base text-on-surface">{property.value}</Text>
                                     </View>
@@ -66,7 +66,7 @@ const PersonDetailView: React.FC<PersonDetailViewProps> = ({
                             <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
                             <View className="flex-col gap-2">
                                 {person.notes.map(note => (
-                                    <View key={note.id} className="bg-surface border border-outline rounded-lg p-3">
+                                    <View key={note._id} className="bg-surface border border-outline rounded-lg p-3">
                                         <Text className="text-base text-on-surface mb-1">{note.content}</Text>
                                         <Text className="text-xs text-on-surface-variant">
                                             {new Date(note.updatedAt).toLocaleDateString()}

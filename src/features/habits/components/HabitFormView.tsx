@@ -38,6 +38,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
 
     const [name, setName] = useState(existingHabit?.name || '');
     const [description, setDescription] = useState(existingHabit?.description || '');
+    const [notes, setNotes] = useState(existingHabit?.notes || '');
     const [frequency, setFrequency] = useState(existingHabit?.frequency || HabitFrequency.DAILY);
     const [rolloverTime, setRolloverTime] = useState(existingHabit?.rolloverTime || '00:00');
     const [isLoading, setIsLoading] = useState(false);
@@ -68,7 +69,8 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
         try {
             const habitData = {
                 name: name.trim(),
-                description: description.trim() || undefined,
+                description: description.trim() || null,
+                notes: notes.trim() || null,
                 frequency,
                 rolloverTime,
             };
@@ -76,7 +78,11 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
             if (isEditMode && existingHabit) {
                 await habitManager.updateHabit(existingHabit._id, habitData);
             } else {
-                await habitManager.createHabit(habitData);
+                await habitManager.createHabit({
+                    ...habitData,
+                    description: habitData.description || undefined,
+                    notes: habitData.notes || undefined
+                });
             }
 
             if (!isEditMode) {
@@ -182,6 +188,15 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
                         value={description}
                         onChangeText={setDescription}
                         placeholder="Add details about your habit (optional)"
+                        maxLength={300}
+                        numberOfLines={3}
+                    />
+
+                    <FormTextArea
+                        label="Notes"
+                        value={notes}
+                        onChangeText={setNotes}
+                        placeholder="Add other notes about your habit (optional)"
                         maxLength={300}
                         numberOfLines={3}
                     />

@@ -10,8 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
-import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
+import { Person, PersonNoteData, PersonNoteId, PersonProperty } from "@timothyw/pat-common";
 
 interface PersonFormViewProps {
     isPresented: boolean;
@@ -34,7 +34,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
 
     const [name, setName] = useState(existingPerson?.name || '');
     const [properties, setProperties] = useState<PersonProperty[]>(existingPerson?.properties || []);
-    const [notes, setNotes] = useState<PersonNote[]>(existingPerson?.notes || []);
+    const [notes, setNotes] = useState<PersonNoteData[]>(existingPerson?.notes || []);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -62,16 +62,28 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         setErrorMessage(null);
 
         try {
+            const personData = {
+                name: name.trim(),
+                properties,
+                notes,
+            };
+
             if (isEditMode && existingPerson) {
-                await personManager.updatePerson(existingPerson.id, name, properties, notes);
+                await personManager.updatePerson(existingPerson._id, personData);
             } else {
-                await personManager.createPerson(name, properties, notes);
+                await personManager.createPerson({
+                    ...personData,
+                    notes: notes.map(note => note._id),
+                });
             }
 
             if (!isEditMode) {
                 setName('');
                 setProperties([]);
                 setNotes([]);
+                setNewPropertyKey('');
+                setNewPropertyValue('');
+                setNewNote('');
             }
 
             onPersonSaved?.();
@@ -90,7 +102,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await personManager.deletePerson(existingPerson.id);
+            await personManager.deletePerson(existingPerson._id);
             onPersonSaved?.();
             onDismiss();
         } catch (error) {
@@ -103,12 +115,11 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         if (!newPropertyKey || !newPropertyValue) return;
 
         const newProp: PersonProperty = {
-            id: Date.now().toString(),
             key: newPropertyKey,
             value: newPropertyValue,
         };
 
-        setProperties([newProp, ...properties]);  // Add to beginning of array
+        setProperties([newProp, ...properties]); // Add to beginning of array
         setNewPropertyKey('');
         setNewPropertyValue('');
     };
@@ -117,7 +128,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         if (!newNote) return;
 
         const now = new Date();
-        const newNoteItem: PersonNote = {
+        const newNoteItem: PersonNoteData = {
             id: Date.now().toString(),
             content: newNote,
             createdAt: now,
@@ -128,29 +139,28 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         setNewNote('');
     };
 
-    const deleteProperty = (id: string) => {
-        setProperties(properties.filter(prop => prop.id !== id));
+    const deleteProperty = (key: string) => {
+        setProperties(properties.filter(prop => prop.key !== key));
     };
 
-    const deleteNote = (id: string) => {
-        setNotes(notes.filter(note => note.id !== id));
+    const deleteNote = (id: PersonNoteId) => {
+        setNotes(notes.filter(note => note._id !== id));
     };
 
-    const updatePropertyValue = (id: string, newValue: string) => {
+    const updatePropertyValue = (key: string, newValue: string) => {
         setProperties(properties.map(prop =>
-            prop.id === id ? { ...prop, value: newValue } : prop
+            prop.key === key ? { ...prop, value: newValue } : prop
         ));
     };
 
     const updateNoteContent = (id: string, newContent: string) => {
         const now = new Date();
         setNotes(notes.map(note =>
-            note.id === id ? { ...note, content: newContent, updatedAt: now } : note
+            note._id === id ? { ...note, content: newContent, updatedAt: now } : note
         ));
     };
 
     const handleCancel = () => {
-        // Reset form state if needed
         if (isEditMode && existingPerson) {
             setName(existingPerson.name);
             setProperties(existingPerson.properties || []);
@@ -160,6 +170,9 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
             setProperties([]);
             setNotes([]);
         }
+        setNewPropertyKey('');
+        setNewPropertyValue('');
+        setNewNote('');
         setErrorMessage(null);
         
         // Use onCancel if provided (for edit mode navigation back to detail view)
@@ -239,20 +252,20 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                     </View>
 
                     {properties.map(property => (
-                        <View key={property.id} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
+                        <View key={property.key} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
                             <View className="flex-row items-center">
                                 <View className="flex-1">
                                     <Text className="text-on-surface-variant text-xs">{property.key}</Text>
                                     <TextInput
                                         className="text-on-surface text-base"
                                         value={property.value}
-                                        onChangeText={(newValue) => updatePropertyValue(property.id, newValue)}
+                                        onChangeText={(newValue) => updatePropertyValue(property.key, newValue)}
                                         placeholder="Property Value"
                                         placeholderTextColor={getColor("on-surface-variant")}
                                     />
                                 </View>
                                 <TouchableOpacity
-                                    onPress={() => deleteProperty(property.id)}
+                                    onPress={() => deleteProperty(property.key)}
                                     className="p-2"
                                 >
                                     <Ionicons name="trash-outline" size={18} color={getColor("on-error")} />
@@ -291,13 +304,13 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                     </View>
 
                     {notes.map(note => (
-                        <View key={note.id} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
+                        <View key={note._id} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
                             <View className="flex-row items-center">
                                 <View className="flex-1">
                                     <TextInput
                                         className="text-on-surface text-base mb-1"
                                         value={note.content}
-                                        onChangeText={(newContent) => updateNoteContent(note.id, newContent)}
+                                        onChangeText={(newContent) => updateNoteContent(note._id, newContent)}
                                         placeholder="Note content"
                                         placeholderTextColor={getColor("on-surface-variant")}
                                         multiline
@@ -307,7 +320,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                                     </Text>
                                 </View>
                                 <TouchableOpacity
-                                    onPress={() => deleteNote(note.id)}
+                                    onPress={() => deleteNote(note._id)}
                                     className="p-2"
                                 >
                                     <Ionicons name="trash-outline" size={18} color={getColor("on-error")} />

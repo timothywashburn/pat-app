@@ -1,17 +1,16 @@
-import {
-    getTodayDate,
-    getYesterdayDate, isSameDay
-} from '@/src/features/habits/models';
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import {
+    CreateHabitEntryRequest,
+    CreateHabitEntryResponse,
     CreateHabitRequest,
     CreateHabitResponse,
-    UpdateHabitRequest,
-    UpdateHabitResponse,
-    GetHabitsResponse,
+    DateOnlyString,
     DeleteHabitResponse,
-    CreateHabitEntryRequest,
-    CreateHabitEntryResponse, Habit, toDateString, HabitEntry, fromDateString, DateOnlyString
+    GetHabitsResponse,
+    Habit,
+    HabitEntry,
+    UpdateHabitRequest,
+    UpdateHabitResponse
 } from '@timothyw/pat-common';
 import { HabitEntryStatus, HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
 
@@ -50,16 +49,11 @@ export class HabitManager {
         }
     }
 
-    async createHabit(params: {
-        name: string;
-        description?: string;
-        frequency?: HabitFrequency;
-        rolloverTime?: string;
-    }): Promise<Habit> {
+    async createHabit(params: CreateHabitRequest): Promise<Habit> {
         const body: CreateHabitRequest = {
             name: params.name,
             description: params.description,
-            frequency: 'daily', // API only supports daily for now
+            frequency: HabitFrequency.DAILY, // API only supports daily for now
             rolloverTime: params.rolloverTime || '00:00'
         };
 
@@ -90,12 +84,7 @@ export class HabitManager {
         }
     }
 
-    async updateHabit(id: string, updates: {
-        name?: string;
-        description?: string;
-        frequency?: HabitFrequency;
-        rolloverTime?: string;
-    }): Promise<void> {
+    async updateHabit(id: string, updates: UpdateHabitRequest): Promise<void> {
         const body: UpdateHabitRequest = {};
 
         if (updates.name !== undefined) {
@@ -105,7 +94,7 @@ export class HabitManager {
             body.description = updates.description;
         }
         if (updates.frequency !== undefined) {
-            body.frequency = 'daily'; // API only supports daily for now
+            body.frequency = HabitFrequency.DAILY; // API only supports daily for now
         }
         if (updates.rolloverTime !== undefined) {
             body.rolloverTime = updates.rolloverTime;

@@ -57,10 +57,16 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                     <Text className="text-on-surface text-2xl font-bold mb-2">
                         {habit.name}
                     </Text>
-                    
+
                     {habit.description && (
                         <Text className="text-on-surface-variant text-base mb-4">
                             {habit.description}
+                        </Text>
+                    )}
+
+                    {habit.notes && (
+                        <Text className="text-on-surface-variant text-base mb-4">
+                            {habit.notes}
                         </Text>
                     )}
 

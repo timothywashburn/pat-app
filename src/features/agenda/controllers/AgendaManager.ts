@@ -115,14 +115,7 @@ export class AgendaManager {
 
     async updateAgendaItem(
         id: string,
-        updates: {
-            name?: string;
-            date?: Date;
-            notes?: string;
-            urgent?: boolean;
-            category?: string;
-            type?: string;
-        }
+        updates: UpdateItemRequest
     ): Promise<void> {
         const body: UpdateItemRequest = {};
 
@@ -130,8 +123,8 @@ export class AgendaManager {
             body.name = updates.name;
         }
 
-        if (updates.date !== undefined) {
-            body.dueDate = updates.date ? updates.date.toISOString() : null;
+        if (updates.dueDate !== undefined) {
+            body.dueDate = updates.dueDate ? updates.dueDate.toISOString() as unknown as Date : null;
         }
 
         if (updates.notes !== undefined) {

@@ -45,7 +45,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     };
 
     const [name, setName] = useState(existingItem?.name || initialName);
-    const [date, setDate] = useState<Date | undefined>(existingItem?.date || getTonight());
+    const [date, setDate] = useState<Date | undefined>(existingItem?.date);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [notes, setNotes] = useState(existingItem?.notes || '');
@@ -78,16 +78,21 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
             const itemData = {
                 name: name.trim(),
                 date: date,
-                notes: notes.trim() || undefined,
+                notes: notes.trim() || null,
                 urgent: urgent,
                 category: category,
                 type: type,
             };
 
+            console.log(itemData);
+
             if (isEditMode && existingItem) {
                 await agendaManager.updateAgendaItem(existingItem.id, itemData);
             } else {
-                await agendaManager.createAgendaItem(itemData);
+                await agendaManager.createAgendaItem({
+                    ...itemData,
+                    notes: itemData.notes || undefined,
+                });
             }
 
             if (!isEditMode) {
@@ -282,9 +287,9 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                         <Switch
                             value={urgent}
                             onValueChange={setUrgent}
-                            trackColor={{ false: getColor("unknown"), true: getColor("error") }}
-                            thumbColor={getColor("on-error")}
-                            ios_backgroundColor={getColor("unknown")}
+                            trackColor={{ false: getColor("surface"), true: getColor("error") }}
+                            thumbColor={getColor("on-background")}
+                            ios_backgroundColor={getColor("surface")}
                         />
                     </View>
                 </View>
