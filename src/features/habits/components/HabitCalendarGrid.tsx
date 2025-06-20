@@ -257,13 +257,13 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
     const isTablet = width >= 768;
 
     return (
-        <View className="bg-surface rounded-lg p-4">
+        <>
             {/* Header with view mode selection */}
             <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-on-surface text-lg font-semibold">
                     {getTitle()}
                 </Text>
-                
+
                 {isTablet ? (
                     <View className="flex-row items-center">
                         <TouchableOpacity
@@ -278,12 +278,12 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                                 Last year
                             </Text>
                         </TouchableOpacity>
-                        
+
                         {availableYears.map(year => (
                             <TouchableOpacity
                                 key={year}
                                 className={`px-3 py-1 rounded-md mr-2 ${
-                                    currentViewMode === 'year' && currentYear === year 
+                                    currentViewMode === 'year' && currentYear === year
                                         ? 'bg-primary' : 'bg-surface-variant'
                                 }`}
                                 onPress={() => {
@@ -292,7 +292,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                                 }}
                             >
                                 <Text className={`text-sm ${
-                                    currentViewMode === 'year' && currentYear === year 
+                                    currentViewMode === 'year' && currentYear === year
                                         ? 'text-on-primary' : 'text-on-surface-variant'
                                 }`}>
                                     {year}
@@ -302,7 +302,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                     </View>
                 ) : null}
             </View>
-            
+
             {/* Mobile view mode selector */}
             {!isTablet && (
                 <View className="mb-4">
@@ -320,12 +320,12 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                                     Last year
                                 </Text>
                             </TouchableOpacity>
-                            
+
                             {availableYears.map(year => (
                                 <TouchableOpacity
                                     key={year}
                                     className={`px-3 py-2 rounded-md mr-2 ${
-                                        currentViewMode === 'year' && currentYear === year 
+                                        currentViewMode === 'year' && currentYear === year
                                             ? 'bg-primary' : 'bg-surface-variant'
                                     }`}
                                     onPress={() => {
@@ -334,7 +334,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                                     }}
                                 >
                                     <Text className={`text-sm ${
-                                        currentViewMode === 'year' && currentYear === year 
+                                        currentViewMode === 'year' && currentYear === year
                                             ? 'text-on-primary' : 'text-on-surface-variant'
                                     }`}>
                                         {year}
@@ -346,20 +346,20 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                 </View>
             )}
 
-            <ScrollView 
+            <ScrollView
                 ref={scrollViewRef}
-                horizontal 
-                showsHorizontalScrollIndicator={false} 
+                horizontal
+                showsHorizontalScrollIndicator={false}
                 className="mb-2"
             >
                 <View className="px-4">
                     {/* Month labels */}
                     <View className="flex-row mb-4 ml-6 h-4">
                         {monthLabels.map((label) => (
-                            <Text 
+                            <Text
                                 key={`${label.month}-${label.weekIndex}`}
                                 className="text-on-surface-variant text-xs"
-                                style={{ 
+                                style={{
                                     position: 'absolute',
                                     left: label.weekIndex * (squareSize + gapSize),
                                     width: squareSize * 4,
@@ -464,7 +464,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
                     {habit.stats.completedDays} days completed • {habit.stats.excusedDays} days excused • {habit.stats.completionRate.toFixed(1)}% success rate
                 </Text>
             </View>
-        </View>
+        </>
     );
 };
 
