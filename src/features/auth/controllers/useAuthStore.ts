@@ -38,7 +38,7 @@ interface UseAuthStore {
     updateAuthData: (update: (authData: PublicAuthData) => void) => void;
 }
 
-const CLIENT_VERSION = 2;
+const CLIENT_VERSION = 3;
 
 export const useAuthStore = create<UseAuthStore>((set, get) => ({
     authStoreStatus: AuthStoreStatus.NOT_INITIALIZED,
