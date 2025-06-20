@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
+import FormField from '@/src/components/common/FormField';
 import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
@@ -187,16 +188,13 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
             deleteConfirmTitle="Delete Person"
             deleteConfirmMessage="Are you sure you want to delete this person? This action cannot be undone."
         >
-                <View className="mb-5">
-                    <Text className="text-on-background text-base font-medium mb-2">Name</Text>
-                    <TextInput
-                        className="bg-surface text-on-surface border border-outline rounded-lg p-3"
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Person Name"
-                        placeholderTextColor={getColor("on-surface-variant")}
-                    />
-                </View>
+                <FormField
+                    label="Name"
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Person Name"
+                    required
+                />
 
                 {/* Properties Section */}
                 <View className="mb-5">

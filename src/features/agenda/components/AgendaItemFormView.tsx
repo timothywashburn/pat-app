@@ -12,6 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
+import FormField from '@/src/components/common/FormField';
+import FormTextArea from '@/src/components/common/FormTextArea';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 import WebDateTimePicker from './WebDateTimePicker';
@@ -196,16 +198,13 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     </View>
                 </View>
             )}
-                <View className="mb-5">
-                    <Text className="text-on-background text-base font-medium mb-2">Name</Text>
-                    <TextInput
-                        className="bg-surface text-on-surface border border-outline rounded-lg p-3"
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Item Name"
-                        placeholderTextColor={getColor("on-surface-variant")}
-                    />
-                </View>
+                <FormField
+                    label="Name"
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Item Name"
+                    required
+                />
 
                 <View className="mb-5">
                     <Text className="text-on-background text-base font-medium mb-2">Date</Text>
@@ -358,19 +357,14 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     </ScrollView>
                 </View>
 
-                <View className="mb-5">
-                    <Text className="text-base font-medium text-primary mb-2">Notes</Text>
-                    <TextInput
-                        className="text-on-surface border border-outline rounded-lg p-3 text-base min-h-[100px]"
-                        value={notes}
-                        onChangeText={setNotes}
-                        placeholder="Add notes..."
-                        placeholderTextColor={getColor("on-surface-variant")}
-                        multiline
-                        numberOfLines={4}
-                        textAlignVertical="top"
-                    />
-                </View>
+                <FormTextArea
+                    label="Notes"
+                    value={notes}
+                    onChangeText={setNotes}
+                    placeholder="Add notes..."
+                    numberOfLines={4}
+                    minHeight={100}
+                />
 
         </BaseFormView>
     );

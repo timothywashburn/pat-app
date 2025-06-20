@@ -9,6 +9,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
+import FormField from '@/src/components/common/FormField';
+import FormTextArea from '@/src/components/common/FormTextArea';
+import SelectionList from '@/src/components/common/SelectionList';
+import FormSection from '@/src/components/common/FormSection';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import { Habit } from "@timothyw/pat-common";
 import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
@@ -162,73 +166,32 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
             deleteConfirmTitle="Delete Habit"
             deleteConfirmMessage="Are you sure you want to delete this habit? All tracking data will be lost. This action cannot be undone."
         >
-                <View className="bg-surface rounded-lg p-4 mb-5">
-                    <Text className="text-on-surface text-lg font-semibold mb-3">
-                        Habit Details
-                    </Text>
+                <FormSection title="Habit Details">
+                    <FormField
+                        label="Habit Name"
+                        value={name}
+                        onChangeText={setName}
+                        placeholder="e.g., Morning Exercise, Read for 20 minutes"
+                        required
+                        autoFocus={!isEditMode}
+                        maxLength={100}
+                    />
 
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            Habit Name *
-                        </Text>
-                        <TextInput
-                            className="bg-surface border border-outline rounded-lg p-3 text-on-surface text-base"
-                            placeholder="e.g., Morning Exercise, Read for 20 minutes"
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            value={name}
-                            onChangeText={setName}
-                            autoFocus={!isEditMode}
-                            maxLength={100}
-                        />
-                    </View>
+                    <FormTextArea
+                        label="Description"
+                        value={description}
+                        onChangeText={setDescription}
+                        placeholder="Add details about your habit (optional)"
+                        maxLength={300}
+                        numberOfLines={3}
+                    />
 
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            Description
-                        </Text>
-                        <TextInput
-                            className="bg-surface border border-outline rounded-lg p-3 text-on-surface text-base"
-                            placeholder="Add details about your habit (optional)"
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            value={description}
-                            onChangeText={setDescription}
-                            multiline
-                            numberOfLines={3}
-                            textAlignVertical="top"
-                            maxLength={300}
-                        />
-                    </View>
-
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            Frequency
-                        </Text>
-                        <View className="bg-surface border border-outline rounded-lg">
-                            {frequencyOptions.map((option, index) => (
-                                <TouchableOpacity
-                                    key={option.value}
-                                    className={`flex-row items-center justify-between p-3 ${
-                                        index < frequencyOptions.length - 1 ? 'border-b border-outline' : ''
-                                    }`}
-                                    onPress={() => setFrequency(option.value)}
-                                >
-                                    <View className="flex-1">
-                                        <Text className="text-on-surface text-base">
-                                            {option.label}
-                                        </Text>
-                                        <Text className="text-on-surface-variant text-sm">
-                                            {option.description}
-                                        </Text>
-                                    </View>
-                                    <Ionicons
-                                        name={frequency === option.value ? 'radio-button-on' : 'radio-button-off'}
-                                        size={20}
-                                        color={frequency === option.value ? getColor('primary') : getColor('on-surface-variant')}
-                                    />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
+                    <SelectionList
+                        label="Frequency"
+                        options={frequencyOptions}
+                        selectedValue={frequency}
+                        onSelectionChange={(value) => setFrequency(value as any)}
+                    />
 
                     <View className="mb-4">
                         <Text className="text-on-surface text-base font-medium mb-2">
@@ -274,7 +237,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
                             maxLength={5}
                         />
                     </View>
-                </View>
+                </FormSection>
 
         </BaseFormView>
     );

@@ -7,6 +7,8 @@ import {
 } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
+import FormField from '@/src/components/common/FormField';
+import FormSection from '@/src/components/common/FormSection';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskList } from '@/src/features/tasks/models';
 
@@ -119,26 +121,17 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
             deleteConfirmTitle="Delete Task List"
             deleteConfirmMessage="Are you sure you want to delete this task list? This will also delete all tasks in it. This action cannot be undone."
         >
-                <View className="bg-surface rounded-lg p-4 mb-5">
-                    <Text className="text-on-surface text-lg font-semibold mb-3">
-                        List Details
-                    </Text>
-
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            List Name *
-                        </Text>
-                        <TextInput
-                            className="bg-surface border border-outline rounded-lg p-3 text-on-surface text-base"
-                            placeholder="Enter list name"
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            value={name}
-                            onChangeText={setName}
-                            autoFocus={!isEditMode}
-                            maxLength={100}
-                        />
-                    </View>
-                </View>
+                <FormSection title="List Details">
+                    <FormField
+                        label="List Name"
+                        value={name}
+                        onChangeText={setName}
+                        placeholder="Enter list name"
+                        required
+                        autoFocus={!isEditMode}
+                        maxLength={100}
+                    />
+                </FormSection>
 
         </BaseFormView>
     );

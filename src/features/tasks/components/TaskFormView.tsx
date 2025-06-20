@@ -9,6 +9,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
+import FormField from '@/src/components/common/FormField';
+import FormTextArea from '@/src/components/common/FormTextArea';
+import SelectionList from '@/src/components/common/SelectionList';
+import FormSection from '@/src/components/common/FormSection';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { TaskData, TaskListId } from "@timothyw/pat-common";
@@ -152,74 +156,38 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
             deleteConfirmTitle="Delete Task"
             deleteConfirmMessage="Are you sure you want to delete this task? This action cannot be undone."
         >
-                <View className="bg-surface rounded-lg p-4 mb-5">
-                    <Text className="text-on-surface text-lg font-semibold mb-3">
-                        Task Details
-                    </Text>
+                <FormSection title="Task Details">
+                    <FormField
+                        label="Task Name"
+                        value={name}
+                        onChangeText={setName}
+                        placeholder="Enter task name"
+                        required
+                        autoFocus={!isEditMode}
+                        maxLength={200}
+                    />
 
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            Task Name *
-                        </Text>
-                        <TextInput
-                            className="bg-surface border border-outline rounded-lg p-3 text-on-surface text-base"
-                            placeholder="Enter task name"
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            value={name}
-                            onChangeText={setName}
-                            autoFocus={!isEditMode}
-                            maxLength={200}
-                        />
-                    </View>
+                    <FormTextArea
+                        label="Notes"
+                        value={notes}
+                        onChangeText={setNotes}
+                        placeholder="Add notes (optional)"
+                        maxLength={1000}
+                        numberOfLines={4}
+                    />
 
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            Notes
-                        </Text>
-                        <TextInput
-                            className="bg-surface border border-outline rounded-lg p-3 text-on-surface text-base"
-                            placeholder="Add notes (optional)"
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            value={notes}
-                            onChangeText={setNotes}
-                            multiline
-                            numberOfLines={4}
-                            textAlignVertical="top"
-                            maxLength={1000}
-                        />
-                    </View>
-
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            Task List *
-                        </Text>
-                        <View className="bg-surface border border-outline rounded-lg">
-                            {taskLists.map((taskList, index) => (
-                                <TouchableOpacity
-                                    key={taskList._id}
-                                    className={`flex-row items-center justify-between p-3 ${
-                                        index < taskLists.length - 1 ? 'border-b border-outline' : ''
-                                    }`}
-                                    onPress={() => setSelectedTaskListId(taskList._id)}
-                                >
-                                    <Text className="text-on-surface text-base flex-1">
-                                        {taskList.name}
-                                    </Text>
-                                    <Ionicons
-                                        name={selectedTaskListId === taskList._id ? 'radio-button-on' : 'radio-button-off'}
-                                        size={20}
-                                        color={selectedTaskListId === taskList._id ? getColor('primary') : getColor('on-surface-variant')}
-                                    />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                        {selectedTaskList && (
-                            <Text className="text-on-surface-variant text-sm mt-1">
-                                {selectedTaskList.tasks.length} tasks in this list
-                            </Text>
-                        )}
-                    </View>
-                </View>
+                    <SelectionList
+                        label="Task List"
+                        options={taskLists.map(taskList => ({
+                            value: taskList._id,
+                            label: taskList.name,
+                            description: `${taskList.tasks.length} tasks in this list`
+                        }))}
+                        selectedValue={selectedTaskListId}
+                        onSelectionChange={(value) => setSelectedTaskListId(value as any)}
+                        required
+                    />
+                </FormSection>
 
         </BaseFormView>
     );
