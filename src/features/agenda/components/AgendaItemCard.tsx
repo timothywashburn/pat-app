@@ -63,7 +63,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
 
                     <View className="w-[20%] px-2">
                         {item.type ? (
-                            <Text className="text-secondary text-xs font-medium" numberOfLines={1}>
+                            <Text className="text-unknown text-xs font-medium" numberOfLines={1}>
                                 {item.type}
                             </Text>
                         ) : (
@@ -109,14 +109,14 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
 
                     <View className="flex-row gap-2">
                         {item.category && (
-                            <View className="bg-primary/12 px-2 py-1 rounded-full">
+                            <View className="px-2 py-1 rounded-full">
                                 <Text className="text-primary text-xs font-medium">
                                     {item.category}
                                 </Text>
                             </View>
                         )}
                         {item.type && (
-                            <View className="bg-secondary/12 px-2 py-1 rounded-full">
+                            <View className="px-2 py-1 rounded-full">
                                 <Text className="text-secondary text-xs font-medium">
                                     {item.type}
                                 </Text>

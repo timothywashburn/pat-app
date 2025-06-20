@@ -48,7 +48,7 @@
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/material-top-tabs": "^7.2.10",
     "@react-navigation/native": "^7.0.14",
-    "@timothyw/pat-common": "^1.0.59",
+    "@timothyw/pat-common": "^1.0.60",
     "expo": "53.0.11",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.6",

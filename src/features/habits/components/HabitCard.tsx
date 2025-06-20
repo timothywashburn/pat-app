@@ -108,17 +108,19 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                 
                 const getBarStyle = () => {
                     const percentage = timeRemaining.percentage;
-                    const primaryColor = getColor('primary');
-                    const errorColor = getColor('error');
-                    
-                    if (timeRemaining.isOverdue || percentage >= 80) {
-                        return { backgroundColor: errorColor };
-                    } else if (percentage <= 70) {
-                        return { backgroundColor: primaryColor };
-                    } else {
+
+                    if (percentage <= 70) {
+                        return { backgroundColor: getColor('success') };
+                    } else if (percentage <= 80) {
                         const gradientFactor = (percentage - 70) / 10;
-                        const blendedColor = interpolateColor(primaryColor, errorColor, gradientFactor);
-                        return { backgroundColor: blendedColor };
+                        const gradientColor = interpolateColor(getColor('success'), getColor('warning'), gradientFactor);
+                        return { backgroundColor: gradientColor };
+                    } else if (percentage <= 90) {
+                        const gradientFactor = (percentage - 80) / 10;
+                        const gradientColor = interpolateColor(getColor('warning'), getColor('error'), gradientFactor);
+                        return { backgroundColor: gradientColor };
+                    } else {
+                        return { backgroundColor: getColor('error') };
                     }
                 };
                 
@@ -133,7 +135,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                                 }}
                             />
                         </View>
-                        <Text className={`text-xs ${timeRemaining.isOverdue ? 'text-error' : timeRemaining.totalMinutes < 60 ? 'text-warning' : 'text-on-surface-variant'}`}>
+                        <Text className={`text-xs ${timeRemaining.isOverdue ? 'text-error' : timeRemaining.totalMinutes < 60 ? 'text-secondary' : 'text-on-surface-variant'}`}>
                             {formatTimeRemaining(timeRemaining)}
                         </Text>
                     </View>

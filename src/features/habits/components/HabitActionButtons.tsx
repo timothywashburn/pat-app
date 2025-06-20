@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
@@ -38,7 +38,7 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
             return { dateStr, dayLabel: 'Today', dayColorClass: 'text-primary' };
         }
         if (isYesterday(date)) {
-            return { dateStr, dayLabel: 'Yesterday', dayColorClass: 'text-warning' };
+            return { dateStr, dayLabel: 'Yesterday', dayColorClass: 'text-secondary' };
         }
         
         // For dates that are 2+ days ago
@@ -97,8 +97,8 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
                 <TouchableOpacity
                     className={`flex-1 rounded-md py-2 mr-2 ${
                         currentEntry?.status === HabitEntryStatus.EXCUSED 
-                            ? 'bg-warning' 
-                            : 'bg-surface-variant border border-warning'
+                            ? 'bg-secondary' 
+                            : 'bg-surface-variant border border-secondary'
                     }`}
                     onPress={() => handleMarkHabit(HabitEntryStatus.EXCUSED)}
                 >
@@ -107,14 +107,14 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
                             name={currentEntry?.status === HabitEntryStatus.EXCUSED ? "remove-circle" : "remove-circle-outline"}
                             size={16}
                             color={currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                ? getColor('on-warning') 
-                                : getColor('warning')
+                                ? getColor('on-secondary')
+                                : getColor('secondary')
                             }
                         />
                         <Text className={`text-sm font-medium ml-1 ${
                             currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                ? 'text-on-warning' 
-                                : 'text-warning'
+                                ? 'text-on-secondary' 
+                                : 'text-secondary'
                         }`}>
                             {currentEntry?.status === HabitEntryStatus.EXCUSED ? 'Excused' : 'Excuse'}
                         </Text>
