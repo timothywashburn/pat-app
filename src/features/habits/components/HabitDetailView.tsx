@@ -10,8 +10,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import DetailViewHeader from '@/src/components/common/DetailViewHeader';
 import {
-    formatTimeRemaining,
-    getTimeRemainingUntilRollover,
     getActiveHabitDate,
     getPreviousHabitDate,
     fromDateOnlyString
@@ -19,6 +17,7 @@ import {
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import HabitCalendarGrid from './HabitCalendarGrid';
 import HabitActionButtons from './HabitActionButtons';
+import TimeRemainingIndicator from './TimeRemainingIndicator';
 import { fromDateString, Habit } from "@timothyw/pat-common";
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 
@@ -46,7 +45,6 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
         return null;
     }
 
-    const timeRemaining = getTimeRemainingUntilRollover(habit.rolloverTime);
 
     return (
         <View
@@ -90,23 +88,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                             </View>
                         </View>
 
-                        {/* Time remaining bar */}
-                        <View className="mb-4">
-                            <View className="flex-row justify-between items-center mb-2">
-                                <Text className="text-on-surface text-sm font-medium">
-                                    Time Remaining Today
-                                </Text>
-                                <Text className={`text-sm ${timeRemaining.isOverdue ? 'text-error' : timeRemaining.totalMinutes < 60 ? 'text-warning' : 'text-on-surface-variant'}`}>
-                                    {formatTimeRemaining(timeRemaining)}
-                                </Text>
-                            </View>
-                            <View className="bg-outline-variant rounded-full h-3">
-                                <View 
-                                    className={`rounded-full h-3 ${timeRemaining.isOverdue ? 'bg-error' : timeRemaining.percentage >= 80 ? 'bg-error' : 'bg-primary'}`}
-                                    style={{ width: `${timeRemaining.percentage}%` }}
-                                />
-                            </View>
-                        </View>
+                        <TimeRemainingIndicator rolloverTime={habit.rolloverTime} />
 
                         {/* Timeframe Toggle and Buttons */}
                         {(() => {
