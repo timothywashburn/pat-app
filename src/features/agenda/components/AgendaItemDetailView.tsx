@@ -1,15 +1,11 @@
 import React from 'react';
 import {
-    ScrollView,
     Text,
-    TouchableOpacity,
     View,
-    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import DetailViewHeader from '@/src/components/common/DetailViewHeader';
+import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { AgendaItem } from "@/src/features/agenda/models";
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 
@@ -28,7 +24,6 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
     onEditRequest,
     onItemUpdated,
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -53,24 +48,32 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
         }
     };
 
+    const actions = [
+        {
+            label: "Edit Item",
+            onPress: onEditRequest,
+            variant: 'outline' as const,
+            icon: 'create-outline'
+        },
+        {
+            label: item.completed ? "Mark as Incomplete" : "Mark as Complete",
+            onPress: handleToggleCompleted,
+            variant: 'primary' as const,
+            icon: item.completed ? 'refresh-circle' : 'checkmark-circle',
+            loading: isLoading
+        }
+    ];
+
     return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
+        <BaseDetailView
+            isPresented={isPresented}
+            onDismiss={onDismiss}
+            title="Details"
+            onEditRequest={onEditRequest}
+            errorMessage={errorMessage}
+            actions={actions}
         >
-            <DetailViewHeader
-                title="Details"
-                onBack={onDismiss}
-                onEdit={onEditRequest}
-            />
-
-            {errorMessage && (
-                <Text className="text-error p-4 text-center">{errorMessage}</Text>
-            )}
-
-            <ScrollView className="flex-1 p-4">
-                <View className="bg-surface rounded-lg p-4 mb-5">
-                    <Text className="text-on-surface text-xl font-bold mb-4">{item.name}</Text>
+            <Text className="text-on-surface text-xl font-bold mb-4">{item.name}</Text>
 
                     <View className="mb-4">
                         {item.date && (
@@ -117,54 +120,17 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                         </View>
                     )}
 
-                    <View className="flex-row items-center">
-                        <Ionicons
-                            name={item.completed ? "checkmark-circle" : "ellipse-outline"}
-                            size={20}
-                            color={item.completed ? getColor("primary") : getColor("on-surface-variant")}
-                        />
-                        <Text className="text-on-surface text-base ml-2">
-                            {item.completed ? "Completed" : "Not completed"}
-                        </Text>
-                    </View>
-                </View>
-
-                <View className="mt-5 gap-2.5">
-                    <TouchableOpacity
-                        className="bg-surface border border-outline flex-row items-center justify-center rounded-lg p-3 mt-2"
-                        onPress={onEditRequest}
-                    >
-                        <Text className="text-primary text-base font-semibold mr-2">
-                            Edit Item
-                        </Text>
-                        <Ionicons name="create-outline" size={20} color={getColor("primary")} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        className="bg-primary flex-row items-center justify-center rounded-lg p-3"
-                        onPress={handleToggleCompleted}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color={getColor("on-primary")} />
-                        ) : (
-                            <>
-                                <Text className="text-on-primary text-base font-semibold mr-2">
-                                    {item.completed ? "Mark as Incomplete" : "Mark as Complete"}
-                                </Text>
-                                <Ionicons
-                                    name={item.completed ? "refresh-circle" : "checkmark-circle"}
-                                    size={20}
-                                    color={getColor("on-primary")}
-                                />
-                            </>
-                        )}
-                    </TouchableOpacity>
-                </View>
-
-                <View className="h-10" />
-            </ScrollView>
-        </View>
+            <View className="flex-row items-center">
+                <Ionicons
+                    name={item.completed ? "checkmark-circle" : "ellipse-outline"}
+                    size={20}
+                    color={item.completed ? getColor("primary") : getColor("on-surface-variant")}
+                />
+                <Text className="text-on-surface text-base ml-2">
+                    {item.completed ? "Completed" : "Not completed"}
+                </Text>
+            </View>
+        </BaseDetailView>
     );
 };
 

@@ -1,17 +1,14 @@
 import React from 'react';
 import {
-    ScrollView,
     Text,
     TouchableOpacity,
     View,
-    ActivityIndicator,
     Alert,
     Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import DetailViewHeader from '@/src/components/common/DetailViewHeader';
+import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import TaskItemCard from './TaskItemCard';
@@ -33,7 +30,6 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
     onTaskPress,
     onTaskListUpdated,
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -46,7 +42,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         return null;
     }
 
-    const handleDeleteTaskList = async () => {
+    const handleDeleteTaskList = () => {
         const taskCount = taskList.tasks.length;
         const message = taskCount > 0 
             ? `This will delete "${taskList.name}" and all ${taskCount} tasks in it. This action cannot be undone.`
@@ -110,7 +106,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         ],
     };
 
-    const handleDeleteCompletedTasks = async () => {
+    const handleDeleteCompletedTasks = () => {
         if (completedTaskCount === 0) return;
 
         Alert.alert(
@@ -145,23 +141,11 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         );
     };
 
-    return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
-        >
-            <DetailViewHeader
-                title="Task List"
-                onBack={onDismiss}
-                onEdit={onEditRequest}
-            />
-
-            {errorMessage && (
-                <Text className="text-error p-4 text-center">{errorMessage}</Text>
-            )}
-
-            <ScrollView className="flex-1 p-4">
-                <View className="bg-surface rounded-lg p-4 mb-5">
+    const sections = [
+        // Task List Info Section
+        {
+            content: (
+                <>
                     <Text className="text-on-surface text-xl font-bold mb-4">{taskList.name}</Text>
 
                     <View className="mb-4">
@@ -188,10 +172,13 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                             </View>
                         )}
                     </View>
-                </View>
-
-                {/* Tasks section */}
-                <View className="bg-surface rounded-lg mb-5">
+                </>
+            )
+        },
+        // Tasks Section
+        {
+            content: (
+                <View className="bg-surface rounded-lg">
                     <TouchableOpacity
                         className={`flex-row items-center p-4 ${showTasks ? 'border-b border-outline' : ''}`}
                         onPress={handleToggleTasks}
@@ -230,66 +217,59 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         </View>
                     )}
                 </View>
+            ),
+            showCard: false
+        }
+    ];
 
-                <View className="mt-5 gap-2.5">
-                    <TouchableOpacity
-                        className="bg-surface border border-outline flex-row items-center justify-center rounded-lg p-3"
-                        onPress={onEditRequest}
-                    >
-                        <Text className="text-primary text-base font-semibold mr-2">
-                            Edit List
-                        </Text>
-                        <Ionicons name="create-outline" size={20} color={getColor("primary")} />
-                    </TouchableOpacity>
+    const actions: Array<{
+        label: string;
+        onPress: () => void;
+        variant?: 'primary' | 'secondary' | 'outline';
+        icon?: string;
+        loading?: boolean;
+        disabled?: boolean;
+        isDestructive?: boolean;
+    }> = [
+        {
+            label: "Edit List",
+            onPress: onEditRequest,
+            variant: 'outline',
+            icon: 'create-outline'
+        }
+    ];
 
-                    {completedTaskCount > 0 && (
-                        <TouchableOpacity
-                            className="bg-error-container flex-row items-center justify-center rounded-lg p-3"
-                            onPress={handleDeleteCompletedTasks}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <ActivityIndicator size="small" color={getColor("on-error-container")} />
-                            ) : (
-                                <>
-                                    <Text className="text-on-error-container text-base font-semibold mr-2">
-                                        Delete Completed Tasks
-                                    </Text>
-                                    <Ionicons
-                                        name="checkmark-done"
-                                        size={20}
-                                        color={getColor("on-error-container")}
-                                    />
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    )}
+    // Add delete completed tasks action if there are completed tasks
+    if (completedTaskCount > 0) {
+        actions.push({
+            label: "Delete Completed Tasks",
+            onPress: handleDeleteCompletedTasks,
+            variant: 'secondary',
+            icon: 'checkmark-done',
+            loading: isLoading
+        });
+    }
 
-                    <TouchableOpacity
-                        className="bg-error flex-row items-center justify-center rounded-lg p-3"
-                        onPress={handleDeleteTaskList}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color={getColor("on-error")} />
-                        ) : (
-                            <>
-                                <Text className="text-on-error text-base font-semibold mr-2">
-                                    Delete List
-                                </Text>
-                                <Ionicons
-                                    name="trash-outline"
-                                    size={20}
-                                    color={getColor("on-error")}
-                                />
-                            </>
-                        )}
-                    </TouchableOpacity>
-                </View>
+    // Add delete list action
+    actions.push({
+        label: "Delete List",
+        onPress: handleDeleteTaskList,
+        variant: 'secondary',
+        icon: 'trash-outline',
+        loading: isLoading,
+        isDestructive: true
+    });
 
-                <View className="h-10" />
-            </ScrollView>
-        </View>
+    return (
+        <BaseDetailView
+            isPresented={isPresented}
+            onDismiss={onDismiss}
+            title="Task List"
+            onEditRequest={onEditRequest}
+            errorMessage={errorMessage}
+            sections={sections}
+            actions={actions}
+        />
     );
 };
 
