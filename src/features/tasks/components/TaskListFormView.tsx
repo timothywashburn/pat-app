@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
     ScrollView,
     Text,
     TextInput,
-    TouchableOpacity,
     View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import FormViewHeader from '@/src/components/common/FormViewHeader';
+import BaseFormView from '@/src/components/common/BaseFormView';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskList } from '@/src/features/tasks/models';
 
@@ -32,7 +27,6 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
     existingTaskList,
     isEditMode = false
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
 
     const [name, setName] = useState(existingTaskList?.name || '');
@@ -76,33 +70,20 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!existingTaskList) return;
 
-        Alert.alert(
-            'Delete Task List',
-            'Are you sure you want to delete this task list? This will also delete all tasks in it. This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        setErrorMessage(null);
+        setIsLoading(true);
+        setErrorMessage(null);
 
-                        try {
-                            await taskManager.deleteTaskList(existingTaskList._id);
-                            onTaskListSaved?.();
-                            onDismiss();
-                        } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete task list');
-                            setIsLoading(false);
-                        }
-                    }
-                },
-            ]
-        );
+        try {
+            await taskManager.deleteTaskList(existingTaskList._id);
+            onTaskListSaved?.();
+            onDismiss();
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete task list');
+            setIsLoading(false);
+        }
     };
 
     const handleCancel = () => {
@@ -123,26 +104,21 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
     };
 
     return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
+        <BaseFormView
+            isPresented={isPresented}
+            onDismiss={handleCancel}
+            title={isEditMode ? 'Edit List' : 'New List'}
+            isEditMode={isEditMode}
+            onSave={handleSaveTaskList}
+            isSaveDisabled={!name.trim()}
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            existingItem={existingTaskList}
+            onDelete={handleDelete}
+            deleteButtonText="Delete List"
+            deleteConfirmTitle="Delete Task List"
+            deleteConfirmMessage="Are you sure you want to delete this task list? This will also delete all tasks in it. This action cannot be undone."
         >
-            <FormViewHeader
-                title={isEditMode ? 'Edit List' : 'New List'}
-                onCancel={handleCancel}
-                onSave={handleSaveTaskList}
-                isEditMode={isEditMode}
-                isSaveDisabled={!name.trim()}
-                isLoading={isLoading}
-            />
-
-            {errorMessage && (
-                <View className="bg-error-container p-4">
-                    <Text className="text-on-error-container text-center">{errorMessage}</Text>
-                </View>
-            )}
-
-            <ScrollView className="flex-1 p-4">
                 <View className="bg-surface rounded-lg p-4 mb-5">
                     <Text className="text-on-surface text-lg font-semibold mb-3">
                         List Details
@@ -164,34 +140,7 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
                     </View>
                 </View>
 
-                {isEditMode && existingTaskList && (
-                    <View className="mt-5">
-                        <TouchableOpacity
-                            className="bg-error flex-row items-center justify-center rounded-lg p-3"
-                            onPress={handleDelete}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <ActivityIndicator size="small" color={getColor("on-error")} />
-                            ) : (
-                                <>
-                                    <Text className="text-on-error text-base font-semibold mr-2">
-                                        Delete List
-                                    </Text>
-                                    <Ionicons
-                                        name="trash-outline"
-                                        size={20}
-                                        color={getColor("on-error")}
-                                    />
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                <View className="h-10" />
-            </ScrollView>
-        </View>
+        </BaseFormView>
     );
 };
 

@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
     ScrollView,
     Text,
     TextInput,
@@ -9,9 +7,8 @@ import {
     View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import FormViewHeader from '@/src/components/common/FormViewHeader';
+import BaseFormView from '@/src/components/common/BaseFormView';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import { Habit } from "@timothyw/pat-common";
 import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
@@ -33,7 +30,6 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
     existingHabit,
     isEditMode = false
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
 
     const [name, setName] = useState(existingHabit?.name || '');
@@ -95,33 +91,20 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!existingHabit) return;
 
-        Alert.alert(
-            'Delete Habit',
-            'Are you sure you want to delete this habit? All tracking data will be lost. This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        setErrorMessage(null);
+        setIsLoading(true);
+        setErrorMessage(null);
 
-                        try {
-                            await habitManager.deleteHabit(existingHabit._id);
-                            onHabitSaved?.();
-                            onDismiss();
-                        } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete habit');
-                            setIsLoading(false);
-                        }
-                    }
-                },
-            ]
-        );
+        try {
+            await habitManager.deleteHabit(existingHabit._id);
+            onHabitSaved?.();
+            onDismiss();
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete habit');
+            setIsLoading(false);
+        }
     };
 
     const handleCancel = () => {
@@ -164,26 +147,21 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
     ];
 
     return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
+        <BaseFormView
+            isPresented={isPresented}
+            onDismiss={handleCancel}
+            title={isEditMode ? 'Edit Habit' : 'New Habit'}
+            isEditMode={isEditMode}
+            onSave={handleSaveHabit}
+            isSaveDisabled={!name.trim()}
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            existingItem={existingHabit}
+            onDelete={handleDelete}
+            deleteButtonText="Delete Habit"
+            deleteConfirmTitle="Delete Habit"
+            deleteConfirmMessage="Are you sure you want to delete this habit? All tracking data will be lost. This action cannot be undone."
         >
-            <FormViewHeader
-                title={isEditMode ? 'Edit Habit' : 'New Habit'}
-                onCancel={handleCancel}
-                onSave={handleSaveHabit}
-                isEditMode={isEditMode}
-                isSaveDisabled={!name.trim()}
-                isLoading={isLoading}
-            />
-
-            {errorMessage && (
-                <View className="bg-error-container p-4">
-                    <Text className="text-on-error-container text-center">{errorMessage}</Text>
-                </View>
-            )}
-
-            <ScrollView className="flex-1 p-4">
                 <View className="bg-surface rounded-lg p-4 mb-5">
                     <Text className="text-on-surface text-lg font-semibold mb-3">
                         Habit Details
@@ -298,34 +276,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
                     </View>
                 </View>
 
-                {isEditMode && existingHabit && (
-                    <View className="mt-5">
-                        <TouchableOpacity
-                            className="bg-error flex-row items-center justify-center rounded-lg p-3"
-                            onPress={handleDelete}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <ActivityIndicator size="small" color={getColor("on-error")} />
-                            ) : (
-                                <>
-                                    <Text className="text-on-error text-base font-semibold mr-2">
-                                        Delete Habit
-                                    </Text>
-                                    <Ionicons
-                                        name="trash-outline"
-                                        size={20}
-                                        color={getColor("on-error")}
-                                    />
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                <View className="h-10" />
-            </ScrollView>
-        </View>
+        </BaseFormView>
     );
 };
 

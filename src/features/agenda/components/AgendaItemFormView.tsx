@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
     Platform,
     ScrollView,
     Switch,
@@ -12,9 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import FormViewHeader from '@/src/components/common/FormViewHeader';
+import BaseFormView from '@/src/components/common/BaseFormView';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { AgendaItem } from "@/src/features/agenda/models";
 import WebDateTimePicker from './WebDateTimePicker';
@@ -37,7 +34,6 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     existingItem,
     isEditMode = false
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
 
     const getTonight = () => {
@@ -110,33 +106,20 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!existingItem) return;
 
-        Alert.alert(
-            'Delete Item',
-            'Are you sure you want to delete this item? This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        setErrorMessage(null);
+        setIsLoading(true);
+        setErrorMessage(null);
 
-                        try {
-                            await agendaManager.deleteAgendaItem(existingItem.id);
-                            onItemSaved?.();
-                            onDismiss();
-                        } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
-                            setIsLoading(false);
-                        }
-                    }
-                },
-            ]
-        );
+        try {
+            await agendaManager.deleteAgendaItem(existingItem.id);
+            onItemSaved?.();
+            onDismiss();
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
+            setIsLoading(false);
+        }
     };
 
     const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -181,24 +164,22 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     };
 
     return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
+        <BaseFormView
+            isPresented={isPresented}
+            onDismiss={onDismiss}
+            title={isEditMode ? 'Edit Item' : 'New Item'}
+            isEditMode={isEditMode}
+            saveText={isEditMode ? 'Save' : 'Add'}
+            onSave={handleSaveItem}
+            isSaveDisabled={!name.trim()}
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            existingItem={existingItem}
+            onDelete={handleDelete}
+            deleteButtonText="Delete Item"
+            deleteConfirmTitle="Delete Item"
+            deleteConfirmMessage="Are you sure you want to delete this item? This action cannot be undone."
         >
-            <FormViewHeader
-                title={isEditMode ? 'Edit Item' : 'New Item'}
-                onCancel={onDismiss}
-                onSave={handleSaveItem}
-                isEditMode={isEditMode}
-                isSaveDisabled={!name.trim()}
-                isLoading={isLoading}
-                saveText={isEditMode ? 'Save' : 'Add'}
-            />
-
-            {errorMessage && (
-                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
-            )}
-
             {Platform.OS === 'web' && showDatePicker && (
                 <View className="absolute inset-0 z-10 bg-black bg-opacity-50 flex items-center justify-center">
                     <TouchableOpacity
@@ -215,8 +196,6 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     </View>
                 </View>
             )}
-
-            <ScrollView className="flex-1 p-4">
                 <View className="mb-5">
                     <Text className="text-on-background text-base font-medium mb-2">Name</Text>
                     <TextInput
@@ -393,21 +372,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     />
                 </View>
 
-                {isEditMode && existingItem && (
-                    <View className="mt-5">
-                        <TouchableOpacity
-                            className="bg-error flex-row items-center justify-center rounded-lg p-3"
-                            onPress={handleDelete}
-                        >
-                            <Text className="text-on-error text-base font-semibold mr-2">Delete Item</Text>
-                            <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                <View className="h-10" />
-            </ScrollView>
-        </View>
+        </BaseFormView>
     );
 };
 

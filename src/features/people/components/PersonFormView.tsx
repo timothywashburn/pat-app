@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
     ScrollView,
     Text,
     TextInput,
@@ -9,9 +7,8 @@ import {
     View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import FormViewHeader from '@/src/components/common/FormViewHeader';
+import BaseFormView from '@/src/components/common/BaseFormView';
 import { Person, PersonNote, PersonProperty } from '@/src/features/people/models';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
 
@@ -32,7 +29,6 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     existingPerson,
     isEditMode = false
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
 
     const [name, setName] = useState(existingPerson?.name || '');
@@ -86,33 +82,20 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!existingPerson) return;
 
-        Alert.alert(
-            'Delete Person',
-            'Are you sure you want to delete this person? This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        setErrorMessage(null);
+        setIsLoading(true);
+        setErrorMessage(null);
 
-                        try {
-                            await personManager.deletePerson(existingPerson.id);
-                            onPersonSaved?.();
-                            onDismiss();
-                        } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete person');
-                            setIsLoading(false);
-                        }
-                    }
-                },
-            ]
-        );
+        try {
+            await personManager.deletePerson(existingPerson.id);
+            onPersonSaved?.();
+            onDismiss();
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete person');
+            setIsLoading(false);
+        }
     };
 
     const addProperty = () => {
@@ -188,25 +171,22 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     };
 
     return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
+        <BaseFormView
+            isPresented={isPresented}
+            onDismiss={handleCancel}
+            title={isEditMode ? 'Edit Person' : 'New Person'}
+            isEditMode={isEditMode}
+            saveText={isEditMode ? 'Save' : 'Add'}
+            onSave={handleSavePerson}
+            isSaveDisabled={!name.trim()}
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            existingItem={existingPerson}
+            onDelete={handleDelete}
+            deleteButtonText="Delete Person"
+            deleteConfirmTitle="Delete Person"
+            deleteConfirmMessage="Are you sure you want to delete this person? This action cannot be undone."
         >
-            <FormViewHeader
-                title={isEditMode ? 'Edit Person' : 'New Person'}
-                onCancel={handleCancel}
-                onSave={handleSavePerson}
-                isEditMode={isEditMode}
-                isSaveDisabled={!name.trim()}
-                isLoading={isLoading}
-                saveText={isEditMode ? 'Save' : 'Add'}
-            />
-
-            {errorMessage && (
-                <Text className="text-unknown p-4 text-center">{errorMessage}</Text>
-            )}
-
-            <ScrollView className="flex-1 p-4">
                 <View className="mb-5">
                     <Text className="text-on-background text-base font-medium mb-2">Name</Text>
                     <TextInput
@@ -339,22 +319,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                     ))}
                 </View>
 
-                {/* Delete button for edit mode */}
-                {isEditMode && existingPerson && (
-                    <View className="mt-5 gap-2.5">
-                        <TouchableOpacity
-                            className="bg-error flex-row items-center justify-center rounded-lg p-3"
-                            onPress={handleDelete}
-                        >
-                            <Text className="text-on-error text-base font-semibold mr-2">Delete Person</Text>
-                            <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                <View className="h-10" />
-            </ScrollView>
-        </View>
+        </BaseFormView>
     );
 };
 
