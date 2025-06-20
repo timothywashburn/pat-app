@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { getTimeRemainingUntilRollover, formatTimeRemaining } from '@/src/features/habits/models';
+import { formatTimeRemaining } from '@/src/features/habits/models';
 import { useTheme } from '@/src/controllers/ThemeManager';
+import { useCountdown } from '@/src/features/habits/hooks/useCountdown';
 
 interface TimeRemainingIndicatorProps {
     rolloverTime: string;
@@ -11,7 +12,7 @@ const TimeRemainingIndicator: React.FC<TimeRemainingIndicatorProps> = ({
     rolloverTime,
 }) => {
     const { getColor } = useTheme();
-    const timeRemaining = getTimeRemainingUntilRollover(rolloverTime);
+    const timeRemaining = useCountdown(rolloverTime);
 
     const interpolateColor = (color1: string, color2: string, factor: number): string => {
         const hex1 = color1.replace('#', '');
