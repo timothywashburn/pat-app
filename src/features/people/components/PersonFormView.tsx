@@ -11,6 +11,7 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import { PersonManager } from "@/src/features/people/controllers/PersonManager";
+import { PersonNoteManager } from "@/src/features/people/controllers/PersonNoteManager";
 import { Person, PersonNoteData, PersonNoteId, PersonProperty } from "@timothyw/pat-common";
 
 interface PersonFormViewProps {
@@ -35,6 +36,9 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     const [name, setName] = useState(existingPerson?.name || '');
     const [properties, setProperties] = useState<PersonProperty[]>(existingPerson?.properties || []);
     const [notes, setNotes] = useState<PersonNoteData[]>(existingPerson?.notes || []);
+    const [pendingNotes, setPendingNotes] = useState<{ content: string; tempId: PersonNoteId; isNew?: boolean }[]>([]);
+    const [modifiedNoteIds, setModifiedNoteIds] = useState<Set<PersonNoteId>>(new Set());
+    const [deletedNoteIds, setDeletedNoteIds] = useState<Set<PersonNoteId>>(new Set());
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -47,6 +51,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     // No separate editing state needed with direct editing
 
     const personManager = PersonManager.getInstance();
+    const personNoteManager = PersonNoteManager.getInstance();
 
     if (!isPresented) {
         return null;
@@ -69,23 +74,62 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
             };
 
             if (isEditMode && existingPerson) {
-                await personManager.updatePerson(existingPerson._id, personData);
+                // Save person data first, but don't auto-refresh until all note operations complete
+                await personManager.updatePerson(existingPerson._id, personData, false);
+                
+                // Handle all note operations in parallel
+                const noteOperations = [];
+                
+                // Delete notes that were marked for deletion
+                for (const noteId of deletedNoteIds) {
+                    noteOperations.push(personNoteManager.deletePersonNote(noteId));
+                }
+                
+                // Update modified existing notes
+                for (const note of notes) {
+                    if (note._id && modifiedNoteIds.has(note._id)) {
+                        noteOperations.push(personNoteManager.updatePersonNote(note._id, note.content));
+                    }
+                }
+                
+                // Create new notes
+                for (const pendingNote of pendingNotes) {
+                    noteOperations.push(personNoteManager.createPersonNote(existingPerson._id, pendingNote.content));
+                }
+                
+                // Wait for all note operations to complete
+                if (noteOperations.length > 0) {
+                    await Promise.all(noteOperations);
+                }
             } else {
-                await personManager.createPerson({
+                // For new person, create person first then create notes
+                const newPerson = await personManager.createPerson({
                     ...personData,
-                    notes: notes.map(note => note._id),
+                    notes: [],
                 });
+                
+                // Create all pending notes for the new person in parallel
+                if (pendingNotes.length > 0) {
+                    const noteCreationPromises = pendingNotes.map(pendingNote =>
+                        personNoteManager.createPersonNote(newPerson._id, pendingNote.content)
+                    );
+                    await Promise.all(noteCreationPromises);
+                }
             }
 
             if (!isEditMode) {
                 setName('');
                 setProperties([]);
                 setNotes([]);
+                setPendingNotes([]);
+                setModifiedNoteIds(new Set());
+                setDeletedNoteIds(new Set());
                 setNewPropertyKey('');
                 setNewPropertyValue('');
                 setNewNote('');
             }
 
+            // Only call onPersonSaved after ALL operations (including notes) are complete
             onPersonSaved?.();
             onDismiss();
         } catch (error) {
@@ -127,15 +171,15 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     const addNote = () => {
         if (!newNote) return;
 
-        const now = new Date();
-        const newNoteItem: PersonNoteData = {
-            id: Date.now().toString(),
+        // Create a temporary ID for the pending note
+        const tempId = `temp_${Date.now()}_${Math.random()}`;
+        const newPendingNote = {
             content: newNote,
-            createdAt: now,
-            updatedAt: now,
+            tempId: tempId as PersonNoteId,
+            isNew: true
         };
 
-        setNotes([newNoteItem, ...notes]);  // Add to beginning of array
+        setPendingNotes([newPendingNote, ...pendingNotes]);
         setNewNote('');
     };
 
@@ -144,7 +188,15 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     };
 
     const deleteNote = (id: PersonNoteId) => {
-        setNotes(notes.filter(note => note._id !== id));
+        // Check if it's an existing note or a pending note
+        if (typeof id === 'string' && id.startsWith('temp_')) {
+            // Remove from pending notes
+            setPendingNotes(pendingNotes.filter(note => note.tempId !== id));
+        } else {
+            // Mark existing note for deletion and remove from display
+            setDeletedNoteIds(prev => new Set(prev).add(id));
+            setNotes(notes.filter(note => note._id !== id));
+        }
     };
 
     const updatePropertyValue = (key: string, newValue: string) => {
@@ -153,11 +205,20 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         ));
     };
 
-    const updateNoteContent = (id: string, newContent: string) => {
-        const now = new Date();
-        setNotes(notes.map(note =>
-            note._id === id ? { ...note, content: newContent, updatedAt: now } : note
-        ));
+    const updateNoteContent = (id: PersonNoteId, newContent: string) => {
+        // Check if it's an existing note or a pending note
+        if (typeof id === 'string' && id.startsWith('temp_')) {
+            // Update pending note content
+            setPendingNotes(pendingNotes.map(note =>
+                note.tempId === id ? { ...note, content: newContent } : note
+            ));
+        } else {
+            // Update existing note content and mark as modified
+            setNotes(notes.map(note =>
+                note._id === id ? { ...note, content: newContent } : note
+            ));
+            setModifiedNoteIds(prev => new Set(prev).add(id));
+        }
     };
 
     const handleCancel = () => {
@@ -170,6 +231,9 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
             setProperties([]);
             setNotes([]);
         }
+        setPendingNotes([]);
+        setModifiedNoteIds(new Set());
+        setDeletedNoteIds(new Set());
         setNewPropertyKey('');
         setNewPropertyValue('');
         setNewNote('');
@@ -303,24 +367,53 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                         </TouchableOpacity>
                     </View>
 
-                    {notes.map(note => (
+                    {/* Display existing notes */}
+                    {notes.filter(note => !deletedNoteIds.has(note._id!)).map(note => (
                         <View key={note._id} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
                             <View className="flex-row items-center">
                                 <View className="flex-1">
                                     <TextInput
                                         className="text-on-surface text-base mb-1"
                                         value={note.content}
-                                        onChangeText={(newContent) => updateNoteContent(note._id, newContent)}
+                                        onChangeText={(newContent) => updateNoteContent(note._id!, newContent)}
                                         placeholder="Note content"
                                         placeholderTextColor={getColor("on-surface-variant")}
                                         multiline
                                     />
                                     <Text className="text-on-surface-variant text-xs">
                                         {new Date(note.updatedAt).toLocaleDateString()}
+                                        {modifiedNoteIds.has(note._id!) && <Text className="text-primary"> • Modified</Text>}
                                     </Text>
                                 </View>
                                 <TouchableOpacity
-                                    onPress={() => deleteNote(note._id)}
+                                    onPress={() => deleteNote(note._id!)}
+                                    className="p-2"
+                                >
+                                    <Ionicons name="trash-outline" size={18} color={getColor("on-error")} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ))}
+
+                    {/* Display pending notes */}
+                    {pendingNotes.map(note => (
+                        <View key={note.tempId} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
+                            <View className="flex-row items-center">
+                                <View className="flex-1">
+                                    <TextInput
+                                        className="text-on-surface text-base mb-1"
+                                        value={note.content}
+                                        onChangeText={(newContent) => updateNoteContent(note.tempId, newContent)}
+                                        placeholder="Note content"
+                                        placeholderTextColor={getColor("on-surface-variant")}
+                                        multiline
+                                    />
+                                    <Text className="text-on-surface-variant text-xs">
+                                        <Text className="text-primary">• New note (will be saved)</Text>
+                                    </Text>
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => deleteNote(note.tempId)}
                                     className="p-2"
                                 >
                                     <Ionicons name="trash-outline" size={18} color={getColor("on-error")} />

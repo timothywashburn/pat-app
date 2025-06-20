@@ -89,9 +89,10 @@ export class PersonManager {
             name?: string;
             properties?: PersonProperty[];
             notes?: PersonNoteData[];
-        }
+        },
+        autoRefresh: boolean = true
     ): Promise<void> {
-        const body: any = {};
+        const body: UpdatePersonRequest = {};
 
         if (updates.name !== undefined) {
             body.name = updates.name;
@@ -105,9 +106,7 @@ export class PersonManager {
         }
 
         if (updates.notes !== undefined) {
-            body.notes = updates.notes.map(note => ({
-                content: note.content,
-            }));
+            body.noteIds = updates.notes.map(note => note._id);
         }
 
         try {
@@ -117,8 +116,10 @@ export class PersonManager {
                 body,
             });
 
-            // Refresh the list
-            await this.loadPeople();
+            // Refresh the list if requested
+            if (autoRefresh) {
+                await this.loadPeople();
+            }
         } catch (error) {
             console.error('Failed to update person:', error);
             throw error;

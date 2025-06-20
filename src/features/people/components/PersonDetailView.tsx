@@ -61,7 +61,7 @@ const PersonDetailView: React.FC<PersonDetailViewProps> = ({
                     )}
 
                     {/* Notes Section */}
-                    {person.notes.length > 0 && (
+                    {person.notes && person.notes.length > 0 && (
                         <View className="mb-4">
                             <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
                             <View className="flex-col gap-2">
