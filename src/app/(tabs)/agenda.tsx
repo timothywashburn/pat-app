@@ -129,21 +129,7 @@ export const AgendaPanel: React.FC = () => {
         });
 
     const renderTableContent = () => (
-        <View className="bg-surface rounded-xl overflow-hidden">
-            <TableHeader />
-            <FlatList
-                data={filteredItems}
-                renderItem={({ item }) => (
-                    <AgendaItemCard
-                        item={item}
-                        onPress={handleItemSelect}
-                        isTableView={true}
-                    />
-                )}
-                keyExtractor={item => item.id}
-                scrollEnabled={false}
-            />
-        </View>
+        <View className="bg-surface rounded-xl overflow-hidden" />
     );
 
     const renderCardContent = () => (
@@ -203,25 +189,46 @@ export const AgendaPanel: React.FC = () => {
                     </TouchableOpacity>
                 </View>
             ) : (
-                <View className={isTableView ? "p-6" : ""}>
-                    {isTableView ? (
-                        <FlatList
-                            data={[filteredItems]} // Wrap in array to render single item
-                            renderItem={() => renderTableContent()}
-                            keyExtractor={() => "table"}
-                            refreshControl={
-                                <RefreshControl
-                                    refreshing={isRefreshing}
-                                    onRefresh={handleRefresh}
-                                    colors={[getColor("primary")]}
-                                    tintColor={getColor("primary")}
-                                />
-                            }
-                        />
-                    ) : (
-                        renderCardContent()
+                <FlatList
+                    data={[{ key: 'content' }]}
+                    renderItem={() => (
+                        isTableView ? (
+                            <View className="p-6">
+                                <View className="bg-surface rounded-xl overflow-hidden">
+                                    <TableHeader />
+                                    {filteredItems.map((item) => (
+                                        <AgendaItemCard
+                                            key={item.id}
+                                            item={item}
+                                            onPress={handleItemSelect}
+                                            isTableView={true}
+                                        />
+                                    ))}
+                                </View>
+                            </View>
+                        ) : (
+                            <View className="px-4">
+                                {filteredItems.map((item) => (
+                                    <AgendaItemCard
+                                        key={item.id}
+                                        item={item}
+                                        onPress={handleItemSelect}
+                                        isTableView={false}
+                                    />
+                                ))}
+                            </View>
+                        )
                     )}
-                </View>
+                    keyExtractor={item => item.key}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            onRefresh={handleRefresh}
+                            colors={[getColor("primary")]}
+                            tintColor={getColor("primary")}
+                        />
+                    }
+                />
             )}
 
             {/* Create new item view */}
