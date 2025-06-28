@@ -69,10 +69,11 @@
     },
     "owner": "timothywashburn",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "fingerprint"
     },
     "updates": {
-      "url": "https://u.expo.dev/567a8eb7-3de0-44ff-b899-e0f7b83d5118"
+      "url": "https://u.expo.dev/567a8eb7-3de0-44ff-b899-e0f7b83d5118",
+      "checkAutomatically": "NEVER"
     }
   }
 }

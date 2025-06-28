@@ -15,6 +15,7 @@ import {
 import { Logger } from "@/src/features/dev/components/Logger";
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
+import Constants from "expo-constants";
 
 export enum AuthStoreStatus {
     NOT_INITIALIZED = 'not_initialized',
@@ -60,9 +61,10 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
 
         set({ authTokens });
 
-
         if (__DEV__) {
             Logger.debug('auth', 'running in development mode, skipping version check');
+        } else if (Constants.expoConfig?.extra?.APP_VARIANT === 'preview') {
+            Logger.debug('auth', 'running in preview mode, skipping version check');
         } else {
             try {
                 const buildVersion = Application.nativeBuildVersion;

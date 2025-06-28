@@ -1,3 +1,6 @@
+const IS_DEV = process.env.APP_VARIANT === 'development';
+const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
+
 export default ({ config }) => {
     const appName = getAppName();
     const bundleId = getIdentifier();
@@ -5,6 +8,10 @@ export default ({ config }) => {
     const updatedConfig = {
         ...config,
         name: appName,
+        extra: {
+            ...config.extra,
+            APP_VARIANT: process.env.APP_VARIANT,
+        },
         ios: {
             ...config.ios,
             bundleIdentifier: bundleId,
@@ -29,9 +36,6 @@ export default ({ config }) => {
 
     return updatedConfig;
 };
-
-const IS_DEV = process.env.APP_VARIANT === 'development';
-const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
 
 const getIdentifier = () => {
     if (IS_DEV) return 'dev.timothyw.patapp.dev';
