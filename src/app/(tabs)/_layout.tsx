@@ -12,6 +12,7 @@ import { ModuleType } from "@timothyw/pat-common";
 import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import { useModuleContext } from "@/src/components/ModuleContext";
 import { moduleInfo } from "@/src/components/ModuleInfo";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export type ModuleProps = {
     isModuleView: boolean;
@@ -69,7 +70,7 @@ export default function TabsLayout() {
     }
 
     return (
-        <View className="flex-1">
+        <SafeAreaView className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}>
             {isWeb && <WebHeader modules={data?.config.modules} />}
             <Tab.Navigator
                 key={navigationKey} // TODO: temporary patch
@@ -80,17 +81,19 @@ export default function TabsLayout() {
                     tabBarStyle: {
                         backgroundColor: getColor("surface"),
                         display: isWeb ? 'none' : 'flex',
-                        height: 80
+                        // height: 60
                     },
                     tabBarIndicatorStyle: {
                         top: 0,
                         bottom: undefined,
                     },
+                    tabBarItemStyle: {
+                        // height: 60,
+                    },
                     tabBarLabelStyle: {
                         fontSize: 11,
                         marginLeft: 0,
                         marginRight: 0,
-                        paddingBottom: 20
                     },
                     tabBarPressColor: 'transparent',
                 }}
@@ -114,6 +117,6 @@ export default function TabsLayout() {
                     );
                 })}
             </Tab.Navigator>
-        </View>
+        </SafeAreaView>
     );
 }

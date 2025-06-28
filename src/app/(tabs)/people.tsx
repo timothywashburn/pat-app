@@ -101,7 +101,7 @@ export const PeoplePanel: React.FC = () => {
     };
 
     return (
-        <SafeAreaView className="bg-background flex-1">
+        <>
             <CustomHeader
                 moduleType={ModuleType.PEOPLE}
                 title="People"
@@ -179,7 +179,7 @@ export const PeoplePanel: React.FC = () => {
                     onEditRequest={handleEditRequest}
                 />
             )}
-        </SafeAreaView>
+        </>
     );
 }
 

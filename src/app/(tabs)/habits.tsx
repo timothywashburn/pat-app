@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '@/src/components/CustomHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
@@ -106,7 +105,7 @@ export const HabitsPanel: React.FC = () => {
 
 
     return (
-        <SafeAreaView className="bg-background flex-1">
+        <>
             <CustomHeader
                 moduleType={ModuleType.HABITS}
                 title="Habits"
@@ -169,7 +168,7 @@ export const HabitsPanel: React.FC = () => {
                 onEditPress={handleEditHabitFromDetail}
                 onHabitUpdated={handleHabitUpdated}
             />
-        </SafeAreaView>
+        </>
     );
 }
 

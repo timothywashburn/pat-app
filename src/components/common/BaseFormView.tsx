@@ -1,6 +1,5 @@
 import React from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import FormViewHeader from './FormViewHeader';
@@ -49,7 +48,6 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     deleteConfirmMessage = "Are you sure you want to delete this item? This action cannot be undone.",
     children
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
 
     if (!isPresented) {
@@ -78,7 +76,6 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     return (
         <View
             className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
         >
             <FormViewHeader
                 title={title}

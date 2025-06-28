@@ -1,6 +1,5 @@
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import DetailViewHeader from './DetailViewHeader';
@@ -52,7 +51,6 @@ const BaseDetailView: React.FC<BaseDetailViewProps> = ({
     sections,
     actions = []
 }) => {
-    const insets = useSafeAreaInsets();
     const { getColor } = useTheme();
 
     if (!isPresented) {
@@ -101,7 +99,6 @@ const BaseDetailView: React.FC<BaseDetailViewProps> = ({
     return (
         <View
             className="bg-background absolute inset-0 z-50"
-            style={{ paddingTop: insets.top }}
         >
             <DetailViewHeader
                 title={title}

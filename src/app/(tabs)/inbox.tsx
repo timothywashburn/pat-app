@@ -18,7 +18,6 @@ import TaskFormView from '@/src/features/tasks/components/TaskFormView';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { useToast } from "@/src/components/toast/ToastContext";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { ModuleType } from "@timothyw/pat-common";
 
 export const InboxPanel: React.FC = () => {
@@ -214,7 +213,7 @@ export const InboxPanel: React.FC = () => {
     };
 
     return (
-        <SafeAreaView className="bg-background flex-1">
+        <>
             <CustomHeader
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
@@ -279,7 +278,7 @@ export const InboxPanel: React.FC = () => {
                         </TouchableOpacity>
                     )}
                     keyExtractor={item => item.id}
-                    contentContainerStyle={{ padding: 16 }}
+                    contentContainerClassName="px-4 pt-3"
                     refreshControl={
                         <RefreshControl
                             refreshing={isRefreshing}
@@ -309,7 +308,7 @@ export const InboxPanel: React.FC = () => {
                     isEditMode={false}
                 />
             )}
-        </SafeAreaView>
+        </>
     );
 }
 

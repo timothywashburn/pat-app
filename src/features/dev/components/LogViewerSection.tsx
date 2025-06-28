@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '@/src/controllers/ThemeManager';
 import DetailViewHeader from '@/src/components/common/DetailViewHeader';
 import LogViewer from './LogViewer';
 import DevPanelSection from './DevPanelSection';
@@ -18,7 +16,6 @@ const LogViewerSection: React.FC<LogViewerSectionProps> = ({
     onClosePanel
 }) => {
     const [internalPanelVisible, setInternalPanelVisible] = useState(false);
-    const insets = useSafeAreaInsets();
 
     const isVisible = panelVisible || internalPanelVisible;
 
@@ -44,7 +41,6 @@ const LogViewerSection: React.FC<LogViewerSectionProps> = ({
         return (
             <View
                 className="bg-background absolute inset-0 z-50"
-                style={{ paddingTop: insets.top }}
             >
                 <DetailViewHeader
                     title="Application Logs"

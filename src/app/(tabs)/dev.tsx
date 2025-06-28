@@ -13,34 +13,32 @@ export const DevPanel: React.FC = () => {
 
     return (
         <>
-            <SafeAreaView className="bg-background flex-1">
-                <CustomHeader
-                    moduleType={ModuleType.DEV}
-                    title="Dev"
-                    showAddButton
-                    onAddTapped={() => {
-                        console.log('add task tapped')
-                    }}
+            <CustomHeader
+                moduleType={ModuleType.DEV}
+                title="Dev"
+                showAddButton
+                onAddTapped={() => {
+                    console.log('add task tapped')
+                }}
+            />
+
+            <ScrollView className="flex-1 p-5">
+                <View className="items-center mb-10">
+                    <Text className="text-on-background text-2xl font-bold mb-5">Dev Panel</Text>
+                    <Text className="text-on-background-variant">For various development things</Text>
+                </View>
+
+                <LogViewerSection
+                    onOpenPanel={() => setLogViewerPanelVisible(true)}
                 />
+                <PushNotificationSection />
+                <DevicesSection />
+                <DeepLinkSection />
 
-                <ScrollView className="flex-1 p-5">
-                    <View className="items-center mb-10">
-                        <Text className="text-on-background text-2xl font-bold mb-5">Dev Panel</Text>
-                        <Text className="text-on-background-variant">For various development things</Text>
-                    </View>
+                <View className="h-10" />
+            </ScrollView>
 
-                    <LogViewerSection 
-                        onOpenPanel={() => setLogViewerPanelVisible(true)}
-                    />
-                    <PushNotificationSection />
-                    <DevicesSection />
-                    <DeepLinkSection />
-
-                    <View className="h-10" />
-                </ScrollView>
-            </SafeAreaView>
-
-            <LogViewerSection 
+            <LogViewerSection
                 panelVisible={logViewerPanelVisible}
                 onClosePanel={() => setLogViewerPanelVisible(false)}
             />

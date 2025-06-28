@@ -3,7 +3,6 @@ import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, Vi
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import { ModuleType } from "@timothyw/pat-common";
@@ -168,7 +167,7 @@ export const TasksPanel: React.FC = () => {
     };
 
     return (
-        <SafeAreaView className="bg-background flex-1">
+        <>
             <CustomHeader
                 moduleType={ModuleType.TASKS}
                 title="Tasks"
@@ -284,7 +283,7 @@ export const TasksPanel: React.FC = () => {
                     isEditMode={true}
                 />
             )}
-        </SafeAreaView>
+        </>
     );
 }
 

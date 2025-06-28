@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
@@ -156,7 +155,7 @@ export const AgendaPanel: React.FC = () => {
     );
 
     return (
-        <SafeAreaView className="bg-background flex-1">
+        <>
             <CustomHeader
                 moduleType={ModuleType.AGENDA}
                 title="Agenda"
@@ -207,8 +206,8 @@ export const AgendaPanel: React.FC = () => {
                                 </View>
                             </View>
                         ) : (
-                            <View className="px-4">
-                                {filteredItems.map((item) => (
+                            <View className="px-4 pt-3">
+                                {filteredItems.map((item, index) => (
                                     <AgendaItemCard
                                         key={item.id}
                                         item={item}
@@ -259,7 +258,7 @@ export const AgendaPanel: React.FC = () => {
                     onItemUpdated={handleItemUpdated}
                 />
             )}
-        </SafeAreaView>
+        </>
     );
 }
 
