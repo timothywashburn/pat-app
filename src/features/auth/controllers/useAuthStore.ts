@@ -13,6 +13,8 @@ import {
     ResendVerificationResponse, PublicAuthData, VersionResponse
 } from "@timothyw/pat-common";
 import { Logger } from "@/src/features/dev/components/Logger";
+import * as Application from 'expo-application';
+import { Platform } from 'react-native';
 
 export enum AuthStoreStatus {
     NOT_INITIALIZED = 'not_initialized',
@@ -28,6 +30,7 @@ interface UseAuthStore {
 
     authTokens: AuthTokens | null;
     authData: PublicAuthData | null;
+    versionInfo: VersionResponse | null;
 
     initializeAuth: () => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
@@ -38,13 +41,13 @@ interface UseAuthStore {
     updateAuthData: (update: (authData: PublicAuthData) => void) => void;
 }
 
-const CLIENT_VERSION = 3;
 
 export const useAuthStore = create<UseAuthStore>((set, get) => ({
     authStoreStatus: AuthStoreStatus.NOT_INITIALIZED,
 
     authTokens: null,
     authData: null,
+    versionInfo: null,
 
     initializeAuth: async () => {
         const authTokens = await SecureStorage.shared.getTokens();
@@ -57,28 +60,37 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
 
         set({ authTokens });
 
-        try {
-            const response = await NetworkManager.shared.performUnauthenticated<undefined, VersionResponse>({
-                endpoint: `/api/version?clientVersion=${CLIENT_VERSION}`,
-                method: HTTPMethod.GET,
-            });
 
-            if (response.updateRequired) {
-                set({
-                    authStoreStatus: AuthStoreStatus.VERSION_MISMATCH
+        if (__DEV__) {
+            Logger.debug('auth', 'running in development mode, skipping version check');
+        } else {
+            try {
+                const buildVersion = Application.nativeBuildVersion;
+                const platformParam = Platform.OS === 'ios' ? 'iOSBuildVersion' : 'androidBuildVersion';
+                const response = await NetworkManager.shared.performUnauthenticated<undefined, VersionResponse>({
+                    endpoint: `/api/version?${platformParam}=${buildVersion}`,
+                    method: HTTPMethod.GET,
                 });
-                return;
-            }
 
-            Logger.info('auth', 'version check successful');
-        } catch (error) {
-            Logger.error('auth', 'version check failed', error);
-            if (error instanceof NetworkError && error.status >= 500) {
-                set({ authStoreStatus: AuthStoreStatus.SERVER_ERROR });
-                throw new Error(AuthError.SERVER_ERROR);
-            }
+                set({ versionInfo: response });
 
-            throw error;
+                if (response.updateRequired) {
+                    set({
+                        authStoreStatus: AuthStoreStatus.VERSION_MISMATCH
+                    });
+                    return;
+                }
+
+                Logger.info('auth', 'version check successful');
+            } catch (error) {
+                Logger.error('auth', 'version check failed', error);
+                if (error instanceof NetworkError && error.status >= 500) {
+                    set({ authStoreStatus: AuthStoreStatus.SERVER_ERROR });
+                    throw new Error(AuthError.SERVER_ERROR);
+                }
+
+                throw error;
+            }
         }
 
         try {
@@ -180,6 +192,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             authStoreStatus: AuthStoreStatus.NOT_AUTHENTICATED,
             authTokens: null,
             authData: null,
+            versionInfo: null,
         });
     },
 

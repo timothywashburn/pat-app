@@ -4,6 +4,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
+import { VersionResponse } from "@timothyw/pat-common";
+import { Platform } from 'react-native';
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
@@ -18,6 +20,7 @@ import LogViewer from "@/src/features/dev/components/LogViewer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ModuleProvider } from "@/src/components/ModuleContext";
+import * as Application from 'expo-application';
 
 const DEV_BOOT = false;
 
@@ -29,7 +32,7 @@ SplashScreen.setOptions({
 
 const AppContent: React.FC = () => {
     const { theme, colorScheme, getColor } = useTheme();
-    const { authStoreStatus, initializeAuth } = useAuthStore();
+    const { authStoreStatus, initializeAuth, versionInfo } = useAuthStore();
     const { userDataStoreStatus, loadUserData } = useUserDataStore();
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
     const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
@@ -190,6 +193,9 @@ const AppContent: React.FC = () => {
             </View>
         );
     } else if (authStoreStatus === AuthStoreStatus.VERSION_MISMATCH) {
+        const requiredVersion = Platform.OS === 'ios'
+            ? versionInfo?.minIOSBuildVersion 
+            : versionInfo?.minAndroidBuildVersion;
         return (
             <View
                 onLayout={hidesplash}
@@ -197,11 +203,19 @@ const AppContent: React.FC = () => {
             >
                 <Ionicons name="close-circle-outline" size={64} color={getColor("error")} />
                 <Text className="mt-4 text-on-background text-center text-lg">
-                    Version mismatch
+                    Client update required
                 </Text>
                 <Text className="mt-2 text-on-surface-variant text-center">
-                    Your client needs to be updated
+                    Current Version: {Application.nativeApplicationVersion}
                 </Text>
+                <Text className="mt-2 text-on-surface-variant text-center">
+                    Current Build: {Application.nativeBuildVersion}
+                </Text>
+                {requiredVersion && (
+                    <Text className="mt-1 text-on-surface-variant text-center">
+                        Required Build: {requiredVersion}+
+                    </Text>
+                )}
             </View>
         );
     }
