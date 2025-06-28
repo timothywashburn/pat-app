@@ -6,6 +6,7 @@ interface LogViewerProps {
     maxHeight?: number;
     showControls?: boolean;
     category?: string;
+    fullScreen?: boolean;
 }
 
 interface LogLevelFilter {
@@ -18,6 +19,7 @@ interface LogLevelFilter {
 const LogViewer: React.FC<LogViewerProps> = ({
     maxHeight,
     showControls = true,
+    fullScreen = false,
 }) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [levelFilter, setLevelFilter] = useState<LogLevelFilter>({
@@ -167,10 +169,13 @@ const LogViewer: React.FC<LogViewerProps> = ({
     }, [autoScroll, logs.length]);
 
     const containerStyle = maxHeight ? { maxHeight } : { flex: 1 };
+    const containerClassName = fullScreen 
+        ? "flex-1 bg-background"
+        : "border border-outline-variant rounded-lg overflow-hidden bg-background";
 
     return (
         <View
-            className="border border-outline-variant rounded-lg overflow-hidden bg-background"
+            className={containerClassName}
             style={containerStyle}
         >
             {showControls && (
