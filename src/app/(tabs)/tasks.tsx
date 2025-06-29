@@ -22,6 +22,7 @@ export const TasksPanel: React.FC = () => {
     const [taskLists, setTaskLists] = useState<TaskListWithTasks[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [showCompleted, setShowCompleted] = useState(false);
 
     // State for detail views
     const [selectedTaskList, setSelectedTaskList] = useState<TaskListWithTasks | null>(null);
@@ -129,6 +130,9 @@ export const TasksPanel: React.FC = () => {
 
     const handleTaskSaved = () => {
         loadTaskLists();
+        setSelectedTask(null);
+        setShowingTaskEdit(false);
+        setShowingCreateTask(false);
     };
 
     const handleAddTaskToList = (taskListId: TaskListId) => {
@@ -164,6 +168,9 @@ export const TasksPanel: React.FC = () => {
 
     const handleTaskListSaved = () => {
         loadTaskLists();
+        setSelectedTaskList(null);
+        setShowingTaskListEdit(false);
+        setShowingCreateTaskList(false);
     };
 
     return (
@@ -173,6 +180,9 @@ export const TasksPanel: React.FC = () => {
                 title="Tasks"
                 showAddButton
                 onAddTapped={handleAddTaskList}
+                showFilterButton
+                isFilterActive={showCompleted}
+                onFilterTapped={() => setShowCompleted(!showCompleted)}
             />
 
             {isLoading && taskLists.length === 0 ? (
@@ -205,6 +215,7 @@ export const TasksPanel: React.FC = () => {
                             onPress={handleTaskListSelect}
                             onTaskPress={handleTaskSelect}
                             onAddTask={handleAddTaskToList}
+                            showCompleted={showCompleted}
                         />
                     )}
                     keyExtractor={item => item._id}

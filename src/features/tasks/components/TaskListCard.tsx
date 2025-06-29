@@ -11,9 +11,10 @@ interface TaskListCardProps {
     onPress: (taskList: TaskListWithTasks) => void;
     onTaskPress: (task: any) => void;
     onAddTask: (taskListId: TaskListId) => void;
+    showCompleted: boolean;
 }
 
-const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPress, onAddTask }) => {
+const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPress, onAddTask, showCompleted }) => {
     const { getColor } = useTheme();
     const [isExpanded, setIsExpanded] = useState(false);
     const [rotateAnimation] = useState(new Animated.Value(0));
@@ -110,14 +111,20 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                             No tasks in this list
                         </Text>
                     ) : (
-                        sortTasks(taskList.tasks).map((task, index) => (
+                        (() => {
+                            const tasksToShow = showCompleted 
+                                ? sortTasks(taskList.tasks)
+                                : sortTasks(taskList.tasks.filter(task => !task.completed));
+                            
+                            return tasksToShow.map((task, index) => (
                                 <TaskItemCard
                                     key={task._id}
                                     task={task}
                                     onPress={onTaskPress}
-                                    isLast={index === taskList.tasks.length - 1}
+                                    isLast={index === tasksToShow.length - 1}
                                 />
-                            ))
+                            ));
+                        })()
                     )}
                 </View>
             )}

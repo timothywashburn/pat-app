@@ -8,6 +8,7 @@ interface BaseFormViewProps {
     // Presentation props
     isPresented: boolean;
     onDismiss: () => void;
+    onCancel?: () => void;
     
     // Header props
     title: string;
@@ -34,6 +35,7 @@ interface BaseFormViewProps {
 const BaseFormView: React.FC<BaseFormViewProps> = ({
     isPresented,
     onDismiss,
+    onCancel,
     title,
     isEditMode = false,
     saveText,
@@ -79,7 +81,7 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
         >
             <FormViewHeader
                 title={title}
-                onCancel={onDismiss}
+                onCancel={onCancel || onDismiss}
                 onSave={onSave}
                 isEditMode={isEditMode}
                 isSaveDisabled={isSaveDisabled}

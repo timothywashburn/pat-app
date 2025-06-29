@@ -22,6 +22,7 @@ import { useUserDataStore } from "@/src/features/settings/controllers/useUserDat
 interface AgendaItemFormViewProps {
     isPresented: boolean;
     onDismiss: () => void;
+    onCancel?: () => void;
     onItemSaved?: () => void;
     initialName?: string;
     existingItem?: AgendaItem;
@@ -31,6 +32,7 @@ interface AgendaItemFormViewProps {
 const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     isPresented,
     onDismiss,
+    onCancel,
     onItemSaved,
     initialName = '',
     existingItem,
@@ -174,6 +176,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         <BaseFormView
             isPresented={isPresented}
             onDismiss={onDismiss}
+            onCancel={onCancel}
             title={isEditMode ? 'Edit Item' : 'New Item'}
             isEditMode={isEditMode}
             saveText={isEditMode ? 'Save' : 'Add'}

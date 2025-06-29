@@ -53,7 +53,7 @@ const FormViewHeader: React.FC<FormViewHeaderProps> = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={onCancel} disabled={isLoading}>
-                    <Text className={`text-base font-medium ${isEditMode ? 'text-on-error' : 'text-primary'}`}>
+                    <Text className={`text-base font-medium text-on-error`}>
                         Cancel
                     </Text>
                 </TouchableOpacity>

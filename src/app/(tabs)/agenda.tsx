@@ -96,20 +96,18 @@ export const AgendaPanel: React.FC = () => {
         setEditFromDetailView(true);
     };
 
-    const handleFormDismiss = () => {
+    const handleFormDismiss = async () => {
+        await loadItems();
+        
         setShowingCreateForm(false);
         setShowingEditForm(false);
-        
-        if (editFromDetailView) {
-            // Return to detail view if edit was opened from detail
-            setEditFromDetailView(false);
-            setShowingDetailView(true);
-        } else {
-            // Clear selected item and return to list if this was a create form
-            setSelectedItem(null);
-        }
-        
-        loadItems();
+        setEditFromDetailView(false);
+        setSelectedItem(null);
+    };
+
+    const handleEditCancel = () => {
+        setShowingEditForm(false);
+        setShowingDetailView(true);
     };
 
     const handleItemUpdated = () => {
@@ -242,6 +240,7 @@ export const AgendaPanel: React.FC = () => {
                 <AgendaItemFormView
                     isPresented={showingEditForm}
                     onDismiss={handleFormDismiss}
+                    onCancel={handleEditCancel}
                     onItemSaved={loadItems}
                     existingItem={selectedItem}
                     isEditMode={true}
