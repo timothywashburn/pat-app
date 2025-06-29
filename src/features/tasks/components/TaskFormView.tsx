@@ -27,6 +27,7 @@ interface TaskFormViewProps {
     defaultTaskListId?: TaskListId;
     initialName?: string;
     isEditMode?: boolean;
+    hideTaskListSelection?: boolean;
 }
 
 const TaskFormView: React.FC<TaskFormViewProps> = ({
@@ -38,15 +39,18 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
     taskLists,
     defaultTaskListId,
     initialName = '',
-    isEditMode = false
+    isEditMode = false,
+    hideTaskListSelection = false
 }) => {
     const { getColor } = useTheme();
 
     const [name, setName] = useState(existingTask?.name || initialName);
     const [notes, setNotes] = useState(existingTask?.notes || '');
-    const [selectedTaskListId, setSelectedTaskListId] = useState<TaskListId>(
-        existingTask?.taskListId || defaultTaskListId || taskLists[0]?._id!
-    );
+    const [selectedTaskListId, setSelectedTaskListId] = useState<TaskListId>(() => {
+        if (existingTask?.taskListId) return existingTask.taskListId;
+        if (defaultTaskListId) return defaultTaskListId;
+        return taskLists[0]?._id!;
+    });
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -176,17 +180,25 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
                         numberOfLines={4}
                     />
 
-                    <SelectionList
-                        label="Task List"
-                        options={taskLists.map(taskList => ({
-                            value: taskList._id,
-                            label: taskList.name,
-                            description: `${taskList.tasks.length} tasks in this list`
-                        }))}
-                        selectedValue={selectedTaskListId}
-                        onSelectionChange={(value) => setSelectedTaskListId(value as any)}
-                        required
-                    />
+                    {hideTaskListSelection ? (
+                        <View className="mb-4">
+                            <Text className="text-on-surface-variant text-sm mb-2">
+                                Creating task in: <Text className="text-on-surface font-semibold">{selectedTaskList?.name}</Text>
+                            </Text>
+                        </View>
+                    ) : (
+                        <SelectionList
+                            label="Task List"
+                            options={taskLists.map(taskList => ({
+                                value: taskList._id,
+                                label: taskList.name,
+                                description: `${taskList.tasks.length} tasks in this list`
+                            }))}
+                            selectedValue={selectedTaskListId}
+                            onSelectionChange={(value) => setSelectedTaskListId(value as any)}
+                            required
+                        />
+                    )}
                 </FormSection>
 
         </BaseFormView>

@@ -264,11 +264,13 @@ export const TasksPanel: React.FC = () => {
 
             {/* Create Task Form */}
             <TaskFormView
+                key={selectedTaskListForNewTask || 'general'}
                 isPresented={showingCreateTask}
                 onDismiss={handleCreateTaskDismiss}
                 onTaskSaved={handleTaskSaved}
                 taskLists={taskLists}
                 defaultTaskListId={selectedTaskListForNewTask || undefined}
+                hideTaskListSelection={!!selectedTaskListForNewTask}
             />
 
             {/* Edit Task Form */}
