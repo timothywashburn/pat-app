@@ -65,6 +65,8 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             Logger.debug('auth', 'running in development mode, skipping version check');
         } else if (Constants.expoConfig?.extra?.APP_VARIANT === 'preview') {
             Logger.debug('auth', 'running in preview mode, skipping version check');
+        } else if (Platform.OS === 'web') {
+            Logger.debug('auth', 'running on web, skipping version check');
         } else {
             try {
                 const buildVersion = Application.nativeBuildVersion;
