@@ -6,10 +6,12 @@ import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
 import HabitCard from '@/src/features/habits/components/HabitCard';
 import HabitFormView from '@/src/features/habits/components/HabitFormView';
 import HabitDetailView from '@/src/features/habits/components/HabitDetailView';
+import { getActiveHabitDate, toDateOnlyString } from '@/src/features/habits/models';
 
 export const HabitsPanel: React.FC = () => {
     const [habits, setHabits] = useState<Habit[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [showUnmarkedOnly, setShowUnmarkedOnly] = useState(false);
     // State for the create/edit form
     const [showingCreateForm, setShowingCreateForm] = useState(false);
     const [showingEditForm, setShowingEditForm] = useState(false);
@@ -103,6 +105,20 @@ export const HabitsPanel: React.FC = () => {
         }
     };
 
+    const getFilteredHabits = (): Habit[] => {
+        if (!showUnmarkedOnly) {
+            return habits;
+        }
+        
+        return habits.filter(habit => {
+            const activeDate = getActiveHabitDate(habit);
+            const targetDateString = toDateOnlyString(activeDate);
+            const currentEntry = habit.entries.find(entry => entry.date === targetDateString);
+            return currentEntry === undefined;
+        });
+    };
+
+    const filteredHabits = getFilteredHabits();
 
     return (
         <>
@@ -111,6 +127,9 @@ export const HabitsPanel: React.FC = () => {
                 title="Habits"
                 showAddButton
                 onAddTapped={handleAddHabit}
+                showFilterButton
+                isFilterActive={showUnmarkedOnly}
+                onFilterTapped={() => setShowUnmarkedOnly(!showUnmarkedOnly)}
             />
 
             <ScrollView className="flex-1 p-5">
@@ -125,11 +144,20 @@ export const HabitsPanel: React.FC = () => {
                             Start building better habits by adding your first one!
                         </Text>
                     </View>
+                ) : filteredHabits.length === 0 ? (
+                    <View className="flex-1 items-center justify-center">
+                        <Text className="text-on-background text-xl font-bold mb-3">No Unmarked Habits</Text>
+                        <Text className="text-on-background-variant text-center">
+                            All habits have been marked for today!
+                        </Text>
+                    </View>
                 ) : (
                     <View>
-                        <Text className="text-on-background text-2xl font-bold mb-5">Your Habits</Text>
+                        <Text className="text-on-background text-2xl font-bold mb-5">
+                            {showUnmarkedOnly ? 'Unmarked Habits' : 'Your Habits'}
+                        </Text>
                         
-                        {habits.map((habit, index) => (
+                        {filteredHabits.map((habit, index) => (
                             <HabitCard
                                 key={habit._id}
                                 habit={habit}
