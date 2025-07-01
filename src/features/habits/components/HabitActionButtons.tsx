@@ -93,9 +93,37 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
             )}
             
             <View className="flex-row">
+                {/* Missed button */}
+                <TouchableOpacity
+                    className={`flex-1 rounded-md py-2 mr-1 ${
+                        currentEntry?.status === HabitEntryStatus.MISSED 
+                            ? 'bg-error' 
+                            : 'bg-surface-variant border border-error'
+                    }`}
+                    onPress={() => handleMarkHabit(HabitEntryStatus.MISSED)}
+                >
+                    <View className="flex-row items-center justify-center">
+                        <Ionicons
+                            name={currentEntry?.status === HabitEntryStatus.MISSED ? "close-circle" : "close-circle-outline"}
+                            size={16}
+                            color={currentEntry?.status === HabitEntryStatus.MISSED 
+                                ? getColor('on-error')
+                                : getColor('error')
+                            }
+                        />
+                        <Text className={`text-sm font-medium ml-1 ${
+                            currentEntry?.status === HabitEntryStatus.MISSED 
+                                ? 'text-on-error' 
+                                : 'text-error'
+                        }`}>
+                            {currentEntry?.status === HabitEntryStatus.MISSED ? 'Missed' : 'Miss'}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+                
                 {/* Excuse button */}
                 <TouchableOpacity
-                    className={`flex-1 rounded-md py-2 mr-2 ${
+                    className={`flex-1 rounded-md py-2 mx-1 ${
                         currentEntry?.status === HabitEntryStatus.EXCUSED 
                             ? 'bg-secondary' 
                             : 'bg-surface-variant border border-secondary'
@@ -123,7 +151,7 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
                 
                 {/* Complete button */}
                 <TouchableOpacity
-                    className={`flex-1 rounded-md py-2 ${
+                    className={`flex-1 rounded-md py-2 ml-1 ${
                         currentEntry?.status === HabitEntryStatus.COMPLETED 
                             ? 'bg-primary' 
                             : 'bg-surface-variant border border-primary'
