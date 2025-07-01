@@ -1,17 +1,16 @@
 import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
-import { AgendaItem } from "@/src/features/agenda/models";
 import {
     CompleteItemRequest, CompleteItemResponse,
     CreateItemRequest,
-    CreateItemResponse, DeleteItemResponse,
-    GetItemsResponse,
+    CreateItemResponse, DeleteItemResponse, deserializeItemData,
+    GetItemsResponse, ItemData,
     UpdateItemRequest,
     UpdateItemResponse
 } from "@timothyw/pat-common";
 
 export class AgendaManager {
     private static instance: AgendaManager;
-    private _agendaItems: AgendaItem[] = [];
+    private _agendaItems: ItemData[] = [];
 
     private constructor() {
     }
@@ -23,7 +22,7 @@ export class AgendaManager {
         return AgendaManager.instance;
     }
 
-    get agendaItems(): AgendaItem[] {
+    get agendaItems(): ItemData[] {
         return [...this._agendaItems];
     }
 
@@ -38,40 +37,22 @@ export class AgendaManager {
                 throw new Error('Invalid response format');
             }
 
-            const items: AgendaItem[] = response.items.map((item: any) => ({
-                id: item._id || item.id,
-                name: item.name,
-                date: item.dueDate ? new Date(item.dueDate) : undefined,
-                notes: item.notes,
-                completed: !!item.completed,
-                urgent: !!item.urgent,
-                category: item.category,
-                type: item.type,
-            }));
-
-            this._agendaItems = items;
+            this._agendaItems = response.items.map(deserializeItemData);
         } catch (error) {
             console.error('Failed to load agenda items:', error);
             throw error;
         }
     }
 
-    async createAgendaItem(params: {
-        name: string;
-        date?: Date;
-        notes?: string;
-        urgent?: boolean;
-        category?: string;
-        type?: string;
-    }): Promise<AgendaItem> {
+    async createAgendaItem(params: CreateItemRequest): Promise<ItemData> {
         const body: CreateItemRequest = {
             name: params.name,
             notes: params.notes || '',
             urgent: params.urgent || false,
         };
 
-        if (params.date) {
-            body.dueDate = params.date.toISOString();
+        if (params.dueDate) {
+            body.dueDate = params.dueDate;
         }
 
         if (params.category) {
@@ -93,20 +74,8 @@ export class AgendaManager {
                 throw new Error('Invalid response format');
             }
 
-            const item = response.item;
-            const agendaItem: AgendaItem = {
-                id: item.id,
-                name: item.name,
-                date: item.dueDate ? new Date(item.dueDate) : undefined,
-                notes: item.notes,
-                completed: item.completed,
-                urgent: item.urgent,
-                category: item.category,
-                type: item.type,
-            };
-
             await this.loadAgendaItems();
-            return agendaItem;
+            return deserializeItemData(response.item);
         } catch (error) {
             console.error('Failed to create agenda item:', error);
             throw error;

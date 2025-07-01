@@ -8,16 +8,15 @@ import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormV
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
-import { AgendaItem } from "@/src/features/agenda/models";
 import { useToast } from "@/src/components/toast/ToastContext";
-import { ModuleType } from "@timothyw/pat-common";
+import { ItemData, ModuleType } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 
 export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const { width } = useWindowDimensions();
-    const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
+    const [agendaItems, setAgendaItems] = useState<ItemData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showCompleted, setShowCompleted] = useState(false);
@@ -27,7 +26,7 @@ export const AgendaPanel: React.FC = () => {
     const [showingEditForm, setShowingEditForm] = useState(false);
 
     // State for detail view
-    const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
     const [showingDetailView, setShowingDetailView] = useState(false);
     const [editFromDetailView, setEditFromDetailView] = useState(false);
 
@@ -80,7 +79,7 @@ export const AgendaPanel: React.FC = () => {
         setEditFromDetailView(false);
     };
 
-    const handleItemSelect = (item: AgendaItem) => {
+    const handleItemSelect = (item: ItemData) => {
         setSelectedItem(item);
         setShowingDetailView(true);
     };
@@ -119,9 +118,9 @@ export const AgendaPanel: React.FC = () => {
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
             if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
-            if (a.date && b.date) return new Date(a.date).getTime() - new Date(b.date).getTime();
-            if (a.date) return -1;
-            if (b.date) return 1;
+            if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            if (a.dueDate) return -1;
+            if (b.dueDate) return 1;
             return 0;
         });
 
@@ -139,7 +138,7 @@ export const AgendaPanel: React.FC = () => {
                     isTableView={false}
                 />
             )}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item._id}
             contentContainerStyle={{ padding: 16 }}
             refreshControl={
                 <RefreshControl
@@ -195,7 +194,7 @@ export const AgendaPanel: React.FC = () => {
                                     <TableHeader />
                                     {filteredItems.map((item) => (
                                         <AgendaItemCard
-                                            key={item.id}
+                                            key={item._id}
                                             item={item}
                                             onPress={handleItemSelect}
                                             isTableView={true}
@@ -207,7 +206,7 @@ export const AgendaPanel: React.FC = () => {
                             <View className="px-4 pt-3">
                                 {filteredItems.map((item, index) => (
                                     <AgendaItemCard
-                                        key={item.id}
+                                        key={item._id}
                                         item={item}
                                         onPress={handleItemSelect}
                                         isTableView={false}

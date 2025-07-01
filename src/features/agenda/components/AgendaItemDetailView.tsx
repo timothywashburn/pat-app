@@ -6,11 +6,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { AgendaItem } from "@/src/features/agenda/models";
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
+import { ItemData } from "@timothyw/pat-common";
 
 interface AgendaItemDetailViewProps {
-    item: AgendaItem;
+    item: ItemData;
     isPresented: boolean;
     onDismiss: () => void;
     onEditRequest: () => void;
@@ -39,7 +39,7 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await agendaManager.setCompleted(item.id, !item.completed);
+            await agendaManager.setCompleted(item._id, !item.completed);
             onItemUpdated?.();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update item');
@@ -76,11 +76,11 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
             <Text className="text-on-surface text-xl font-bold mb-4">{item.name}</Text>
 
                     <View className="mb-4">
-                        {item.date && (
+                        {item.dueDate && (
                             <View className="flex-row items-center mb-2">
                                 <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
                                 <Text className="text-on-surface-variant text-base ml-2">
-                                    {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {
+                                    {item.dueDate.toLocaleDateString()} at {item.dueDate.toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 })}

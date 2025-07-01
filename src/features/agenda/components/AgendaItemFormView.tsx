@@ -15,9 +15,9 @@ import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
-import { AgendaItem } from "@/src/features/agenda/models";
 import WebDateTimePicker from './WebDateTimePicker';
 import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { ItemData } from "@timothyw/pat-common";
 
 interface AgendaItemFormViewProps {
     isPresented: boolean;
@@ -25,7 +25,7 @@ interface AgendaItemFormViewProps {
     onCancel?: () => void;
     onItemSaved?: () => void;
     initialName?: string;
-    existingItem?: AgendaItem;
+    existingItem?: ItemData;
     isEditMode?: boolean;
 }
 
@@ -47,7 +47,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     };
 
     const [name, setName] = useState(existingItem?.name || initialName);
-    const [date, setDate] = useState<Date | undefined>(existingItem?.date);
+    const [date, setDate] = useState<Date | undefined>(existingItem?.dueDate);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [notes, setNotes] = useState(existingItem?.notes || '');
@@ -89,7 +89,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
             console.log(itemData);
 
             if (isEditMode && existingItem) {
-                await agendaManager.updateAgendaItem(existingItem.id, itemData);
+                await agendaManager.updateAgendaItem(existingItem._id, itemData);
             } else {
                 await agendaManager.createAgendaItem({
                     ...itemData,
@@ -122,7 +122,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await agendaManager.deleteAgendaItem(existingItem.id);
+            await agendaManager.deleteAgendaItem(existingItem._id);
             onItemSaved?.();
             onDismiss();
         } catch (error) {

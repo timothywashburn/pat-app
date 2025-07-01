@@ -1,12 +1,12 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AgendaItem } from "@/src/features/agenda/models";
 import { useTheme } from '@/src/controllers/ThemeManager';
+import { ItemData } from "@timothyw/pat-common";
 
 interface AgendaItemCardProps {
-    item: AgendaItem;
-    onPress: (item: AgendaItem) => void;
+    item: ItemData;
+    onPress: (item: ItemData) => void;
     isTableView?: boolean;
 }
 
@@ -34,7 +34,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
                     </View>
 
                     <View className="w-[25%] px-2">
-                        {item.date ? (
+                        {item.dueDate ? (
                             <View className="flex-row items-center">
                                 <Ionicons
                                     name="time-outline"
@@ -42,8 +42,8 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
                                     color={getColor("on-surface-variant")}
                                 />
                                 <Text className="text-on-surface-variant text-xs ml-1" numberOfLines={1}>
-                                    {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })},{" "}
-                                    {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {item.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })},{" "}
+                                    {item.dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </Text>
                             </View>
                         ) : (
@@ -91,7 +91,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
                 </View>
 
                 <View className="flex-row items-center justify-between">
-                    {item.date ? (
+                    {item.dueDate ? (
                         <View className="flex-row items-center flex-1">
                             <Ionicons
                                 name="time-outline"
@@ -99,7 +99,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
                                 color={getColor("on-surface-variant")}
                             />
                             <Text className="text-on-surface-variant text-sm ml-1">
-                                {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {new Date(item.date).toLocaleTimeString([], {
+                                {item.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {item.dueDate.toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
