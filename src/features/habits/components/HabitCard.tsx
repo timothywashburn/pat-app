@@ -8,18 +8,16 @@ import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
-import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
-import { fromDateString, Habit } from "@timothyw/pat-common";
+import { Habit } from "@timothyw/pat-common";
 
 interface HabitCardProps {
     habit: Habit;
     onPress: (habit: Habit) => void;
     onEditPress: (habit: Habit) => void;
     onHabitUpdated?: () => void;
-    isLast?: boolean;
 }
 
-const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHabitUpdated, isLast }) => {
+const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHabitUpdated }) => {
     const { getColor } = useTheme();
     const habitManager = HabitManager.getInstance();
 
@@ -35,7 +33,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
 
     return (
         <TouchableOpacity
-            className={`bg-surface rounded-lg p-4 ${!isLast ? 'mb-4' : ''} border border-surface-variant`}
+            className={`bg-surface rounded-lg p-4 mb-5 border border-surface-variant`}
             onPress={() => onPress(habit)}
             activeOpacity={0.7}
         >

@@ -136,7 +136,6 @@ export const HabitsPanel: React.FC = () => {
                                 onPress={handleHabitPress}
                                 onEditPress={handleEditHabit}
                                 onHabitUpdated={handleHabitUpdated}
-                                isLast={index === habits.length - 1}
                             />
                         ))}
                     </View>
