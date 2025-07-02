@@ -45,29 +45,11 @@ export class AgendaManager {
     }
 
     async createAgendaItem(params: CreateItemRequest): Promise<ItemData> {
-        const body: CreateItemRequest = {
-            name: params.name,
-            notes: params.notes || '',
-            urgent: params.urgent || false,
-        };
-
-        if (params.dueDate) {
-            body.dueDate = params.dueDate;
-        }
-
-        if (params.category) {
-            body.category = params.category;
-        }
-
-        if (params.type) {
-            body.type = params.type;
-        }
-
         try {
             const response = await NetworkManager.shared.performAuthenticated<CreateItemRequest, CreateItemResponse>({
                 endpoint: '/api/items',
                 method: HTTPMethod.POST,
-                body,
+                body: params,
             });
 
             if (!response.item) {
@@ -86,37 +68,13 @@ export class AgendaManager {
         id: string,
         updates: UpdateItemRequest
     ): Promise<void> {
-        const body: UpdateItemRequest = {};
-
-        if (updates.name !== undefined) {
-            body.name = updates.name;
-        }
-
-        if (updates.dueDate !== undefined) {
-            body.dueDate = updates.dueDate ? updates.dueDate.toISOString() as unknown as Date : null;
-        }
-
-        if (updates.notes !== undefined) {
-            body.notes = updates.notes;
-        }
-
-        if (updates.urgent !== undefined) {
-            body.urgent = updates.urgent;
-        }
-
-        if (updates.category !== undefined) {
-            body.category = updates.category;
-        }
-
-        if (updates.type !== undefined) {
-            body.type = updates.type;
-        }
+        console.log('Updating agenda item with body:', updates);
 
         try {
             await NetworkManager.shared.performAuthenticated<UpdateItemRequest, UpdateItemResponse>({
                 endpoint: `/api/items/${id}`,
                 method: HTTPMethod.PUT,
-                body,
+                body: updates,
             });
 
             // Refresh the list

@@ -17,7 +17,7 @@ import FormTextArea from '@/src/components/common/FormTextArea';
 import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import WebDateTimePicker from './WebDateTimePicker';
 import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
-import { ItemData } from "@timothyw/pat-common";
+import { CreateItemRequest, ItemData, UpdateItemRequest } from "@timothyw/pat-common";
 
 interface AgendaItemFormViewProps {
     isPresented: boolean;
@@ -48,12 +48,13 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
     const [name, setName] = useState(existingItem?.name || initialName);
     const [date, setDate] = useState<Date | undefined>(existingItem?.dueDate);
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
     const [notes, setNotes] = useState(existingItem?.notes || '');
     const [urgent, setUrgent] = useState(existingItem?.urgent || false);
     const [category, setCategory] = useState<string | undefined>(existingItem?.category);
     const [type, setType] = useState<string | undefined>(existingItem?.type);
+
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -77,24 +78,28 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            const itemData = {
-                name: name.trim(),
-                date: date,
-                notes: notes.trim() || null,
-                urgent: urgent,
-                category: category,
-                type: type,
-            };
-
-            console.log(itemData);
-
             if (isEditMode && existingItem) {
+                const itemData: UpdateItemRequest = {
+                    name: name.trim(),
+                    dueDate: date?.toISOString() || null,
+                    notes: notes.trim() || null,
+                    urgent: urgent,
+                    category: category || null,
+                    type: type || null,
+                };
+
                 await agendaManager.updateAgendaItem(existingItem._id, itemData);
             } else {
-                await agendaManager.createAgendaItem({
-                    ...itemData,
-                    notes: itemData.notes || undefined,
-                });
+                const itemData: CreateItemRequest = {
+                    name: name.trim(),
+                    dueDate: date?.toISOString(),
+                    notes: notes.trim(),
+                    urgent: urgent,
+                    category: category,
+                    type: type,
+                };
+
+                await agendaManager.createAgendaItem(itemData);
             }
 
             if (!isEditMode) {
