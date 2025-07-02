@@ -28,7 +28,6 @@ export const AgendaPanel: React.FC = () => {
     // State for detail view
     const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
     const [showingDetailView, setShowingDetailView] = useState(false);
-    const [editFromDetailView, setEditFromDetailView] = useState(false);
 
     const agendaManager = AgendaManager.getInstance();
 
@@ -76,7 +75,6 @@ export const AgendaPanel: React.FC = () => {
 
     const handleAddItem = () => {
         setShowingCreateForm(true);
-        setEditFromDetailView(false);
     };
 
     const handleItemSelect = (item: ItemData) => {
@@ -92,7 +90,6 @@ export const AgendaPanel: React.FC = () => {
     const handleEditRequest = () => {
         setShowingDetailView(false);
         setShowingEditForm(true);
-        setEditFromDetailView(true);
     };
 
     const handleFormDismiss = async () => {
@@ -100,7 +97,6 @@ export const AgendaPanel: React.FC = () => {
         
         setShowingCreateForm(false);
         setShowingEditForm(false);
-        setEditFromDetailView(false);
         setSelectedItem(null);
     };
 
@@ -123,33 +119,6 @@ export const AgendaPanel: React.FC = () => {
             if (b.dueDate) return 1;
             return 0;
         });
-
-    const renderTableContent = () => (
-        <View className="bg-surface rounded-xl overflow-hidden" />
-    );
-
-    const renderCardContent = () => (
-        <FlatList
-            data={filteredItems}
-            renderItem={({ item }) => (
-                <AgendaItemCard
-                    item={item}
-                    onPress={handleItemSelect}
-                    isTableView={false}
-                />
-            )}
-            keyExtractor={item => item._id}
-            contentContainerStyle={{ padding: 16 }}
-            refreshControl={
-                <RefreshControl
-                    refreshing={isRefreshing}
-                    onRefresh={handleRefresh}
-                    colors={[getColor("primary")]}
-                    tintColor={getColor("primary")}
-                />
-            }
-        />
-    );
 
     return (
         <>

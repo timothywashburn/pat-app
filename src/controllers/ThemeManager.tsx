@@ -19,12 +19,12 @@ type ThemeColors = {
     "on-success": string,
     "success-container": string,
     "on-success-container": string,
+    "warning": string;
+    "on-warning": string;
     "error": string;
     "on-error": string;
     "error-container": string;
     "on-error-container": string;
-    "warning": string;
-    "on-warning": string;
     "background": string;
     "on-background": string;
     "on-background-variant": string;
