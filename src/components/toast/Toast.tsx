@@ -113,7 +113,7 @@ export const Toast: React.FC<ToastProps> = ({
             }}
         >
             <View
-                className={`rounded-lg shadow-md overflow-hidden mx-auto min-w-[150px] max-w-[90%] ${styles.background}`}
+                className={`rounded-lg shadow-md overflow-hidden mx-auto min-w-[150px] max-w-[90%] sm:max-w-[500px] ${styles.background}`}
             >
                 <View className="px-4 py-3 flex-row items-center justify-between">
                     <Text className={`flex-shrink ${styles.text}`}>{message}</Text>
