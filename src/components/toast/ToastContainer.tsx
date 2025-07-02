@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, LayoutChangeEvent } from 'react-native';
+import { View, LayoutChangeEvent, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from './Toast';
 import { ToastItem } from './ToastContext';
@@ -50,7 +50,7 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, setToast
                 {topToasts.map((toast) => (
                     <View
                         key={toast.id}
-                        className="w-full items-center"
+                        className={`items-center ${Platform.OS == 'web' ? '' : 'w-full'}`}
                         style={{
                             position: 'absolute',
                             top: TOAST_SPACING + insets.top + topOffsets[toast.id],
