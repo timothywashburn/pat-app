@@ -11,25 +11,25 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
-import ThoughtManager, { Thought } from '@/src/features/inbox/controllers/ThoughtManager';
+import ThoughtManager from '@/src/features/inbox/controllers/ThoughtManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import TaskFormView from '@/src/features/tasks/components/TaskFormView';
 import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { useToast } from "@/src/components/toast/ToastContext";
-import { ModuleType } from "@timothyw/pat-common";
+import { ModuleType, ThoughtData } from "@timothyw/pat-common";
 
 export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const [thoughts, setThoughts] = useState<Thought[]>([]);
+    const [thoughts, setThoughts] = useState<ThoughtData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [newThought, setNewThought] = useState('');
-    const [selectedThought, setSelectedThought] = useState<Thought | null>(null);
+    const [selectedThought, setSelectedThought] = useState<ThoughtData | null>(null);
     const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
-    const [editingThought, setEditingThought] = useState<Thought | null>(null);
+    const [editingThought, setEditingThought] = useState<ThoughtData | null>(null);
     const [editedContent, setEditedContent] = useState('');
     const [showingCreateAgendaForm, setShowingCreateAgendaForm] = useState(false);
     const [showingCreateTaskForm, setShowingCreateTaskForm] = useState(false);
@@ -113,7 +113,7 @@ export const InboxPanel: React.FC = () => {
         }
 
         try {
-            await thoughtManager.updateThought(editingThought.id, editedContent);
+            await thoughtManager.updateThought(editingThought._id, editedContent);
             setThoughts(thoughtManager.thoughts);
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to update thought';
@@ -148,7 +148,7 @@ export const InboxPanel: React.FC = () => {
 
     const handleItemCreated = () => {
         if (selectedThought) {
-            handleDeleteThought(selectedThought.id);
+            handleDeleteThought(selectedThought._id);
             setSelectedThought(null);
         }
     };
@@ -157,34 +157,34 @@ export const InboxPanel: React.FC = () => {
         if (selectedThought) {
             // Reload task lists to get fresh data (this will update any TaskManager instance)
             await loadTaskLists();
-            handleDeleteThought(selectedThought.id);
+            handleDeleteThought(selectedThought._id);
             setSelectedThought(null);
         }
     };
 
-    const toggleThoughtExpansion = (thought: Thought) => {
+    const toggleThoughtExpansion = (thought: ThoughtData) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
         // If there's an active edit, cancel it when clicking on a different thought
-        if (editingThought && editingThought.id !== thought.id) {
+        if (editingThought && editingThought._id !== thought._id) {
             setEditingThought(null);
         }
 
-        if (expandedThoughtId === thought.id) {
+        if (expandedThoughtId === thought._id) {
             setExpandedThoughtId(null);
         } else {
-            setExpandedThoughtId(thought.id);
+            setExpandedThoughtId(thought._id);
             setSelectedThought(thought);
         }
     };
 
-    const handleMoveToAgenda = (thought: Thought) => {
+    const handleMoveToAgenda = (thought: ThoughtData) => {
         setSelectedThought(thought);
         setShowingCreateAgendaForm(true);
         setExpandedThoughtId(null);
     };
 
-    const handleMoveToTasks = (thought: Thought) => {
+    const handleMoveToTasks = (thought: ThoughtData) => {
         if (taskLists.length === 0) {
             errorToast('No task lists available. Create a task list first in the Tasks tab.');
             setExpandedThoughtId(null);
@@ -196,19 +196,19 @@ export const InboxPanel: React.FC = () => {
         setExpandedThoughtId(null);
     };
 
-    const handleStartEdit = (thought: Thought) => {
+    const handleStartEdit = (thought: ThoughtData) => {
         setEditingThought(thought);
         setEditedContent(thought.content);
         // Keep the menu expanded when editing starts
-        setExpandedThoughtId(thought.id);
+        setExpandedThoughtId(thought._id);
     };
 
-    const handleConfirmDelete = (thought: Thought) => {
+    const handleConfirmDelete = (thought: ThoughtData) => {
         // If in edit mode, treat delete action as cancel edit
-        if (editingThought && editingThought.id === thought.id) {
+        if (editingThought && editingThought._id === thought._id) {
             setEditingThought(null);
         } else {
-            handleDeleteThought(thought.id);
+            handleDeleteThought(thought._id);
         }
     };
 
@@ -257,7 +257,7 @@ export const InboxPanel: React.FC = () => {
                     renderItem={({ item }) => (
                         <TouchableOpacity
                             onPress={() => {
-                                if (!editingThought || editingThought.id !== item.id) {
+                                if (!editingThought || editingThought._id !== item._id) {
                                     toggleThoughtExpansion(item);
                                 }
                             }}
@@ -265,8 +265,8 @@ export const InboxPanel: React.FC = () => {
                         >
                             <ThoughtView
                                 thought={item}
-                                isEditing={editingThought?.id === item.id}
-                                isExpanded={expandedThoughtId === item.id}
+                                isEditing={editingThought?._id === item._id}
+                                isExpanded={expandedThoughtId === item._id}
                                 editedContent={editedContent}
                                 onChangeEditContent={setEditedContent}
                                 onCommitEdit={handleEditThought}
@@ -277,7 +277,7 @@ export const InboxPanel: React.FC = () => {
                             />
                         </TouchableOpacity>
                     )}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item._id}
                     contentContainerClassName="px-4 pt-3"
                     refreshControl={
                         <RefreshControl

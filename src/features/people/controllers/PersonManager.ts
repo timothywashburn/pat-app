@@ -2,7 +2,7 @@ import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import {
     CreatePersonRequest,
     CreatePersonResponse, DeletePersonResponse,
-    GetPeopleResponse, Person, PersonNoteData, PersonNoteId, PersonProperty,
+    GetPeopleResponse, Person, PersonNoteData, PersonNoteId, PersonProperty, Serializer,
     UpdatePersonRequest, UpdatePersonResponse
 } from "@timothyw/pat-common";
 
@@ -35,7 +35,7 @@ export class PersonManager {
                 throw new Error('Invalid response format');
             }
 
-            this._people = response.people;
+            this._people = response.people.map(person => Serializer.deserializePerson(person));
         } catch (error) {
             console.error('Failed to load people:', error);
             throw error;

@@ -8,7 +8,7 @@ import {
     DeletePersonNoteResponse,
     PersonNoteId,
     PersonNoteData,
-    PersonId
+    PersonId, Serializer
 } from "@timothyw/pat-common";
 
 export class PersonNoteManager {
@@ -39,7 +39,7 @@ export class PersonNoteManager {
                 throw new Error('Invalid response format');
             }
 
-            return response.personNote;
+            return Serializer.deserializePersonNoteData(response.personNote);
         } catch (error) {
             console.error('Failed to create person note:', error);
             throw error;
@@ -57,7 +57,7 @@ export class PersonNoteManager {
                 throw new Error('Invalid response format');
             }
 
-            return response.personNotes;
+            return response.personNotes.map(note => Serializer.deserializePersonNoteData(note));
         } catch (error) {
             console.error('Failed to load person notes:', error);
             throw error;
@@ -78,7 +78,7 @@ export class PersonNoteManager {
                 throw new Error('Invalid response format');
             }
 
-            return response.personNote;
+            return Serializer.deserializePersonNoteData(response.personNote);
         } catch (error) {
             console.error('Failed to update person note:', error);
             throw error;

@@ -3,7 +3,7 @@ import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import { Ionicons } from "@expo/vector-icons";
 import {
     GetUserResponse,
-    ModuleType,
+    ModuleType, Serializer,
     UpdateUserRequest,
     UpdateUserResponse,
     UserData, UserId
@@ -60,7 +60,7 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
 
             set({
                 userDataStoreStatus: UserDataStoreStatus.LOADED,
-                data: response.user,
+                data: Serializer.deserializeUserData(response.user),
             });
 
             Logger.debug('unclassified', 'user data loaded successfully');
@@ -76,8 +76,9 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
             body: partialData,
         });
 
-        set({ data: response.user });
-        console.log('user data updated successfully');
+        set({
+            data: Serializer.deserializeUserData(response.user)
+        });
     },
 
     getFirstModule: () => {

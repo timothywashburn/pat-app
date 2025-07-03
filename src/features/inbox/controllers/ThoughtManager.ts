@@ -2,18 +2,13 @@ import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import {
     CreateThoughtRequest,
     CreateThoughtResponse, DeleteThoughtResponse,
-    GetThoughtsResponse,
+    GetThoughtsResponse, Serializer, ThoughtData,
     UpdateThoughtRequest, UpdateThoughtResponse
 } from "@timothyw/pat-common";
 
-export interface Thought {
-    id: string;
-    content: string;
-}
-
 class ThoughtManager {
     private static instance: ThoughtManager;
-    private _thoughts: Thought[] = [];
+    private _thoughts: ThoughtData[] = [];
 
     private constructor() {}
 
@@ -24,7 +19,7 @@ class ThoughtManager {
         return ThoughtManager.instance;
     }
 
-    get thoughts(): Thought[] {
+    get thoughts(): ThoughtData[] {
         return [...this._thoughts];
     }
 
@@ -39,17 +34,14 @@ class ThoughtManager {
                 throw new Error('Invalid response format');
             }
 
-            this._thoughts = response.thoughts.map((thought: any) => ({
-                id: thought.id || thought._id,
-                content: thought.content
-            }));
+            this._thoughts = response.thoughts.map(thought => Serializer.deserializeThoughtData(thought));
         } catch (error) {
             console.error('Failed to load thoughts:', error);
             throw error;
         }
     }
 
-    async createThought(content: string): Promise<Thought> {
+    async createThought(content: string): Promise<ThoughtData> {
         try {
             const response = await NetworkManager.shared.performAuthenticated<CreateThoughtRequest, CreateThoughtResponse>({
                 endpoint: '/api/thoughts',
@@ -64,10 +56,7 @@ class ThoughtManager {
             // Refresh thoughts list
             await this.loadThoughts();
 
-            return {
-                id: response.thought.id,
-                content: response.thought.content
-            };
+            return Serializer.deserializeThoughtData(response.thought);
         } catch (error) {
             console.error('Failed to create thought:', error);
             throw error;

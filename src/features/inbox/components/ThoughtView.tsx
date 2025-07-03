@@ -1,11 +1,11 @@
 import React from 'react';
 import { Text, TextInput, View, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { Thought } from '../controllers/ThoughtManager';
 import { Ionicons } from '@expo/vector-icons';
+import { ThoughtData } from "@timothyw/pat-common";
 
 interface ThoughtViewProps {
-    thought: Thought;
+    thought: ThoughtData;
     isEditing: boolean;
     isExpanded: boolean;
     editedContent: string;

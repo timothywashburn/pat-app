@@ -8,7 +8,7 @@ import {
     DeleteHabitResponse,
     GetHabitsResponse,
     Habit,
-    HabitEntry,
+    HabitEntry, Serializer,
     UpdateHabitRequest,
     UpdateHabitResponse
 } from '@timothyw/pat-common';
@@ -42,7 +42,7 @@ export class HabitManager {
                 throw new Error('Invalid response format');
             }
 
-            this._habits = response.habits;
+            this._habits = response.habits.map(habit => Serializer.deserializeHabit(habit));
         } catch (error) {
             console.error('Failed to load habits:', error);
             throw error;

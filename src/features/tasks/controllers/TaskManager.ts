@@ -11,7 +11,7 @@ import {
     CreateTaskListResponse,
     UpdateTaskListRequest,
     UpdateTaskListResponse,
-    GetTaskListsResponse, TaskListId, TaskListData, TaskId
+    GetTaskListsResponse, TaskListId, TaskListData, TaskId, Serializer
 } from '@timothyw/pat-common';
 import { Task } from "@/src/features/tasks/models";
 import { TaskListWithTasks } from "@/src/features/tasks/models";
@@ -55,14 +55,7 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
-            const userId = useUserDataStore.getState().data._id;
-            this._taskLists = response.taskLists.map(taskList => ({
-                _id: taskList.id,
-                userId: userId,
-                name: taskList.name,
-                createdAt: new Date(taskList.createdAt),
-                updatedAt: new Date(taskList.updatedAt),
-            }));
+            this._taskLists = response.taskLists.map(taskList => Serializer.deserializeTaskListData(taskList));
 
             await this.loadTasks();
             this.updateTaskListsWithTasks();
@@ -83,17 +76,7 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
-            const userId = useUserDataStore.getState().data._id;
-            this._tasks = response.tasks.map(task => ({
-                _id: task.id,
-                userId: userId,
-                name: task.name,
-                notes: task.notes,
-                completed: task.completed,
-                taskListId: task.taskListId,
-                createdAt: new Date(task.createdAt),
-                updatedAt: new Date(task.updatedAt),
-            }));
+            this._tasks = response.tasks.map(task => Serializer.deserializeTaskData(task));
 
             this.updateTaskListsWithTasks();
         } catch (error) {
@@ -123,17 +106,8 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
-            const userId = useUserDataStore.getState().data._id;
-            const taskList: TaskListData = {
-                _id: response.taskList.id,
-                userId: userId,
-                name: response.taskList.name,
-                createdAt: new Date(response.taskList.createdAt),
-                updatedAt: new Date(response.taskList.updatedAt),
-            };
-
             await this.loadTaskLists();
-            return taskList;
+            return Serializer.deserializeTaskListData(response.taskList);
         } catch (error) {
             console.error('Failed to create task list:', error);
             throw error;
@@ -197,20 +171,8 @@ export class TaskManager {
                 throw new Error('Invalid response format');
             }
 
-            const userId = useUserDataStore.getState().data._id;
-            const task: Task = {
-                _id: response.task.id,
-                userId: userId,
-                name: response.task.name,
-                notes: response.task.notes,
-                completed: response.task.completed,
-                taskListId: response.task.taskListId,
-                createdAt: new Date(response.task.createdAt),
-                updatedAt: new Date(response.task.updatedAt),
-            };
-
             await this.loadTasks();
-            return task;
+            return Serializer.deserializeTaskData(response.task);
         } catch (error) {
             console.error('Failed to create task:', error);
             throw error;

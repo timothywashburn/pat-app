@@ -2,8 +2,8 @@ import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
 import {
     CompleteItemRequest, CompleteItemResponse,
     CreateItemRequest,
-    CreateItemResponse, DeleteItemResponse, deserializeItemData,
-    GetItemsResponse, ItemData,
+    CreateItemResponse, DeleteItemResponse,
+    GetItemsResponse, ItemData, Serializer,
     UpdateItemRequest,
     UpdateItemResponse
 } from "@timothyw/pat-common";
@@ -37,7 +37,7 @@ export class AgendaManager {
                 throw new Error('Invalid response format');
             }
 
-            this._agendaItems = response.items.map(deserializeItemData);
+            this._agendaItems = response.items.map(item => Serializer.deserializeItemData(item));
         } catch (error) {
             console.error('Failed to load agenda items:', error);
             throw error;
@@ -57,7 +57,7 @@ export class AgendaManager {
             }
 
             await this.loadAgendaItems();
-            return deserializeItemData(response.item);
+            return Serializer.deserializeItemData(response.item);
         } catch (error) {
             console.error('Failed to create agenda item:', error);
             throw error;
