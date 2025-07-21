@@ -31,7 +31,7 @@
     "unknown": "#ff00ff"
   },
   "dark": {
-    "primary": "#ff00ff",
+    "primary": "#625fff",
     "on-primary": "#ffffff",
     "primary-container": "#cdccff",
     "on-primary-container": "#4b47ff",
