@@ -30,9 +30,7 @@ class ThoughtManager {
                 method: HTTPMethod.GET,
             });
 
-            if (!response.thoughts || !Array.isArray(response.thoughts)) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to load thoughts');
 
             this._thoughts = response.thoughts.map(thought => Serializer.deserializeThoughtData(thought));
         } catch (error) {
@@ -49,9 +47,7 @@ class ThoughtManager {
                 body: { content },
             });
 
-            if (!response.thought) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to create thought');
 
             // Refresh thoughts list
             await this.loadThoughts();

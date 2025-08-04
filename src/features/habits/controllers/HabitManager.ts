@@ -38,9 +38,7 @@ export class HabitManager {
                 method: HTTPMethod.GET,
             });
 
-            if (!response.habits || !Array.isArray(response.habits)) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to load habits');
 
             this._habits = response.habits.map(habit => Serializer.deserializeHabit(habit));
         } catch (error) {
@@ -64,18 +62,12 @@ export class HabitManager {
                 body
             });
 
-            if (!response.habit) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to create habit');
 
-            // Refresh habits list
             await this.loadHabits();
 
-            // Find the newly created habit
             const newHabit = this._habits.find(h => h._id === response.habit._id);
-            if (!newHabit) {
-                throw new Error('Failed to create habit');
-            }
+            if (!newHabit) throw new Error('Failed to create habit');
 
             return newHabit;
         } catch (error) {

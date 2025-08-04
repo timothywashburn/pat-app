@@ -31,11 +31,9 @@ export class AgendaManager {
             const response = await NetworkManager.shared.performAuthenticated<undefined, GetItemsResponse>({
                 endpoint: '/api/items',
                 method: HTTPMethod.GET,
-            }) as GetItemsResponse;
+            });
 
-            if (!response.items || !Array.isArray(response.items)) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to load agenda items');
 
             this._agendaItems = response.items.map(item => Serializer.deserializeItemData(item));
         } catch (error) {
@@ -52,9 +50,7 @@ export class AgendaManager {
                 body: params,
             });
 
-            if (!response.item) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to create agenda item');
 
             await this.loadAgendaItems();
             return Serializer.deserializeItemData(response.item);

@@ -51,9 +51,7 @@ export class TaskManager {
                 method: HTTPMethod.GET,
             });
 
-            if (!response.taskLists || !Array.isArray(response.taskLists)) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to load task lists');
 
             this._taskLists = response.taskLists.map(taskList => Serializer.deserializeTaskListData(taskList));
 
@@ -72,9 +70,7 @@ export class TaskManager {
                 method: HTTPMethod.GET,
             });
 
-            if (!response.tasks || !Array.isArray(response.tasks)) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to load tasks');
 
             this._tasks = response.tasks.map(task => Serializer.deserializeTaskData(task));
 
@@ -102,9 +98,7 @@ export class TaskManager {
                 body,
             });
 
-            if (!response.taskList) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to create task list');
 
             await this.loadTaskLists();
             return Serializer.deserializeTaskListData(response.taskList);
@@ -167,9 +161,7 @@ export class TaskManager {
                 body,
             });
 
-            if (!response.task) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to create task');
 
             await this.loadTasks();
             return Serializer.deserializeTaskData(response.task);

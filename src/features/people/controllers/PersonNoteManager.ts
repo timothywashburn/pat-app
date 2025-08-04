@@ -35,9 +35,7 @@ export class PersonNoteManager {
                 }
             });
 
-            if (!response.personNote) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to create person note');
 
             return Serializer.deserializePersonNoteData(response.personNote);
         } catch (error) {
@@ -53,9 +51,7 @@ export class PersonNoteManager {
                 method: HTTPMethod.GET,
             });
 
-            if (!response.personNotes || !Array.isArray(response.personNotes)) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to load person notes');
 
             return response.personNotes.map(note => Serializer.deserializePersonNoteData(note));
         } catch (error) {
@@ -74,9 +70,7 @@ export class PersonNoteManager {
                 }
             });
 
-            if (!response.personNote) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to update person note');
 
             return Serializer.deserializePersonNoteData(response.personNote);
         } catch (error) {

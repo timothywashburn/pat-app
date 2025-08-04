@@ -76,6 +76,8 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
                     method: HTTPMethod.GET,
                 });
 
+                if (!response.success) throw new Error('Failed to fetch version info');
+
                 set({ versionInfo: response });
 
                 if (response.updateRequired) {
@@ -120,6 +122,8 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
                 method: HTTPMethod.POST,
                 body: { email, password },
             });
+
+            if (!response.success) throw new Error('Sign in failed');
 
             await SecureStorage.shared.saveTokens(response.tokenData);
 
@@ -168,6 +172,8 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
                 method: HTTPMethod.POST,
                 body: { refreshToken: tokens.refreshToken },
             });
+
+            if (!response.success) throw new Error('Failed to refresh auth');
 
             await SecureStorage.shared.saveTokens(response.tokenData);
 

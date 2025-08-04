@@ -58,6 +58,8 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
                 method: HTTPMethod.GET,
             });
 
+            if (!response.success) throw new Error('Failed to load user data');
+
             set({
                 userDataStoreStatus: UserDataStoreStatus.LOADED,
                 data: Serializer.deserializeUserData(response.user),
@@ -75,6 +77,8 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
             method: HTTPMethod.PUT,
             body: partialData,
         });
+
+        if (!response.success) throw new Error('Failed to update user data');
 
         set({
             data: Serializer.deserializeUserData(response.user)

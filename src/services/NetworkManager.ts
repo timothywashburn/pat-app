@@ -1,5 +1,6 @@
 import PatConfig from '@/src/controllers/PatConfig';
 import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
+import axios, { AxiosRequestConfig } from 'axios';
 
 export enum HTTPMethod {
     GET = 'GET',
@@ -23,6 +24,18 @@ export class NetworkError extends Error {
     }
 }
 
+// TODO: as noted in pat-api, should probably be in shared
+export type ApiSuccessResponse<TRes = unknown> = TRes & {
+    success: true;
+};
+
+export interface ApiErrorResponse {
+    success: false;
+    error: string;
+}
+
+export type ApiResponseBody<TRes = unknown> = ApiSuccessResponse<TRes> | ApiErrorResponse;
+
 /**
  * Service for making API requests
  */
@@ -41,63 +54,56 @@ class NetworkManager {
         return NetworkManager.instance;
     }
 
-    async performAuthenticated<ReqData = never, ResData = never>(
-        request: NetworkRequest<ReqData>
-    ): Promise<ResData> {
+    async performAuthenticated<TReq, TRes>(
+        request: NetworkRequest<TReq>
+    ): Promise<ApiResponseBody<TRes>> {
         const authTokens = useAuthStore.getState().authTokens;
         if (!authTokens) throw new Error('could not perform authenticated request: no auth tokens available');
-        return this.perform<ReqData, ResData>(request, authTokens.accessToken);
+        return this.perform<TReq, ApiResponseBody<TRes>>(request, authTokens.accessToken);
     }
 
-    async performUnauthenticated<ReqData = never, ResData = never>(
-        request: NetworkRequest<ReqData>
-    ): Promise<ResData> {
-        return this.perform<ReqData, ResData>(request, null);
+    async performUnauthenticated<TReq, TRes>(
+        request: NetworkRequest<TReq>
+    ): Promise<ApiResponseBody<TRes>> {
+        return this.perform<TReq, ApiResponseBody<TRes>>(request, null);
     }
 
-    private async perform<ReqData = never, ResData = never>(
-        request: NetworkRequest<ReqData>,
+    private async perform<TReq, TRes>(
+        request: NetworkRequest<TReq>,
         token: string | null = null
-    ): Promise<ResData> {
+    ): Promise<ApiResponseBody<TRes>> {
         const url = `${this.baseURL}${request.endpoint}`;
 
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json',
+        const config: AxiosRequestConfig = {
+            method: request.method.toLowerCase() as any,
+            url,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data: request.body,
         };
 
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const options: RequestInit = {
-            method: request.method,
-            headers,
-            body: request.body ? JSON.stringify(request.body) : undefined,
-        };
-
-        const response = await fetch(url, options);
-
-        const contentType = response.headers.get('content-type');
-        const isJSON = contentType && contentType.includes('application/json');
-        const data = isJSON ? await response.json().catch((jsonError) => {
-            console.error('json parse error:', jsonError);
-            throw new Error('invalid json response from server');
-        }) : null;
-
-        if (!response.ok) {
-            const message = data?.error || response.statusText || 'unknown error occurred';
-            console.error(`API request failed: ${response.status} ${message}`);
-            throw new NetworkError(message, response.status);
+        if (token) {
+            config.headers!['Authorization'] = `Bearer ${token}`;
         }
 
-        if (!isJSON) {
-            console.error('api returned non-json response:', contentType);
-            throw new Error('api server returned unexpected response format');
+        try {
+            const response = await axios(config);
+            const data: ApiResponseBody<TRes> = response.data;
+            return data;
+        } catch (error: any) {
+            if (error.response) {
+                const message = error.response.data?.error || error.response.statusText || 'unknown error occurred';
+                console.error(`API request failed: ${error.response.status} ${message}`);
+                throw new NetworkError(message, error.response.status);
+            } else if (error.request) {
+                console.error('Network error: no response received');
+                throw new NetworkError('Network error: no response received', 0);
+            } else {
+                console.error('Request setup error:', error.message);
+                throw new Error(error.message);
+            }
         }
-
-        if (!data.success) {
-            throw new Error(data.error || 'unknown error occurred');
-        }
-
-        return data.data;
     }
 }
 

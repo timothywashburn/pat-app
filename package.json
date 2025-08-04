@@ -50,6 +50,7 @@
     "@react-navigation/material-top-tabs": "^7.2.10",
     "@react-navigation/native": "^7.0.14",
     "@timothyw/pat-common": "^1.0.101",
+    "axios": "^1.11.0",
     "expo": "53.0.11",
     "expo-application": "~6.1.4",
     "expo-blur": "~14.1.5",

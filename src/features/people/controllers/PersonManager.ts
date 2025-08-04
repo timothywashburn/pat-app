@@ -31,6 +31,8 @@ export class PersonManager {
                 method: HTTPMethod.GET,
             });
 
+            if (!response.success) throw new Error('Failed to load people');
+
             if (!response.people || !Array.isArray(response.people)) {
                 throw new Error('Invalid response format');
             }
@@ -63,18 +65,12 @@ export class PersonManager {
                 body,
             });
 
-            if (!response.person) {
-                throw new Error('Invalid response format');
-            }
+            if (!response.success) throw new Error('Failed to create person');
 
-            // Refresh the list to get the updated data
             await this.loadPeople();
 
-            // Find the newly created person
             const newPerson = this._people.find(p => p._id === response.person._id);
-            if (!newPerson) {
-                throw new Error('Failed to create person');
-            }
+            if (!newPerson) throw new Error('Failed to create person');
 
             return newPerson;
         } catch (error) {
