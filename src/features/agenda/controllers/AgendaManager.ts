@@ -5,12 +5,17 @@ import {
     CreateItemResponse, DeleteItemResponse,
     GetItemsResponse, ItemData, Serializer,
     UpdateItemRequest,
-    UpdateItemResponse
+    UpdateItemResponse,
+    NotificationTemplateData
 } from "@timothyw/pat-common";
+import NotificationService from '@/src/services/NotificationService';
+import { NotifiableWrapper } from '@/src/services/NotifiableEntity';
+import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 
 export class AgendaManager {
     private static instance: AgendaManager;
     private _agendaItems: ItemData[] = [];
+    private notificationService = NotificationService.getInstance();
 
     private constructor() {
     }
@@ -52,8 +57,13 @@ export class AgendaManager {
 
             if (!response.success) throw new Error('Failed to create agenda item');
 
+            const createdItem = Serializer.deserializeItemData(response.item);
+
+            // Register notification triggers for the new item
+            await this.registerItemNotifications(createdItem);
+
             await this.loadAgendaItems();
-            return Serializer.deserializeItemData(response.item);
+            return createdItem;
         } catch (error) {
             console.error('Failed to create agenda item:', error);
             throw error;
@@ -104,6 +114,9 @@ export class AgendaManager {
                 method: HTTPMethod.DELETE,
             });
 
+            // Remove notification triggers for deleted item
+            await this.removeItemNotifications(id);
+
             // Refresh the list
             await this.loadAgendaItems();
         } catch (error) {
@@ -111,4 +124,54 @@ export class AgendaManager {
             throw error;
         }
     }
+
+    // Notification integration methods
+
+    /**
+     * Create a notifiable wrapper for an agenda item
+     */
+    private createNotifiableItem(item: ItemData): NotifiableWrapper<ItemData> {
+        return new NotifiableWrapper(
+            item._id,
+            'agenda_item',
+            item,
+            useUserDataStore.getState().data?._id
+        );
+    }
+
+    /**
+     * Register notification triggers for an agenda item
+     */
+    async registerItemNotifications(item: ItemData): Promise<void> {
+        try {
+            const notifiableItem = this.createNotifiableItem(item);
+
+            // Create inherited templates if this is a new item
+            await notifiableItem.createInheritedTemplates();
+
+            // Register notification triggers
+            await notifiableItem.registerNotificationTriggers();
+        } catch (error) {
+            console.error('Failed to register item notifications:', error);
+        }
+    }
+
+    /**
+     * Remove notification triggers for an agenda item
+     */
+    async removeItemNotifications(itemId: string): Promise<void> {
+        try {
+            const notifiableItem = new NotifiableWrapper(
+                itemId,
+                'agenda_item',
+                { _id: itemId } as ItemData,
+                useUserDataStore.getState().data?._id
+            );
+
+            await notifiableItem.removeNotificationTriggers();
+        } catch (error) {
+            console.error('Failed to remove item notifications:', error);
+        }
+    }
+
 }

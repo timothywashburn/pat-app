@@ -11,6 +11,7 @@ import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ItemData, ModuleType } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
+import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 
 export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
@@ -28,6 +29,9 @@ export const AgendaPanel: React.FC = () => {
     // State for detail view
     const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
     const [showingDetailView, setShowingDetailView] = useState(false);
+
+    // State for notifications
+    const [showingNotifications, setShowingNotifications] = useState(false);
 
     const agendaManager = AgendaManager.getInstance();
 
@@ -110,6 +114,14 @@ export const AgendaPanel: React.FC = () => {
         handleDetailDismiss();
     };
 
+    const handleNotificationsPress = () => {
+        setShowingNotifications(true);
+    };
+
+    const handleNotificationsDismiss = () => {
+        setShowingNotifications(false);
+    };
+
     const filteredItems = agendaItems
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
@@ -125,6 +137,8 @@ export const AgendaPanel: React.FC = () => {
             <CustomHeader
                 moduleType={ModuleType.AGENDA}
                 title="Agenda"
+                showNotificationsButton
+                onNotificationsTapped={handleNotificationsPress}
                 showAddButton
                 onAddTapped={handleAddItem}
                 showFilterButton
@@ -223,6 +237,15 @@ export const AgendaPanel: React.FC = () => {
                     onDismiss={handleDetailDismiss}
                     onEditRequest={handleEditRequest}
                     onItemUpdated={handleItemUpdated}
+                />
+            )}
+
+            {/* Panel notifications view */}
+            {showingNotifications && (
+                <NotificationConfigView
+                    entityType="agenda"
+                    entityName="Agenda Panel"
+                    onClose={handleNotificationsDismiss}
                 />
             )}
         </>

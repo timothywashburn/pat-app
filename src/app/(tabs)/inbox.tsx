@@ -19,6 +19,7 @@ import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData } from "@timothyw/pat-common";
+import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 
 export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
@@ -34,6 +35,7 @@ export const InboxPanel: React.FC = () => {
     const [showingCreateAgendaForm, setShowingCreateAgendaForm] = useState(false);
     const [showingCreateTaskForm, setShowingCreateTaskForm] = useState(false);
     const [taskLists, setTaskLists] = useState<TaskListWithTasks[]>([]);
+    const [showingNotificationConfig, setShowingNotificationConfig] = useState(false);
 
     const thoughtManager = ThoughtManager.getInstance();
     const taskManager = TaskManager.getInstance();
@@ -58,6 +60,9 @@ export const InboxPanel: React.FC = () => {
         try {
             await thoughtManager.loadThoughts();
             setThoughts(thoughtManager.thoughts);
+            
+            // Register inbox notifications when thoughts are loaded
+            await thoughtManager.registerInboxNotifications();
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to load thoughts';
             errorToast(errorMsg);
@@ -219,6 +224,8 @@ export const InboxPanel: React.FC = () => {
                 title="Inbox"
                 showAddButton={true}
                 onAddTapped={() => setShowingCreateAgendaForm(true)}
+                showNotificationsButton={true}
+                onNotificationsTapped={() => setShowingNotificationConfig(true)}
             />
 
             <View className="flex-row p-4 py-2 items-center">
@@ -306,6 +313,14 @@ export const InboxPanel: React.FC = () => {
                     taskLists={taskLists}
                     initialName={selectedThought?.content || ''}
                     isEditMode={false}
+                />
+            )}
+
+            {showingNotificationConfig && (
+                <NotificationConfigView
+                    entityType="inbox"
+                    entityName="Inbox"
+                    onClose={() => setShowingNotificationConfig(false)}
                 />
             )}
         </>

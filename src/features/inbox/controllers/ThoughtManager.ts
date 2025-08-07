@@ -3,12 +3,17 @@ import {
     CreateThoughtRequest,
     CreateThoughtResponse, DeleteThoughtResponse,
     GetThoughtsResponse, Serializer, ThoughtData,
-    UpdateThoughtRequest, UpdateThoughtResponse
+    UpdateThoughtRequest, UpdateThoughtResponse,
+    NotificationTemplateData
 } from "@timothyw/pat-common";
+import NotificationService from '@/src/services/NotificationService';
+import { NotifiableWrapper } from '@/src/services/NotifiableEntity';
+import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 
 class ThoughtManager {
     private static instance: ThoughtManager;
     private _thoughts: ThoughtData[] = [];
+    private notificationService = NotificationService.getInstance();
 
     private constructor() {}
 
@@ -86,6 +91,47 @@ class ThoughtManager {
         } catch (error) {
             console.error('Failed to delete thought:', error);
             throw error;
+        }
+    }
+
+    // Notification integration methods
+
+    /**
+     * Create a notifiable wrapper for the inbox entity
+     * The inbox is treated as a single entity - individual thoughts are not notifiable
+     */
+    private createNotifiableInbox(): NotifiableWrapper<{ thoughts: ThoughtData[] }> {
+        return new NotifiableWrapper(
+            'inbox', // Fixed ID since there's only one inbox per user
+            'inbox',
+            { thoughts: this._thoughts },
+            useUserDataStore.getState().data?._id
+        );
+    }
+
+    /**
+     * Register notification triggers for the inbox
+     * Called when the inbox is first accessed or when thoughts are modified
+     */
+    async registerInboxNotifications(): Promise<void> {
+        try {
+            const notifiableInbox = this.createNotifiableInbox();
+            await notifiableInbox.registerNotificationTriggers();
+        } catch (error) {
+            console.error('Failed to register inbox notifications:', error);
+        }
+    }
+
+    /**
+     * Remove notification triggers for the inbox
+     * Called if user wants to disable inbox notifications
+     */
+    async removeInboxNotifications(): Promise<void> {
+        try {
+            const notifiableInbox = this.createNotifiableInbox();
+            await notifiableInbox.removeNotificationTriggers();
+        } catch (error) {
+            console.error('Failed to remove inbox notifications:', error);
         }
     }
 }
