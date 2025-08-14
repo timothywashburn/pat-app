@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { formatTimeRemaining } from '@/src/features/habits/models';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { useCountdown } from '@/src/features/habits/hooks/useCountdown';
 
 interface TimeRemainingIndicatorProps {

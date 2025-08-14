@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, TouchableOpacity, View, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/controllers/ThemeManager';
-import { useUserDataStore } from '@/src/features/settings/controllers/useUserDataStore';
+import { useTheme } from '@/src/context/ThemeContext';
+import { useUserDataStore } from '@/src/stores/useUserDataStore';
 import { Module } from '@timothyw/pat-common';
 import { useModuleContext } from './ModuleContext';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 
 interface FormTextAreaProps {
     label: string;

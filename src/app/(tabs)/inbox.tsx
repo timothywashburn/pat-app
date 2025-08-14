@@ -8,101 +8,44 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
-import ThoughtManager from '@/src/features/inbox/controllers/ThoughtManager';
+import { useThoughts } from '@/src/features/inbox/hooks/useThoughts';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
-import TaskFormView from '@/src/features/tasks/components/TaskFormView';
-import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
-import { TaskListWithTasks } from '@/src/features/tasks/models';
+import ListItemFormView from '@/src/features/lists/components/ListItemFormView';
+import { useLists } from '@/src/features/lists/hooks/useLists';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData } from "@timothyw/pat-common";
+import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
+import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const [thoughts, setThoughts] = useState<ThoughtData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    const thoughtsHook = useThoughts();
+    const { thoughts, isLoading, error } = thoughtsHook;
+    const { refreshControl } = useRefreshControl(thoughtsHook.loadThoughts, 'Failed to refresh thoughts');
     const [newThought, setNewThought] = useState('');
     const [selectedThought, setSelectedThought] = useState<ThoughtData | null>(null);
     const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
     const [editingThought, setEditingThought] = useState<ThoughtData | null>(null);
     const [editedContent, setEditedContent] = useState('');
     const [showingCreateAgendaForm, setShowingCreateAgendaForm] = useState(false);
-    const [showingCreateTaskForm, setShowingCreateTaskForm] = useState(false);
-    const [taskLists, setTaskLists] = useState<TaskListWithTasks[]>([]);
+    const [showingCreateListItemForm, setShowingCreateListItemForm] = useState(false);
+    const [showingNotificationConfig, setShowingNotificationConfig] = useState(false);
 
-    const thoughtManager = ThoughtManager.getInstance();
-    const taskManager = TaskManager.getInstance();
-
-    useEffect(() => {
-        loadThoughts();
-        loadTaskLists();
-    }, []);
-
-    // Refresh task lists when tab is focused (e.g., after creating task list in tasks tab)
-    useFocusEffect(
-        React.useCallback(() => {
-            loadTaskLists();
-        }, [])
-    );
-
-    const loadThoughts = async () => {
-        if (isRefreshing) return;
-
-        setIsLoading(true);
-
-        try {
-            await thoughtManager.loadThoughts();
-            setThoughts(thoughtManager.thoughts);
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to load thoughts';
-            errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const loadTaskLists = async () => {
-        try {
-            await taskManager.loadTaskLists();
-            setTaskLists(taskManager.taskListsWithTasks);
-        } catch (error) {
-            console.error('Failed to load task lists:', error);
-            // Don't show error toast here since this is background loading
-        }
-    };
-
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-        try {
-            await thoughtManager.loadThoughts();
-            setThoughts(thoughtManager.thoughts);
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to refresh thoughts';
-            errorToast(errorMsg);
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
+    const { listsWithItems } = useLists();
 
     const handleAddThought = async () => {
         if (newThought.trim() === '') return;
 
-        setIsLoading(true);
-
         try {
-            await thoughtManager.createThought(newThought);
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.createThought(newThought);
             setNewThought('');
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to create thought';
             errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -113,8 +56,7 @@ export const InboxPanel: React.FC = () => {
         }
 
         try {
-            await thoughtManager.updateThought(editingThought._id, editedContent);
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.updateThought(editingThought._id, editedContent);
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to update thought';
             errorToast(errorMsg);
@@ -126,8 +68,7 @@ export const InboxPanel: React.FC = () => {
 
     const handleDeleteThought = async (id: string) => {
         try {
-            await thoughtManager.deleteThought(id);
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.deleteThought(id);
             setExpandedThoughtId(null);
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to delete thought';
@@ -141,8 +82,8 @@ export const InboxPanel: React.FC = () => {
         setSelectedThought(null);
     };
 
-    const handleTaskFormDismiss = () => {
-        setShowingCreateTaskForm(false);
+    const handleListItemFormDismiss = () => {
+        setShowingCreateListItemForm(false);
         setSelectedThought(null);
     };
 
@@ -153,10 +94,8 @@ export const InboxPanel: React.FC = () => {
         }
     };
 
-    const handleTaskCreated = async () => {
+    const handleListItemCreated = async () => {
         if (selectedThought) {
-            // Reload task lists to get fresh data (this will update any TaskManager instance)
-            await loadTaskLists();
             handleDeleteThought(selectedThought._id);
             setSelectedThought(null);
         }
@@ -184,15 +123,15 @@ export const InboxPanel: React.FC = () => {
         setExpandedThoughtId(null);
     };
 
-    const handleMoveToTasks = (thought: ThoughtData) => {
-        if (taskLists.length === 0) {
-            errorToast('No task lists available. Create a task list first in the Tasks tab.');
+    const handleMoveToLists = (thought: ThoughtData) => {
+        if (listsWithItems.length === 0) {
+            errorToast('No lists available. Create a list first in the Lists tab.');
             setExpandedThoughtId(null);
             return;
         }
-        
+
         setSelectedThought(thought);
-        setShowingCreateTaskForm(true);
+        setShowingCreateListItemForm(true);
         setExpandedThoughtId(null);
     };
 
@@ -219,6 +158,8 @@ export const InboxPanel: React.FC = () => {
                 title="Inbox"
                 showAddButton={true}
                 onAddTapped={() => setShowingCreateAgendaForm(true)}
+                showNotificationsButton={true}
+                onNotificationsTapped={() => setShowingNotificationConfig(true)}
             />
 
             <View className="flex-row p-4 py-2 items-center">
@@ -271,7 +212,7 @@ export const InboxPanel: React.FC = () => {
                                 onChangeEditContent={setEditedContent}
                                 onCommitEdit={handleEditThought}
                                 onMoveToAgenda={() => handleMoveToAgenda(item)}
-                                onMoveToTasks={() => handleMoveToTasks(item)}
+                                onMoveToLists={() => handleMoveToLists(item)}
                                 onEdit={() => handleStartEdit(item)}
                                 onDelete={() => handleConfirmDelete(item)}
                             />
@@ -279,14 +220,7 @@ export const InboxPanel: React.FC = () => {
                     )}
                     keyExtractor={item => item._id}
                     contentContainerClassName="px-4 pt-3"
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefreshing}
-                            onRefresh={handleRefresh}
-                            colors={[getColor("primary")]}
-                            tintColor={getColor("primary")}
-                        />
-                    }
+                    refreshControl={refreshControl}
                 />
             )}
 
@@ -298,14 +232,22 @@ export const InboxPanel: React.FC = () => {
                 isEditMode={false}
             />
 
-            {showingCreateTaskForm && (
-                <TaskFormView
-                    isPresented={showingCreateTaskForm}
-                    onDismiss={handleTaskFormDismiss}
-                    onTaskSaved={handleTaskCreated}
-                    taskLists={taskLists}
+            {showingCreateListItemForm && (
+                <ListItemFormView
+                    isPresented={showingCreateListItemForm}
+                    onDismiss={handleListItemFormDismiss}
+                    onListItemSaved={handleListItemCreated}
+                    Lists={listsWithItems}
                     initialName={selectedThought?.content || ''}
                     isEditMode={false}
+                />
+            )}
+
+            {showingNotificationConfig && (
+                <NotificationConfigView
+                    entityType="inbox"
+                    entityName="Inbox"
+                    onClose={() => setShowingNotificationConfig(false)}
                 />
             )}
         </>

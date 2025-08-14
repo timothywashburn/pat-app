@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextInput, View, TouchableOpacity } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { ThoughtData } from "@timothyw/pat-common";
 
@@ -12,7 +12,7 @@ interface ThoughtViewProps {
     onChangeEditContent: (content: string) => void;
     onCommitEdit: () => void;
     onMoveToAgenda: () => void;
-    onMoveToTasks: () => void;
+    onMoveToLists: () => void;
     onEdit: () => void;
     onDelete: () => void;
 }
@@ -25,7 +25,7 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
     onChangeEditContent,
     onCommitEdit,
     onMoveToAgenda,
-    onMoveToTasks,
+    onMoveToLists,
     onEdit,
     onDelete
 }) => {
@@ -67,10 +67,10 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
 
                         <TouchableOpacity
                             className={`flex-1 py-3 flex-row items-center justify-center ${isEditing ? 'opacity-40' : ''}`}
-                            onPress={onMoveToTasks}
+                            onPress={onMoveToLists}
                             disabled={isEditing}
                         >
-                            <Text className="text-primary mr-2 font-medium">To Tasks</Text>
+                            <Text className="text-primary mr-2 font-medium">To Lists</Text>
                             <Ionicons name="checkbox-outline" size={16} color={getColor("primary")} />
                         </TouchableOpacity>
                     </View>

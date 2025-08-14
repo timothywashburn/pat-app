@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
-import PatConfig from '@/src/controllers/PatConfig';
-import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
+import PatConfig from '@/src/misc/PatConfig';
+import { useAuthStore } from '@/src/stores/useAuthStore';
 import {
     ClientVerifyEmailResponseData,
     ServerHeartbeatData,
@@ -9,7 +9,7 @@ import {
     SocketMessageType,
     UserId
 } from "@timothyw/pat-common";
-import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 
 class SocketService {
     private static instance: SocketService;

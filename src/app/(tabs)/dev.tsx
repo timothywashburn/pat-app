@@ -18,7 +18,7 @@ export const DevPanel: React.FC = () => {
                 title="Dev"
                 showAddButton
                 onAddTapped={() => {
-                    console.log('add task tapped')
+                    console.log('dev tapped')
                 }}
             />
 

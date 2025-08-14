@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/controllers/ThemeManager';
-import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
+import { useTheme } from '@/src/context/ThemeContext';
+import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 import { Habit } from "@timothyw/pat-common";
 import { isToday, isYesterday, toDateOnlyString } from '@/src/features/habits/models';
@@ -23,7 +23,7 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
 }) => {
     const { errorToast } = useToast();
     const { getColor } = useTheme();
-    const habitManager = HabitManager.getInstance();
+    const habitManager = useHabits();
 
     const targetDateOnlyString = toDateOnlyString(targetDate);
     const currentEntry = habit.entries.find(entry => entry.date === targetDateOnlyString);

@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, ScrollView } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import CustomHeader from '@/src/components/CustomHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
-import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
+import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import HabitCard from '@/src/features/habits/components/HabitCard';
 import HabitFormView from '@/src/features/habits/components/HabitFormView';
 import HabitDetailView from '@/src/features/habits/components/HabitDetailView';
 import { getActiveHabitDate, toDateOnlyString } from '@/src/features/habits/models';
+import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const HabitsPanel: React.FC = () => {
-    const [habits, setHabits] = useState<Habit[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const habitsHook = useHabits();
+    const { habits, isLoading, error } = habitsHook;
+    const { refreshControl } = useRefreshControl(habitsHook.loadHabits, 'Failed to refresh habits');
     const [showUnmarkedOnly, setShowUnmarkedOnly] = useState(false);
     // State for the create/edit form
     const [showingCreateForm, setShowingCreateForm] = useState(false);
@@ -20,23 +22,6 @@ export const HabitsPanel: React.FC = () => {
     const [showHabitDetail, setShowHabitDetail] = useState(false);
     const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
     const [editFromDetailView, setEditFromDetailView] = useState(false);
-
-    useEffect(() => {
-        loadHabits();
-    }, []);
-
-    const loadHabits = async () => {
-        try {
-            setIsLoading(true);
-            const manager = HabitManager.getInstance();
-            await manager.loadHabits();
-            setHabits(manager.habits);
-        } catch (error) {
-            console.error('Failed to load habits:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleAddHabit = () => {
         setShowingCreateForm(true);
@@ -61,10 +46,6 @@ export const HabitsPanel: React.FC = () => {
         setEditFromDetailView(true);
     };
 
-    const handleHabitSaved = () => {
-        loadHabits(); // Reload habits after save/delete
-    };
-
     const handleFormDismiss = () => {
         setShowingCreateForm(false);
         setShowingEditForm(false);
@@ -77,8 +58,6 @@ export const HabitsPanel: React.FC = () => {
             // Clear selected habit and return to list if this was a create form
             setEditingHabit(null);
         }
-        
-        loadHabits();
     };
 
     const handleCloseDetail = () => {
@@ -88,14 +67,11 @@ export const HabitsPanel: React.FC = () => {
 
     const handleHabitUpdated = async () => {
         try {
-            const manager = HabitManager.getInstance();
-            await manager.loadHabits();
-            const updatedHabits = manager.habits;
-            setHabits(updatedHabits);
+            await habitsHook.loadHabits();
             
             // If we have a selected habit, update it with fresh data
             if (selectedHabit) {
-                const updatedSelectedHabit = updatedHabits.find(h => h._id === selectedHabit._id);
+                const updatedSelectedHabit = habitsHook.getHabitById(selectedHabit._id);
                 if (updatedSelectedHabit) {
                     setSelectedHabit(updatedSelectedHabit);
                 }
@@ -132,8 +108,11 @@ export const HabitsPanel: React.FC = () => {
                 onFilterTapped={() => setShowUnmarkedOnly(!showUnmarkedOnly)}
             />
 
-            <ScrollView className="flex-1 p-5">
-                {isLoading ? (
+            <ScrollView 
+                className="flex-1 p-5"
+                refreshControl={refreshControl}
+            >
+                {isLoading && habits.length === 0 ? (
                     <View className="flex-1 items-center justify-center">
                         <Text className="text-on-background-variant">Loading habits...</Text>
                     </View>
@@ -174,7 +153,7 @@ export const HabitsPanel: React.FC = () => {
             <HabitFormView
                 isPresented={showingCreateForm}
                 onDismiss={handleFormDismiss}
-                onHabitSaved={handleHabitSaved}
+                onHabitSaved={() => {}}
             />
 
             {/* Edit habit view */}
@@ -182,7 +161,7 @@ export const HabitsPanel: React.FC = () => {
                 <HabitFormView
                     isPresented={showingEditForm}
                     onDismiss={handleFormDismiss}
-                    onHabitSaved={handleHabitSaved}
+                    onHabitSaved={() => {}}
                     existingHabit={editingHabit}
                     isEditMode={true}
                 />

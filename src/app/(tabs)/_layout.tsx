@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { ActivityIndicator, Platform, Text, View, TouchableOpacity } from 'react-native';
 import {
     UserDataStoreStatus,
     useUserDataStore
-} from "@/src/features/settings/controllers/useUserDataStore";
+} from "@/src/stores/useUserDataStore";
 import WebHeader from '@/src/components/WebHeader';
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { ModuleType } from "@timothyw/pat-common";
-import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
+import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
 import { useModuleContext } from "@/src/components/ModuleContext";
 import { moduleInfo } from "@/src/components/ModuleInfo";
 import { SafeAreaView } from "react-native-safe-area-context";

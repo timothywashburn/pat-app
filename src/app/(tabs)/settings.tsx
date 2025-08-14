@@ -3,9 +3,9 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
-import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
+import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
-import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { Module, ModuleType } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 

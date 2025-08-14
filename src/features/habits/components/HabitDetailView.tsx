@@ -4,14 +4,14 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import {
     getActiveHabitDate,
     getPreviousHabitDate,
     fromDateOnlyString
 } from '@/src/features/habits/models';
-import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
+import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import HabitCalendarGrid from './HabitCalendarGrid';
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
@@ -34,7 +34,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
     onHabitUpdated,
 }) => {
     const { getColor } = useTheme();
-    const habitManager = HabitManager.getInstance();
+    const habitManager = useHabits();
     const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
 
     if (!isPresented || !habit) {

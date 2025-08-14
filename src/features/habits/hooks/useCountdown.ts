@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getTimeRemainingUntilRollover, TimeRemaining } from '@/src/features/habits/models';
-import { useAppFocus } from '../../../hooks/useAppFocus';
+import { useAppFocus } from '@/src/hooks/useAppFocus';
 
 export const useCountdown = (rolloverTime: string): TimeRemaining => {
     const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(() => 

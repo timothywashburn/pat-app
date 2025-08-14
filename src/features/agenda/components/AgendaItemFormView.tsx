@@ -10,13 +10,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
-import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
+import { useAgenda } from "@/src/features/agenda/hooks/useAgenda";
 import WebDateTimePicker from './WebDateTimePicker';
-import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { CreateItemRequest, ItemData, UpdateItemRequest } from "@timothyw/pat-common";
 
 interface AgendaItemFormViewProps {
@@ -62,7 +62,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const categories = data.config.agenda.itemCategories;
     const types = data.config.agenda.itemTypes;
 
-    const agendaManager = AgendaManager.getInstance();
+    const agendaHook = useAgenda();
 
     if (!isPresented) {
         return null;
@@ -88,7 +88,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     type: type || null,
                 };
 
-                await agendaManager.updateAgendaItem(existingItem._id, itemData);
+                await agendaHook.updateAgendaItem(existingItem._id, itemData);
             } else {
                 const itemData: CreateItemRequest = {
                     name: name.trim(),
@@ -99,7 +99,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     type: type,
                 };
 
-                await agendaManager.createAgendaItem(itemData);
+                await agendaHook.createAgendaItem(itemData);
             }
 
             if (!isEditMode) {
@@ -127,7 +127,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await agendaManager.deleteAgendaItem(existingItem._id);
+            await agendaHook.deleteAgendaItem(existingItem._id);
             onItemSaved?.();
             onDismiss();
         } catch (error) {

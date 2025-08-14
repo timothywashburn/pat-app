@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import DevPanelSection from './DevPanelSection';
 import { UpdateUserRequest } from '@timothyw/pat-common';
-import { DataState } from "@/src/features/settings/controllers/useUserDataStore";
+import { DataState } from "@/src/stores/useUserDataStore";
 
 const DevicesSection = () => {
     const { getColor } = useTheme();
