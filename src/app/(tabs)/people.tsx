@@ -11,13 +11,13 @@ import PersonFormView from "@/src/features/people/components/PersonFormView";
 import PersonDetailView from "@/src/features/people/components/PersonDetailView";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, Person } from "@timothyw/pat-common";
+import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const PeoplePanel: React.FC = () => {
     const { getColor } = useTheme();
-    const { errorToast } = useToast();
     const peopleHook = usePeople();
     const { people, isLoading, error } = peopleHook;
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { refreshControl } = useRefreshControl(peopleHook.loadPeople, 'Failed to refresh people');
 
     // State for the create/edit form
     const [showingCreateForm, setShowingCreateForm] = useState(false);
@@ -26,43 +26,6 @@ export const PeoplePanel: React.FC = () => {
     // State for detail view
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
     const [showingDetailView, setShowingDetailView] = useState(false);
-
-    const personManager = peopleHook;
-
-    useEffect(() => {
-        loadPeople();
-    }, []);
-
-    const loadPeople = async () => {
-        if (isRefreshing) return;
-
-
-        try {
-            await peopleHook.loadPeople();
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to load people';
-            errorToast(errorMsg);
-        }
-    };
-
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-
-        try {
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        } catch (error) {
-            console.log('haptics not available:', error);
-        }
-
-        try {
-            await peopleHook.loadPeople();
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to refresh people';
-            errorToast(errorMsg);
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
 
     const handleAddPerson = () => {
         setShowingCreateForm(true);
@@ -87,12 +50,11 @@ export const PeoplePanel: React.FC = () => {
         setShowingCreateForm(false);
         setShowingEditForm(false);
         setSelectedPerson(null);
-        loadPeople();
     };
 
     const handleEditCancel = () => {
         setShowingEditForm(false);
-        setShowingDetailView(true); // Go back to detail view instead of list
+        setShowingDetailView(true);
     };
 
     return (
@@ -135,14 +97,7 @@ export const PeoplePanel: React.FC = () => {
                     )}
                     keyExtractor={item => item._id}
                     contentContainerStyle={{ padding: 16 }}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefreshing}
-                            onRefresh={handleRefresh}
-                            colors={[getColor("primary")]}
-                            tintColor={getColor("primary")}
-                        />
-                    }
+                    refreshControl={refreshControl}
                 />
             )}
 
@@ -150,7 +105,7 @@ export const PeoplePanel: React.FC = () => {
             <PersonFormView
                 isPresented={showingCreateForm}
                 onDismiss={handleFormDismiss}
-                onPersonSaved={loadPeople}
+                onPersonSaved={() => {}}
             />
 
             {/* Edit person view */}
@@ -159,7 +114,7 @@ export const PeoplePanel: React.FC = () => {
                     isPresented={showingEditForm}
                     onDismiss={handleFormDismiss}
                     onCancel={handleEditCancel}
-                    onPersonSaved={loadPeople}
+                    onPersonSaved={() => {}}
                     existingPerson={selectedPerson}
                     isEditMode={true}
                 />

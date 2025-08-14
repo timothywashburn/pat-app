@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
@@ -146,7 +146,6 @@ export function useHabits() {
             status
         };
 
-        console.log(body.date);
 
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -187,6 +186,12 @@ export function useHabits() {
         if (!habit) return undefined;
         return habit.entries.find(e => e.date === date);
     }, [getHabitById]);
+
+    useEffect(() => {
+        loadHabits().catch(error => {
+            console.error('Failed to load habits on mount:', error);
+        });
+    }, []);
 
     return {
         ...state,

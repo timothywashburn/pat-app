@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
-import { useThoughts, useInboxNotifications } from '@/src/features/inbox/hooks/useThoughts';
+import { useThoughts } from '@/src/features/inbox/hooks/useThoughts';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import ListItemFormView from '@/src/features/lists/components/ListItemFormView';
@@ -18,13 +18,14 @@ import { useLists } from '@/src/features/lists/hooks/useLists';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData } from "@timothyw/pat-common";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
+import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const thoughtsHook = useThoughts();
     const { thoughts, isLoading, error } = thoughtsHook;
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { refreshControl } = useRefreshControl(thoughtsHook.loadThoughts, 'Failed to refresh thoughts');
     const [newThought, setNewThought] = useState('');
     const [selectedThought, setSelectedThought] = useState<ThoughtData | null>(null);
     const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
@@ -34,39 +35,7 @@ export const InboxPanel: React.FC = () => {
     const [showingCreateListItemForm, setShowingCreateListItemForm] = useState(false);
     const [showingNotificationConfig, setShowingNotificationConfig] = useState(false);
 
-    const inboxNotifications = useInboxNotifications(thoughts);
-
     const { listsWithItems } = useLists();
-
-    useEffect(() => {
-        loadThoughts();
-    }, []);
-
-    const loadThoughts = async () => {
-        if (isRefreshing) return;
-
-        try {
-            await thoughtsHook.loadThoughts();
-
-            // Register inbox notifications when thoughts are loaded
-            await inboxNotifications.registerInboxNotifications();
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to load thoughts';
-            errorToast(errorMsg);
-        }
-    };
-
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-        try {
-            await thoughtsHook.loadThoughts();
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Failed to refresh thoughts';
-            errorToast(errorMsg);
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
 
     const handleAddThought = async () => {
         if (newThought.trim() === '') return;
@@ -127,7 +96,6 @@ export const InboxPanel: React.FC = () => {
 
     const handleListItemCreated = async () => {
         if (selectedThought) {
-            // await loadTaskLists(); // TODO: I'm not sure if there needs to be a refresh call (I switched the ownership of the lists from this component to the hook)
             handleDeleteThought(selectedThought._id);
             setSelectedThought(null);
         }
@@ -252,14 +220,7 @@ export const InboxPanel: React.FC = () => {
                     )}
                     keyExtractor={item => item._id}
                     contentContainerClassName="px-4 pt-3"
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefreshing}
-                            onRefresh={handleRefresh}
-                            colors={[getColor("primary")]}
-                            tintColor={getColor("primary")}
-                        />
-                    }
+                    refreshControl={refreshControl}
                 />
             )}
 

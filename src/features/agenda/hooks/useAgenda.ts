@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
@@ -133,6 +133,12 @@ export function useAgenda() {
         }, { errorMessage: 'Failed to delete agenda item' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
 
+    useEffect(() => {
+        loadAgendaItems().catch(error => {
+            console.error('Failed to load agenda items on mount:', error);
+        });
+    }, []);
+
     return {
         ...state,
         loadAgendaItems,
@@ -140,65 +146,5 @@ export function useAgenda() {
         updateAgendaItem,
         setCompleted,
         deleteAgendaItem,
-    };
-}
-
-/**
- * Hook for managing notifications for an agenda item
- */
-export function useAgendaItemNotifications(item: ItemData) {
-    const { data: userData } = useUserDataStore();
-    
-    return useNotifiableEntity({
-        id: item._id,
-        entityType: 'agenda_item',
-        entityData: item,
-        userId: userData?._id || '',
-    });
-}
-
-/**
- * Hook for registering and removing notifications for agenda items
- */
-export function useAgendaNotifications() {
-    const { data: userData } = useUserDataStore();
-
-    /**
-     * Register notification triggers for an agenda item
-     */
-    const registerItemNotifications = useCallback(async (item: ItemData): Promise<void> => {
-        if (!userData?._id) return;
-
-        try {
-            // Note: We can't use useNotifiableEntity here directly due to hooks rules
-            // Instead, we'll call the notification service directly
-            console.log(`Registering notifications for agenda item ${item._id}`);
-            
-            // This should trigger server-side notification setup
-            // The actual notification registration happens server-side when the item is created/updated
-        } catch (error) {
-            console.error('Failed to register item notifications:', error);
-        }
-    }, [userData]);
-
-    /**
-     * Remove notification triggers for an agenda item
-     */
-    const removeItemNotifications = useCallback(async (itemId: string): Promise<void> => {
-        if (!userData?._id) return;
-
-        try {
-            console.log(`Removing notifications for agenda item ${itemId}`);
-            
-            // This should trigger server-side notification cleanup
-            // The actual notification removal happens server-side when the item is deleted
-        } catch (error) {
-            console.error('Failed to remove item notifications:', error);
-        }
-    }, [userData]);
-
-    return {
-        registerItemNotifications,
-        removeItemNotifications,
     };
 }

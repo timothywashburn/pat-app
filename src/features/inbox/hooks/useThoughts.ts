@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
@@ -108,60 +108,17 @@ export function useThoughts() {
         }, { errorMessage: 'Failed to delete thought' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadThoughts]);
 
+    useEffect(() => {
+        loadThoughts().catch(error => {
+            console.error('Failed to load thoughts on mount:', error);
+        });
+    }, []);
+
     return {
         ...state,
         loadThoughts,
         createThought,
         updateThought,
         deleteThought,
-    };
-}
-
-/**
- * Hook for managing notifications for the inbox
- * The inbox is treated as a single entity - individual thoughts are not notifiable
- */
-export function useInboxNotifications(thoughts: ThoughtData[] = []) {
-    const { data: userData } = useUserDataStore();
-    
-    const inboxNotifiable = useNotifiableEntity({
-        id: 'inbox', // Fixed ID since there's only one inbox per user
-        entityType: 'inbox',
-        entityData: { thoughts },
-        userId: userData?._id || '',
-    });
-
-    /**
-     * Register notification triggers for the inbox
-     * Called when the inbox is first accessed or when thoughts are modified
-     */
-    const registerInboxNotifications = useCallback(async (): Promise<void> => {
-        if (!userData?._id) return;
-
-        try {
-            await inboxNotifiable.registerNotificationTriggers();
-        } catch (error) {
-            console.error('Failed to register inbox notifications:', error);
-        }
-    }, [userData, inboxNotifiable]);
-
-    /**
-     * Remove notification triggers for the inbox
-     * Called if user wants to disable inbox notifications
-     */
-    const removeInboxNotifications = useCallback(async (): Promise<void> => {
-        if (!userData?._id) return;
-
-        try {
-            await inboxNotifiable.removeNotificationTriggers();
-        } catch (error) {
-            console.error('Failed to remove inbox notifications:', error);
-        }
-    }, [userData, inboxNotifiable]);
-
-    return {
-        registerInboxNotifications,
-        removeInboxNotifications,
-        ...inboxNotifiable,
     };
 }

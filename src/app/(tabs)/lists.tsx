@@ -14,13 +14,14 @@ import ListItemDetailView from '@/src/features/lists/components/ListItemDetailVi
 import ListItemFormView from '@/src/features/lists/components/ListItemFormView';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ListWithItems } from "@/src/features/lists/models";
+import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const ListsPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const listsHook = useLists();
     const { listsWithItems: lists, isLoading, error } = listsHook;
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { isRefreshing, refreshControl } = useRefreshControl(listsHook.loadLists, 'Failed to refresh lists');
     const [showCompleted, setShowCompleted] = useState(false);
 
     // State for detail views
@@ -34,45 +35,17 @@ export const ListsPanel: React.FC = () => {
     const [showingCreateListItem, setShowingCreateListItem] = useState(false);
     const [selectedListForNewItem, setSelectedListForNewItem] = useState<ListId | null>(null);
 
-    useEffect(() => {
-        loadLists();
-    }, []);
-
     useFocusEffect(
         React.useCallback(() => {
-            loadLists();
-        }, [])
+            if (isRefreshing) return;
+
+            listsHook.loadLists().catch(err => {
+                const errorMsg = err instanceof Error ? err.message : 'Failed to load lists';
+                errorToast(errorMsg);
+            });
+        }, [isRefreshing])
     );
 
-    const loadLists = async () => {
-        if (isRefreshing) return;
-
-        try {
-            await listsHook.loadLists();
-        } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : 'Failed to load lists';
-            errorToast(errorMsg);
-        }
-    };
-
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-
-        try {
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        } catch (err) {
-            console.log('haptics not available:', err);
-        }
-
-        try {
-            await listsHook.loadLists();
-        } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : 'Failed to refresh lists';
-            errorToast(errorMsg);
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
 
     const handleAddList = () => {
         setShowingCreateList(true);
@@ -104,7 +77,6 @@ export const ListsPanel: React.FC = () => {
     };
 
     const handleListItemUpdated = () => {
-        loadLists();
         handleListItemDetailDismiss();
     };
 
@@ -115,11 +87,10 @@ export const ListsPanel: React.FC = () => {
 
     const handleListItemEditCancel = () => {
         setShowingListItemEdit(false);
-        setShowingListItemDetail(true); // Go back to detail view instead of list
+        setShowingListItemDetail(true);
     };
 
     const handleListItemSaved = () => {
-        loadLists();
         setSelectedListItem(null);
         setShowingListItemEdit(false);
         setShowingCreateListItem(false);
@@ -141,7 +112,6 @@ export const ListsPanel: React.FC = () => {
     };
 
     const handleListUpdated = () => {
-        loadLists();
         handleListDetailDismiss();
     };
 
@@ -153,11 +123,10 @@ export const ListsPanel: React.FC = () => {
 
     const handleListEditCancel = () => {
         setShowingListEdit(false);
-        setShowingListDetail(true); // Go back to detail view instead of list
+        setShowingListDetail(true);
     };
 
     const handleListSaved = () => {
-        loadLists();
         setSelectedList(null);
         setShowingListEdit(false);
         setShowingCreateList(false);
@@ -210,14 +179,7 @@ export const ListsPanel: React.FC = () => {
                     )}
                     keyExtractor={item => item._id}
                     contentContainerStyle={{ padding: 16 }}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefreshing}
-                            onRefresh={handleRefresh}
-                            colors={[getColor("primary")]}
-                            tintColor={getColor("primary")}
-                        />
-                    }
+                    refreshControl={refreshControl}
                 />
             )}
 
@@ -250,7 +212,7 @@ export const ListsPanel: React.FC = () => {
             )}
 
             {selectedListItem && (() => {
-                const list = lists.find(tl => tl._id === selectedListItem.taskListId);
+                const list = lists.find(tl => tl._id === selectedListItem.listId);
                 return list ? (
                     <ListItemDetailView
                         listItem={selectedListItem}

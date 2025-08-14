@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
@@ -44,7 +44,7 @@ export function useLists() {
     const updateListsWithItems = useCallback((lists: ListData[], items: ListItemData[]) => {
         const listsWithItems = lists.map(list => ({
             ...list,
-            items: items.filter(item => item.taskListId === list._id),
+            items: items.filter(item => item.listId === list._id),
         }));
 
         setState(prev => ({
@@ -263,6 +263,12 @@ export function useLists() {
             setLoading(false);
         }, { errorMessage: 'Failed to delete list item' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadListItems]);
+
+    useEffect(() => {
+        loadLists().catch(error => {
+            console.error('Failed to load lists on mount:', error);
+        });
+    }, []);
 
     return {
         ...state,

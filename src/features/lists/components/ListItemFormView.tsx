@@ -41,7 +41,7 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
     const [name, setName] = useState(existingListItem?.name || initialName);
     const [notes, setNotes] = useState(existingListItem?.notes || '');
     const [selectedListId, setSelectedListId] = useState<ListId>(() => {
-        if (existingListItem?.taskListId) return existingListItem.taskListId;
+        if (existingListItem?.listId) return existingListItem.listId;
         if (defaultListId) return defaultListId;
         return Lists[0]?._id!;
     });
@@ -119,7 +119,7 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
         if (isEditMode && existingListItem) {
             setName(existingListItem.name);
             setNotes(existingListItem.notes || '');
-            setSelectedListId(existingListItem.taskListId);
+            setSelectedListId(existingListItem.listId);
         } else {
             setName(initialName);
             setNotes('');

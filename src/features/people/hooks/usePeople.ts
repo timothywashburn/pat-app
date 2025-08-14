@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
@@ -157,6 +157,12 @@ export function usePeople() {
             setLoading(false);
         }, { errorMessage: 'Failed to delete person' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadPeople]);
+
+    useEffect(() => {
+        loadPeople().catch(error => {
+            console.error('Failed to load people on mount:', error);
+        });
+    }, []);
 
     return {
         ...state,

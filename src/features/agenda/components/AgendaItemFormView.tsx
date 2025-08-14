@@ -14,7 +14,7 @@ import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
-import { useAgenda, useAgendaNotifications } from "@/src/features/agenda/hooks/useAgenda";
+import { useAgenda } from "@/src/features/agenda/hooks/useAgenda";
 import WebDateTimePicker from './WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { CreateItemRequest, ItemData, UpdateItemRequest } from "@timothyw/pat-common";
@@ -63,7 +63,6 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const types = data.config.agenda.itemTypes;
 
     const agendaHook = useAgenda();
-    const agendaNotifications = useAgendaNotifications();
 
     if (!isPresented) {
         return null;
@@ -100,10 +99,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     type: type,
                 };
 
-                const newItem = await agendaHook.createAgendaItem(itemData);
-                
-                // Register notifications for the new item
-                await agendaNotifications.registerItemNotifications(newItem);
+                await agendaHook.createAgendaItem(itemData);
             }
 
             if (!isEditMode) {
@@ -131,9 +127,6 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            // Remove notifications before deleting
-            await agendaNotifications.removeItemNotifications(existingItem._id);
-            
             await agendaHook.deleteAgendaItem(existingItem._id);
             onItemSaved?.();
             onDismiss();

@@ -7,20 +7,19 @@ import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
-import { useAgenda, useAgendaNotifications } from "@/src/features/agenda/hooks/useAgenda";
+import { useAgenda } from "@/src/features/agenda/hooks/useAgenda";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ItemData, ModuleType } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
+import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
-    const { errorToast } = useToast();
     const { width } = useWindowDimensions();
     const agendaHook = useAgenda();
     const { agendaItems, isLoading, error } = agendaHook;
-    const agendaNotifications = useAgendaNotifications();
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { refreshControl } = useRefreshControl(agendaHook.loadAgendaItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);
 
     // State for the create/edit form
@@ -35,40 +34,6 @@ export const AgendaPanel: React.FC = () => {
     const [showingNotifications, setShowingNotifications] = useState(false);
 
     const isTableView = width >= 768;
-
-    useEffect(() => {
-        loadItems();
-    }, []);
-
-    const loadItems = async () => {
-        if (isRefreshing) return;
-
-        try {
-            await agendaHook.loadAgendaItems();
-        } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : 'Failed to load items';
-            errorToast(errorMsg);
-        }
-    };
-
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-
-        try {
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        } catch (err) {
-            console.log('haptics not available:', err);
-        }
-
-        try {
-            await agendaHook.loadAgendaItems();
-        } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : 'Failed to refresh items';
-            errorToast(errorMsg);
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
 
     const handleAddItem = () => {
         setShowingCreateForm(true);
@@ -90,8 +55,6 @@ export const AgendaPanel: React.FC = () => {
     };
 
     const handleFormDismiss = async () => {
-        await loadItems();
-        
         setShowingCreateForm(false);
         setShowingEditForm(false);
         setSelectedItem(null);
@@ -103,7 +66,6 @@ export const AgendaPanel: React.FC = () => {
     };
 
     const handleItemUpdated = () => {
-        loadItems();
         handleDetailDismiss();
     };
 
@@ -192,14 +154,7 @@ export const AgendaPanel: React.FC = () => {
                         )
                     )}
                     keyExtractor={item => item.key}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefreshing}
-                            onRefresh={handleRefresh}
-                            colors={[getColor("primary")]}
-                            tintColor={getColor("primary")}
-                        />
-                    }
+                    refreshControl={refreshControl}
                 />
             )}
 
@@ -207,7 +162,7 @@ export const AgendaPanel: React.FC = () => {
             <AgendaItemFormView
                 isPresented={showingCreateForm}
                 onDismiss={handleFormDismiss}
-                onItemSaved={loadItems}
+                onItemSaved={() => {}}
             />
 
             {/* Edit item view */}
@@ -216,7 +171,7 @@ export const AgendaPanel: React.FC = () => {
                     isPresented={showingEditForm}
                     onDismiss={handleFormDismiss}
                     onCancel={handleEditCancel}
-                    onItemSaved={loadItems}
+                    onItemSaved={() => {}}
                     existingItem={selectedItem}
                     isEditMode={true}
                 />
