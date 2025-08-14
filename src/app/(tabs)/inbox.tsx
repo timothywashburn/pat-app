@@ -11,11 +11,11 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
-import ThoughtManager from '@/src/features/inbox/controllers/ThoughtManager';
+import { useThoughts, useInboxNotifications } from '@/src/hooks/useThoughts';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import TaskFormView from '@/src/features/tasks/components/TaskFormView';
-import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
+import { useTasks } from '@/src/hooks/useTasks';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData } from "@timothyw/pat-common";
@@ -24,8 +24,8 @@ import { NotificationConfigView } from '@/src/features/notifications/components/
 export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const [thoughts, setThoughts] = useState<ThoughtData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const thoughtsHook = useThoughts();
+    const { thoughts, isLoading, error } = thoughtsHook;
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [newThought, setNewThought] = useState('');
     const [selectedThought, setSelectedThought] = useState<ThoughtData | null>(null);
@@ -37,8 +37,8 @@ export const InboxPanel: React.FC = () => {
     const [taskLists, setTaskLists] = useState<TaskListWithTasks[]>([]);
     const [showingNotificationConfig, setShowingNotificationConfig] = useState(false);
 
-    const thoughtManager = ThoughtManager.getInstance();
-    const taskManager = TaskManager.getInstance();
+    const inboxNotifications = useInboxNotifications(thoughts);
+    const tasksHook = useTasks();
 
     useEffect(() => {
         loadThoughts();
@@ -55,26 +55,21 @@ export const InboxPanel: React.FC = () => {
     const loadThoughts = async () => {
         if (isRefreshing) return;
 
-        setIsLoading(true);
-
         try {
-            await thoughtManager.loadThoughts();
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.loadThoughts();
             
             // Register inbox notifications when thoughts are loaded
-            await thoughtManager.registerInboxNotifications();
+            await inboxNotifications.registerInboxNotifications();
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to load thoughts';
             errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const loadTaskLists = async () => {
         try {
-            await taskManager.loadTaskLists();
-            setTaskLists(taskManager.taskListsWithTasks);
+            await tasksHook.loadTaskLists();
+            setTaskLists(tasksHook.taskListsWithTasks);
         } catch (error) {
             console.error('Failed to load task lists:', error);
             // Don't show error toast here since this is background loading
@@ -84,8 +79,7 @@ export const InboxPanel: React.FC = () => {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         try {
-            await thoughtManager.loadThoughts();
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.loadThoughts();
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to refresh thoughts';
             errorToast(errorMsg);
@@ -97,17 +91,12 @@ export const InboxPanel: React.FC = () => {
     const handleAddThought = async () => {
         if (newThought.trim() === '') return;
 
-        setIsLoading(true);
-
         try {
-            await thoughtManager.createThought(newThought);
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.createThought(newThought);
             setNewThought('');
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to create thought';
             errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -118,8 +107,7 @@ export const InboxPanel: React.FC = () => {
         }
 
         try {
-            await thoughtManager.updateThought(editingThought._id, editedContent);
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.updateThought(editingThought._id, editedContent);
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to update thought';
             errorToast(errorMsg);
@@ -131,8 +119,7 @@ export const InboxPanel: React.FC = () => {
 
     const handleDeleteThought = async (id: string) => {
         try {
-            await thoughtManager.deleteThought(id);
-            setThoughts(thoughtManager.thoughts);
+            await thoughtsHook.deleteThought(id);
             setExpandedThoughtId(null);
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to delete thought';

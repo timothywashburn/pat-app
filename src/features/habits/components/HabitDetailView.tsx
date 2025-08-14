@@ -11,7 +11,7 @@ import {
     getPreviousHabitDate,
     fromDateOnlyString
 } from '@/src/features/habits/models';
-import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
+import { useHabits } from '@/src/hooks/useHabits';
 import HabitCalendarGrid from './HabitCalendarGrid';
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
@@ -34,7 +34,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
     onHabitUpdated,
 }) => {
     const { getColor } = useTheme();
-    const habitManager = HabitManager.getInstance();
+    const habitManager = useHabits();
     const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
 
     if (!isPresented || !habit) {

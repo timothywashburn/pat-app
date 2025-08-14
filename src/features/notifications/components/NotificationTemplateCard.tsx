@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { NotificationTemplateData } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Ionicons } from '@expo/vector-icons';
-import NotificationService from '@/src/services/NotificationService';
+import { useNotifications } from '@/src/hooks/useNotifications';
 
 interface NotificationTemplateCardProps {
     template: NotificationTemplateData;
@@ -22,7 +22,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
 }) => {
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = useState(false);
-    const notificationService = NotificationService.getInstance();
+    const notifications = useNotifications();
 
 
     const handleDelete = () => {

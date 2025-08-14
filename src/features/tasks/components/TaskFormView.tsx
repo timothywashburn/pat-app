@@ -13,7 +13,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
-import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
+import { useTasks } from '@/src/hooks/useTasks';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { TaskData, TaskListId } from "@timothyw/pat-common";
 
@@ -54,7 +54,7 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const taskManager = TaskManager.getInstance();
+    const tasksHook = useTasks();
 
     if (!isPresented) {
         return null;
@@ -82,9 +82,9 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
             };
 
             if (isEditMode && existingTask) {
-                await taskManager.updateTask(existingTask._id, taskData);
+                await tasksHook.updateTask(existingTask._id, taskData);
             } else {
-                await taskManager.createTask({
+                await tasksHook.createTask({
                     name: name.trim(),
                     notes: notes.trim() || undefined,
                     taskListId: selectedTaskListId,
@@ -112,7 +112,7 @@ const TaskFormView: React.FC<TaskFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await taskManager.deleteTask(existingTask._id);
+            await tasksHook.deleteTask(existingTask._id);
             onTaskSaved?.();
             onDismiss();
         } catch (error) {

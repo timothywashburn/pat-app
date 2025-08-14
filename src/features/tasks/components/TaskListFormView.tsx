@@ -9,7 +9,7 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormSection from '@/src/components/common/FormSection';
-import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
+import { useTasks } from '@/src/hooks/useTasks';
 import { TaskList } from '@/src/features/tasks/models';
 
 interface TaskListFormViewProps {
@@ -35,7 +35,7 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const taskManager = TaskManager.getInstance();
+    const tasksHook = useTasks();
 
     if (!isPresented) {
         return null;
@@ -52,11 +52,11 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
 
         try {
             if (isEditMode && existingTaskList) {
-                await taskManager.updateTaskList(existingTaskList._id, {
+                await tasksHook.updateTaskList(existingTaskList._id, {
                     name: name.trim()
                 });
             } else {
-                await taskManager.createTaskList(name.trim());
+                await tasksHook.createTaskList(name.trim());
             }
 
             if (!isEditMode) {
@@ -79,7 +79,7 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await taskManager.deleteTaskList(existingTaskList._id);
+            await tasksHook.deleteTaskList(existingTaskList._id);
             onTaskListSaved?.();
             onDismiss();
         } catch (error) {

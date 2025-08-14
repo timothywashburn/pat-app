@@ -7,7 +7,7 @@ import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
-import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
+import { useAgenda, useAgendaNotifications } from "@/src/hooks/useAgenda";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ItemData, ModuleType } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
@@ -17,8 +17,9 @@ export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const { width } = useWindowDimensions();
-    const [agendaItems, setAgendaItems] = useState<ItemData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const agendaHook = useAgenda();
+    const { agendaItems, isLoading, error } = agendaHook;
+    const agendaNotifications = useAgendaNotifications();
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showCompleted, setShowCompleted] = useState(false);
 
@@ -33,8 +34,6 @@ export const AgendaPanel: React.FC = () => {
     // State for notifications
     const [showingNotifications, setShowingNotifications] = useState(false);
 
-    const agendaManager = AgendaManager.getInstance();
-
     const isTableView = width >= 768;
 
     useEffect(() => {
@@ -44,16 +43,11 @@ export const AgendaPanel: React.FC = () => {
     const loadItems = async () => {
         if (isRefreshing) return;
 
-        setIsLoading(true);
-
         try {
-            await agendaManager.loadAgendaItems();
-            setAgendaItems(agendaManager.agendaItems);
+            await agendaHook.loadAgendaItems();
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to load items';
             errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -67,8 +61,7 @@ export const AgendaPanel: React.FC = () => {
         }
 
         try {
-            await agendaManager.loadAgendaItems();
-            setAgendaItems(agendaManager.agendaItems);
+            await agendaHook.loadAgendaItems();
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to refresh items';
             errorToast(errorMsg);

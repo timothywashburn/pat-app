@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { NotificationTemplateData, NotificationEntityType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Ionicons } from '@expo/vector-icons';
-import NotificationService from '@/src/services/NotificationService';
+import { useNotifications } from '@/src/hooks/useNotifications';
 
 interface NotificationsSectionProps {
     entityType: NotificationEntityType;
@@ -21,9 +21,8 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
     compact = false
 }) => {
     const { getColor } = useTheme();
-    const [templates, setTemplates] = useState<NotificationTemplateData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const notificationService = NotificationService.getInstance();
+    const notifications = useNotifications(entityType, entityId);
+    const { templates, isLoading } = notifications;
 
     useEffect(() => {
         loadTemplates();
@@ -31,12 +30,9 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
 
     const loadTemplates = async () => {
         try {
-            const loadedTemplates = await notificationService.getTemplates(entityType, entityId);
-            setTemplates(loadedTemplates.filter(t => t.active));
+            await notifications.getTemplates();
         } catch (error) {
             console.error('Failed to load templates:', error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -54,7 +50,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         return getColor('success');
     };
 
-    const activeTemplates = templates.filter(t => t.active);
+    const activeTemplates = templates.filter((t: NotificationTemplateData) => t.active);
     const totalCount = activeTemplates.length;
 
     if (isLoading) {

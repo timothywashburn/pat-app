@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { AuthError } from '@/src/features/auth/models/auth';
-import NetworkManager, { HTTPMethod, NetworkError } from '../../../services/NetworkManager';
+import { HTTPMethod, ApiResponseBody } from '@/src/hooks/base/useNetworkRequest';
+import PatConfig from '@/src/controllers/PatConfig';
+import axios, { AxiosRequestConfig } from 'axios';
 import SecureStorage from '../../../services/SecureStorage';
 import {
     AuthTokens,
@@ -16,6 +18,54 @@ import { Logger } from "@/src/features/dev/components/Logger";
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
 import Constants from "expo-constants";
+
+// NetworkError class for auth store
+export class NetworkError extends Error {
+    status: number;
+
+    constructor(message: string, status: number) {
+        super(message);
+        this.status = status;
+    }
+}
+
+// Helper function for network requests in Zustand store
+const performNetworkRequest = async <TReq, TRes>(config: {
+    endpoint: string;
+    method: HTTPMethod;
+    body?: TReq;
+    token?: string;
+}): Promise<ApiResponseBody<TRes>> => {
+    const url = `${PatConfig.apiURL}${config.endpoint}`;
+
+    const axiosConfig: AxiosRequestConfig = {
+        method: config.method.toLowerCase() as any,
+        url,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: config.body,
+    };
+
+    if (config.token) {
+        axiosConfig.headers!['Authorization'] = `Bearer ${config.token}`;
+    }
+
+    try {
+        const response = await axios(axiosConfig);
+        const data: ApiResponseBody<TRes> = response.data;
+        return data;
+    } catch (error: any) {
+        if (error.response) {
+            const message = error.response.data?.error || error.response.statusText || 'Unknown error occurred';
+            throw new NetworkError(message, error.response.status);
+        } else if (error.request) {
+            throw new NetworkError('Network error: no response received', 0);
+        } else {
+            throw new Error(error.message);
+        }
+    }
+};
 
 export enum AuthStoreStatus {
     NOT_INITIALIZED = 'not_initialized',
@@ -71,7 +121,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             try {
                 const buildVersion = Application.nativeBuildVersion;
                 const platformParam = Platform.OS === 'ios' ? 'iOSBuildVersion' : 'androidBuildVersion';
-                const response = await NetworkManager.shared.performUnauthenticated<undefined, VersionResponse>({
+                const response = await performNetworkRequest<undefined, VersionResponse>({
                     endpoint: `/api/version?${platformParam}=${buildVersion}`,
                     method: HTTPMethod.GET,
                 });
@@ -117,7 +167,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
         Logger.info('auth', 'signing in with email', email);
 
         try {
-            const response = await NetworkManager.shared.performUnauthenticated<SignInRequest, SignInResponse>({
+            const response = await performNetworkRequest<SignInRequest, SignInResponse>({
                 endpoint: '/api/auth/sign-in',
                 method: HTTPMethod.POST,
                 body: { email, password },
@@ -144,7 +194,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
     },
 
     createAccount: async (name: string, email: string, password: string) => {
-        await NetworkManager.shared.performUnauthenticated<CreateAccountRequest, CreateAccountResponse>({
+        await performNetworkRequest<CreateAccountRequest, CreateAccountResponse>({
             endpoint: '/api/auth/create-account',
             method: HTTPMethod.POST,
             body: { name, email, password },
@@ -154,9 +204,13 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
     },
 
     resendVerificationEmail: async () => {
-        await NetworkManager.shared.performAuthenticated<undefined, ResendVerificationResponse>({
+        const tokens = get().authTokens;
+        if (!tokens) throw new Error('No auth tokens available');
+        
+        await performNetworkRequest<undefined, ResendVerificationResponse>({
             endpoint: '/api/auth/resend-verification',
             method: HTTPMethod.POST,
+            token: tokens.accessToken,
         });
     },
 
@@ -167,7 +221,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
         }
 
         try {
-            const response = await NetworkManager.shared.performUnauthenticated<RefreshAuthRequest, RefreshAuthResponse>({
+            const response = await performNetworkRequest<RefreshAuthRequest, RefreshAuthResponse>({
                 endpoint: '/api/auth/refresh',
                 method: HTTPMethod.POST,
                 body: { refreshToken: tokens.refreshToken },

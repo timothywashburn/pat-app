@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, ScrollView } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import CustomHeader from '@/src/components/CustomHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
-import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
+import { useHabits } from '@/src/hooks/useHabits';
 import HabitCard from '@/src/features/habits/components/HabitCard';
 import HabitFormView from '@/src/features/habits/components/HabitFormView';
 import HabitDetailView from '@/src/features/habits/components/HabitDetailView';
 import { getActiveHabitDate, toDateOnlyString } from '@/src/features/habits/models';
 
 export const HabitsPanel: React.FC = () => {
-    const [habits, setHabits] = useState<Habit[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const habitsHook = useHabits();
+    const { habits, isLoading, error } = habitsHook;
     const [showUnmarkedOnly, setShowUnmarkedOnly] = useState(false);
     // State for the create/edit form
     const [showingCreateForm, setShowingCreateForm] = useState(false);
@@ -27,14 +27,9 @@ export const HabitsPanel: React.FC = () => {
 
     const loadHabits = async () => {
         try {
-            setIsLoading(true);
-            const manager = HabitManager.getInstance();
-            await manager.loadHabits();
-            setHabits(manager.habits);
+            await habitsHook.loadHabits();
         } catch (error) {
             console.error('Failed to load habits:', error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -88,14 +83,12 @@ export const HabitsPanel: React.FC = () => {
 
     const handleHabitUpdated = async () => {
         try {
-            const manager = HabitManager.getInstance();
+            const manager = habitsHook;
             await manager.loadHabits();
-            const updatedHabits = manager.habits;
-            setHabits(updatedHabits);
             
             // If we have a selected habit, update it with fresh data
             if (selectedHabit) {
-                const updatedSelectedHabit = updatedHabits.find(h => h._id === selectedHabit._id);
+                const updatedSelectedHabit = manager.habits.find(h => h._id === selectedHabit._id);
                 if (updatedSelectedHabit) {
                     setSelectedHabit(updatedSelectedHabit);
                 }

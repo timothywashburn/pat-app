@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
-import { PersonManager } from "@/src/features/people/controllers/PersonManager";
+import { usePeople } from "@/src/hooks/usePeople";
 import PersonItemView from "@/src/features/people/components/PersonItemView";
 import PersonFormView from "@/src/features/people/components/PersonFormView";
 import PersonDetailView from "@/src/features/people/components/PersonDetailView";
@@ -15,8 +15,8 @@ import { ModuleType, Person } from "@timothyw/pat-common";
 export const PeoplePanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const [people, setPeople] = useState<Person[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const peopleHook = usePeople();
+    const { people, isLoading, error } = peopleHook;
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     // State for the create/edit form
@@ -27,7 +27,7 @@ export const PeoplePanel: React.FC = () => {
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
     const [showingDetailView, setShowingDetailView] = useState(false);
 
-    const personManager = PersonManager.getInstance();
+    const personManager = peopleHook;
 
     useEffect(() => {
         loadPeople();
@@ -36,16 +36,12 @@ export const PeoplePanel: React.FC = () => {
     const loadPeople = async () => {
         if (isRefreshing) return;
 
-        setIsLoading(true);
 
         try {
-            await personManager.loadPeople();
-            setPeople(personManager.people);
+            await peopleHook.loadPeople();
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to load people';
             errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -59,8 +55,7 @@ export const PeoplePanel: React.FC = () => {
         }
 
         try {
-            await personManager.loadPeople();
-            setPeople(personManager.people);
+            await peopleHook.loadPeople();
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to refresh people';
             errorToast(errorMsg);

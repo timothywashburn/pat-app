@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { AgendaManager } from "@/src/features/agenda/controllers/AgendaManager";
+import { useAgenda } from "@/src/hooks/useAgenda";
 import { ItemData } from "@timothyw/pat-common";
 import { NotificationsSection } from '@/src/features/notifications/components/NotificationsSection';
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
@@ -31,7 +31,7 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     const [showNotificationConfig, setShowNotificationConfig] = React.useState(false);
 
-    const agendaManager = AgendaManager.getInstance();
+    const agendaHook = useAgenda();
 
     if (!isPresented) {
         return null;
@@ -42,7 +42,7 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await agendaManager.setCompleted(item._id, !item.completed);
+            await agendaHook.setCompleted(item._id, !item.completed);
             onItemUpdated?.();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update item');

@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, Switch }
 import { NotificationTemplateData, NotificationEntityType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Ionicons } from '@expo/vector-icons';
-import NotificationService from '@/src/services/NotificationService';
+import { useNotifications } from '@/src/hooks/useNotifications';
 import { NotificationTemplateCard } from './NotificationTemplateCard';
 import { NotificationTemplateForm } from './NotificationTemplateForm';
 
@@ -21,15 +21,20 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     onClose
 }) => {
     const { getColor } = useTheme();
-    const [templates, setTemplates] = useState<NotificationTemplateData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isRefreshing, setIsRefreshing] = useState(false);
     const [showTemplateForm, setShowTemplateForm] = useState(false);
     const [editingTemplate, setEditingTemplate] = useState<NotificationTemplateData | null>(null);
     const [viewMode, setViewMode] = useState<'individual' | 'defaults'>('individual'); // For panel-level toggle
     const [isSynced, setIsSynced] = useState<boolean>(true); // For individual entities
     const [hasParentTemplates, setHasParentTemplates] = useState<boolean>(false);
-    const notificationService = NotificationService.getInstance();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    
+    // Get the effective entity type based on view mode
+    const effectiveEntityType = (!entityId && viewMode === 'defaults') 
+        ? `${entityType}_defaults` as NotificationEntityType 
+        : entityType;
+    
+    const notifications = useNotifications(effectiveEntityType, entityId);
+    const { templates, isLoading, error } = notifications;
 
     useEffect(() => {
         loadTemplates();
@@ -40,21 +45,10 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
 
     const loadTemplates = async () => {
         try {
-            const isPanelLevel = !entityId;
-            let effectiveEntityType = entityType;
-
-            // For panel level, adjust entity type based on view mode
-            if (isPanelLevel && viewMode === 'defaults') {
-                effectiveEntityType = `${entityType}_defaults` as NotificationEntityType;
-            }
-
-            const loadedTemplates = await notificationService.getTemplates(effectiveEntityType, entityId);
-            setTemplates(loadedTemplates);
+            await notifications.getTemplates();
         } catch (error) {
             console.error('Failed to load templates:', error);
             Alert.alert('Error', 'Failed to load notification templates');
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -62,7 +56,7 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
         if (!entityId) return;
 
         try {
-            const syncState = await notificationService.getEntitySyncState(entityType, entityId);
+            const syncState = await notifications.getEntitySyncState(entityType, entityId);
             setIsSynced(syncState.synced);
             setHasParentTemplates(syncState.hasParentTemplates);
         } catch (error) {
@@ -77,36 +71,14 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     };
 
     const handleTemplateUpdate = (updatedTemplate: NotificationTemplateData) => {
-        setTemplates(prev => {
-            const existingIndex = prev.findIndex(template => template._id === updatedTemplate._id);
-
-            if (existingIndex >= 0) {
-                // Update existing template
-                const newTemplates = [...prev];
-                newTemplates[existingIndex] = updatedTemplate;
-                return newTemplates;
-            } else {
-                // This might be a virtual template that became real - replace it
-                const virtualId = `inherited_${updatedTemplate.inheritedFrom}_${entityId}`;
-                const virtualIndex = prev.findIndex(template => template._id === virtualId);
-
-                if (virtualIndex >= 0) {
-                    // Replace virtual template with real one
-                    const newTemplates = [...prev];
-                    newTemplates[virtualIndex] = updatedTemplate;
-                    return newTemplates;
-                } else {
-                    // Add new template
-                    return [...prev, updatedTemplate];
-                }
-            }
-        });
+        // The hook already handles state updates automatically
+        // This function is kept for compatibility but the state is managed by the hook
+        console.log('Template updated:', updatedTemplate);
     };
 
     const handleTemplateDelete = async (templateId: string) => {
         try {
-            await notificationService.deleteTemplate(templateId);
-            setTemplates(prev => prev.filter(template => template._id !== templateId));
+            await notifications.deleteTemplate(templateId);
         } catch (error) {
             console.error('Failed to delete template:', error);
             Alert.alert('Error', 'Failed to delete notification template');
@@ -118,10 +90,9 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
 
         try {
             const newSyncState = !isSynced;
-            const result = await notificationService.updateEntitySync(entityType, entityId, newSyncState);
+            const result = await notifications.updateEntitySync(entityType, entityId, newSyncState);
 
             setIsSynced(result.synced);
-            setTemplates(result.templates || []);
 
             Alert.alert(
                 'Sync Updated',
@@ -134,13 +105,8 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     };
 
     const handleTemplateSave = (savedTemplate: NotificationTemplateData) => {
-        if (editingTemplate) {
-            // Update existing template
-            setTemplates(prev => prev.map(t => t._id === savedTemplate._id ? savedTemplate : t));
-        } else {
-            // Add new template
-            setTemplates(prev => [...prev, savedTemplate]);
-        }
+        // The hook automatically manages state updates
+        // Just close the form
         setShowTemplateForm(false);
         setEditingTemplate(null);
     };

@@ -13,7 +13,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
-import { HabitManager } from '@/src/features/habits/controllers/HabitManager';
+import { useHabits } from '@/src/hooks/useHabits';
 import { Habit } from "@timothyw/pat-common";
 import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
 
@@ -44,7 +44,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const habitManager = HabitManager.getInstance();
+    const habitManager = useHabits();
 
     if (!isPresented) {
         return null;

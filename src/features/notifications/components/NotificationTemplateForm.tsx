@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Alert } fr
 import { NotificationTemplateData, NotificationEntityType, CreateNotificationTemplateRequest } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Ionicons } from '@expo/vector-icons';
-import NotificationService from '@/src/services/NotificationService';
+import { useNotifications } from '@/src/hooks/useNotifications';
 
 interface NotificationTemplateFormProps {
     entityType: NotificationEntityType;
@@ -32,7 +32,7 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
     });
     const [isLoading, setIsLoading] = useState(false);
     const [preview, setPreview] = useState<any>(null);
-    const notificationService = NotificationService.getInstance();
+    const notifications = useNotifications();
 
     const updateFormData = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -45,7 +45,7 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
         }
 
         try {
-            const previewData = await notificationService.previewTemplate({
+            const previewData = await notifications.previewTemplate({
                 templateTitle: formData.title,
                 templateBody: formData.body,
                 entityType,
@@ -99,10 +99,10 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
             let savedTemplate: NotificationTemplateData;
             if (template) {
                 // Update existing template
-                savedTemplate = await notificationService.updateTemplate(template._id, templateData);
+                savedTemplate = await notifications.updateTemplate(template._id, templateData);
             } else {
                 // Create new template
-                savedTemplate = await notificationService.createTemplate(templateData);
+                savedTemplate = await notifications.createTemplate(templateData);
             }
 
             onSave(savedTemplate);

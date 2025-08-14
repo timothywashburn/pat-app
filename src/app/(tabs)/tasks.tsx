@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import { ModuleType } from "@timothyw/pat-common";
-import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
+import { useTasks } from '@/src/hooks/useTasks';
 import { TaskListWithTasks, Task } from '@/src/features/tasks/models';
 import { TaskListId } from '@timothyw/pat-common';
 import TaskListCard from '@/src/features/tasks/components/TaskListCard';
@@ -19,8 +19,8 @@ import { useToast } from "@/src/components/toast/ToastContext";
 export const TasksPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const [taskLists, setTaskLists] = useState<TaskListWithTasks[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const tasksHook = useTasks();
+    const { taskListsWithTasks: taskLists, isLoading, error } = tasksHook;
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showCompleted, setShowCompleted] = useState(false);
 
@@ -34,8 +34,6 @@ export const TasksPanel: React.FC = () => {
     const [showingTaskEdit, setShowingTaskEdit] = useState(false);
     const [showingCreateTask, setShowingCreateTask] = useState(false);
     const [selectedTaskListForNewTask, setSelectedTaskListForNewTask] = useState<TaskListId | null>(null);
-
-    const taskManager = TaskManager.getInstance();
 
     useEffect(() => {
         loadTaskLists();
@@ -51,16 +49,11 @@ export const TasksPanel: React.FC = () => {
     const loadTaskLists = async () => {
         if (isRefreshing) return;
 
-        setIsLoading(true);
-
         try {
-            await taskManager.loadTaskLists();
-            setTaskLists(taskManager.taskListsWithTasks);
+            await tasksHook.loadTaskLists();
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to load task lists';
             errorToast(errorMsg);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -74,8 +67,7 @@ export const TasksPanel: React.FC = () => {
         }
 
         try {
-            await taskManager.loadTaskLists();
-            setTaskLists(taskManager.taskListsWithTasks);
+            await tasksHook.loadTaskLists();
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to refresh task lists';
             errorToast(errorMsg);

@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
-import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
+import { useTasks } from '@/src/hooks/useTasks';
 import TaskItemCard from './TaskItemCard';
 
 interface TaskListDetailViewProps {
@@ -36,7 +36,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
     const [showTasks, setShowTasks] = React.useState(false);
     const [rotateAnimation] = React.useState(new Animated.Value(0));
 
-    const taskManager = TaskManager.getInstance();
+    const tasksHook = useTasks();
 
     if (!isPresented) {
         return null;
@@ -64,7 +64,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await taskManager.deleteTaskList(taskList._id);
+                            await tasksHook.deleteTaskList(taskList._id);
                             onTaskListUpdated?.();
                             onDismiss();
                         } catch (error) {
@@ -127,7 +127,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         try {
                             // Delete all completed tasks
                             await Promise.all(
-                                completedTasks.map(task => taskManager.deleteTask(task._id))
+                                completedTasks.map(task => tasksHook.deleteTask(task._id))
                             );
                             onTaskListUpdated?.();
                         } catch (error) {

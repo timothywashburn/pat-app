@@ -10,8 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
-import { PersonManager } from "@/src/features/people/controllers/PersonManager";
-import { PersonNoteManager } from "@/src/features/people/controllers/PersonNoteManager";
+import { usePeople } from "@/src/hooks/usePeople";
+import { usePersonNotes } from "@/src/hooks/usePersonNotes";
 import { Person, PersonNoteData, PersonNoteId, PersonProperty } from "@timothyw/pat-common";
 
 interface PersonFormViewProps {
@@ -50,8 +50,8 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     // For editing existing properties and notes
     // No separate editing state needed with direct editing
 
-    const personManager = PersonManager.getInstance();
-    const personNoteManager = PersonNoteManager.getInstance();
+    const personManager = usePeople();
+    const personNoteManager = usePersonNotes();
 
     if (!isPresented) {
         return null;

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { Task } from '@/src/features/tasks/models';
-import { TaskManager } from '@/src/features/tasks/controllers/TaskManager';
+import { useTasks } from '@/src/hooks/useTasks';
 
 interface TaskDetailViewProps {
     task: Task;
@@ -29,7 +29,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-    const taskManager = TaskManager.getInstance();
+    const tasksHook = useTasks();
 
     if (!isPresented) {
         return null;
@@ -40,7 +40,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await taskManager.setTaskCompleted(task._id, !task.completed);
+            await tasksHook.setTaskCompleted(task._id, !task.completed);
             onTaskUpdated?.();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update task');
@@ -66,7 +66,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await taskManager.deleteTask(task._id);
+                            await tasksHook.deleteTask(task._id);
                             onTaskUpdated?.();
                             onDismiss();
                         } catch (error) {

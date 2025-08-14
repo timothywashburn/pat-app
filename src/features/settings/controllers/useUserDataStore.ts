@@ -1,6 +1,9 @@
 import { create } from 'zustand';
-import NetworkManager, { HTTPMethod } from '@/src/services/NetworkManager';
+import { HTTPMethod, ApiResponseBody } from '@/src/hooks/base/useNetworkRequest';
 import { Ionicons } from "@expo/vector-icons";
+import PatConfig from '@/src/controllers/PatConfig';
+import axios, { AxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
 import {
     GetUserResponse,
     ModuleType, Serializer,
@@ -16,6 +19,43 @@ import {
 // import DevPanel from "@/src/app/(tabs)/dev";
 import { Logger } from "@/src/features/dev/components/Logger";
 import React from "react";
+
+// Helper function for authenticated requests in UserData store
+const performAuthenticatedRequest = async <TReq, TRes>(config: {
+    endpoint: string;
+    method: HTTPMethod;
+    body?: TReq;
+}): Promise<ApiResponseBody<TRes>> => {
+    const authTokens = useAuthStore.getState().authTokens;
+    if (!authTokens) throw new Error('No auth tokens available');
+
+    const url = `${PatConfig.apiURL}${config.endpoint}`;
+
+    const axiosConfig: AxiosRequestConfig = {
+        method: config.method.toLowerCase() as any,
+        url,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authTokens.accessToken}`,
+        },
+        data: config.body,
+    };
+
+    try {
+        const response = await axios(axiosConfig);
+        const data: ApiResponseBody<TRes> = response.data;
+        return data;
+    } catch (error: any) {
+        if (error.response) {
+            const message = error.response.data?.error || error.response.statusText || 'Unknown error occurred';
+            throw new Error(message);
+        } else if (error.request) {
+            throw new Error('Network error: no response received');
+        } else {
+            throw new Error(error.message);
+        }
+    }
+};
 
 export enum UserDataStoreStatus {
     NOT_LOADED = 'not_loaded',
@@ -53,7 +93,7 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
         set({ userDataStoreStatus: UserDataStoreStatus.LOADING });
 
         try {
-            const response = await NetworkManager.shared.performAuthenticated<undefined, GetUserResponse>({
+            const response = await performAuthenticatedRequest<undefined, GetUserResponse>({
                 endpoint: '/api/account',
                 method: HTTPMethod.GET,
             });
@@ -72,7 +112,7 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
     },
 
     updateUserData: async (partialData: UpdateUserRequest) => {
-        const response = await NetworkManager.shared.performAuthenticated<UpdateUserRequest, UpdateUserResponse>({
+        const response = await performAuthenticatedRequest<UpdateUserRequest, UpdateUserResponse>({
             endpoint: '/api/account',
             method: HTTPMethod.PUT,
             body: partialData,
