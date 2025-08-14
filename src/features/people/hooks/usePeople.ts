@@ -21,10 +21,6 @@ export interface PeopleHookState {
     error: string | null;
 }
 
-/**
- * React hook for managing people
- * Replaces the PersonManager singleton
- */
 export function usePeople() {
     const [state, setState] = useState<PeopleHookState>({
         people: [],
@@ -47,9 +43,6 @@ export function usePeople() {
         setState(prev => ({ ...prev, people, error: null }));
     }, []);
 
-    /**
-     * Load all people
-     */
     const loadPeople = useCallback(async (): Promise<Person[]> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -73,9 +66,6 @@ export function usePeople() {
         }, { errorMessage: 'Failed to load people' });
     }, [asyncOp, performAuthenticated, setLoading, setError, setPeople]);
 
-    /**
-     * Create a new person
-     */
     const createPerson = useCallback(async (params: {
         name: string;
         properties?: PersonProperty[];
@@ -102,7 +92,6 @@ export function usePeople() {
 
             if (!response.success) throw new Error('Failed to create person');
 
-            // Refresh people list
             const updatedPeople = await loadPeople();
 
             const newPerson = updatedPeople.find(p => p._id === response.person._id);
@@ -113,9 +102,6 @@ export function usePeople() {
         }, { errorMessage: 'Failed to create person' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadPeople]);
 
-    /**
-     * Update a person
-     */
     const updatePerson = useCallback(async (
         id: string,
         updates: {
@@ -152,17 +138,11 @@ export function usePeople() {
                 body,
             }, { skipLoadingState: true });
 
-            // Refresh the list if requested
-            if (autoRefresh) {
-                await loadPeople();
-            }
+            if (autoRefresh) await loadPeople();
             setLoading(false);
         }, { errorMessage: 'Failed to update person' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadPeople]);
 
-    /**
-     * Delete a person
-     */
     const deletePerson = useCallback(async (id: string): Promise<void> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -173,7 +153,6 @@ export function usePeople() {
                 method: HTTPMethod.DELETE,
             }, { skipLoadingState: true });
 
-            // Refresh the list
             await loadPeople();
             setLoading(false);
         }, { errorMessage: 'Failed to delete person' });

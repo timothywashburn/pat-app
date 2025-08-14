@@ -16,10 +16,6 @@ export interface ThoughtsHookState {
     error: string | null;
 }
 
-/**
- * React hook for managing thoughts (inbox)
- * Replaces the ThoughtManager singleton
- */
 export function useThoughts() {
     const [state, setState] = useState<ThoughtsHookState>({
         thoughts: [],
@@ -27,7 +23,6 @@ export function useThoughts() {
         error: null,
     });
 
-    const { data: userData } = useUserDataStore();
     const { performAuthenticated } = useNetworkRequest();
     const asyncOp = useAsyncOperation();
 
@@ -43,9 +38,6 @@ export function useThoughts() {
         setState(prev => ({ ...prev, thoughts, error: null }));
     }, []);
 
-    /**
-     * Load all thoughts
-     */
     const loadThoughts = useCallback(async (): Promise<ThoughtData[]> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -65,9 +57,6 @@ export function useThoughts() {
         }, { errorMessage: 'Failed to load thoughts' });
     }, [asyncOp, performAuthenticated, setLoading, setError, setThoughts]);
 
-    /**
-     * Create a new thought
-     */
     const createThought = useCallback(async (content: string): Promise<ThoughtData> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -81,7 +70,6 @@ export function useThoughts() {
 
             if (!response.success) throw new Error('Failed to create thought');
 
-            // Refresh thoughts list
             await loadThoughts();
             setLoading(false);
 
@@ -89,9 +77,6 @@ export function useThoughts() {
         }, { errorMessage: 'Failed to create thought' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadThoughts]);
 
-    /**
-     * Update a thought
-     */
     const updateThought = useCallback(async (id: string, content: string): Promise<void> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -103,15 +88,11 @@ export function useThoughts() {
                 body: { content },
             }, { skipLoadingState: true });
 
-            // Refresh thoughts list
             await loadThoughts();
             setLoading(false);
         }, { errorMessage: 'Failed to update thought' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadThoughts]);
 
-    /**
-     * Delete a thought
-     */
     const deleteThought = useCallback(async (id: string): Promise<void> => {
         return asyncOp.execute(async () => {
             setLoading(true);

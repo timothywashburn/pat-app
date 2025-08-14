@@ -23,10 +23,6 @@ export interface HabitsHookState {
     error: string | null;
 }
 
-/**
- * React hook for managing habits
- * Replaces the HabitManager singleton
- */
 export function useHabits() {
     const [state, setState] = useState<HabitsHookState>({
         habits: [],
@@ -49,9 +45,6 @@ export function useHabits() {
         setState(prev => ({ ...prev, habits, error: null }));
     }, []);
 
-    /**
-     * Load all habits
-     */
     const loadHabits = useCallback(async (): Promise<Habit[]> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -71,9 +64,6 @@ export function useHabits() {
         }, { errorMessage: 'Failed to load habits' });
     }, [asyncOp, performAuthenticated, setLoading, setError, setHabits]);
 
-    /**
-     * Create a new habit
-     */
     const createHabit = useCallback(async (params: CreateHabitRequest): Promise<Habit> => {
         const body: CreateHabitRequest = {
             name: params.name,
@@ -94,7 +84,6 @@ export function useHabits() {
 
             if (!response.success) throw new Error('Failed to create habit');
 
-            // Refresh habits list
             const updatedHabits = await loadHabits();
 
             const newHabit = updatedHabits.find(h => h._id === response.habit._id);
@@ -105,9 +94,6 @@ export function useHabits() {
         }, { errorMessage: 'Failed to create habit' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadHabits]);
 
-    /**
-     * Update a habit
-     */
     const updateHabit = useCallback(async (id: string, updates: UpdateHabitRequest): Promise<void> => {
         const body: UpdateHabitRequest = {};
 
@@ -134,15 +120,11 @@ export function useHabits() {
                 body
             }, { skipLoadingState: true });
 
-            // Refresh habits list
             await loadHabits();
             setLoading(false);
         }, { errorMessage: 'Failed to update habit' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadHabits]);
 
-    /**
-     * Delete a habit
-     */
     const deleteHabit = useCallback(async (id: string): Promise<void> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -153,15 +135,11 @@ export function useHabits() {
                 method: HTTPMethod.DELETE
             }, { skipLoadingState: true });
 
-            // Refresh habits list
             await loadHabits();
             setLoading(false);
         }, { errorMessage: 'Failed to delete habit' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadHabits]);
 
-    /**
-     * Mark a habit entry for a specific date
-     */
     const markHabitEntry = useCallback(async (habitId: string, date: DateOnlyString, status: HabitEntryStatus): Promise<void> => {
         const body: CreateHabitEntryRequest = {
             date,
@@ -180,15 +158,11 @@ export function useHabits() {
                 body
             }, { skipLoadingState: true });
 
-            // Refresh habits list
             await loadHabits();
             setLoading(false);
         }, { errorMessage: 'Failed to mark habit entry' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadHabits]);
 
-    /**
-     * Delete a habit entry for a specific date
-     */
     const deleteHabitEntry = useCallback(async (habitId: string, date: DateOnlyString): Promise<void> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -199,22 +173,15 @@ export function useHabits() {
                 method: HTTPMethod.DELETE
             }, { skipLoadingState: true });
 
-            // Refresh habits list
             await loadHabits();
             setLoading(false);
         }, { errorMessage: 'Failed to delete habit entry' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadHabits]);
 
-    /**
-     * Get a habit by ID
-     */
     const getHabitById = useCallback((id: string): Habit | undefined => {
         return state.habits.find(h => h._id === id);
     }, [state.habits]);
 
-    /**
-     * Get a habit entry by habit ID and date
-     */
     const getHabitEntryByDate = useCallback((habitId: string, date: DateOnlyString): HabitEntry | undefined => {
         const habit = getHabitById(habitId);
         if (!habit) return undefined;

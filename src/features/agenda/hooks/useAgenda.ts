@@ -18,10 +18,6 @@ export interface AgendaHookState {
     error: string | null;
 }
 
-/**
- * React hook for managing agenda items
- * Replaces the AgendaManager singleton
- */
 export function useAgenda() {
     const [state, setState] = useState<AgendaHookState>({
         agendaItems: [],
@@ -29,7 +25,6 @@ export function useAgenda() {
         error: null,
     });
 
-    const { data: userData } = useUserDataStore();
     const { performAuthenticated } = useNetworkRequest();
     const asyncOp = useAsyncOperation();
 
@@ -45,9 +40,6 @@ export function useAgenda() {
         setState(prev => ({ ...prev, agendaItems: items, error: null }));
     }, []);
 
-    /**
-     * Load all agenda items
-     */
     const loadAgendaItems = useCallback(async (): Promise<ItemData[]> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -67,9 +59,6 @@ export function useAgenda() {
         }, { errorMessage: 'Failed to load agenda items' });
     }, [asyncOp, performAuthenticated, setLoading, setError, setAgendaItems]);
 
-    /**
-     * Create a new agenda item
-     */
     const createAgendaItem = useCallback(async (params: CreateItemRequest): Promise<ItemData> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -85,7 +74,6 @@ export function useAgenda() {
 
             const createdItem = Serializer.deserializeItemData(response.item);
 
-            // Refresh the agenda items list
             await loadAgendaItems();
             setLoading(false);
 
@@ -93,9 +81,6 @@ export function useAgenda() {
         }, { errorMessage: 'Failed to create agenda item' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
 
-    /**
-     * Update an agenda item
-     */
     const updateAgendaItem = useCallback(async (
         id: string,
         updates: UpdateItemRequest
@@ -112,15 +97,11 @@ export function useAgenda() {
                 body: updates,
             }, { skipLoadingState: true });
 
-            // Refresh the list
             await loadAgendaItems();
             setLoading(false);
         }, { errorMessage: 'Failed to update agenda item' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
 
-    /**
-     * Set completion status of an agenda item
-     */
     const setCompleted = useCallback(async (id: string, completed: boolean): Promise<void> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -132,15 +113,11 @@ export function useAgenda() {
                 body: { completed },
             }, { skipLoadingState: true });
 
-            // Refresh the list
             await loadAgendaItems();
             setLoading(false);
         }, { errorMessage: 'Failed to set completed status' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
 
-    /**
-     * Delete an agenda item
-     */
     const deleteAgendaItem = useCallback(async (id: string): Promise<void> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -151,7 +128,6 @@ export function useAgenda() {
                 method: HTTPMethod.DELETE,
             }, { skipLoadingState: true });
 
-            // Refresh the list
             await loadAgendaItems();
             setLoading(false);
         }, { errorMessage: 'Failed to delete agenda item' });

@@ -20,10 +20,6 @@ export interface PersonNotesHookState {
     error: string | null;
 }
 
-/**
- * React hook for managing person notes
- * Replaces the PersonNoteManager singleton
- */
 export function usePersonNotes() {
     const [state, setState] = useState<PersonNotesHookState>({
         personNotes: [],
@@ -46,9 +42,6 @@ export function usePersonNotes() {
         setState(prev => ({ ...prev, personNotes, error: null }));
     }, []);
 
-    /**
-     * Create a new person note
-     */
     const createPersonNote = useCallback(async (personId: PersonId, content: string): Promise<PersonNoteData> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -67,7 +60,6 @@ export function usePersonNotes() {
 
             const newNote = Serializer.deserializePersonNoteData(response.personNote);
 
-            // Add the new note to local state
             setState(prev => ({
                 ...prev,
                 personNotes: [...prev.personNotes, newNote],
@@ -79,9 +71,6 @@ export function usePersonNotes() {
         }, { errorMessage: 'Failed to create person note' });
     }, [asyncOp, performAuthenticated, setLoading, setError]);
 
-    /**
-     * Get all person notes
-     */
     const getPersonNotes = useCallback(async (): Promise<PersonNoteData[]> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -101,9 +90,6 @@ export function usePersonNotes() {
         }, { errorMessage: 'Failed to load person notes' });
     }, [asyncOp, performAuthenticated, setLoading, setError, setPersonNotes]);
 
-    /**
-     * Update a person note
-     */
     const updatePersonNote = useCallback(async (personNoteId: PersonNoteId, content: string): Promise<PersonNoteData> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -121,7 +107,6 @@ export function usePersonNotes() {
 
             const updatedNote = Serializer.deserializePersonNoteData(response.personNote);
 
-            // Update the note in local state
             setState(prev => ({
                 ...prev,
                 personNotes: prev.personNotes.map(note => 
@@ -135,9 +120,6 @@ export function usePersonNotes() {
         }, { errorMessage: 'Failed to update person note' });
     }, [asyncOp, performAuthenticated, setLoading, setError]);
 
-    /**
-     * Delete a person note
-     */
     const deletePersonNote = useCallback(async (personNoteId: PersonNoteId): Promise<boolean> => {
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -149,7 +131,6 @@ export function usePersonNotes() {
             }, { skipLoadingState: true });
 
             if (response.success) {
-                // Remove the note from local state
                 setState(prev => ({
                     ...prev,
                     personNotes: prev.personNotes.filter(note => note._id !== personNoteId),
