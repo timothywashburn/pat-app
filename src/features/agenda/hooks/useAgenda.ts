@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
-import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
     CompleteItemRequest, CompleteItemResponse,
     CreateItemRequest,
@@ -9,138 +8,103 @@ import {
     UpdateItemRequest,
     UpdateItemResponse,
 } from '@timothyw/pat-common';
-import { useNotifiableEntity } from '../../notifications/hooks/useNotifiableEntity';
-import { useUserDataStore } from '@/src/stores/useUserDataStore';
-
-export interface AgendaHookState {
-    agendaItems: ItemData[];
-    isLoading: boolean;
-    error: string | null;
-}
+import { useToast } from "@/src/components/toast/ToastContext";
 
 export function useAgenda() {
-    const [state, setState] = useState<AgendaHookState>({
-        agendaItems: [],
-        isLoading: false,
-        error: null,
-    });
+    const [ agendaItems, setAgendaItems ] = useState<ItemData[]>([]);
+    const [ isInitialized, setIsInitialized ] = useState<boolean>(false);
 
     const { performAuthenticated } = useNetworkRequest();
-    const asyncOp = useAsyncOperation();
+    const { errorToast } = useToast();
 
-    const setLoading = useCallback((loading: boolean) => {
-        setState(prev => ({ ...prev, isLoading: loading }));
-    }, []);
-
-    const setError = useCallback((error: string | null) => {
-        setState(prev => ({ ...prev, error }));
-    }, []);
-
-    const setAgendaItems = useCallback((items: ItemData[]) => {
-        setState(prev => ({ ...prev, agendaItems: items, error: null }));
+    useEffect(() => {
+        loadAgendaItems();
     }, []);
 
     const loadAgendaItems = useCallback(async (): Promise<ItemData[]> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<undefined, GetItemsResponse>({
+            endpoint: '/api/items',
+            method: HTTPMethod.GET,
+        });
 
-            const response = await performAuthenticated<undefined, GetItemsResponse>({
-                endpoint: '/api/items',
-                method: HTTPMethod.GET,
-            }, { skipLoadingState: true });
+        if (!response.success) {
+            errorToast(response.error);
+            return [];
+        }
 
-            if (!response.success) throw new Error('Failed to load agenda items');
-
-            const items = response.items.map(item => Serializer.deserialize<ItemData>(item));
-            setAgendaItems(items);
-            setLoading(false);
-            return items;
-        }, { errorMessage: 'Failed to load agenda items' });
-    }, [asyncOp, performAuthenticated, setLoading, setError, setAgendaItems]);
+        const items = response.items.map(item => Serializer.deserialize<ItemData>(item));
+        setAgendaItems(items);
+        setIsInitialized(true);
+        return items;
+    }, [performAuthenticated, errorToast, setAgendaItems, setIsInitialized]);
 
     const createAgendaItem = useCallback(async (params: CreateItemRequest): Promise<ItemData> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<CreateItemRequest, CreateItemResponse>({
+            endpoint: '/api/items',
+            method: HTTPMethod.POST,
+            body: params,
+        });
 
-            const response = await performAuthenticated<CreateItemRequest, CreateItemResponse>({
-                endpoint: '/api/items',
-                method: HTTPMethod.POST,
-                body: params,
-            }, { skipLoadingState: true });
+        if (!response.success) {
+            errorToast(response.error);
+            throw new Error(response.error);
+        }
 
-            if (!response.success) throw new Error('Failed to create agenda item');
-
-            const createdItem = Serializer.deserialize<ItemData>(response.item);
-
-            await loadAgendaItems();
-            setLoading(false);
-
-            return createdItem;
-        }, { errorMessage: 'Failed to create agenda item' });
-    }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
+        const createdItem = Serializer.deserialize<ItemData>(response.item);
+        await loadAgendaItems();
+        return createdItem;
+    }, [performAuthenticated, errorToast, loadAgendaItems]);
 
     const updateAgendaItem = useCallback(async (
         id: string,
         updates: UpdateItemRequest
     ): Promise<void> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<UpdateItemRequest, UpdateItemResponse>({
+            endpoint: `/api/items/${id}`,
+            method: HTTPMethod.PUT,
+            body: updates,
+        });
 
-            console.log('Updating agenda item with body:', updates);
+        if (!response.success) {
+            errorToast(response.error);
+            return;
+        }
 
-            await performAuthenticated<UpdateItemRequest, UpdateItemResponse>({
-                endpoint: `/api/items/${id}`,
-                method: HTTPMethod.PUT,
-                body: updates,
-            }, { skipLoadingState: true });
-
-            await loadAgendaItems();
-            setLoading(false);
-        }, { errorMessage: 'Failed to update agenda item' });
-    }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
+        await loadAgendaItems();
+    }, [performAuthenticated, errorToast, loadAgendaItems]);
 
     const setCompleted = useCallback(async (id: string, completed: boolean): Promise<void> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<CompleteItemRequest, CompleteItemResponse>({
+            endpoint: `/api/items/${id}/complete`,
+            method: HTTPMethod.PUT,
+            body: { completed },
+        });
 
-            await performAuthenticated<CompleteItemRequest, CompleteItemResponse>({
-                endpoint: `/api/items/${id}/complete`,
-                method: HTTPMethod.PUT,
-                body: { completed },
-            }, { skipLoadingState: true });
+        if (!response.success) {
+            errorToast(response.error);
+            return;
+        }
 
-            await loadAgendaItems();
-            setLoading(false);
-        }, { errorMessage: 'Failed to set completed status' });
-    }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
+        await loadAgendaItems();
+    }, [performAuthenticated, errorToast, loadAgendaItems]);
 
     const deleteAgendaItem = useCallback(async (id: string): Promise<void> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
-
-            await performAuthenticated<undefined, DeleteItemResponse>({
-                endpoint: `/api/items/${id}`,
-                method: HTTPMethod.DELETE,
-            }, { skipLoadingState: true });
-
-            await loadAgendaItems();
-            setLoading(false);
-        }, { errorMessage: 'Failed to delete agenda item' });
-    }, [asyncOp, performAuthenticated, setLoading, setError, loadAgendaItems]);
-
-    useEffect(() => {
-        loadAgendaItems().catch(error => {
-            console.error('Failed to load agenda items on mount:', error);
+        const response = await performAuthenticated<undefined, DeleteItemResponse>({
+            endpoint: `/api/items/${id}`,
+            method: HTTPMethod.DELETE,
         });
-    }, []);
+
+        if (!response.success) {
+            errorToast(response.error);
+            return;
+        }
+
+        await loadAgendaItems();
+    }, [performAuthenticated, errorToast, loadAgendaItems]);
 
     return {
-        ...state,
+        agendaItems,
+        isInitialized,
         loadAgendaItems,
         createAgendaItem,
         updateAgendaItem,

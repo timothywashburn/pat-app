@@ -18,7 +18,7 @@ export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
     const agendaHook = useAgenda();
-    const { agendaItems, isLoading, error } = agendaHook;
+    const { agendaItems, isInitialized } = agendaHook;
     const { refreshControl } = useRefreshControl(agendaHook.loadAgendaItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);
 
@@ -101,7 +101,7 @@ export const AgendaPanel: React.FC = () => {
                 onFilterTapped={() => setShowCompleted(!showCompleted)}
             />
 
-            {isLoading && agendaItems.length === 0 ? (
+            {isInitialized && agendaItems.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>

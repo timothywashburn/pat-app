@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
-import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
     CreatePersonNoteRequest,
     CreatePersonNoteResponse,
@@ -13,138 +12,94 @@ import {
     PersonId,
     Serializer, ListItemData
 } from '@timothyw/pat-common';
-
-export interface PersonNotesHookState {
-    personNotes: PersonNoteData[];
-    isLoading: boolean;
-    error: string | null;
-}
+import { useToast } from "@/src/components/toast/ToastContext";
 
 export function usePersonNotes() {
-    const [state, setState] = useState<PersonNotesHookState>({
-        personNotes: [],
-        isLoading: false,
-        error: null,
-    });
+    const [ personNotes, setPersonNotes ] = useState<PersonNoteData[]>([]);
+    const [ isInitialized, setIsInitialized ] = useState<boolean>(false);
 
     const { performAuthenticated } = useNetworkRequest();
-    const asyncOp = useAsyncOperation();
-
-    const setLoading = useCallback((loading: boolean) => {
-        setState(prev => ({ ...prev, isLoading: loading }));
-    }, []);
-
-    const setError = useCallback((error: string | null) => {
-        setState(prev => ({ ...prev, error }));
-    }, []);
-
-    const setPersonNotes = useCallback((personNotes: PersonNoteData[]) => {
-        setState(prev => ({ ...prev, personNotes, error: null }));
-    }, []);
+    const { errorToast } = useToast();
 
     const createPersonNote = useCallback(async (personId: PersonId, content: string): Promise<PersonNoteData> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<CreatePersonNoteRequest, CreatePersonNoteResponse>({
+            endpoint: '/api/people/notes',
+            method: HTTPMethod.POST,
+            body: {
+                personId,
+                content
+            }
+        });
 
-            const response = await performAuthenticated<CreatePersonNoteRequest, CreatePersonNoteResponse>({
-                endpoint: '/api/people/notes',
-                method: HTTPMethod.POST,
-                body: {
-                    personId,
-                    content
-                }
-            }, { skipLoadingState: true });
+        if (!response.success) {
+            errorToast(response.error);
+            throw new Error(response.error);
+        }
 
-            if (!response.success) throw new Error('Failed to create person note');
+        const newNote = Serializer.deserialize<PersonNoteData>(response.personNote);
 
-            const newNote = Serializer.deserialize<PersonNoteData>(response.personNote);
+        setPersonNotes(prev => [...prev, newNote]);
+        setIsInitialized(true);
 
-            setState(prev => ({
-                ...prev,
-                personNotes: [...prev.personNotes, newNote],
-                error: null
-            }));
-
-            setLoading(false);
-            return newNote;
-        }, { errorMessage: 'Failed to create person note' });
-    }, [asyncOp, performAuthenticated, setLoading, setError]);
+        return newNote;
+    }, [performAuthenticated, errorToast]);
 
     const getPersonNotes = useCallback(async (): Promise<PersonNoteData[]> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<undefined, GetPersonNotesResponse>({
+            endpoint: '/api/people/notes',
+            method: HTTPMethod.GET,
+        });
 
-            const response = await performAuthenticated<undefined, GetPersonNotesResponse>({
-                endpoint: '/api/people/notes',
-                method: HTTPMethod.GET,
-            }, { skipLoadingState: true });
+        if (!response.success) {
+            errorToast(response.error);
+            return [];
+        }
 
-            if (!response.success) throw new Error('Failed to load person notes');
-
-            const personNotes = response.personNotes.map(note => Serializer.deserialize<PersonNoteData>(note));
-            setPersonNotes(personNotes);
-            setLoading(false);
-            return personNotes;
-        }, { errorMessage: 'Failed to load person notes' });
-    }, [asyncOp, performAuthenticated, setLoading, setError, setPersonNotes]);
+        const personNotes = response.personNotes.map(note => Serializer.deserialize<PersonNoteData>(note));
+        setPersonNotes(personNotes);
+        return personNotes;
+    }, [performAuthenticated, errorToast, setPersonNotes]);
 
     const updatePersonNote = useCallback(async (personNoteId: PersonNoteId, content: string): Promise<PersonNoteData> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<UpdatePersonNoteRequest, UpdatePersonNoteResponse>({
+            endpoint: `/api/people/notes/${personNoteId}`,
+            method: HTTPMethod.PUT,
+            body: {
+                content
+            }
+        });
 
-            const response = await performAuthenticated<UpdatePersonNoteRequest, UpdatePersonNoteResponse>({
-                endpoint: `/api/people/notes/${personNoteId}`,
-                method: HTTPMethod.PUT,
-                body: {
-                    content
-                }
-            }, { skipLoadingState: true });
+        if (!response.success) {
+            errorToast(response.error);
+            throw new Error(response.error);
+        }
 
-            if (!response.success) throw new Error('Failed to update person note');
+        const updatedNote = Serializer.deserialize<PersonNoteData>(response.personNote);
 
-            const updatedNote = Serializer.deserialize<PersonNoteData>(response.personNote);
+        setPersonNotes(prev => prev.map(note => note._id === personNoteId ? updatedNote : note));
 
-            setState(prev => ({
-                ...prev,
-                personNotes: prev.personNotes.map(note => 
-                    note._id === personNoteId ? updatedNote : note
-                ),
-                error: null
-            }));
-
-            setLoading(false);
-            return updatedNote;
-        }, { errorMessage: 'Failed to update person note' });
-    }, [asyncOp, performAuthenticated, setLoading, setError]);
+        return updatedNote;
+    }, [performAuthenticated, errorToast]);
 
     const deletePersonNote = useCallback(async (personNoteId: PersonNoteId): Promise<boolean> => {
-        return asyncOp.execute(async () => {
-            setLoading(true);
-            setError(null);
+        const response = await performAuthenticated<undefined, DeletePersonNoteResponse>({
+            endpoint: `/api/people/notes/${personNoteId}`,
+            method: HTTPMethod.DELETE,
+        });
 
-            const response = await performAuthenticated<undefined, DeletePersonNoteResponse>({
-                endpoint: `/api/people/notes/${personNoteId}`,
-                method: HTTPMethod.DELETE,
-            }, { skipLoadingState: true });
+        if (!response.success) {
+            errorToast(response.error);
+            return false;
+        }
 
-            if (response.success) {
-                setState(prev => ({
-                    ...prev,
-                    personNotes: prev.personNotes.filter(note => note._id !== personNoteId),
-                    error: null
-                }));
-            }
+        setPersonNotes(prev => prev.filter(note => note._id !== personNoteId));
 
-            setLoading(false);
-            return response.success;
-        }, { errorMessage: 'Failed to delete person note' });
-    }, [asyncOp, performAuthenticated, setLoading, setError]);
+        return true;
+    }, [performAuthenticated, errorToast]);
 
     return {
-        ...state,
+        personNotes,
+        isInitialized,
         createPersonNote,
         getPersonNotes,
         updatePersonNote,

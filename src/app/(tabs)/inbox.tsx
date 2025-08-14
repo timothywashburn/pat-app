@@ -24,7 +24,7 @@ export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const thoughtsHook = useThoughts();
-    const { thoughts, isLoading, error } = thoughtsHook;
+    const { thoughts, isInitialized } = thoughtsHook;
     const { refreshControl } = useRefreshControl(thoughtsHook.loadThoughts, 'Failed to refresh thoughts');
     const [newThought, setNewThought] = useState('');
     const [selectedThought, setSelectedThought] = useState<ThoughtData | null>(null);
@@ -56,13 +56,14 @@ export const InboxPanel: React.FC = () => {
         }
 
         try {
-            await thoughtsHook.updateThought(editingThought._id, editedContent);
+            await thoughtsHook.updateThought(editingThought._id, {
+                content: editedContent,
+            });
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to update thought';
             errorToast(errorMsg);
         } finally {
             setEditingThought(null);
-            // Keep the expandedThoughtId as is (don't collapse the menu after saving)
         }
     };
 
@@ -174,9 +175,9 @@ export const InboxPanel: React.FC = () => {
                 <TouchableOpacity
                     className={`bg-primary rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-40' : ''}`}
                     onPress={handleAddThought}
-                    disabled={newThought.trim() === '' || isLoading}
+                    disabled={newThought.trim() === '' || isInitialized}
                 >
-                    {isLoading ? (
+                    {isInitialized ? (
                         <ActivityIndicator size="small" color={getColor("on-primary")} />
                     ) : (
                         <Text className="text-on-primary font-bold">Add</Text>
@@ -184,7 +185,7 @@ export const InboxPanel: React.FC = () => {
                 </TouchableOpacity>
             </View>
 
-            {isLoading && thoughts.length === 0 ? (
+            {isInitialized && thoughts.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>

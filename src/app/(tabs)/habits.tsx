@@ -11,7 +11,7 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const HabitsPanel: React.FC = () => {
     const habitsHook = useHabits();
-    const { habits, isLoading, error } = habitsHook;
+    const { habits, isInitialized } = habitsHook;
     const { refreshControl } = useRefreshControl(habitsHook.loadHabits, 'Failed to refresh habits');
     const [showUnmarkedOnly, setShowUnmarkedOnly] = useState(false);
     // State for the create/edit form
@@ -112,7 +112,7 @@ export const HabitsPanel: React.FC = () => {
                 className="flex-1 p-5"
                 refreshControl={refreshControl}
             >
-                {isLoading && habits.length === 0 ? (
+                {isInitialized && habits.length === 0 ? (
                     <View className="flex-1 items-center justify-center">
                         <Text className="text-on-background-variant">Loading habits...</Text>
                     </View>

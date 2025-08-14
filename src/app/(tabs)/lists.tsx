@@ -20,7 +20,7 @@ export const ListsPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const listsHook = useLists();
-    const { listsWithItems: lists, isLoading, error } = listsHook;
+    const { listsWithItems: lists, isInitialized, error } = listsHook;
     const { isRefreshing, refreshControl } = useRefreshControl(listsHook.loadLists, 'Failed to refresh lists');
     const [showCompleted, setShowCompleted] = useState(false);
 
@@ -144,7 +144,7 @@ export const ListsPanel: React.FC = () => {
                 onFilterTapped={() => setShowCompleted(!showCompleted)}
             />
 
-            {isLoading && lists.length === 0 ? (
+            {isInitialized && lists.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
