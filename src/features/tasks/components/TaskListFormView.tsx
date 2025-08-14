@@ -9,8 +9,10 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormSection from '@/src/components/common/FormSection';
+import SelectionList from '@/src/components/common/SelectionList';
 import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 import { TaskList } from '@/src/features/tasks/models';
+import { TaskListType } from '@timothyw/pat-common';
 
 interface TaskListFormViewProps {
     isPresented: boolean;
@@ -32,6 +34,7 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
     const { getColor } = useTheme();
 
     const [name, setName] = useState(existingTaskList?.name || '');
+    const [type, setType] = useState<TaskListType>(existingTaskList?.type || TaskListType.TASKS);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -53,10 +56,11 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
         try {
             if (isEditMode && existingTaskList) {
                 await tasksHook.updateTaskList(existingTaskList._id, {
-                    name: name.trim()
+                    name: name.trim(),
+                    type: type
                 });
             } else {
-                await tasksHook.createTaskList(name.trim());
+                await tasksHook.createTaskList(name.trim(), type);
             }
 
             if (!isEditMode) {
@@ -91,8 +95,10 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
     const handleCancel = () => {
         if (isEditMode && existingTaskList) {
             setName(existingTaskList.name);
+            setType(existingTaskList.type);
         } else {
             setName('');
+            setType(TaskListType.TASKS);
         }
         setErrorMessage(null);
         
@@ -130,6 +136,17 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
                         required
                         autoFocus={!isEditMode}
                         maxLength={100}
+                    />
+                    
+                    <SelectionList
+                        label="List Type"
+                        selectedValue={type}
+                        onSelectionChange={(value) => setType(value as TaskListType)}
+                        options={[
+                            { label: 'Task List', value: TaskListType.TASKS, description: 'Items can be marked as complete' },
+                            { label: 'Note List', value: TaskListType.NOTES, description: 'Items are notes and cannot be completed' }
+                        ]}
+                        required
                     />
                 </FormSection>
 

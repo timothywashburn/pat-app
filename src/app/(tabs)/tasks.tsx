@@ -255,15 +255,19 @@ export const TasksPanel: React.FC = () => {
             )}
 
             {/* Task Detail View */}
-            {selectedTask && (
-                <TaskDetailView
-                    task={selectedTask}
-                    isPresented={showingTaskDetail}
-                    onDismiss={handleTaskDetailDismiss}
-                    onEditRequest={handleTaskEditRequest}
-                    onTaskUpdated={handleTaskUpdated}
-                />
-            )}
+            {selectedTask && (() => {
+                const taskList = taskLists.find(tl => tl._id === selectedTask.taskListId);
+                return taskList ? (
+                    <TaskDetailView
+                        task={selectedTask}
+                        taskList={taskList}
+                        isPresented={showingTaskDetail}
+                        onDismiss={handleTaskDetailDismiss}
+                        onEditRequest={handleTaskEditRequest}
+                        onTaskUpdated={handleTaskUpdated}
+                    />
+                ) : null;
+            })()}
 
             {/* Create Task Form */}
             <TaskFormView

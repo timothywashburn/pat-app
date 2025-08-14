@@ -16,6 +16,7 @@ import {
     GetTaskListsResponse,
     TaskListId,
     TaskListData,
+    TaskListType,
     Serializer
 } from '@timothyw/pat-common';
 import { Task } from '@/src/features/tasks/models';
@@ -127,8 +128,8 @@ export function useTasks() {
     /**
      * Create a new task list
      */
-    const createTaskList = useCallback(async (name: string): Promise<TaskListData> => {
-        const body: CreateTaskListRequest = { name };
+    const createTaskList = useCallback(async (name: string, type: TaskListType): Promise<TaskListData> => {
+        const body: CreateTaskListRequest = { name, type };
 
         return asyncOp.execute(async () => {
             setLoading(true);
@@ -155,11 +156,14 @@ export function useTasks() {
     /**
      * Update a task list
      */
-    const updateTaskList = useCallback(async (id: string, updates: { name?: string }): Promise<void> => {
+    const updateTaskList = useCallback(async (id: string, updates: { name?: string; type?: TaskListType }): Promise<void> => {
         const body: UpdateTaskListRequest = {};
 
         if (updates.name !== undefined) {
             body.name = updates.name;
+        }
+        if (updates.type !== undefined) {
+            body.type = updates.type;
         }
 
         return asyncOp.execute(async () => {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
-import { TaskListId } from '@timothyw/pat-common';
+import { TaskListId, TaskListType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import TaskItemCard from './TaskItemCard';
 
@@ -69,12 +69,23 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                     />
                 </Animated.View>
                 
+                <View className="flex-row items-center mr-3">
+                    <Ionicons
+                        name={taskList.type === TaskListType.NOTES ? 'document-text' : 'checkbox'}
+                        size={20}
+                        color={getColor('on-surface-variant')}
+                    />
+                </View>
+                
                 <View className="flex-1">
                     <Text className="text-on-surface text-lg font-semibold mb-1">
                         {taskList.name}
                     </Text>
                     <Text className="text-on-surface-variant text-sm">
-                        {completedTasks.length}/{totalTasks} completed
+                        {taskList.type === TaskListType.NOTES 
+                            ? `${totalTasks} note${totalTasks !== 1 ? 's' : ''}`
+                            : `${completedTasks.length}/${totalTasks} completed`
+                        }
                     </Text>
                 </View>
                 
@@ -113,13 +124,14 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                     ) : (
                         (() => {
                             const tasksToShow = showCompleted 
-                                ? sortTasks(taskList.tasks)
-                                : sortTasks(taskList.tasks.filter(task => !task.completed));
+                                ? sortTasks(taskList.tasks, taskList.type)
+                                : sortTasks(taskList.tasks.filter(task => !task.completed), taskList.type);
                             
                             return tasksToShow.map((task, index) => (
                                 <TaskItemCard
                                     key={task._id}
                                     task={task}
+                                    taskList={taskList}
                                     onPress={onTaskPress}
                                     isLast={index === tasksToShow.length - 1}
                                 />

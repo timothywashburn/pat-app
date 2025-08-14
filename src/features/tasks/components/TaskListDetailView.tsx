@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
+import { TaskListType } from '@timothyw/pat-common';
 import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 import TaskItemCard from './TaskItemCard';
 
@@ -150,9 +151,23 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
 
                     <View className="mb-4">
                         <View className="flex-row items-center mb-2">
+                            <Ionicons 
+                                name={taskList.type === TaskListType.NOTES ? 'document-text' : 'checkbox'} 
+                                size={20} 
+                                color={getColor("on-surface-variant")} 
+                            />
+                            <Text className="text-on-surface-variant text-base ml-2">
+                                {taskList.type === TaskListType.NOTES ? 'Note List' : 'Task List'}
+                            </Text>
+                        </View>
+
+                        <View className="flex-row items-center mb-2">
                             <Ionicons name="list-outline" size={20} color={getColor("on-surface-variant")} />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                {completedTaskCount}/{totalTasks} completed
+                                {taskList.type === TaskListType.NOTES 
+                                    ? `${totalTasks} note${totalTasks !== 1 ? 's' : ''}`
+                                    : `${completedTaskCount}/${totalTasks} completed`
+                                }
                             </Text>
                         </View>
 
@@ -191,7 +206,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                             />
                         </Animated.View>
                         <Text className="text-on-surface text-lg font-semibold">
-                            Tasks{' '}
+                            {taskList.type === TaskListType.NOTES ? 'Notes' : 'Tasks'}{' '}
                             <Text className="text-on-surface-variant font-normal">
                                 {totalTasks}
                             </Text>
@@ -202,13 +217,14 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         <View className="p-4">
                             {totalTasks === 0 ? (
                                 <Text className="text-on-surface-variant text-center py-4">
-                                    No tasks in this list
+                                    {taskList.type === TaskListType.NOTES ? 'No notes in this list' : 'No tasks in this list'}
                                 </Text>
                             ) : (
-                                sortTasks(taskList.tasks).map((task, index) => (
+                                sortTasks(taskList.tasks, taskList.type).map((task, index) => (
                                         <TaskItemCard
                                             key={task._id}
                                             task={task}
+                                            taskList={taskList}
                                             onPress={onTaskPress}
                                             isLast={index === taskList.tasks.length - 1}
                                         />
@@ -239,8 +255,8 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         }
     ];
 
-    // Add delete completed tasks action if there are completed tasks
-    if (completedTaskCount > 0) {
+    // Add delete completed tasks action if there are completed tasks (only for task lists)
+    if (completedTaskCount > 0 && taskList.type === TaskListType.TASKS) {
         actions.push({
             label: "Delete Completed Tasks",
             onPress: handleDeleteCompletedTasks,
@@ -264,7 +280,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         <BaseDetailView
             isPresented={isPresented}
             onDismiss={onDismiss}
-            title="Task List"
+            title={taskList.type === TaskListType.NOTES ? "Note List" : "Task List"}
             onEditRequest={onEditRequest}
             errorMessage={errorMessage}
             sections={sections}

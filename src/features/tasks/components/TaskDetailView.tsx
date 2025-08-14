@@ -7,11 +7,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { Task } from '@/src/features/tasks/models';
+import { Task, TaskList } from '@/src/features/tasks/models';
+import { TaskListType } from '@timothyw/pat-common';
 import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 
 interface TaskDetailViewProps {
     task: Task;
+    taskList: TaskList;
     isPresented: boolean;
     onDismiss: () => void;
     onEditRequest: () => void;
@@ -20,6 +22,7 @@ interface TaskDetailViewProps {
 
 const TaskDetailView: React.FC<TaskDetailViewProps> = ({
     task,
+    taskList,
     isPresented,
     onDismiss,
     onEditRequest,
@@ -28,7 +31,8 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-
+    
+    const isNoteList = taskList.type === TaskListType.NOTES;
     const tasksHook = useTasks();
 
     if (!isPresented) {
@@ -82,20 +86,20 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
 
     const actions = [
         {
-            label: "Edit Task",
+            label: isNoteList ? "Edit Note" : "Edit Task",
             onPress: onEditRequest,
             variant: 'outline' as const,
             icon: 'create-outline'
         },
-        {
+        ...(isNoteList ? [] : [{
             label: task.completed ? "Mark as Incomplete" : "Mark as Complete",
             onPress: handleToggleCompleted,
             variant: 'primary' as const,
             icon: task.completed ? 'refresh-circle' : 'checkmark-circle',
             loading: isLoading
-        },
+        }]),
         {
-            label: "Delete Task",
+            label: isNoteList ? "Delete Note" : "Delete Task",
             onPress: handleDeleteTask,
             variant: 'secondary' as const,
             icon: 'trash-outline',
@@ -107,7 +111,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
         <BaseDetailView
             isPresented={isPresented}
             onDismiss={onDismiss}
-            title="Task Details"
+            title={isNoteList ? "Note Details" : "Task Details"}
             onEditRequest={onEditRequest}
             errorMessage={errorMessage}
             actions={actions}
@@ -141,16 +145,18 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                         </View>
                     )}
 
-            <View className="flex-row items-center">
-                <Ionicons
-                    name={task.completed ? "checkmark-circle" : "radio-button-off"}
-                    size={20}
-                    color={task.completed ? getColor("primary") : getColor("on-surface-variant")}
-                />
-                <Text className="text-on-surface text-base ml-2">
-                    {task.completed ? "Completed" : "Not completed"}
-                </Text>
-            </View>
+            {!isNoteList && (
+                <View className="flex-row items-center">
+                    <Ionicons
+                        name={task.completed ? "checkmark-circle" : "radio-button-off"}
+                        size={20}
+                        color={task.completed ? getColor("primary") : getColor("on-surface-variant")}
+                    />
+                    <Text className="text-on-surface text-base ml-2">
+                        {task.completed ? "Completed" : "Not completed"}
+                    </Text>
+                </View>
+            )}
         </BaseDetailView>
     );
 };
