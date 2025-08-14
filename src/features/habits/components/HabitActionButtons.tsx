@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { useHabits } from '@/src/hooks/useHabits';
+import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 import { Habit } from "@timothyw/pat-common";
 import { isToday, isYesterday, toDateOnlyString } from '@/src/features/habits/models';

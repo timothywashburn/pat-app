@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { NotificationTemplateData, NotificationEntityType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Ionicons } from '@expo/vector-icons';
-import { useNotifications } from '@/src/hooks/useNotifications';
+import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 
 interface NotificationsSectionProps {
     entityType: NotificationEntityType;

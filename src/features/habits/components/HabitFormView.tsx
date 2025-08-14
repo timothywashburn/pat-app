@@ -13,7 +13,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
-import { useHabits } from '@/src/hooks/useHabits';
+import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import { Habit } from "@timothyw/pat-common";
 import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
 

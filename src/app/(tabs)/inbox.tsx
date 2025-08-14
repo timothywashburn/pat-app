@@ -11,11 +11,11 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
-import { useThoughts, useInboxNotifications } from '@/src/hooks/useThoughts';
+import { useThoughts, useInboxNotifications } from '@/src/features/inbox/hooks/useThoughts';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import TaskFormView from '@/src/features/tasks/components/TaskFormView';
-import { useTasks } from '@/src/hooks/useTasks';
+import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData } from "@timothyw/pat-common";

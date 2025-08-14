@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, Switch }
 import { NotificationTemplateData, NotificationEntityType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Ionicons } from '@expo/vector-icons';
-import { useNotifications } from '@/src/hooks/useNotifications';
+import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 import { NotificationTemplateCard } from './NotificationTemplateCard';
 import { NotificationTemplateForm } from './NotificationTemplateForm';
 

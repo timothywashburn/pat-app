@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
-import { usePeople } from "@/src/hooks/usePeople";
+import { usePeople } from "@/src/features/people/hooks/usePeople";
 import PersonItemView from "@/src/features/people/components/PersonItemView";
 import PersonFormView from "@/src/features/people/components/PersonFormView";
 import PersonDetailView from "@/src/features/people/components/PersonDetailView";

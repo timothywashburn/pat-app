@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useNetworkRequest, HTTPMethod } from '@/src/hooks/base/useNetworkRequest';
-import { useAsyncOperation } from '@/src/hooks/base/useAsyncOperation';
+import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
+import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
     CompleteItemRequest, CompleteItemResponse,
     CreateItemRequest,
@@ -9,7 +9,7 @@ import {
     UpdateItemRequest,
     UpdateItemResponse,
 } from '@timothyw/pat-common';
-import { useNotifiableEntity } from './useNotifiableEntity';
+import { useNotifiableEntity } from '../../notifications/hooks/useNotifiableEntity';
 import { useUserDataStore } from '@/src/features/settings/controllers/useUserDataStore';
 
 export interface AgendaHookState {

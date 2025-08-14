@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import CustomHeader from '@/src/components/CustomHeader';
 import { ModuleType } from "@timothyw/pat-common";
-import { useTasks } from '@/src/hooks/useTasks';
+import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 import { TaskListWithTasks, Task } from '@/src/features/tasks/models';
 import { TaskListId } from '@timothyw/pat-common';
 import TaskListCard from '@/src/features/tasks/components/TaskListCard';

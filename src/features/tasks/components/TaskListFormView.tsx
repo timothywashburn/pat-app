@@ -9,7 +9,7 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormSection from '@/src/components/common/FormSection';
-import { useTasks } from '@/src/hooks/useTasks';
+import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 import { TaskList } from '@/src/features/tasks/models';
 
 interface TaskListFormViewProps {

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useNetworkRequest, HTTPMethod } from '@/src/hooks/base/useNetworkRequest';
-import { useAsyncOperation } from '@/src/hooks/base/useAsyncOperation';
+import { useNetworkRequest, HTTPMethod } from '@/src/hooks/useNetworkRequest';
+import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
     NotificationTemplateData,
     NotificationEntityType,

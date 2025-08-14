@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
-import { useTasks } from '@/src/hooks/useTasks';
+import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 import TaskItemCard from './TaskItemCard';
 
 interface TaskListDetailViewProps {

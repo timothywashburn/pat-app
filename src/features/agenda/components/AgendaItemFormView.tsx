@@ -14,7 +14,7 @@ import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
-import { useAgenda, useAgendaNotifications } from "@/src/hooks/useAgenda";
+import { useAgenda, useAgendaNotifications } from "@/src/features/agenda/hooks/useAgenda";
 import WebDateTimePicker from './WebDateTimePicker';
 import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
 import { CreateItemRequest, ItemData, UpdateItemRequest } from "@timothyw/pat-common";

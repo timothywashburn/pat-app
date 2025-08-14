@@ -7,7 +7,7 @@ import {
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
 import { useTheme } from '@/src/controllers/ThemeManager';
-import { useHabits } from '@/src/hooks/useHabits';
+import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import { Habit } from "@timothyw/pat-common";
 
 interface HabitCardProps {

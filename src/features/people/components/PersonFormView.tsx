@@ -10,8 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
-import { usePeople } from "@/src/hooks/usePeople";
-import { usePersonNotes } from "@/src/hooks/usePersonNotes";
+import { usePeople } from "@/src/features/people/hooks/usePeople";
+import { usePersonNotes } from "@/src/features/people/hooks/usePersonNotes";
 import { Person, PersonNoteData, PersonNoteId, PersonProperty } from "@timothyw/pat-common";
 
 interface PersonFormViewProps {

@@ -11,7 +11,7 @@ import {
     getPreviousHabitDate,
     fromDateOnlyString
 } from '@/src/features/habits/models';
-import { useHabits } from '@/src/hooks/useHabits';
+import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import HabitCalendarGrid from './HabitCalendarGrid';
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';

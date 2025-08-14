@@ -13,7 +13,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
-import { useTasks } from '@/src/hooks/useTasks';
+import { useTasks } from '@/src/features/tasks/hooks/useTasks';
 import { TaskListWithTasks } from '@/src/features/tasks/models';
 import { TaskData, TaskListId } from "@timothyw/pat-common";
 

@@ -7,7 +7,7 @@ import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
-import { useAgenda, useAgendaNotifications } from "@/src/hooks/useAgenda";
+import { useAgenda, useAgendaNotifications } from "@/src/features/agenda/hooks/useAgenda";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ItemData, ModuleType } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";

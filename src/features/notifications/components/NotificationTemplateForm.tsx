@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Alert } fr
 import { NotificationTemplateData, NotificationEntityType, CreateNotificationTemplateRequest } from '@timothyw/pat-common';
 import { useTheme } from '@/src/controllers/ThemeManager';
 import { Ionicons } from '@expo/vector-icons';
-import { useNotifications } from '@/src/hooks/useNotifications';
+import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 
 interface NotificationTemplateFormProps {
     entityType: NotificationEntityType;
