@@ -11,7 +11,7 @@ import {
     PersonNoteId,
     PersonNoteData,
     PersonId,
-    Serializer
+    Serializer, ListItemData
 } from '@timothyw/pat-common';
 
 export interface PersonNotesHookState {
@@ -58,7 +58,7 @@ export function usePersonNotes() {
 
             if (!response.success) throw new Error('Failed to create person note');
 
-            const newNote = Serializer.deserializePersonNoteData(response.personNote);
+            const newNote = Serializer.deserialize<PersonNoteData>(response.personNote);
 
             setState(prev => ({
                 ...prev,
@@ -83,7 +83,7 @@ export function usePersonNotes() {
 
             if (!response.success) throw new Error('Failed to load person notes');
 
-            const personNotes = response.personNotes.map(note => Serializer.deserializePersonNoteData(note));
+            const personNotes = response.personNotes.map(note => Serializer.deserialize<PersonNoteData>(note));
             setPersonNotes(personNotes);
             setLoading(false);
             return personNotes;
@@ -105,7 +105,7 @@ export function usePersonNotes() {
 
             if (!response.success) throw new Error('Failed to update person note');
 
-            const updatedNote = Serializer.deserializePersonNoteData(response.personNote);
+            const updatedNote = Serializer.deserialize<PersonNoteData>(response.personNote);
 
             setState(prev => ({
                 ...prev,

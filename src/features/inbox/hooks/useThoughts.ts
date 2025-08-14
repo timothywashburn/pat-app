@@ -4,7 +4,7 @@ import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
     CreateThoughtRequest,
     CreateThoughtResponse, DeleteThoughtResponse,
-    GetThoughtsResponse, Serializer, ThoughtData,
+    GetThoughtsResponse, ItemData, Serializer, ThoughtData,
     UpdateThoughtRequest, UpdateThoughtResponse,
 } from '@timothyw/pat-common';
 import { useNotifiableEntity } from '../../notifications/hooks/useNotifiableEntity';
@@ -50,7 +50,7 @@ export function useThoughts() {
 
             if (!response.success) throw new Error('Failed to load thoughts');
 
-            const thoughts = response.thoughts.map(thought => Serializer.deserializeThoughtData(thought));
+            const thoughts = response.thoughts.map(thought => Serializer.deserialize<ThoughtData>(thought));
             setThoughts(thoughts);
             setLoading(false);
             return thoughts;
@@ -73,7 +73,7 @@ export function useThoughts() {
             await loadThoughts();
             setLoading(false);
 
-            return Serializer.deserializeThoughtData(response.thought);
+            return Serializer.deserialize<ThoughtData>(response.thought);
         }, { errorMessage: 'Failed to create thought' });
     }, [asyncOp, performAuthenticated, setLoading, setError, loadThoughts]);
 

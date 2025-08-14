@@ -4,7 +4,7 @@ import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/src/stores/useAuthStore';
 import {
-    GetUserResponse,
+    GetUserResponse, ListItemData,
     ModuleType, Serializer,
     UpdateUserRequest,
     UpdateUserResponse,
@@ -93,7 +93,7 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
 
             set({
                 userDataStoreStatus: UserDataStoreStatus.LOADED,
-                data: Serializer.deserializeUserData(response.user),
+                data: Serializer.deserialize<UserData>(response.user),
             });
 
             Logger.debug('unclassified', 'user data loaded successfully');
@@ -112,7 +112,7 @@ export const useUserDataStore = create<UserDataState>((set, get) => ({
         if (!response.success) throw new Error('Failed to update user data');
 
         set({
-            data: Serializer.deserializeUserData(response.user)
+            data: Serializer.deserialize<UserData>(response.user)
         });
     },
 

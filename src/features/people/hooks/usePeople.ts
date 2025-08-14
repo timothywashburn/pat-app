@@ -59,7 +59,7 @@ export function usePeople() {
                 throw new Error('Invalid response format');
             }
 
-            const people = response.people.map(person => Serializer.deserializePerson(person));
+            const people = response.people.map(person => Serializer.deserialize<Person>(person));
             setPeople(people);
             setLoading(false);
             return people;

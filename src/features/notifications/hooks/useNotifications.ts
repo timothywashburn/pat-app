@@ -12,7 +12,7 @@ import {
     DeleteNotificationTemplateResponse,
     PreviewNotificationTemplateRequest,
     PreviewNotificationTemplateResponse,
-    Serializer,
+    Serializer, ListItemData, NotificationTemplateId,
 } from '@timothyw/pat-common';
 
 export interface NotificationHookState {
@@ -70,7 +70,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
 
             if (!response.success) throw new Error('Failed to get notification templates');
 
-            const templates = response.templates?.map(template => Serializer.deserializeNotificationTemplateData(template)) || [];
+            const templates = response.templates?.map(template => Serializer.deserialize<NotificationTemplateData>(template)) || [];
             setTemplates(templates);
             setLoading(false);
             return templates;
@@ -94,7 +94,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
             if (!response.success) throw new Error('Failed to create notification template');
             if (!response.template) throw new Error('No template returned');
 
-            const newTemplate = Serializer.deserializeNotificationTemplateData(response.template);
+            const newTemplate = Serializer.deserialize<NotificationTemplateData>(response.template);
             
             // Add to current templates if they match the current context
             if (!entityType || !entityId || 
@@ -128,7 +128,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
             if (!response.success) throw new Error('Failed to update notification template');
             if (!response.template) throw new Error('No template returned');
 
-            const updatedTemplate = Serializer.deserializeNotificationTemplateData(response.template);
+            const updatedTemplate = Serializer.deserialize<NotificationTemplateData>(response.template);
             
             // Update in current templates
             setState(prev => ({
@@ -247,7 +247,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
 
             if (!response.success) throw new Error('Failed to update entity sync');
 
-            const templates = response.templates?.map((template: any) => Serializer.deserializeNotificationTemplateData(template)) || [];
+            const templates = response.templates?.map((template: any) => Serializer.deserialize<NotificationTemplateData>(template)) || [];
             
             // Update local state if this matches current context
             if (entityType === state.templates[0]?.entityType) {

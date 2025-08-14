@@ -52,7 +52,7 @@ export function useAgenda() {
 
             if (!response.success) throw new Error('Failed to load agenda items');
 
-            const items = response.items.map(item => Serializer.deserializeItemData(item));
+            const items = response.items.map(item => Serializer.deserialize<ItemData>(item));
             setAgendaItems(items);
             setLoading(false);
             return items;
@@ -72,7 +72,7 @@ export function useAgenda() {
 
             if (!response.success) throw new Error('Failed to create agenda item');
 
-            const createdItem = Serializer.deserializeItemData(response.item);
+            const createdItem = Serializer.deserialize<ItemData>(response.item);
 
             await loadAgendaItems();
             setLoading(false);

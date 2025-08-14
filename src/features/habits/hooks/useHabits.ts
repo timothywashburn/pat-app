@@ -10,7 +10,7 @@ import {
     DeleteHabitResponse,
     GetHabitsResponse,
     Habit,
-    HabitEntry,
+    HabitEntry, ItemData,
     Serializer,
     UpdateHabitRequest,
     UpdateHabitResponse
@@ -57,7 +57,7 @@ export function useHabits() {
 
             if (!response.success) throw new Error('Failed to load habits');
 
-            const habits = response.habits.map(habit => Serializer.deserializeHabit(habit));
+            const habits = response.habits.map(habit => Serializer.deserialize<Habit>(habit));
             setHabits(habits);
             setLoading(false);
             return habits;

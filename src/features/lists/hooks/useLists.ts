@@ -5,7 +5,7 @@ import {
     CompleteListItemRequest,
     CompleteListItemResponse,
     CreateListItemRequest, CreateListItemResponse, CreateListRequest, CreateListResponse, GetListItemsResponse,
-    GetListsResponse,
+    GetListsResponse, ItemData,
     ListData,
     ListId,
     ListItemData, ListType,
@@ -68,7 +68,7 @@ export function useLists() {
 
             if (!response.success) throw new Error('Failed to load lists');
 
-            const lists = response.lists.map(list => Serializer.deserializeListData(list));
+            const lists = response.lists.map(list => Serializer.deserialize<ListData>(list));
 
             // Also load list items to update the combined view
             const listItems = await loadListItemsInternal();
@@ -87,7 +87,7 @@ export function useLists() {
 
         if (!response.success) throw new Error('Failed to load list items');
 
-        return response.listItems.map(listItem => Serializer.deserializeListItemData(listItem));
+        return response.listItems.map(listItem => Serializer.deserialize<ListItemData>(listItem));
     }, [performAuthenticated]);
 
     const loadListItems = useCallback(async (): Promise<ListItemData[]> => {
@@ -118,7 +118,7 @@ export function useLists() {
 
             if (!response.success) throw new Error('Failed to create list');
 
-            const newList = Serializer.deserializeListData(response.list);
+            const newList = Serializer.deserialize<ListData>(response.list);
 
             await loadLists();
             setLoading(false);
@@ -190,7 +190,7 @@ export function useLists() {
 
             if (!response.success) throw new Error('Failed to create list item');
 
-            const newListItem = Serializer.deserializeListItemData(response.listItem);
+            const newListItem = Serializer.deserialize<ListItemData>(response.listItem);
 
             await loadListItems();
             setLoading(false);
