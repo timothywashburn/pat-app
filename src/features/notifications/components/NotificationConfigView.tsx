@@ -127,16 +127,10 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
         switch (entityType) {
             case 'agenda':
                 return 'Agenda Panel';
-            case 'tasks':
-                return 'Tasks Panel';
             case 'habits':
                 return 'Habits Panel';
             case 'agenda_item':
                 return 'Agenda Item';
-            case 'task':
-                return 'Task';
-            case 'task_list':
-                return 'Task List';
             case 'habit':
                 return 'Habit';
             default:
@@ -149,10 +143,6 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
             case 'agenda':
             case 'agenda_item':
                 return 'calendar';
-            case 'tasks':
-            case 'task':
-            case 'task_list':
-                return 'checkmark-circle';
             case 'habits':
             case 'habit':
                 return 'fitness';

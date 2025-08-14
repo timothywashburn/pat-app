@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { HTTPMethod, ApiResponseBody } from '@/src/hooks/useNetworkRequest';
-import { Ionicons } from "@expo/vector-icons";
 import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
@@ -11,16 +10,8 @@ import {
     UpdateUserResponse,
     UserData, UserId
 } from "@timothyw/pat-common";
-// import { AgendaPanel } from "@/src/app/(tabs)/agenda";
-// import InboxPanel from "@/src/app/(tabs)/inbox";
-// import TasksPanel from "@/src/app/(tabs)/tasks";
-// import PeoplePanel from "@/src/app/(tabs)/people";
-// import SettingsPanel from "@/src/app/(tabs)/settings";
-// import DevPanel from "@/src/app/(tabs)/dev";
 import { Logger } from "@/src/features/dev/components/Logger";
-import React from "react";
 
-// Helper function for authenticated requests in UserData store
 const performAuthenticatedRequest = async <TReq, TRes>(config: {
     endpoint: string;
     method: HTTPMethod;

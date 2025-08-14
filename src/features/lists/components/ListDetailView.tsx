@@ -9,48 +9,48 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
-import { TaskListType } from '@timothyw/pat-common';
-import { useTasks } from '@/src/features/tasks/hooks/useTasks';
-import TaskItemCard from './TaskItemCard';
+import { ListWithItems, sortListItems } from '@/src/features/lists/models';
+import { ListItemData, ListType } from '@timothyw/pat-common';
+import { useLists } from '@/src/features/lists/hooks/useLists';
+import ListItemCard from './ListItemCard';
 
-interface TaskListDetailViewProps {
-    taskList: TaskListWithTasks;
+interface ListDetailViewProps {
+    list: ListWithItems;
     isPresented: boolean;
     onDismiss: () => void;
     onEditRequest: () => void;
-    onTaskPress: (task: any) => void;
-    onTaskListUpdated?: () => void;
+    onListItemPress: (listItem: ListItemData) => void;
+    onListUpdated?: () => void;
 }
 
-const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
-    taskList,
+const ListDetailView: React.FC<ListDetailViewProps> = ({
+    list,
     isPresented,
     onDismiss,
     onEditRequest,
-    onTaskPress,
-    onTaskListUpdated,
+    onListItemPress,
+    onListUpdated,
 }) => {
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-    const [showTasks, setShowTasks] = React.useState(false);
+    const [showListItems, setShowListItems] = React.useState(false);
     const [rotateAnimation] = React.useState(new Animated.Value(0));
 
-    const tasksHook = useTasks();
+    const listsHook = useLists();
 
     if (!isPresented) {
         return null;
     }
 
-    const handleDeleteTaskList = () => {
-        const taskCount = taskList.tasks.length;
-        const message = taskCount > 0 
-            ? `This will delete "${taskList.name}" and all ${taskCount} tasks in it. This action cannot be undone.`
-            : `This will delete "${taskList.name}". This action cannot be undone.`;
+    const handleDeleteList = () => {
+        const listItemCount = list.items.length;
+        const message = listItemCount > 0
+            ? `This will delete "${list.name}" and all ${listItemCount} items in it. This action cannot be undone.`
+            : `This will delete "${list.name}". This action cannot be undone.`;
 
         Alert.alert(
-            'Delete Task List',
+            'Delete List',
             message,
             [
                 {
@@ -65,11 +65,11 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await tasksHook.deleteTaskList(taskList._id);
-                            onTaskListUpdated?.();
+                            await listsHook.deleteList(list._id);
+                            onListUpdated?.();
                             onDismiss();
                         } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete task list');
+                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
                         } finally {
                             setIsLoading(false);
                         }
@@ -79,18 +79,15 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         );
     };
 
-    const incompleteTasks = taskList.tasks.filter(task => !task.completed);
-    const completedTasks = taskList.tasks.filter(task => task.completed);
-    const incompleteTaskCount = incompleteTasks.length;
-    const completedTaskCount = completedTasks.length;
-    const totalTasks = taskList.tasks.length;
+    const completedListItems = list.items.filter(item => item.completed);
+    const totalListItems = list.items.length;
 
-    const handleToggleTasks = () => {
-        const newShowTasks = !showTasks;
-        setShowTasks(newShowTasks);
+    const handleToggleListItems = () => {
+        const newShowListItems = !showListItems;
+        setShowListItems(newShowListItems);
         
         Animated.timing(rotateAnimation, {
-            toValue: newShowTasks ? 1 : 0,
+            toValue: newShowListItems ? 1 : 0,
             duration: 200,
             useNativeDriver: true,
         }).start();
@@ -107,12 +104,12 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         ],
     };
 
-    const handleDeleteCompletedTasks = () => {
-        if (completedTaskCount === 0) return;
+    const handleDeleteCompletedListItems = () => {
+        if (completedListItems.length === 0) return;
 
         Alert.alert(
-            'Delete Completed Tasks',
-            `This will delete ${completedTaskCount} completed ${completedTaskCount === 1 ? 'task' : 'tasks'}. This action cannot be undone.`,
+            'Delete Completed Items',
+            `This will delete ${completedListItems.length} completed ${completedListItems.length === 1 ? 'item' : 'items'}. This action cannot be undone.`,
             [
                 {
                     text: 'Cancel',
@@ -126,13 +123,13 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            // Delete all completed tasks
+                            // Delete all completed list items
                             await Promise.all(
-                                completedTasks.map(task => tasksHook.deleteTask(task._id))
+                                completedListItems.map(listItems => listsHook.deleteListItem(listItems._id))
                             );
-                            onTaskListUpdated?.();
+                            onListUpdated?.();
                         } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete completed tasks');
+                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete completed list items');
                         } finally {
                             setIsLoading(false);
                         }
@@ -143,30 +140,29 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
     };
 
     const sections = [
-        // Task List Info Section
         {
             content: (
                 <>
-                    <Text className="text-on-surface text-xl font-bold mb-4">{taskList.name}</Text>
+                    <Text className="text-on-surface text-xl font-bold mb-4">{list.name}</Text>
 
                     <View className="mb-4">
                         <View className="flex-row items-center mb-2">
                             <Ionicons 
-                                name={taskList.type === TaskListType.NOTES ? 'document-text' : 'checkbox'} 
+                                name={list.type === ListType.NOTES ? 'document-text' : 'checkbox'}
                                 size={20} 
                                 color={getColor("on-surface-variant")} 
                             />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                {taskList.type === TaskListType.NOTES ? 'Note List' : 'Task List'}
+                                {list.type === ListType.NOTES ? 'Note List' : 'Task List'}
                             </Text>
                         </View>
 
                         <View className="flex-row items-center mb-2">
                             <Ionicons name="list-outline" size={20} color={getColor("on-surface-variant")} />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                {taskList.type === TaskListType.NOTES 
-                                    ? `${totalTasks} note${totalTasks !== 1 ? 's' : ''}`
-                                    : `${completedTaskCount}/${totalTasks} completed`
+                                {list.type === ListType.NOTES
+                                    ? `${totalListItems} note${totalListItems !== 1 ? 's' : ''}`
+                                    : `${completedListItems.length}/${totalListItems} completed`
                                 }
                             </Text>
                         </View>
@@ -174,15 +170,15 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                         <View className="flex-row items-center mb-2">
                             <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                Created {new Date(taskList.createdAt).toLocaleDateString()}
+                                Created {new Date(list.createdAt).toLocaleDateString()}
                             </Text>
                         </View>
 
-                        {taskList.updatedAt.getTime() !== taskList.createdAt.getTime() && (
+                        {list.updatedAt.getTime() !== list.createdAt.getTime() && (
                             <View className="flex-row items-center">
                                 <Ionicons name="time-outline" size={20} color={getColor("on-surface-variant")} />
                                 <Text className="text-on-surface-variant text-base ml-2">
-                                    Updated {new Date(taskList.updatedAt).toLocaleDateString()}
+                                    Updated {new Date(list.updatedAt).toLocaleDateString()}
                                 </Text>
                             </View>
                         )}
@@ -190,13 +186,12 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                 </>
             )
         },
-        // Tasks Section
         {
             content: (
                 <View className="bg-surface rounded-lg">
                     <TouchableOpacity
-                        className={`flex-row items-center p-4 ${showTasks ? 'border-b border-outline' : ''}`}
-                        onPress={handleToggleTasks}
+                        className={`flex-row items-center p-4 ${showListItems ? 'border-b border-outline' : ''}`}
+                        onPress={handleToggleListItems}
                     >
                         <Animated.View style={rotateStyle} className="mr-3">
                             <Ionicons
@@ -206,27 +201,27 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
                             />
                         </Animated.View>
                         <Text className="text-on-surface text-lg font-semibold">
-                            {taskList.type === TaskListType.NOTES ? 'Notes' : 'Tasks'}{' '}
+                            {list.type === ListType.NOTES ? 'Notes' : 'Tasks'}{' '}
                             <Text className="text-on-surface-variant font-normal">
-                                {totalTasks}
+                                {totalListItems}
                             </Text>
                         </Text>
                     </TouchableOpacity>
                     
-                    {showTasks && (
+                    {showListItems && (
                         <View className="p-4">
-                            {totalTasks === 0 ? (
+                            {totalListItems === 0 ? (
                                 <Text className="text-on-surface-variant text-center py-4">
-                                    {taskList.type === TaskListType.NOTES ? 'No notes in this list' : 'No tasks in this list'}
+                                    {list.type === ListType.NOTES ? 'No notes in this list' : 'No tasks in this list'}
                                 </Text>
                             ) : (
-                                sortTasks(taskList.tasks, taskList.type).map((task, index) => (
-                                        <TaskItemCard
-                                            key={task._id}
-                                            task={task}
-                                            taskList={taskList}
-                                            onPress={onTaskPress}
-                                            isLast={index === taskList.tasks.length - 1}
+                                sortListItems(list.items, list.type).map((item, index) => (
+                                        <ListItemCard
+                                            key={item._id}
+                                            listItem={item}
+                                            list={list}
+                                            onPress={onListItemPress}
+                                            isLast={index === list.items.length - 1}
                                         />
                                     ))
                             )}
@@ -255,11 +250,11 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         }
     ];
 
-    // Add delete completed tasks action if there are completed tasks (only for task lists)
-    if (completedTaskCount > 0 && taskList.type === TaskListType.TASKS) {
+    // Add delete completed items action if there are completed items
+    if (completedListItems.length > 0 && list.type === ListType.TASKS) {
         actions.push({
-            label: "Delete Completed Tasks",
-            onPress: handleDeleteCompletedTasks,
+            label: "Delete Completed List Items",
+            onPress: handleDeleteCompletedListItems,
             variant: 'secondary',
             icon: 'checkmark-done',
             loading: isLoading
@@ -269,7 +264,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
     // Add delete list action
     actions.push({
         label: "Delete List",
-        onPress: handleDeleteTaskList,
+        onPress: handleDeleteList,
         variant: 'secondary',
         icon: 'trash-outline',
         loading: isLoading,
@@ -280,7 +275,7 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
         <BaseDetailView
             isPresented={isPresented}
             onDismiss={onDismiss}
-            title={taskList.type === TaskListType.NOTES ? "Note List" : "Task List"}
+            title={list.type === ListType.NOTES ? "Note List" : "Task List"}
             onEditRequest={onEditRequest}
             errorMessage={errorMessage}
             sections={sections}
@@ -289,4 +284,4 @@ const TaskListDetailView: React.FC<TaskListDetailViewProps> = ({
     );
 };
 
-export default TaskListDetailView;
+export default ListDetailView;

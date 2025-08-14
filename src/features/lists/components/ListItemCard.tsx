@@ -1,32 +1,31 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Task, TaskList } from '@/src/features/tasks/models';
-import { TaskListType } from '@timothyw/pat-common';
+import { ListData, ListItemData, ListType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 
-interface TaskItemCardProps {
-    task: Task;
-    taskList: TaskList;
-    onPress: (task: Task) => void;
+interface ListItemCardProps {
+    listItem: ListItemData;
+    list: ListData;
+    onPress: (listItem: ListItemData) => void;
     isLast?: boolean;
 }
 
-const TaskItemCard: React.FC<TaskItemCardProps> = ({ task, taskList, onPress, isLast }) => {
+const ListItemCard: React.FC<ListItemCardProps> = ({ listItem, list, onPress, isLast }) => {
     const { getColor } = useTheme();
-    const isNoteList = taskList.type === TaskListType.NOTES;
+    const isNoteList = list.type === ListType.NOTES;
 
     return (
         <TouchableOpacity
             className={`flex-row items-center py-3 ${!isLast ? 'border-b border-surface-variant' : ''}`}
-            onPress={() => onPress(task)}
+            onPress={() => onPress(listItem)}
         >
             {!isNoteList && (
                 <View className="mr-3">
                     <Ionicons
-                        name={task.completed ? 'checkmark-circle' : 'radio-button-off'}
+                        name={listItem.completed ? 'checkmark-circle' : 'radio-button-off'}
                         size={20}
-                        color={task.completed ? getColor('primary') : getColor('on-surface-variant')}
+                        color={listItem.completed ? getColor('primary') : getColor('on-surface-variant')}
                     />
                 </View>
             )}
@@ -44,17 +43,17 @@ const TaskItemCard: React.FC<TaskItemCardProps> = ({ task, taskList, onPress, is
             <View className="flex-1">
                 <Text 
                     className={`text-base ${
-                        !isNoteList && task.completed 
+                        !isNoteList && listItem.completed 
                             ? 'text-on-surface-variant line-through' 
                             : 'text-on-surface'
                     }`}
                 >
-                    {task.name}
+                    {listItem.name}
                 </Text>
                 
-                {task.notes && (
+                {listItem.notes && (
                     <Text className="text-on-surface-variant text-sm mt-1">
-                        {task.notes}
+                        {listItem.notes}
                     </Text>
                 )}
             </View>
@@ -68,4 +67,4 @@ const TaskItemCard: React.FC<TaskItemCardProps> = ({ task, taskList, onPress, is
     );
 };
 
-export default TaskItemCard;
+export default ListItemCard;

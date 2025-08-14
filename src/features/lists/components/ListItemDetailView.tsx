@@ -7,33 +7,32 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { Task, TaskList } from '@/src/features/tasks/models';
-import { TaskListType } from '@timothyw/pat-common';
-import { useTasks } from '@/src/features/tasks/hooks/useTasks';
+import { ListData, ListItemData, ListType } from '@timothyw/pat-common';
+import { useLists } from '@/src/features/lists/hooks/useLists';
 
-interface TaskDetailViewProps {
-    task: Task;
-    taskList: TaskList;
+interface ListItemDetailViewProps {
+    listItem: ListItemData;
+    list: ListData;
     isPresented: boolean;
     onDismiss: () => void;
     onEditRequest: () => void;
-    onTaskUpdated?: () => void;
+    onListItemUpdated?: () => void;
 }
 
-const TaskDetailView: React.FC<TaskDetailViewProps> = ({
-    task,
-    taskList,
+const ListItemDetailView: React.FC<ListItemDetailViewProps> = ({
+    listItem,
+    list,
     isPresented,
     onDismiss,
     onEditRequest,
-    onTaskUpdated,
+    onListItemUpdated,
 }) => {
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     
-    const isNoteList = taskList.type === TaskListType.NOTES;
-    const tasksHook = useTasks();
+    const isNoteList = list.type === ListType.NOTES;
+    const listsHook = useLists();
 
     if (!isPresented) {
         return null;
@@ -44,19 +43,19 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await tasksHook.setTaskCompleted(task._id, !task.completed);
-            onTaskUpdated?.();
+            await listsHook.setListItemCompleted(listItem._id, !listItem.completed);
+            onListItemUpdated?.();
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update task');
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to update list item');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleDeleteTask = () => {
+    const handleDeleteListItem = () => {
         Alert.alert(
-            'Delete Task',
-            'Are you sure you want to delete this task? This action cannot be undone.',
+            'Delete List Item',
+            'Are you sure you want to delete this list item? This action cannot be undone.',
             [
                 {
                     text: 'Cancel',
@@ -70,11 +69,11 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await tasksHook.deleteTask(task._id);
-                            onTaskUpdated?.();
+                            await listsHook.deleteListItem(listItem._id);
+                            onListItemUpdated?.();
                             onDismiss();
                         } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete task');
+                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
                         } finally {
                             setIsLoading(false);
                         }
@@ -92,15 +91,15 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
             icon: 'create-outline'
         },
         ...(isNoteList ? [] : [{
-            label: task.completed ? "Mark as Incomplete" : "Mark as Complete",
+            label: listItem.completed ? "Mark as Incomplete" : "Mark as Complete",
             onPress: handleToggleCompleted,
             variant: 'primary' as const,
-            icon: task.completed ? 'refresh-circle' : 'checkmark-circle',
+            icon: listItem.completed ? 'refresh-circle' : 'checkmark-circle',
             loading: isLoading
         }]),
         {
             label: isNoteList ? "Delete Note" : "Delete Task",
-            onPress: handleDeleteTask,
+            onPress: handleDeleteListItem,
             variant: 'secondary' as const,
             icon: 'trash-outline',
             isDestructive: true
@@ -116,31 +115,31 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
             errorMessage={errorMessage}
             actions={actions}
         >
-            <Text className="text-on-surface text-xl font-bold mb-4">{task.name}</Text>
+            <Text className="text-on-surface text-xl font-bold mb-4">{listItem.name}</Text>
 
                     <View className="mb-4">
                         <View className="flex-row items-center mb-2">
                             <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                Created {new Date(task.createdAt).toLocaleDateString()}
+                                Created {new Date(listItem.createdAt).toLocaleDateString()}
                             </Text>
                         </View>
 
-                        {task.updatedAt.getTime() !== task.createdAt.getTime() && (
+                        {listItem.updatedAt.getTime() !== listItem.createdAt.getTime() && (
                             <View className="flex-row items-center mb-2">
                                 <Ionicons name="time-outline" size={20} color={getColor("on-surface-variant")} />
                                 <Text className="text-on-surface-variant text-base ml-2">
-                                    Updated {new Date(task.updatedAt).toLocaleDateString()}
+                                    Updated {new Date(listItem.updatedAt).toLocaleDateString()}
                                 </Text>
                             </View>
                         )}
                     </View>
 
-                    {task.notes && (
+                    {listItem.notes && (
                         <View className="mb-4">
                             <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
                             <View className="bg-surface border border-outline rounded-lg p-3">
-                                <Text className="text-on-surface text-base">{task.notes}</Text>
+                                <Text className="text-on-surface text-base">{listItem.notes}</Text>
                             </View>
                         </View>
                     )}
@@ -148,12 +147,12 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
             {!isNoteList && (
                 <View className="flex-row items-center">
                     <Ionicons
-                        name={task.completed ? "checkmark-circle" : "radio-button-off"}
+                        name={listItem.completed ? "checkmark-circle" : "radio-button-off"}
                         size={20}
-                        color={task.completed ? getColor("primary") : getColor("on-surface-variant")}
+                        color={listItem.completed ? getColor("primary") : getColor("on-surface-variant")}
                     />
                     <Text className="text-on-surface text-base ml-2">
-                        {task.completed ? "Completed" : "Not completed"}
+                        {listItem.completed ? "Completed" : "Not completed"}
                     </Text>
                 </View>
             )}
@@ -161,4 +160,4 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
     );
 };
 
-export default TaskDetailView;
+export default ListItemDetailView;

@@ -1,28 +1,26 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
-import { TaskListId, TaskListType } from '@timothyw/pat-common';
+import { ListWithItems, sortListItems } from '@/src/features/lists/models';
+import { ListId, ListItemData, ListType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
-import TaskItemCard from './TaskItemCard';
+import ListItemCard from './ListItemCard';
 
-interface TaskListCardProps {
-    taskList: TaskListWithTasks;
-    onPress: (taskList: TaskListWithTasks) => void;
-    onTaskPress: (task: any) => void;
-    onAddTask: (taskListId: TaskListId) => void;
+interface ListCardProps {
+    list: ListWithItems;
+    onPress: (list: ListWithItems) => void;
+    onListItemPress: (listItem: ListItemData) => void;
+    onAddListItem: (listId: ListId) => void;
     showCompleted: boolean;
 }
 
-const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPress, onAddTask, showCompleted }) => {
+const ListCard: React.FC<ListCardProps> = ({ list, onPress, onListItemPress, onAddListItem, showCompleted }) => {
     const { getColor } = useTheme();
     const [isExpanded, setIsExpanded] = useState(false);
     const [rotateAnimation] = useState(new Animated.Value(0));
     
-    const incompleteTasks = taskList.tasks.filter(task => !task.completed);
-    const completedTasks = taskList.tasks.filter(task => task.completed);
-    const incompleteTaskCount = incompleteTasks.length;
-    const totalTasks = taskList.tasks.length;
+    const completedItems = list.items.filter(item => item.completed);
+    const totalItems = list.items.length;
 
     const handleHeaderPress = () => {
         const newExpanded = !isExpanded;
@@ -36,11 +34,11 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
     };
 
     const handleListPress = () => {
-        onPress(taskList);
+        onPress(list);
     };
 
-    const handleAddTask = () => {
-        onAddTask(taskList._id);
+    const handleAddListItem = () => {
+        onAddListItem(list._id);
     };
 
     const rotateStyle = {
@@ -71,7 +69,7 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                 
                 <View className="flex-row items-center mr-3">
                     <Ionicons
-                        name={taskList.type === TaskListType.NOTES ? 'document-text' : 'checkbox'}
+                        name={list.type === ListType.NOTES ? 'document-text' : 'checkbox'}
                         size={20}
                         color={getColor('on-surface-variant')}
                     />
@@ -79,12 +77,12 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                 
                 <View className="flex-1">
                     <Text className="text-on-surface text-lg font-semibold mb-1">
-                        {taskList.name}
+                        {list.name}
                     </Text>
                     <Text className="text-on-surface-variant text-sm">
-                        {taskList.type === TaskListType.NOTES 
-                            ? `${totalTasks} note${totalTasks !== 1 ? 's' : ''}`
-                            : `${completedTasks.length}/${totalTasks} completed`
+                        {list.type === ListType.NOTES
+                            ? `${totalItems} note${totalItems !== 1 ? 's' : ''}`
+                            : `${completedItems.length}/${totalItems} completed`
                         }
                     </Text>
                 </View>
@@ -103,7 +101,7 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                     
                     <TouchableOpacity
                         className="p-2"
-                        onPress={handleAddTask}
+                        onPress={handleAddListItem}
                     >
                         <Ionicons 
                             name="add"
@@ -114,26 +112,25 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
                 </View>
             </TouchableOpacity>
 
-            {/* Expanded tasks */}
             {isExpanded && (
                 <View className="px-4 pb-4">
-                    {taskList.tasks.length === 0 ? (
+                    {list.items.length === 0 ? (
                         <Text className="text-on-surface-variant text-center py-4">
-                            No tasks in this list
+                            No items in this list
                         </Text>
                     ) : (
                         (() => {
-                            const tasksToShow = showCompleted 
-                                ? sortTasks(taskList.tasks, taskList.type)
-                                : sortTasks(taskList.tasks.filter(task => !task.completed), taskList.type);
+                            const itemsToShow = showCompleted
+                                ? sortListItems(list.items, list.type)
+                                : sortListItems(list.items.filter(items => !items.completed), list.type);
                             
-                            return tasksToShow.map((task, index) => (
-                                <TaskItemCard
-                                    key={task._id}
-                                    task={task}
-                                    taskList={taskList}
-                                    onPress={onTaskPress}
-                                    isLast={index === tasksToShow.length - 1}
+                            return itemsToShow.map((listItem, index) => (
+                                <ListItemCard
+                                    key={listItem._id}
+                                    listItem={listItem}
+                                    list={list}
+                                    onPress={onListItemPress}
+                                    isLast={index === itemsToShow.length - 1}
                                 />
                             ));
                         })()
@@ -144,4 +141,4 @@ const TaskListCard: React.FC<TaskListCardProps> = ({ taskList, onPress, onTaskPr
     );
 };
 
-export default TaskListCard;
+export default ListCard;

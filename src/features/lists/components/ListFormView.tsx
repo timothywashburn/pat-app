@@ -1,50 +1,40 @@
 import React, { useState } from 'react';
-import {
-    ScrollView,
-    Text,
-    TextInput,
-    View,
-} from 'react-native';
-import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormSection from '@/src/components/common/FormSection';
 import SelectionList from '@/src/components/common/SelectionList';
-import { useTasks } from '@/src/features/tasks/hooks/useTasks';
-import { TaskList } from '@/src/features/tasks/models';
-import { TaskListType } from '@timothyw/pat-common';
+import { useLists } from '@/src/features/lists/hooks/useLists';
+import { ListData, ListType } from "@timothyw/pat-common";
 
-interface TaskListFormViewProps {
+interface ListFormViewProps {
     isPresented: boolean;
     onDismiss: () => void;
     onCancel?: () => void;
-    onTaskListSaved?: () => void;
-    existingTaskList?: TaskList;
+    onListSaved?: () => void;
+    existingList?: ListData;
     isEditMode?: boolean;
 }
 
-const TaskListFormView: React.FC<TaskListFormViewProps> = ({
+const ListFormView: React.FC<ListFormViewProps> = ({
     isPresented,
     onDismiss,
     onCancel,
-    onTaskListSaved,
-    existingTaskList,
+    onListSaved,
+    existingList,
     isEditMode = false
 }) => {
-    const { getColor } = useTheme();
-
-    const [name, setName] = useState(existingTaskList?.name || '');
-    const [type, setType] = useState<TaskListType>(existingTaskList?.type || TaskListType.TASKS);
+    const [name, setName] = useState(existingList?.name || '');
+    const [type, setType] = useState<ListType>(existingList?.type || ListType.TASKS);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const tasksHook = useTasks();
+    const listsHook = useLists();
 
     if (!isPresented) {
         return null;
     }
 
-    const handleSaveTaskList = async () => {
+    const handleSaveList = async () => {
         if (!name.trim()) {
             setErrorMessage('List name is required');
             return;
@@ -54,51 +44,51 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            if (isEditMode && existingTaskList) {
-                await tasksHook.updateTaskList(existingTaskList._id, {
+            if (isEditMode && existingList) {
+                await listsHook.updateList(existingList._id, {
                     name: name.trim(),
                     type: type
                 });
             } else {
-                await tasksHook.createTaskList(name.trim(), type);
+                await listsHook.createList(name.trim(), type);
             }
 
             if (!isEditMode) {
                 setName('');
             }
 
-            onTaskListSaved?.();
+            onListSaved?.();
             onDismiss();
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to save task list');
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to save list');
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleDelete = async () => {
-        if (!existingTaskList) return;
+        if (!existingList) return;
 
         setIsLoading(true);
         setErrorMessage(null);
 
         try {
-            await tasksHook.deleteTaskList(existingTaskList._id);
-            onTaskListSaved?.();
+            await listsHook.deleteList(existingList._id);
+            onListSaved?.();
             onDismiss();
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete task list');
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
             setIsLoading(false);
         }
     };
 
     const handleCancel = () => {
-        if (isEditMode && existingTaskList) {
-            setName(existingTaskList.name);
-            setType(existingTaskList.type);
+        if (isEditMode && existingList) {
+            setName(existingList.name);
+            setType(existingList.type);
         } else {
             setName('');
-            setType(TaskListType.TASKS);
+            setType(ListType.TASKS);
         }
         setErrorMessage(null);
         
@@ -117,15 +107,15 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
             onDismiss={handleCancel}
             title={isEditMode ? 'Edit List' : 'New List'}
             isEditMode={isEditMode}
-            onSave={handleSaveTaskList}
+            onSave={handleSaveList}
             isSaveDisabled={!name.trim()}
             isLoading={isLoading}
             errorMessage={errorMessage}
-            existingItem={existingTaskList}
+            existingItem={existingList}
             onDelete={handleDelete}
             deleteButtonText="Delete List"
-            deleteConfirmTitle="Delete Task List"
-            deleteConfirmMessage="Are you sure you want to delete this task list? This will also delete all tasks in it. This action cannot be undone."
+            deleteConfirmTitle="Delete List"
+            deleteConfirmMessage="Are you sure you want to delete this list? This will also delete all tasks in it. This action cannot be undone."
         >
                 <FormSection title="List Details">
                     <FormField
@@ -141,10 +131,10 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
                     <SelectionList
                         label="List Type"
                         selectedValue={type}
-                        onSelectionChange={(value) => setType(value as TaskListType)}
+                        onSelectionChange={(value) => setType(value as ListType)}
                         options={[
-                            { label: 'Task List', value: TaskListType.TASKS, description: 'Items can be marked as complete' },
-                            { label: 'Note List', value: TaskListType.NOTES, description: 'Items are notes and cannot be completed' }
+                            { label: 'Task List', value: ListType.TASKS, description: 'Items can be marked as complete' },
+                            { label: 'Note List', value: ListType.NOTES, description: 'Items are notes and cannot be completed' }
                         ]}
                         required
                     />
@@ -154,4 +144,4 @@ const TaskListFormView: React.FC<TaskListFormViewProps> = ({
     );
 };
 
-export default TaskListFormView;
+export default ListFormView;

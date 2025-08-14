@@ -52,9 +52,6 @@ export function useNotifiableEntity<T>(config: NotifiableEntityConfig<T>) {
         switch (config.entityType) {
             case 'agenda_item':
                 return 'agenda';
-            case 'task':
-            case 'task_list':
-                return 'tasks';
             case 'habit':
                 return 'habits';
             default:
