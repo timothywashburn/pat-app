@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { usePathname, useRouter, useSegments } from 'expo-router';
-import { AuthStoreStatus, useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
+import { AuthStoreStatus, useAuthStore } from '@/src/stores/useAuthStore';
 import { View } from 'react-native';
-import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 
 function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLayout?: () => void }) {

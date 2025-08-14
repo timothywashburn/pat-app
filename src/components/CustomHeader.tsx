@@ -5,7 +5,7 @@ import { useTheme } from '@/src/context/ThemeContext';
 import HamburgerMenu from './HamburgerMenu';
 import { useModuleContext } from "@/src/components/ModuleContext";
 import { ModuleType } from "@timothyw/pat-common";
-import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 
 interface CustomHeaderProps {
     moduleType: ModuleType;

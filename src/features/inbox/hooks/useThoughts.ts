@@ -8,7 +8,7 @@ import {
     UpdateThoughtRequest, UpdateThoughtResponse,
 } from '@timothyw/pat-common';
 import { useNotifiableEntity } from '../../notifications/hooks/useNotifiableEntity';
-import { useUserDataStore } from '@/src/features/settings/controllers/useUserDataStore';
+import { useUserDataStore } from '@/src/stores/useUserDataStore';
 
 export interface ThoughtsHookState {
     thoughts: ThoughtData[];

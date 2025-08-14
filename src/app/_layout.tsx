@@ -3,7 +3,7 @@ import "@/global.css"
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
-import { AuthStoreStatus, useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
+import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
 import { VersionResponse } from "@timothyw/pat-common";
 import { Platform } from 'react-native';
 import SocketService from '@/src/services/SocketService';
@@ -14,7 +14,7 @@ import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import { UserDataStoreStatus, useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { UserDataStoreStatus, useUserDataStore } from "@/src/stores/useUserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
 import { SafeAreaView } from "react-native-safe-area-context";

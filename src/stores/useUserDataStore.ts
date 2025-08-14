@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { HTTPMethod, ApiResponseBody } from '@/src/hooks/useNetworkRequest';
 import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
-import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
+import { useAuthStore } from '@/src/stores/useAuthStore';
 import {
     GetUserResponse,
     ModuleType, Serializer,

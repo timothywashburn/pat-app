@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
+import { useAuthStore } from '@/src/stores/useAuthStore';
 import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 

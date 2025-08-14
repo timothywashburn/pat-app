@@ -16,7 +16,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import { useAgenda, useAgendaNotifications } from "@/src/features/agenda/hooks/useAgenda";
 import WebDateTimePicker from './WebDateTimePicker';
-import { useUserDataStore } from "@/src/features/settings/controllers/useUserDataStore";
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { CreateItemRequest, ItemData, UpdateItemRequest } from "@timothyw/pat-common";
 
 interface AgendaItemFormViewProps {
