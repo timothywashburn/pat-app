@@ -6,7 +6,7 @@ import {
 } from '@/src/features/habits/models';
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { useHabits } from '@/src/features/habits/hooks/useHabits';
 import { Habit } from "@timothyw/pat-common";
 

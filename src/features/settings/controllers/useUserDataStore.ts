@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { HTTPMethod, ApiResponseBody } from '@/src/hooks/useNetworkRequest';
 import { Ionicons } from "@expo/vector-icons";
-import PatConfig from '@/src/controllers/PatConfig';
+import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
 import {

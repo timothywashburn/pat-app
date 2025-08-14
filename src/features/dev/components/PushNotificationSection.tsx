@@ -3,7 +3,7 @@ import { Text, View, TouchableOpacity, Platform, ActivityIndicator } from 'react
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import DevPanelSection from './DevPanelSection';
 import { UpdateUserRequest } from '@timothyw/pat-common';
 import { DataState } from "@/src/features/settings/controllers/useUserDataStore";

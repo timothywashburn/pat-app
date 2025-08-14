@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, Switch } from 'react-native';
 import { NotificationTemplateData, NotificationEntityType } from '@timothyw/pat-common';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 import { NotificationTemplateCard } from './NotificationTemplateCard';

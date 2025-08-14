@@ -3,7 +3,7 @@ import {
     Text,
     View,
 } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { Person } from "@timothyw/pat-common";
 

@@ -4,7 +4,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import {
     getActiveHabitDate,

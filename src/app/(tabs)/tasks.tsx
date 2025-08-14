@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, Vi
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
 import { ModuleType } from "@timothyw/pat-common";
 import { useTasks } from '@/src/features/tasks/hooks/useTasks';

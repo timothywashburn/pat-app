@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
-import PatConfig from '@/src/controllers/PatConfig';
+import PatConfig from '@/src/misc/PatConfig';
 import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
 import {
     ClientVerifyEmailResponseData,

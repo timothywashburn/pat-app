@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { DateOnlyString, DateString, fromDateString, Habit, HabitEntry } from "@timothyw/pat-common";
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 import { useToast } from "@/src/components/toast/ToastContext";

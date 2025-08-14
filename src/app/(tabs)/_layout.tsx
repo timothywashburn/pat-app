@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { ActivityIndicator, Platform, Text, View, TouchableOpacity } from 'react-native';
 import {
     UserDataStoreStatus,

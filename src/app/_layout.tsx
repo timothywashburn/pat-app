@@ -9,7 +9,7 @@ import { Platform } from 'react-native';
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
-import { CustomThemeProvider, useTheme } from "@/src/controllers/ThemeManager";
+import { CustomThemeProvider, useTheme } from "@/src/context/ThemeContext";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';

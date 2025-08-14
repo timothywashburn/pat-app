@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import { useThoughts, useInboxNotifications } from '@/src/features/inbox/hooks/useThoughts';
 import CustomHeader from '@/src/components/CustomHeader';

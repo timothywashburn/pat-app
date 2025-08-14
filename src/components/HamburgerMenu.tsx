@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { useUserDataStore } from '@/src/features/settings/controllers/useUserDataStore';
 import { Module } from '@timothyw/pat-common';
 import { useModuleContext } from './ModuleContext';

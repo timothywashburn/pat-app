@@ -4,7 +4,7 @@ import {
     View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { useAgenda } from "@/src/features/agenda/hooks/useAgenda";
 import { ItemData } from "@timothyw/pat-common";

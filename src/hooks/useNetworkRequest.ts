@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useAuthStore } from '@/src/features/auth/controllers/useAuthStore';
-import PatConfig from '@/src/controllers/PatConfig';
+import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 
 export enum HTTPMethod {

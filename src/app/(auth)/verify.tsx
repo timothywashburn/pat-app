@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { useAuthStore } from "@/src/features/auth/controllers/useAuthStore";
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from '@/src/components/toast/ToastContext';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextInput, View, TouchableOpacity } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { ThoughtData } from "@timothyw/pat-common";
 

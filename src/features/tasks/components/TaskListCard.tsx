@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
 import { TaskListId, TaskListType } from '@timothyw/pat-common';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import TaskItemCard from './TaskItemCard';
 
 interface TaskListCardProps {

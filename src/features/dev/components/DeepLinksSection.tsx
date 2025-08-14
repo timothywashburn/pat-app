@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import DevPanelSection from './DevPanelSection';
 
 const DeepLinkSection = () => {

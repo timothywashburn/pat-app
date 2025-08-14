@@ -7,7 +7,7 @@ import {
     Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { TaskListWithTasks, sortTasks } from '@/src/features/tasks/models';
 import { TaskListType } from '@timothyw/pat-common';

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { AuthError } from '@/src/features/auth/models/auth';
 import { HTTPMethod, ApiResponseBody } from '@/src/hooks/useNetworkRequest';
-import PatConfig from '@/src/controllers/PatConfig';
+import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 import SecureStorage from '../../../services/SecureStorage';
 import {

@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Task, TaskList } from '@/src/features/tasks/models';
 import { TaskListType } from '@timothyw/pat-common';
-import { useTheme } from '@/src/controllers/ThemeManager';
+import { useTheme } from '@/src/context/ThemeContext';
 
 interface TaskItemCardProps {
     task: Task;
