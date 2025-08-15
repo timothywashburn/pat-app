@@ -19,6 +19,7 @@ export const AgendaPanel: React.FC = () => {
     const { width } = useWindowDimensions();
     const agendaHook = useAgenda();
     const { agendaItems, isInitialized } = agendaHook;
+    console.log(`[Agenda] agendaItems from hook: ${agendaItems.map((item: any) => item.name).join(', ')}`);
     const { refreshControl } = useRefreshControl(agendaHook.loadAgendaItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);
 
@@ -77,6 +78,8 @@ export const AgendaPanel: React.FC = () => {
         setShowingNotifications(false);
     };
 
+    console.log(`[Agenda Component] re rendering with item names: ${agendaItems.map((item: any) => item.name).join(', ')}`);
+
     const filteredItems = agendaItems
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
@@ -123,10 +126,10 @@ export const AgendaPanel: React.FC = () => {
                     </TouchableOpacity>
                 </View>
             ) : (
-                <FlatList
-                    data={[{ key: 'content' }]}
-                    renderItem={() => (
-                        isTableView ? (
+                isTableView ? (
+                    <FlatList
+                        data={[{ key: 'content' }]}
+                        renderItem={() => (
                             <View className="p-6">
                                 <View className="bg-surface rounded-xl overflow-hidden">
                                     <TableHeader />
@@ -140,22 +143,25 @@ export const AgendaPanel: React.FC = () => {
                                     ))}
                                 </View>
                             </View>
-                        ) : (
-                            <View className="px-4 pt-3">
-                                {filteredItems.map((item, index) => (
-                                    <AgendaItemCard
-                                        key={item._id}
-                                        item={item}
-                                        onPress={handleItemSelect}
-                                        isTableView={false}
-                                    />
-                                ))}
-                            </View>
-                        )
-                    )}
-                    keyExtractor={item => item.key}
-                    refreshControl={refreshControl}
-                />
+                        )}
+                        keyExtractor={item => item.key}
+                        refreshControl={refreshControl}
+                    />
+                ) : (
+                    <FlatList
+                        data={filteredItems}
+                        renderItem={({ item }) => (
+                            <AgendaItemCard
+                                item={item}
+                                onPress={handleItemSelect}
+                                isTableView={false}
+                            />
+                        )}
+                        keyExtractor={item => item._id}
+                        refreshControl={refreshControl}
+                        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
+                    />
+                )
             )}
 
             {/* Create new item view */}
