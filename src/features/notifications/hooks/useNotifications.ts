@@ -66,7 +66,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
             const response = await performAuthenticated<undefined, GetNotificationTemplatesResponse>({
                 endpoint,
                 method: HTTPMethod.GET,
-            }, { skipLoadingState: true });
+            });
 
             if (!response.success) throw new Error('Failed to get notification templates');
 
@@ -89,7 +89,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
                 endpoint: '/api/notifications/templates',
                 method: HTTPMethod.POST,
                 body: templateData,
-            }, { skipLoadingState: true });
+            });
 
             if (!response.success) throw new Error('Failed to create notification template');
             if (!response.template) throw new Error('No template returned');
@@ -123,7 +123,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
                 endpoint: `/api/notifications/templates/${templateId}`,
                 method: HTTPMethod.PUT,
                 body: updates,
-            }, { skipLoadingState: true });
+            });
 
             if (!response.success) throw new Error('Failed to update notification template');
             if (!response.template) throw new Error('No template returned');
@@ -153,7 +153,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
             const response = await performAuthenticated<undefined, DeleteNotificationTemplateResponse>({
                 endpoint: `/api/notifications/templates/${templateId}`,
                 method: HTTPMethod.DELETE,
-            }, { skipLoadingState: true });
+            });
 
             if (!response.success) throw new Error('Failed to delete notification template');
 
@@ -184,7 +184,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
                 endpoint: '/api/notifications/templates/preview',
                 method: HTTPMethod.POST,
                 body: request,
-            }, { skipLoadingState: true });
+            });
 
             if (!response.success) throw new Error('Failed to preview notification template');
             if (!response.preview) throw new Error('No preview returned');
@@ -214,7 +214,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
             const response = await performAuthenticated<undefined, any>({
                 endpoint: `/api/notifications/entity-sync?${params.toString()}`,
                 method: HTTPMethod.GET,
-            }, { skipLoadingState: true });
+            });
 
             if (!response.success) throw new Error('Failed to get entity sync state');
 
@@ -243,7 +243,7 @@ export function useNotifications(entityType?: NotificationEntityType, entityId?:
                 endpoint: '/api/notifications/entity-sync',
                 method: HTTPMethod.PUT,
                 body: { entityType, entityId, synced },
-            }, { skipLoadingState: true });
+            });
 
             if (!response.success) throw new Error('Failed to update entity sync');
 
