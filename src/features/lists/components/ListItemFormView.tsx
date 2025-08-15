@@ -9,7 +9,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
-import { useLists } from '@/src/features/lists/hooks/useLists';
+import { useListsStore } from '@/src/stores/useListsStore';
 import { ListItemData, ListId, UpdateListItemRequest } from "@timothyw/pat-common";
 import { ListWithItems } from "@/src/features/lists/models";
 
@@ -48,7 +48,7 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const listsHook = useLists();
+    const { createListItem, updateListItem, deleteListItem } = useListsStore();
 
     if (!isPresented) {
         return null;
@@ -76,9 +76,9 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
             };
 
             if (isEditMode && existingListItem) {
-                await listsHook.updateListItem(existingListItem._id, listItemData);
+                await updateListItem(existingListItem._id, listItemData);
             } else {
-                await listsHook.createListItem({
+                await createListItem({
                     name: name.trim(),
                     notes: notes.trim() || undefined,
                     listId: selectedListId,
@@ -106,7 +106,7 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await listsHook.deleteListItem(existingListItem._id);
+            await deleteListItem(existingListItem._id);
             onListItemSaved?.();
             onDismiss();
         } catch (error) {

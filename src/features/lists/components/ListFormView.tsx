@@ -3,7 +3,7 @@ import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormSection from '@/src/components/common/FormSection';
 import SelectionList from '@/src/components/common/SelectionList';
-import { useLists } from '@/src/features/lists/hooks/useLists';
+import { useListsStore } from '@/src/stores/useListsStore';
 import { ListData, ListType } from "@timothyw/pat-common";
 
 interface ListFormViewProps {
@@ -28,7 +28,7 @@ const ListFormView: React.FC<ListFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const listsHook = useLists();
+    const { createList, updateList, deleteList } = useListsStore();
 
     if (!isPresented) {
         return null;
@@ -45,12 +45,12 @@ const ListFormView: React.FC<ListFormViewProps> = ({
 
         try {
             if (isEditMode && existingList) {
-                await listsHook.updateList(existingList._id, {
+                await updateList(existingList._id, {
                     name: name.trim(),
                     type: type
                 });
             } else {
-                await listsHook.createList(name.trim(), type);
+                await createList(name.trim(), type);
             }
 
             if (!isEditMode) {
@@ -73,7 +73,7 @@ const ListFormView: React.FC<ListFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await listsHook.deleteList(existingList._id);
+            await deleteList(existingList._id);
             onListSaved?.();
             onDismiss();
         } catch (error) {

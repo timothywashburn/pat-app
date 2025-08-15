@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
-import { useThoughts } from '@/src/features/inbox/hooks/useThoughts';
+import { useThoughtsStore } from '@/src/stores/useThoughtsStore';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import ListItemFormView from '@/src/features/lists/components/ListItemFormView';
-import { useLists } from '@/src/features/lists/hooks/useLists';
+import { useListsStore } from '@/src/stores/useListsStore';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData } from "@timothyw/pat-common";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
@@ -23,9 +23,14 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const thoughtsHook = useThoughts();
-    const { thoughts, isInitialized } = thoughtsHook;
-    const { refreshControl } = useRefreshControl(thoughtsHook.loadThoughts, 'Failed to refresh thoughts');
+    const { thoughts, isInitialized, loadThoughts, createThought, updateThought, deleteThought } = useThoughtsStore();
+    const { refreshControl } = useRefreshControl(loadThoughts, 'Failed to refresh thoughts');
+
+    useEffect(() => {
+        if (!isInitialized) {
+            loadThoughts();
+        }
+    }, [isInitialized, loadThoughts]);
     const [newThought, setNewThought] = useState('');
     const [selectedThought, setSelectedThought] = useState<ThoughtData | null>(null);
     const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
@@ -35,13 +40,14 @@ export const InboxPanel: React.FC = () => {
     const [showingCreateListItemForm, setShowingCreateListItemForm] = useState(false);
     const [showingNotificationConfig, setShowingNotificationConfig] = useState(false);
 
-    const { listsWithItems } = useLists();
+    const { getListsWithItems } = useListsStore();
+    const listsWithItems = getListsWithItems();
 
     const handleAddThought = async () => {
         if (newThought.trim() === '') return;
 
         try {
-            await thoughtsHook.createThought(newThought);
+            await createThought(newThought);
             setNewThought('');
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to create thought';
@@ -56,7 +62,7 @@ export const InboxPanel: React.FC = () => {
         }
 
         try {
-            await thoughtsHook.updateThought(editingThought._id, {
+            await updateThought(editingThought._id, {
                 content: editedContent,
             });
         } catch (error) {
@@ -69,7 +75,7 @@ export const InboxPanel: React.FC = () => {
 
     const handleDeleteThought = async (id: string) => {
         try {
-            await thoughtsHook.deleteThought(id);
+            await deleteThought(id);
             setExpandedThoughtId(null);
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : 'Failed to delete thought';

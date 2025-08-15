@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { ToastContainer } from './ToastContainer';
 import { ToastType } from './Toast';
+import { toastManager } from '@/src/utils/toastUtils';
 
 export interface ToastOptions {
     message: string;
@@ -97,6 +98,18 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
             position: 'top'
         });
     }, [showToast]);
+
+    // Register this context with the toast manager for imperative access
+    useEffect(() => {
+        toastManager.setToastContext({
+            showToast,
+            hideToast,
+            infoToast,
+            successToast,
+            errorToast,
+            warningToast
+        });
+    }, [showToast, hideToast, infoToast, successToast, errorToast, warningToast]);
 
     return (
         <ToastContext.Provider value={{

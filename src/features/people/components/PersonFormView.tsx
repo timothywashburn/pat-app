@@ -10,8 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
-import { usePeople } from "@/src/features/people/hooks/usePeople";
-import { usePersonNotes } from "@/src/features/people/hooks/usePersonNotes";
+import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import { Person, PersonNoteData, PersonNoteId, PersonProperty } from "@timothyw/pat-common";
 
 interface PersonFormViewProps {
@@ -50,8 +49,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     // For editing existing properties and notes
     // No separate editing state needed with direct editing
 
-    const personManager = usePeople();
-    const personNoteManager = usePersonNotes();
+    const { createPerson, updatePerson, deletePerson, createPersonNote, updatePersonNote, deletePersonNote } = usePeopleStore();
 
     if (!isPresented) {
         return null;
@@ -75,26 +73,26 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
 
             if (isEditMode && existingPerson) {
                 // Save person data first, but don't auto-refresh until all note operations complete
-                await personManager.updatePerson(existingPerson._id, personData, false);
+                await updatePerson(existingPerson._id, personData, false);
                 
                 // Handle all note operations in parallel
                 const noteOperations = [];
                 
                 // Delete notes that were marked for deletion
                 for (const noteId of deletedNoteIds) {
-                    noteOperations.push(personNoteManager.deletePersonNote(noteId));
+                    noteOperations.push(deletePersonNote(noteId));
                 }
                 
                 // Update modified existing notes
                 for (const note of notes) {
                     if (note._id && modifiedNoteIds.has(note._id)) {
-                        noteOperations.push(personNoteManager.updatePersonNote(note._id, note.content));
+                        noteOperations.push(updatePersonNote(note._id, note.content));
                     }
                 }
                 
                 // Create new notes
                 for (const pendingNote of pendingNotes) {
-                    noteOperations.push(personNoteManager.createPersonNote(existingPerson._id, pendingNote.content));
+                    noteOperations.push(createPersonNote(existingPerson._id, pendingNote.content));
                 }
                 
                 // Wait for all note operations to complete
@@ -103,7 +101,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 }
             } else {
                 // For new person, create person first then create notes
-                const newPerson = await personManager.createPerson({
+                const newPerson = await createPerson({
                     ...personData,
                     notes: [],
                 });
@@ -111,7 +109,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 // Create all pending notes for the new person in parallel
                 if (pendingNotes.length > 0) {
                     const noteCreationPromises = pendingNotes.map(pendingNote =>
-                        personNoteManager.createPersonNote(newPerson._id, pendingNote.content)
+                        createPersonNote(newPerson._id, pendingNote.content)
                     );
                     await Promise.all(noteCreationPromises);
                 }
@@ -146,7 +144,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await personManager.deletePerson(existingPerson._id);
+            await deletePerson(existingPerson._id);
             onPersonSaved?.();
             onDismiss();
         } catch (error) {

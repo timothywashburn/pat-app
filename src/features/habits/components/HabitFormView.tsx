@@ -13,7 +13,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
-import { useHabits } from '@/src/features/habits/hooks/useHabits';
+import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import { Habit } from "@timothyw/pat-common";
 import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
 
@@ -44,7 +44,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const habitManager = useHabits();
+    const { createHabit, updateHabit, deleteHabit } = useHabitsStore();
 
     if (!isPresented) {
         return null;
@@ -76,9 +76,9 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
             };
 
             if (isEditMode && existingHabit) {
-                await habitManager.updateHabit(existingHabit._id, habitData);
+                await updateHabit(existingHabit._id, habitData);
             } else {
-                await habitManager.createHabit({
+                await createHabit({
                     ...habitData,
                     description: habitData.description || undefined,
                     notes: habitData.notes || undefined
@@ -108,7 +108,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await habitManager.deleteHabit(existingHabit._id);
+            await deleteHabit(existingHabit._id);
             onHabitSaved?.();
             onDismiss();
         } catch (error) {

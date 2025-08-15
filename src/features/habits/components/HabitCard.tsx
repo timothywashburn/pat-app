@@ -7,7 +7,7 @@ import {
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
 import { useTheme } from '@/src/context/ThemeContext';
-import { useHabits } from '@/src/features/habits/hooks/useHabits';
+import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import { Habit } from "@timothyw/pat-common";
 
 interface HabitCardProps {
@@ -19,7 +19,7 @@ interface HabitCardProps {
 
 const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHabitUpdated }) => {
     const { getColor } = useTheme();
-    const habitManager = useHabits();
+    const habitStore = useHabitsStore();
 
     const formatCompletionRate = (rate: number): string => {
         return rate.toFixed(1);

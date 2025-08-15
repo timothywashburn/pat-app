@@ -14,7 +14,7 @@ import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
-import { useAgenda } from "@/src/features/agenda/hooks/useAgenda";
+import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import WebDateTimePicker from './WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { CreateItemRequest, ItemData, UpdateItemRequest } from "@timothyw/pat-common";
@@ -62,7 +62,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     const categories = data.config.agenda.itemCategories;
     const types = data.config.agenda.itemTypes;
 
-    const agendaHook = useAgenda();
+    const { createItem, updateItem, deleteItem } = useAgendaStore();
 
     if (!isPresented) {
         return null;
@@ -88,7 +88,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     type: type || null,
                 };
 
-                await agendaHook.updateAgendaItem(existingItem._id, itemData);
+                await updateItem(existingItem._id, itemData);
             } else {
                 const itemData: CreateItemRequest = {
                     name: name.trim(),
@@ -99,7 +99,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     type: type,
                 };
 
-                await agendaHook.createAgendaItem(itemData);
+                await createItem(itemData);
             }
 
             if (!isEditMode) {
@@ -127,7 +127,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await agendaHook.deleteAgendaItem(existingItem._id);
+            await deleteItem(existingItem._id);
             onItemSaved?.();
             onDismiss();
         } catch (error) {

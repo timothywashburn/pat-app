@@ -11,7 +11,7 @@ import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { ListWithItems, sortListItems } from '@/src/features/lists/models';
 import { ListItemData, ListType } from '@timothyw/pat-common';
-import { useLists } from '@/src/features/lists/hooks/useLists';
+import { useListsStore } from '@/src/stores/useListsStore';
 import ListItemCard from './ListItemCard';
 
 interface ListDetailViewProps {
@@ -37,7 +37,7 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
     const [showListItems, setShowListItems] = React.useState(false);
     const [rotateAnimation] = React.useState(new Animated.Value(0));
 
-    const listsHook = useLists();
+    const { deleteList, deleteListItem } = useListsStore();
 
     if (!isPresented) {
         return null;
@@ -65,7 +65,7 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await listsHook.deleteList(list._id);
+                            await deleteList(list._id);
                             onListUpdated?.();
                             onDismiss();
                         } catch (error) {
@@ -125,7 +125,7 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
                         try {
                             // Delete all completed list items
                             await Promise.all(
-                                completedListItems.map(listItems => listsHook.deleteListItem(listItems._id))
+                                completedListItems.map(listItems => deleteListItem(listItems._id))
                             );
                             onListUpdated?.();
                         } catch (error) {

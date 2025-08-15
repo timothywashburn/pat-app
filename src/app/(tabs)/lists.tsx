@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
 import { ListId, ListItemData, ModuleType } from "@timothyw/pat-common";
-import { useLists } from '@/src/features/lists/hooks/useLists';
+import { useListsStore } from '@/src/stores/useListsStore';
 import ListCard from '@/src/features/lists/components/ListCard';
 import ListDetailView from '@/src/features/lists/components/ListDetailView';
 import ListFormView from '@/src/features/lists/components/ListFormView';
@@ -19,9 +19,15 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 export const ListsPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const listsHook = useLists();
-    const { listsWithItems: lists, isInitialized, error } = listsHook;
-    const { isRefreshing, refreshControl } = useRefreshControl(listsHook.loadLists, 'Failed to refresh lists');
+    const { getListsWithItems, isInitialized, loadAll } = useListsStore();
+    const lists = getListsWithItems();
+    const { isRefreshing, refreshControl } = useRefreshControl(loadAll, 'Failed to refresh lists');
+
+    useEffect(() => {
+        if (!isInitialized) {
+            loadAll();
+        }
+    }, [isInitialized, loadAll]);
     const [showCompleted, setShowCompleted] = useState(false);
 
     // State for detail views
@@ -39,7 +45,7 @@ export const ListsPanel: React.FC = () => {
         React.useCallback(() => {
             if (isRefreshing) return;
 
-            listsHook.loadLists().catch(err => {
+            loadAll().catch(err => {
                 const errorMsg = err instanceof Error ? err.message : 'Failed to load lists';
                 errorToast(errorMsg);
             });

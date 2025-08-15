@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
-import { usePeople } from "@/src/features/people/hooks/usePeople";
+import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import PersonItemView from "@/src/features/people/components/PersonItemView";
 import PersonFormView from "@/src/features/people/components/PersonFormView";
 import PersonDetailView from "@/src/features/people/components/PersonDetailView";
@@ -15,9 +15,14 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const PeoplePanel: React.FC = () => {
     const { getColor } = useTheme();
-    const peopleHook = usePeople();
-    const { people, isInitialized } = peopleHook;
-    const { refreshControl } = useRefreshControl(peopleHook.loadPeople, 'Failed to refresh people');
+    const { people, isInitialized, loadPeople } = usePeopleStore();
+    const { refreshControl } = useRefreshControl(loadPeople, 'Failed to refresh people');
+
+    useEffect(() => {
+        if (!isInitialized) {
+            loadPeople();
+        }
+    }, [isInitialized, loadPeople]);
 
     // State for the create/edit form
     const [showingCreateForm, setShowingCreateForm] = useState(false);

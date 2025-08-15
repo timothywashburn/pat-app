@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
-import { useHabits } from '@/src/features/habits/hooks/useHabits';
+import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 import { Habit } from "@timothyw/pat-common";
 import { isToday, isYesterday, toDateOnlyString } from '@/src/features/habits/models';
@@ -23,7 +23,7 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
 }) => {
     const { errorToast } = useToast();
     const { getColor } = useTheme();
-    const habitManager = useHabits();
+    const { markHabitEntry, deleteHabitEntry } = useHabitsStore();
 
     const targetDateOnlyString = toDateOnlyString(targetDate);
     const currentEntry = habit.entries.find(entry => entry.date === targetDateOnlyString);
@@ -53,9 +53,9 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
     const handleMarkHabit = async (status: HabitEntryStatus) => {
         try {
             if (currentEntry?.status === status) {
-                await habitManager.deleteHabitEntry(habit._id, targetDateOnlyString);
+                await deleteHabitEntry(habit._id, targetDateOnlyString);
             } else {
-                await habitManager.markHabitEntry(habit._id, targetDateOnlyString, status);
+                await markHabitEntry(habit._id, targetDateOnlyString, status);
             }
             onHabitUpdated?.();
         } catch (error) {

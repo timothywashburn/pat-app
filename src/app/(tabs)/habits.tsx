@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import CustomHeader from '@/src/components/CustomHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
-import { useHabits } from '@/src/features/habits/hooks/useHabits';
+import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCard from '@/src/features/habits/components/HabitCard';
 import HabitFormView from '@/src/features/habits/components/HabitFormView';
 import HabitDetailView from '@/src/features/habits/components/HabitDetailView';
@@ -10,9 +10,14 @@ import { getActiveHabitDate, toDateOnlyString } from '@/src/features/habits/mode
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 export const HabitsPanel: React.FC = () => {
-    const habitsHook = useHabits();
-    const { habits, isInitialized } = habitsHook;
-    const { refreshControl } = useRefreshControl(habitsHook.loadHabits, 'Failed to refresh habits');
+    const { habits, isInitialized, loadHabits, getHabitById } = useHabitsStore();
+    const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
+
+    useEffect(() => {
+        if (!isInitialized) {
+            loadHabits();
+        }
+    }, [isInitialized, loadHabits]);
     const [showUnmarkedOnly, setShowUnmarkedOnly] = useState(false);
     // State for the create/edit form
     const [showingCreateForm, setShowingCreateForm] = useState(false);
@@ -67,11 +72,11 @@ export const HabitsPanel: React.FC = () => {
 
     const handleHabitUpdated = async () => {
         try {
-            await habitsHook.loadHabits();
+            await loadHabits();
             
             // If we have a selected habit, update it with fresh data
             if (selectedHabit) {
-                const updatedSelectedHabit = habitsHook.getHabitById(selectedHabit._id);
+                const updatedSelectedHabit = getHabitById(selectedHabit._id);
                 if (updatedSelectedHabit) {
                     setSelectedHabit(updatedSelectedHabit);
                 }

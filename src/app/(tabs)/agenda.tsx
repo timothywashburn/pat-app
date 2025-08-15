@@ -7,7 +7,7 @@ import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
-import { useAgenda } from "@/src/features/agenda/hooks/useAgenda";
+import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ItemData, ModuleType } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
@@ -17,10 +17,9 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
-    const agendaHook = useAgenda();
-    const { agendaItems, isInitialized } = agendaHook;
-    console.log(`[Agenda] agendaItems from hook: ${agendaItems.map((item: any) => item.name).join(', ')}`);
-    const { refreshControl } = useRefreshControl(agendaHook.loadAgendaItems, 'Failed to refresh items');
+    const { items: agendaItems, isInitialized, loadItems, createItem, updateItem, deleteItem, setCompleted } = useAgendaStore();
+    console.log(`[Agenda] agendaItems from store: ${agendaItems.map((item: any) => item.name).join(', ')}`);
+    const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);
 
     // State for the create/edit form
@@ -35,6 +34,13 @@ export const AgendaPanel: React.FC = () => {
     const [showingNotifications, setShowingNotifications] = useState(false);
 
     const isTableView = width >= 768;
+
+    // Load items when component mounts
+    useEffect(() => {
+        if (!isInitialized) {
+            loadItems();
+        }
+    }, [isInitialized, loadItems]);
 
     const handleAddItem = () => {
         setShowingCreateForm(true);

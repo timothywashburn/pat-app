@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { ListData, ListItemData, ListType } from '@timothyw/pat-common';
-import { useLists } from '@/src/features/lists/hooks/useLists';
+import { useListsStore } from '@/src/stores/useListsStore';
 
 interface ListItemDetailViewProps {
     listItem: ListItemData;
@@ -32,7 +32,7 @@ const ListItemDetailView: React.FC<ListItemDetailViewProps> = ({
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     
     const isNoteList = list.type === ListType.NOTES;
-    const listsHook = useLists();
+    const { setListItemCompleted, deleteListItem } = useListsStore();
 
     if (!isPresented) {
         return null;
@@ -43,7 +43,7 @@ const ListItemDetailView: React.FC<ListItemDetailViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await listsHook.setListItemCompleted(listItem._id, !listItem.completed);
+            await setListItemCompleted(listItem._id, !listItem.completed);
             onListItemUpdated?.();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update list item');
@@ -69,7 +69,7 @@ const ListItemDetailView: React.FC<ListItemDetailViewProps> = ({
                         setErrorMessage(null);
 
                         try {
-                            await listsHook.deleteListItem(listItem._id);
+                            await deleteListItem(listItem._id);
                             onListItemUpdated?.();
                             onDismiss();
                         } catch (error) {
