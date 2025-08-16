@@ -7,12 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import { ItemData } from "@timothyw/pat-common";
+import { AgendaItemData } from "@timothyw/pat-common";
 import { NotificationsSection } from '@/src/features/notifications/components/NotificationsSection';
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 
 interface AgendaItemDetailViewProps {
-    item: ItemData;
+    item: AgendaItemData;
     isPresented: boolean;
     onDismiss: () => void;
     onEditRequest: () => void;

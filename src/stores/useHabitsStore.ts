@@ -9,12 +9,12 @@ import {
     DeleteHabitResponse,
     GetHabitsResponse,
     Habit,
-    HabitEntry,
+    HabitEntryData,
+    HabitEntryStatus, HabitFrequency,
     Serializer,
     UpdateHabitRequest,
     UpdateHabitResponse
 } from '@timothyw/pat-common';
-import { HabitEntryStatus, HabitFrequency } from '@timothyw/pat-common/src/types/models/habit-data';
 import { performAuthenticatedRequest } from '@/src/utils/networkUtils';
 import { toastManager } from '@/src/utils/toastUtils';
 
@@ -32,7 +32,7 @@ interface HabitsActions {
     markHabitEntry: (habitId: string, date: DateOnlyString, status: HabitEntryStatus) => Promise<void>;
     deleteHabitEntry: (habitId: string, date: DateOnlyString) => Promise<void>;
     getHabitById: (id: string) => Habit | undefined;
-    getHabitEntryByDate: (habitId: string, date: DateOnlyString) => HabitEntry | undefined;
+    getHabitEntryByDate: (habitId: string, date: DateOnlyString) => HabitEntryData | undefined;
 }
 
 export const useHabitsStore = create<HabitsState & HabitsActions>((set, get) => ({
@@ -160,7 +160,7 @@ export const useHabitsStore = create<HabitsState & HabitsActions>((set, get) => 
         return get().habits.find(h => h._id === id);
     },
 
-    getHabitEntryByDate: (habitId: string, date: DateOnlyString): HabitEntry | undefined => {
+    getHabitEntryByDate: (habitId: string, date: DateOnlyString): HabitEntryData | undefined => {
         const habit = get().getHabitById(habitId);
         if (!habit) return undefined;
         return habit.entries.find(e => e.date === date);

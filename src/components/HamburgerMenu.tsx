@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useUserDataStore } from '@/src/stores/useUserDataStore';
-import { Module } from '@timothyw/pat-common';
+import { UserModuleData } from '@timothyw/pat-common';
 import { useModuleContext } from './ModuleContext';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { moduleInfo } from "@/src/components/ModuleInfo";
@@ -21,13 +21,13 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ visible, onClose }) => {
     const modules = data?.config?.modules || [];
     const hiddenModules = modules.filter(module => !module.visible);
 
-    const handleModuleTap = (module: Module) => {
+    const handleModuleTap = (module: UserModuleData) => {
         console.log('tapping module:', module.type);
         showHiddenModule(module);
         onClose();
     };
 
-    const renderHiddenModuleItem = (item: Module) => (
+    const renderHiddenModuleItem = (item: UserModuleData) => (
         <TouchableOpacity
             key={item.type}
             className="flex-row items-center py-3 px-4 bg-surface rounded-lg mb-2"

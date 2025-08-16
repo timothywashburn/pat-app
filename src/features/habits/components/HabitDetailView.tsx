@@ -16,7 +16,6 @@ import HabitCalendarGrid from './HabitCalendarGrid';
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
 import { fromDateString, Habit } from "@timothyw/pat-common";
-import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
 
 interface HabitDetailViewProps {
     isPresented: boolean;

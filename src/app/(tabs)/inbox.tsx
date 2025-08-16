@@ -253,6 +253,7 @@ export const InboxPanel: React.FC = () => {
             {showingNotificationConfig && (
                 <NotificationConfigView
                     entityType="inbox"
+                    entityId="inbox"
                     entityName="Inbox"
                     onClose={() => setShowingNotificationConfig(false)}
                 />

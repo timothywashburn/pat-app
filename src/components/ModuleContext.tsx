@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Module } from '@timothyw/pat-common';
+import { UserModuleData } from '@timothyw/pat-common';
 
 interface ModuleContextType {
-    activeHiddenModule: Module | null;
-    setActiveHiddenModule: (module: Module | null) => void;
-    showHiddenModule: (module: Module) => void;
+    activeHiddenModule: UserModuleData | null;
+    setActiveHiddenModule: (module: UserModuleData | null) => void;
+    showHiddenModule: (module: UserModuleData) => void;
     hideActiveModule: () => void;
 }
 
@@ -15,9 +15,9 @@ interface ModuleProviderProps {
 }
 
 export const ModuleProvider: React.FC<ModuleProviderProps> = ({ children }) => {
-    const [activeHiddenModule, setActiveHiddenModule] = useState<Module | null>(null);
+    const [activeHiddenModule, setActiveHiddenModule] = useState<UserModuleData | null>(null);
 
-    const showHiddenModule = (module: Module) => {
+    const showHiddenModule = (module: UserModuleData) => {
         console.log('showing hidden module:', module.type);
         setActiveHiddenModule(module);
     };

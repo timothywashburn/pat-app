@@ -7,7 +7,7 @@ import { useNotifications } from '@/src/features/notifications/hooks/useNotifica
 
 interface NotificationsSectionProps {
     entityType: NotificationEntityType;
-    entityId?: string;
+    entityId: string;
     entityName?: string;
     onPress?: () => void;
     compact?: boolean;
@@ -22,7 +22,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
 }) => {
     const { getColor } = useTheme();
     const notifications = useNotifications(entityType, entityId);
-    const { templates, isLoading } = notifications;
+    const { templates } = notifications;
 
     useEffect(() => {
         loadTemplates();
@@ -52,25 +52,6 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
 
     const activeTemplates = templates.filter((t: NotificationTemplateData) => t.active);
     const totalCount = activeTemplates.length;
-
-    if (isLoading) {
-        return (
-            <View className={`bg-surface border border-divider ${compact ? 'rounded-lg p-3 my-1' : 'rounded-xl p-4 my-2'}`}>
-                <View className={`flex-row items-center justify-between ${compact ? 'mb-1.5' : 'mb-2'}`}>
-                    <View className="flex-row items-center flex-1">
-                        <Ionicons
-                            name="notifications-outline"
-                            size={compact ? 16 : 18}
-                            color={getColor('on-surface-variant')}
-                            className="mr-2"
-                        />
-                        <Text className={`text-on-surface font-semibold ${compact ? 'text-sm' : 'text-base'}`}>Notifications</Text>
-                    </View>
-                </View>
-                <Text className={`text-on-surface-variant italic ml-1 ${compact ? 'text-xs' : 'text-sm'}`}>Loading...</Text>
-            </View>
-        );
-    }
 
     return (
         <TouchableOpacity className={`bg-surface border border-divider ${compact ? 'rounded-lg p-3 my-1' : 'rounded-xl p-4 my-2'}`} onPress={onPress} activeOpacity={0.7}>

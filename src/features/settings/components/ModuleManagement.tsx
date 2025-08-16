@@ -2,15 +2,15 @@ import React, { useRef } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
-import { Module, ModuleType } from "@timothyw/pat-common";
+import { UserModuleData, ModuleType } from "@timothyw/pat-common";
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { moduleInfo } from "@/src/components/ModuleInfo";
 
 interface ModuleManagementProps {
     editMode: boolean;
-    modules: Module[];
-    onUpdateModules: (updatedModules: Module[]) => void;
+    modules: UserModuleData[];
+    onUpdateModules: (updatedModules: UserModuleData[]) => void;
 }
 
 export const ModuleManagement: React.FC<ModuleManagementProps> = ({
@@ -23,8 +23,8 @@ export const ModuleManagement: React.FC<ModuleManagementProps> = ({
     const visibleListRef = useRef(null);
     const hiddenListRef = useRef(null);
 
-    const visibleModules: Module[] = modules.filter(module => module.visible);
-    const hiddenModules: Module[] = modules.filter(module => !module.visible);
+    const visibleModules: UserModuleData[] = modules.filter(module => module.visible);
+    const hiddenModules: UserModuleData[] = modules.filter(module => !module.visible);
 
     const toggleModuleVisibility = (moduleType: ModuleType, visible: boolean) => {
         const moduleToToggle = modules.find(m => m.type === moduleType);
@@ -33,7 +33,7 @@ export const ModuleManagement: React.FC<ModuleManagementProps> = ({
         const otherModules = modules.filter(m => m.type !== moduleType);
 
         const updatedModule = { ...moduleToToggle, visible };
-        const updatedModules: Module[] = [];
+        const updatedModules: UserModuleData[] = [];
 
         updatedModules.push(...otherModules.filter(m => m.visible));
         updatedModules.push(updatedModule);
@@ -44,8 +44,8 @@ export const ModuleManagement: React.FC<ModuleManagementProps> = ({
         console.log(`modules (toggle): ${updatedModules.map(m => m.type)}`);
     };
 
-    const onDragEnd = (data: Module[], isVisible: boolean) => {
-        let updatedModules: Module[];
+    const onDragEnd = (data: UserModuleData[], isVisible: boolean) => {
+        let updatedModules: UserModuleData[];
         if (isVisible) {
             const hiddenModules = modules.filter(m => !m.visible);
             updatedModules = [...data, ...hiddenModules];
@@ -66,7 +66,7 @@ export const ModuleManagement: React.FC<ModuleManagementProps> = ({
         console.log(`panel names (drag): ${updatedModules.map(m => m.type)}`);
     };
 
-    const renderItem = ({ item, drag, isActive }: RenderItemParams<Module>) => {
+    const renderItem = ({ item, drag, isActive }: RenderItemParams<UserModuleData>) => {
         return (
             <ScaleDecorator>
                 <TouchableOpacity
@@ -111,7 +111,7 @@ export const ModuleManagement: React.FC<ModuleManagementProps> = ({
     };
 
     // For non-edit mode, we use a simpler renderer
-    const renderStaticItem = (item: Module) => (
+    const renderStaticItem = (item: UserModuleData) => (
         <View key={item.type} className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2">
             <View className="flex-row items-center">
                 <Ionicons
@@ -138,7 +138,7 @@ export const ModuleManagement: React.FC<ModuleManagementProps> = ({
                             ref={visibleListRef}
                             data={visibleModules}
                             renderItem={renderItem}
-                            keyExtractor={(item: Module) => item.type}
+                            keyExtractor={(item: UserModuleData) => item.type}
                             onDragEnd={({ data }) => onDragEnd(data, true)}
                             activationDistance={10}
                             scrollEnabled={false}
@@ -158,7 +158,7 @@ export const ModuleManagement: React.FC<ModuleManagementProps> = ({
                             ref={hiddenListRef}
                             data={hiddenModules}
                             renderItem={renderItem}
-                            keyExtractor={(item: Module) => item.type}
+                            keyExtractor={(item: UserModuleData) => item.type}
                             onDragEnd={({ data }) => onDragEnd(data, false)}
                             activationDistance={10}
                             scrollEnabled={false}

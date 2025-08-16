@@ -8,7 +8,7 @@ import {
     Person,
     PersonNoteData,
     PersonNoteId,
-    PersonProperty,
+    PersonPropertyData,
     Serializer,
     UpdatePersonRequest,
     UpdatePersonResponse,
@@ -33,7 +33,7 @@ interface PeopleState {
 
 interface PeopleActions {
     loadPeople: () => Promise<Person[]>;
-    createPerson: (params: { name: string; properties?: PersonProperty[]; notes?: PersonNoteId[]; }) => Promise<Person>;
+    createPerson: (params: { name: string; properties?: PersonPropertyData[]; notes?: PersonNoteId[]; }) => Promise<Person>;
     updatePerson: (id: string, updates: UpdatePersonRequest, autoRefresh?: boolean) => Promise<void>;
     deletePerson: (id: string) => Promise<void>;
     createPersonNote: (personId: PersonId, content: string) => Promise<PersonNoteData>;
@@ -81,7 +81,7 @@ export const usePeopleStore = create<PeopleState & PeopleActions>((set, get) => 
 
     createPerson: async (params: {
         name: string;
-        properties?: PersonProperty[];
+        properties?: PersonPropertyData[];
         notes?: PersonNoteId[];
     }): Promise<Person> => {
         const body = {

@@ -14,8 +14,7 @@ import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
-import { Habit } from "@timothyw/pat-common";
-import { HabitFrequency } from "@timothyw/pat-common/src/types/models/habit-data";
+import { Habit, HabitFrequency } from "@timothyw/pat-common";
 
 interface HabitFormViewProps {
     isPresented: boolean;

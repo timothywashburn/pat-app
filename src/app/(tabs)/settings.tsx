@@ -6,7 +6,7 @@ import { ModuleManagement } from '@/src/features/settings/components/ModuleManag
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
-import { Module, ModuleType } from "@timothyw/pat-common";
+import { UserModuleData, ModuleType } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export const SettingsPanel: React.FC = () => {
@@ -59,7 +59,7 @@ export const SettingsPanel: React.FC = () => {
         }
     };
 
-    const updateLocalModules = (updatedModules: Module[]) => {
+    const updateLocalModules = (updatedModules: UserModuleData[]) => {
         setLocalModules(updatedModules);
     };
 

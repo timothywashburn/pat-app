@@ -21,9 +21,6 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
     readOnly = false
 }) => {
     const { getColor } = useTheme();
-    const [isLoading, setIsLoading] = useState(false);
-    const notifications = useNotifications();
-
 
     const handleDelete = () => {
         Alert.alert(

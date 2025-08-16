@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import { useToast } from "@/src/components/toast/ToastContext";
-import { ItemData, ModuleType } from "@timothyw/pat-common";
+import { AgendaItemData, ModuleType } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
@@ -27,7 +25,7 @@ export const AgendaPanel: React.FC = () => {
     const [showingEditForm, setShowingEditForm] = useState(false);
 
     // State for detail view
-    const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
+    const [selectedItem, setSelectedItem] = useState<AgendaItemData | null>(null);
     const [showingDetailView, setShowingDetailView] = useState(false);
 
     // State for notifications
@@ -46,7 +44,7 @@ export const AgendaPanel: React.FC = () => {
         setShowingCreateForm(true);
     };
 
-    const handleItemSelect = (item: ItemData) => {
+    const handleItemSelect = (item: AgendaItemData) => {
         setSelectedItem(item);
         setShowingDetailView(true);
     };
@@ -204,6 +202,7 @@ export const AgendaPanel: React.FC = () => {
             {showingNotifications && (
                 <NotificationConfigView
                     entityType="agenda"
+                    entityId="agenda"
                     entityName="Agenda Panel"
                     onClose={handleNotificationsDismiss}
                 />

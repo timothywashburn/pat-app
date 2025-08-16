@@ -1,27 +1,27 @@
 import { create } from 'zustand';
 import { HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import {
-    CompleteItemRequest, CompleteItemResponse,
-    CreateItemRequest,
-    CreateItemResponse, DeleteItemResponse,
-    GetItemsResponse, ItemData,
-    UpdateItemRequest,
-    UpdateItemResponse,
+    CompleteAgendaItemRequest, CompleteAgendaItemResponse,
+    CreateAgendaItemRequest,
+    CreateAgendaItemResponse, DeleteAgendaItemResponse,
+    GetAgendaItemsResponse, AgendaItemData,
+    UpdateAgendaItemRequest,
+    UpdateAgendaItemResponse,
     Serializer
 } from '@timothyw/pat-common';
 import { performAuthenticatedRequest } from '@/src/utils/networkUtils';
 import { toastManager } from '@/src/utils/toastUtils';
 
 interface AgendaState {
-    items: ItemData[];
+    items: AgendaItemData[];
     isInitialized: boolean;
     isLoading: boolean;
 }
 
 interface AgendaActions {
-    loadItems: () => Promise<ItemData[]>;
-    createItem: (params: CreateItemRequest) => Promise<ItemData>;
-    updateItem: (id: string, updates: UpdateItemRequest) => Promise<void>;
+    loadItems: () => Promise<AgendaItemData[]>;
+    createItem: (params: CreateAgendaItemRequest) => Promise<AgendaItemData>;
+    updateItem: (id: string, updates: UpdateAgendaItemRequest) => Promise<void>;
     deleteItem: (id: string) => Promise<void>;
     setCompleted: (id: string, completed: boolean) => Promise<void>;
 }
@@ -31,11 +31,11 @@ export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => 
     isInitialized: false,
     isLoading: false,
 
-    loadItems: async (): Promise<ItemData[]> => {
+    loadItems: async (): Promise<AgendaItemData[]> => {
         set({ isLoading: true });
 
         try {
-            const response = await performAuthenticatedRequest<undefined, GetItemsResponse>({
+            const response = await performAuthenticatedRequest<undefined, GetAgendaItemsResponse>({
                 endpoint: '/api/items',
                 method: HTTPMethod.GET,
             });
@@ -46,7 +46,7 @@ export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => 
                 return [];
             }
 
-            const items = response.items.map(item => Serializer.deserialize<ItemData>(item));
+            const items = response.agendaItems.map(item => Serializer.deserialize<AgendaItemData>(item));
             set({ items, isInitialized: true, isLoading: false });
             return items;
         } catch (error) {
@@ -55,8 +55,8 @@ export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => 
         }
     },
 
-    createItem: async (params: CreateItemRequest): Promise<ItemData> => {
-        const response = await performAuthenticatedRequest<CreateItemRequest, CreateItemResponse>({
+    createItem: async (params: CreateAgendaItemRequest): Promise<AgendaItemData> => {
+        const response = await performAuthenticatedRequest<CreateAgendaItemRequest, CreateAgendaItemResponse>({
             endpoint: '/api/items',
             method: HTTPMethod.POST,
             body: params,
@@ -67,13 +67,13 @@ export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => 
             throw new Error(response.error);
         }
 
-        const createdItem = Serializer.deserialize<ItemData>(response.item);
+        const createdItem = Serializer.deserialize<AgendaItemData>(response.agendaItem);
         await get().loadItems();
         return createdItem;
     },
 
-    updateItem: async (id: string, updates: UpdateItemRequest): Promise<void> => {
-        const response = await performAuthenticatedRequest<UpdateItemRequest, UpdateItemResponse>({
+    updateItem: async (id: string, updates: UpdateAgendaItemRequest): Promise<void> => {
+        const response = await performAuthenticatedRequest<UpdateAgendaItemRequest, UpdateAgendaItemResponse>({
             endpoint: `/api/items/${id}`,
             method: HTTPMethod.PUT,
             body: updates,
@@ -88,7 +88,7 @@ export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => 
     },
 
     deleteItem: async (id: string): Promise<void> => {
-        const response = await performAuthenticatedRequest<undefined, DeleteItemResponse>({
+        const response = await performAuthenticatedRequest<undefined, DeleteAgendaItemResponse>({
             endpoint: `/api/items/${id}`,
             method: HTTPMethod.DELETE,
         });
@@ -102,7 +102,7 @@ export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => 
     },
 
     setCompleted: async (id: string, completed: boolean): Promise<void> => {
-        const response = await performAuthenticatedRequest<CompleteItemRequest, CompleteItemResponse>({
+        const response = await performAuthenticatedRequest<CompleteAgendaItemRequest, CompleteAgendaItemResponse>({
             endpoint: `/api/items/${id}/complete`,
             method: HTTPMethod.PUT,
             body: { completed },

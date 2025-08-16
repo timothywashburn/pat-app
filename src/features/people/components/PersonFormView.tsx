@@ -11,7 +11,7 @@ import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
-import { Person, PersonNoteData, PersonNoteId, PersonProperty } from "@timothyw/pat-common";
+import { Person, PersonNoteData, PersonNoteId, PersonPropertyData } from "@timothyw/pat-common";
 
 interface PersonFormViewProps {
     isPresented: boolean;
@@ -33,7 +33,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     const { getColor } = useTheme();
 
     const [name, setName] = useState(existingPerson?.name || '');
-    const [properties, setProperties] = useState<PersonProperty[]>(existingPerson?.properties || []);
+    const [properties, setProperties] = useState<PersonPropertyData[]>(existingPerson?.properties || []);
     const [notes, setNotes] = useState<PersonNoteData[]>(existingPerson?.notes || []);
     const [pendingNotes, setPendingNotes] = useState<{ content: string; tempId: PersonNoteId; isNew?: boolean }[]>([]);
     const [modifiedNoteIds, setModifiedNoteIds] = useState<Set<PersonNoteId>>(new Set());
@@ -156,7 +156,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     const addProperty = () => {
         if (!newPropertyKey || !newPropertyValue) return;
 
-        const newProp: PersonProperty = {
+        const newProp: PersonPropertyData = {
             key: newPropertyKey,
             value: newPropertyValue,
         };

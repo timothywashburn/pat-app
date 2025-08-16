@@ -41,39 +41,34 @@ export type ApiResponseBody<TRes = unknown> = ApiSuccessResponse<TRes> | ApiErro
  * Replaces the NetworkManager singleton with React-native patterns
  */
 export function useNetworkRequest() {
-    const [isLoading, setIsLoading] = useState(false);
-
     const makeRequest = async <TReq, TRes>(
         request: NetworkRequest<TReq>,
         requireAuth: boolean = true
-    ): Promise<ApiResponseBody<TRes>> => {
-        setIsLoading(true);
-
+    ): Promise<ApiSuccessResponse<TRes>> => {
         try {
-            return await performRequest<TReq, TRes>(request, requireAuth);
-        } catch (error: any) {
-            toastManager.errorToast(error.message || 'Network request failed');
+            const result = await performRequest<TReq, TRes>(request, requireAuth);
+            if (!result.success) throw new Error(result.error || 'Response indicated failure');
+            return result;
+        } catch (error: unknown) {
+            if (error instanceof Error) toastManager.errorToast(error.message);
             throw error;
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const performAuthenticated = async <TReq, TRes>(
         request: NetworkRequest<TReq>
-    ): Promise<ApiResponseBody<TRes>> => {
+    ): Promise<ApiSuccessResponse<TRes>> => {
         return makeRequest<TReq, TRes>(request, true);
     };
 
     const performUnauthenticated = async <TReq, TRes>(
         request: NetworkRequest<TReq>
-    ): Promise<ApiResponseBody<TRes>> => {
+    ): Promise<ApiSuccessResponse<TRes>> => {
         return makeRequest<TReq, TRes>(request, false);
     };
 
     return {
         performAuthenticated,
         performUnauthenticated,
-        isLoading,
     };
 }

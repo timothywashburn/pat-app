@@ -9,7 +9,7 @@ import { NotificationTemplateForm } from './NotificationTemplateForm';
 
 interface NotificationConfigViewProps {
     entityType: NotificationEntityType;
-    entityId?: string;
+    entityId: string;
     entityName?: string;
     onClose?: () => void;
 }
@@ -34,7 +34,7 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
         : entityType;
     
     const notifications = useNotifications(effectiveEntityType, entityId);
-    const { templates, isLoading, error } = notifications;
+    const { templates } = notifications;
 
     useEffect(() => {
         loadTemplates();
@@ -183,14 +183,6 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     );
 
     const renderContent = () => {
-        if (isLoading) {
-            return (
-                <View className="flex-1 justify-center items-center px-8">
-                    <Text className="text-on-surface-variant text-sm">Loading templates...</Text>
-                </View>
-            );
-        }
-
         if (templates.length === 0) {
             return renderEmptyState();
         }

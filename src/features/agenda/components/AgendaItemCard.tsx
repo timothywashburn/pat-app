@@ -2,11 +2,11 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
-import { ItemData } from "@timothyw/pat-common";
+import { AgendaItemData } from "@timothyw/pat-common";
 
 interface AgendaItemCardProps {
-    item: ItemData;
-    onPress: (item: ItemData) => void;
+    item: AgendaItemData;
+    onPress: (item: AgendaItemData) => void;
     isTableView?: boolean;
 }
 

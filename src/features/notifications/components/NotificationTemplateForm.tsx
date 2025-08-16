@@ -7,7 +7,7 @@ import { useNotifications } from '@/src/features/notifications/hooks/useNotifica
 
 interface NotificationTemplateFormProps {
     entityType: NotificationEntityType;
-    entityId?: string;
+    entityId: string;
     template?: NotificationTemplateData; // For editing
     onSave: (template: NotificationTemplateData) => void;
     onCancel: () => void;
@@ -32,7 +32,7 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
     });
     const [isLoading, setIsLoading] = useState(false);
     const [preview, setPreview] = useState<any>(null);
-    const notifications = useNotifications();
+    const notifications = useNotifications(entityType, entityId);
 
     const updateFormData = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));

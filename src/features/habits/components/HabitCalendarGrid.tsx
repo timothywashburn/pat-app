@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import { useTheme } from '@/src/context/ThemeContext';
-import { DateOnlyString, DateString, fromDateString, Habit, HabitEntry } from "@timothyw/pat-common";
-import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
+import { Habit, HabitEntryData, HabitEntryStatus } from "@timothyw/pat-common";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { fromDateOnlyString } from "@/src/features/habits/models";
 
@@ -105,18 +103,18 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
         }
     }
 
-    const entryMap = new Map<string, HabitEntry>();
+    const entryMap = new Map<string, HabitEntryData>();
     habit.entries.forEach(entry => {
         const entryDate = fromDateOnlyString(entry.date);
         const key = dateUtils.toLocalDateKey(entryDate);
         entryMap.set(key, entry);
     });
-    const getEntry = (date: Date): HabitEntry | undefined => {
+    const getEntry = (date: Date): HabitEntryData | undefined => {
         const key = dateUtils.toLocalDateKey(date);
         return entryMap.get(key);
     }
 
-    const getDateDisplayText = (date: Date, entry?: HabitEntry): string => {
+    const getDateDisplayText = (date: Date, entry?: HabitEntryData): string => {
         const firstDay = fromDateOnlyString(habit.firstDay);
         
         if (dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay)) {
@@ -137,7 +135,7 @@ const HabitCalendarGrid: React.FC<HabitCalendarGridProps> = ({
         }
     };
 
-    const getSquareBorderStyle = (date: Date, entry?: HabitEntry) => {
+    const getSquareBorderStyle = (date: Date, entry?: HabitEntryData) => {
         const firstDay = fromDateOnlyString(habit.firstDay);
         const isBeforeCreation = dateUtils.toLocalDateKey(date) < dateUtils.toLocalDateKey(firstDay);
         if (isBeforeCreation || !entry) return 'border border-outline-variant';

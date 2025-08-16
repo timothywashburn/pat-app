@@ -3,8 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
-import { HabitEntryStatus } from "@timothyw/pat-common/src/types/models/habit-data";
-import { Habit } from "@timothyw/pat-common";
+import { Habit, HabitEntryStatus } from "@timothyw/pat-common";
 import { isToday, isYesterday, toDateOnlyString } from '@/src/features/habits/models';
 import { useToast } from "@/src/components/toast/ToastContext";
 

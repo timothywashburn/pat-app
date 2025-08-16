@@ -17,7 +17,7 @@ import FormTextArea from '@/src/components/common/FormTextArea';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import WebDateTimePicker from './WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
-import { CreateItemRequest, ItemData, UpdateItemRequest } from "@timothyw/pat-common";
+import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest } from "@timothyw/pat-common";
 
 interface AgendaItemFormViewProps {
     isPresented: boolean;
@@ -25,7 +25,7 @@ interface AgendaItemFormViewProps {
     onCancel?: () => void;
     onItemSaved?: () => void;
     initialName?: string;
-    existingItem?: ItemData;
+    existingItem?: AgendaItemData;
     isEditMode?: boolean;
 }
 
@@ -79,7 +79,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
         try {
             if (isEditMode && existingItem) {
-                const itemData: UpdateItemRequest = {
+                const itemData: UpdateAgendaItemRequest = {
                     name: name.trim(),
                     dueDate: date?.toISOString() || null,
                     notes: notes.trim() || null,
@@ -90,7 +90,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
                 await updateItem(existingItem._id, itemData);
             } else {
-                const itemData: CreateItemRequest = {
+                const itemData: CreateAgendaItemRequest = {
                     name: name.trim(),
                     dueDate: date?.toISOString(),
                     notes: notes.trim(),
