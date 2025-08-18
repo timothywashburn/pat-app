@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, Switch } from 'react-native';
-import { NotificationTemplateData, NotificationEntityType } from '@timothyw/pat-common';
+import { NotificationTemplateData, NotificationEntityType, NotificationTemplateLevel } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
@@ -8,40 +8,35 @@ import { NotificationTemplateCard } from './NotificationTemplateCard';
 import { NotificationTemplateForm } from './NotificationTemplateForm';
 
 interface NotificationConfigViewProps {
-    entityType: NotificationEntityType;
-    entityId: string;
+    targetEntityType: NotificationEntityType;
+    targetId: string;
+    targetLevel: NotificationTemplateLevel;
     entityName?: string;
     onClose?: () => void;
 }
 
 export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
-    entityType,
-    entityId,
+    targetEntityType,
+    targetId,
+    targetLevel,
     entityName,
     onClose
 }) => {
     const { getColor } = useTheme();
     const [showTemplateForm, setShowTemplateForm] = useState(false);
     const [editingTemplate, setEditingTemplate] = useState<NotificationTemplateData | null>(null);
-    const [viewMode, setViewMode] = useState<'individual' | 'defaults'>('individual'); // For panel-level toggle
     const [isSynced, setIsSynced] = useState<boolean>(true); // For individual entities
-    const [hasParentTemplates, setHasParentTemplates] = useState<boolean>(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     
-    // Get the effective entity type based on view mode
-    const effectiveEntityType = (!entityId && viewMode === 'defaults') 
-        ? `${entityType}_defaults` as NotificationEntityType 
-        : entityType;
-    
-    const notifications = useNotifications(effectiveEntityType, entityId);
-    const { templates } = notifications;
+    const notifications = useNotifications(targetEntityType, targetId, targetLevel);
+    const { templates, refreshTemplates } = notifications;
 
     useEffect(() => {
         loadTemplates();
-        if (entityId) {
+        if (targetLevel === NotificationTemplateLevel.ENTITY) {
             loadSyncState();
         }
-    }, [entityType, entityId, viewMode]);
+    }, [targetEntityType, targetId, targetLevel]);
 
     const loadTemplates = async () => {
         try {
@@ -53,12 +48,11 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     };
 
     const loadSyncState = async () => {
-        if (!entityId) return;
+        if (targetLevel !== NotificationTemplateLevel.ENTITY) return;
 
         try {
-            const syncState = await notifications.getEntitySyncState(entityType, entityId);
+            const syncState = await notifications.getEntitySyncState(targetEntityType, targetId);
             setIsSynced(syncState.synced);
-            setHasParentTemplates(syncState.hasParentTemplates);
         } catch (error) {
             console.error('Failed to load sync state:', error);
         }
@@ -67,6 +61,9 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     const handleRefresh = async () => {
         setIsRefreshing(true);
         await loadTemplates();
+        if (targetLevel === NotificationTemplateLevel.ENTITY) {
+            await loadSyncState();
+        }
         setIsRefreshing(false);
     };
 
@@ -79,6 +76,7 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     const handleTemplateDelete = async (templateId: string) => {
         try {
             await notifications.deleteTemplate(templateId);
+            await refreshTemplates();
         } catch (error) {
             console.error('Failed to delete template:', error);
             Alert.alert('Error', 'Failed to delete notification template');
@@ -86,13 +84,14 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     };
 
     const handleSyncToggle = async () => {
-        if (!entityId || !hasParentTemplates) return;
+        if (targetLevel !== NotificationTemplateLevel.ENTITY) return;
 
         try {
             const newSyncState = !isSynced;
-            const result = await notifications.updateEntitySync(entityType, entityId, newSyncState);
+            const result = await notifications.updateEntitySync(targetEntityType, targetId, newSyncState);
 
             setIsSynced(result.synced);
+            await refreshTemplates();
 
             Alert.alert(
                 'Sync Updated',
@@ -104,9 +103,10 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
         }
     };
 
-    const handleTemplateSave = (savedTemplate: NotificationTemplateData) => {
-        // The hook automatically manages state updates
-        // Just close the form
+    const handleTemplateSave = async (savedTemplate: NotificationTemplateData) => {
+        // Refresh templates to ensure UI is updated
+        await refreshTemplates();
+        // Close the form
         setShowTemplateForm(false);
         setEditingTemplate(null);
     };
@@ -124,35 +124,35 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     const getEntityDisplayName = () => {
         if (entityName) return entityName;
 
-        switch (entityType) {
-            case 'agenda':
-                return 'Agenda Panel';
-            case 'habits':
-                return 'Habits Panel';
-            case 'agenda_item':
+        // Simple display name mapping
+        switch (targetEntityType) {
+            case NotificationEntityType.AGENDA_ITEM:
                 return 'Agenda Item';
-            case 'habit':
-                return 'Habit';
+            case NotificationEntityType.AGENDA_PANEL:
+                return 'Agenda Panel';
+            case NotificationEntityType.INBOX_PANEL:
+                return 'Inbox Panel';
             default:
-                return entityType;
+                return targetEntityType;
         }
     };
 
-    const getEntityIcon = () => {
-        switch (entityType) {
-            case 'agenda':
-            case 'agenda_item':
+    const getEntityIcon = (): keyof typeof Ionicons.glyphMap => {
+        // Simple icon mapping
+        switch (targetEntityType) {
+            case NotificationEntityType.AGENDA_ITEM:
+                return 'list';
+            case NotificationEntityType.AGENDA_PANEL:
                 return 'calendar';
-            case 'habits':
-            case 'habit':
-                return 'fitness';
+            case NotificationEntityType.INBOX_PANEL:
+                return 'mail';
             default:
                 return 'notifications';
         }
     };
 
-    const isPanelLevel = !entityId;
-    const isIndividualEntity = !!entityId;
+    const isPanelLevel = targetLevel === NotificationTemplateLevel.PARENT;
+    const isIndividualEntity = targetLevel === NotificationTemplateLevel.ENTITY;
 
     const renderTemplate = ({ item }: { item: NotificationTemplateData }) => (
         <NotificationTemplateCard
@@ -183,10 +183,6 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     );
 
     const renderContent = () => {
-        if (templates.length === 0) {
-            return renderEmptyState();
-        }
-
         return (
             <FlatList
                 data={templates}
@@ -200,12 +196,13 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
                         tintColor={getColor('primary')}
                     />
                 }
+                ListEmptyComponent={renderEmptyState}
                 ListHeaderComponent={
                     templates.length > 0 ? (
                         <View className="flex-row items-center justify-between mb-3 mt-2">
                             <Text className="text-on-surface text-base font-semibold">
                                 {isPanelLevel
-                                    ? (viewMode === 'defaults' ? 'Default Templates' : `${getEntityDisplayName()} Notifications`)
+                                    ? `${getEntityDisplayName()} Notifications`
                                     : (isSynced ? 'Inherited Templates' : 'Custom Templates')
                                 }
                             </Text>
@@ -255,35 +252,8 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
                 )}
             </View>
 
-            {isPanelLevel && (
-                <View className="flex-row items-center justify-between p-4 bg-surface-variant border-b border-divider">
-                    <Text className="text-on-surface text-sm font-medium">View:</Text>
-                    <View className="flex-row bg-surface rounded-lg p-1">
-                        <TouchableOpacity
-                            className={`px-3 py-1 rounded-md ${viewMode === 'individual' ? 'bg-primary' : ''}`}
-                            onPress={() => setViewMode('individual')}
-                        >
-                            <Text className={`text-xs font-medium ${
-                                viewMode === 'individual' ? 'text-white' : 'text-on-surface-variant'
-                            }`}>
-                                {getEntityDisplayName()}
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            className={`px-3 py-1 rounded-md ${viewMode === 'defaults' ? 'bg-primary' : ''}`}
-                            onPress={() => setViewMode('defaults')}
-                        >
-                            <Text className={`text-xs font-medium ${
-                                viewMode === 'defaults' ? 'text-white' : 'text-on-surface-variant'
-                            }`}>
-                                Default Templates
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            )}
 
-            {isIndividualEntity && hasParentTemplates && (
+            {isIndividualEntity && (
                 <View className="flex-row items-center justify-between p-4 bg-surface-variant border-b border-divider">
                     <View className="flex-1">
                         <Text className="text-on-surface text-sm font-medium">
@@ -310,8 +280,9 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
 
             {showTemplateForm && (
                 <NotificationTemplateForm
-                    entityType={isPanelLevel && viewMode === 'defaults' ? `${entityType}_defaults` as NotificationEntityType : entityType}
-                    entityId={entityId}
+                    targetEntityType={targetEntityType}
+                    targetId={targetId}
+                    targetLevel={targetLevel}
                     template={editingTemplate || undefined}
                     onSave={handleTemplateSave}
                     onCancel={handleTemplateFormCancel}

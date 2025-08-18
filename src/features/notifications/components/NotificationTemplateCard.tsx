@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { NotificationTemplateData } from '@timothyw/pat-common';
+import { NotificationTemplateData, NotificationTriggerType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 
 interface NotificationTemplateCardProps {
     template: NotificationTemplateData;
@@ -25,7 +24,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
     const handleDelete = () => {
         Alert.alert(
             'Delete Template',
-            `Are you sure you want to delete "${template.name}"?`,
+            'Are you sure you want to delete this notification template?',
             [
                 { text: 'Cancel', style: 'cancel' },
                 {
@@ -39,11 +38,11 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
 
     const getTriggerDisplayText = () => {
         switch (template.trigger.type) {
-            case 'time_based':
+            case NotificationTriggerType.TIME_BASED:
                 return 'Time-based';
-            case 'event_based':
+            case NotificationTriggerType.EVENT_BASED:
                 return 'Event-based';
-            case 'recurring':
+            case NotificationTriggerType.RECURRING:
                 return 'Recurring';
             default:
                 return template.trigger.type;
@@ -56,7 +55,9 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
         } ${readOnly ? 'opacity-75 border-l-4 border-l-success/40' : ''}`}>
             <View className="flex-row justify-between items-center mb-2">
                 <View className="flex-row items-center flex-1">
-                    <Text className="text-on-surface text-base font-semibold">{template.name}</Text>
+                    <Text className="text-on-surface text-base font-semibold">
+                        {template.targetLevel}:{template.targetEntityType}
+                    </Text>
                     {readOnly && (
                         <View className="flex-row items-center ml-2 bg-success/20 px-2 py-0.5 rounded">
                             <Ionicons name="lock-closed" size={10} color={getColor('success')} />
@@ -80,20 +81,13 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
                 </View>
             </View>
 
-            {template.description && (
-                <Text className="text-on-surface-variant text-sm mb-3">{template.description}</Text>
-            )}
-
-            <Text className="text-primary text-xs bg-primary/20 px-2 py-1 rounded-md self-start overflow-hidden">
-                {getTriggerDisplayText()}
+            <Text className="text-on-surface-variant text-sm mb-3">
+                Target: {template.targetId}
             </Text>
 
-            <View className="my-2">
-                <Text className="text-on-surface-variant text-xs italic">
-                    "{template.content.title}" - {template.content.body}
-                </Text>
-            </View>
-
+            <Text className="text-primary text-xs bg-primary/20 py-1 rounded-md self-start overflow-hidden">
+                {getTriggerDisplayText()}
+            </Text>
 
             <View className="flex-row justify-end items-center mt-3">
                 {!readOnly && (

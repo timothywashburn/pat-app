@@ -6,16 +6,19 @@ import {
     CreateNotificationTemplateResponse,
     DeleteNotificationTemplateResponse,
     GetNotificationTemplatesResponse,
-    NotificationEntityType,
     NotificationTemplateData,
-    PreviewNotificationTemplateRequest,
-    PreviewNotificationTemplateResponse,
     Serializer,
     UpdateNotificationTemplateRequest,
     UpdateNotificationTemplateResponse,
+    EntitySyncRequest,
+    EntitySyncResponse,
+    GetEntitySyncRequest,
+    GetEntitySyncResponse,
+    NotificationEntityType,
+    NotificationTemplateLevel,
 } from '@timothyw/pat-common';
 
-export function useNotifications(entityType: NotificationEntityType, entityId: string) {
+export function useNotifications(targetEntityType: NotificationEntityType, targetId: string, targetLevel: NotificationTemplateLevel) {
     const [ templates, setTemplates ] = useState<NotificationTemplateData[]>([]);
 
     const { performAuthenticated } = useNetworkRequest();
@@ -24,8 +27,9 @@ export function useNotifications(entityType: NotificationEntityType, entityId: s
     const getTemplates = useCallback(async (): Promise<NotificationTemplateData[]> => {
         return asyncOp.execute(async () => {
             const params = new URLSearchParams();
-            if (entityType) params.append('entityType', entityType);
-            if (entityId) params.append('entityId', entityId);
+            if (targetLevel) params.append('targetLevel', targetLevel);
+            if (targetEntityType) params.append('targetEntityType', targetEntityType);
+            if (targetId) params.append('targetId', targetId);
 
             const endpoint = `/api/notifications/templates${params.toString() ? '?' + params.toString() : ''}`;
 
@@ -38,7 +42,7 @@ export function useNotifications(entityType: NotificationEntityType, entityId: s
             setTemplates(templates);
             return templates;
         });
-    }, [asyncOp, performAuthenticated, entityType, entityId, setTemplates]);
+    }, [asyncOp, performAuthenticated, targetLevel, targetEntityType, targetId, setTemplates]);
 
     const createTemplate = useCallback(async (templateData: CreateNotificationTemplateRequest): Promise<NotificationTemplateData> => {
         return asyncOp.execute(async () => {
@@ -51,14 +55,15 @@ export function useNotifications(entityType: NotificationEntityType, entityId: s
             const newTemplate = Serializer.deserialize<NotificationTemplateData>(response.template);
 
             // Add to current templates if they match the current context
-            if (!entityType || !entityId ||
-                (templateData.entityType === entityType && templateData.entityId === entityId)) {
+            if (templateData.targetEntityType === targetEntityType && 
+                templateData.targetId === targetId &&
+                templateData.targetLevel === targetLevel) {
                 setTemplates(prev => [...prev, newTemplate]);
             }
 
             return newTemplate;
         });
-    }, [asyncOp, performAuthenticated, entityType, entityId]);
+    }, [asyncOp, performAuthenticated, targetEntityType, targetId, targetLevel]);
 
     const updateTemplate = useCallback(async (templateId: string, updates: UpdateNotificationTemplateRequest): Promise<NotificationTemplateData> => {
         return asyncOp.execute(async () => {
@@ -87,45 +92,21 @@ export function useNotifications(entityType: NotificationEntityType, entityId: s
         });
     }, [asyncOp, performAuthenticated]);
 
-    const previewTemplate = useCallback(async (request: PreviewNotificationTemplateRequest): Promise<{
-        title: string;
-        body: string;
-        variables: Record<string, any>;
-        missingVariables: string[];
-    }> => {
-        return asyncOp.execute(async () => {
-            const response = await performAuthenticated<PreviewNotificationTemplateRequest, PreviewNotificationTemplateResponse>({
-                endpoint: '/api/notifications/templates/preview',
-                method: HTTPMethod.POST,
-                body: request,
-            });
-
-            return {
-                title: response.preview.title,
-                body: response.preview.body,
-                variables: response.preview.variables,
-                missingVariables: response.missingVariables || []
-            };
-        });
-    }, [asyncOp, performAuthenticated]);
-
-    const getEntitySyncState = useCallback(async (entityType: NotificationEntityType, entityId: string): Promise<{
+    const getEntitySyncState = useCallback(async (targetEntityType: NotificationEntityType, targetId: string): Promise<{
         synced: boolean;
-        hasParentTemplates: boolean;
     }> => {
         try {
             const params = new URLSearchParams();
-            params.append('entityType', entityType);
-            params.append('entityId', entityId);
+            params.append('targetEntityType', targetEntityType);
+            params.append('targetId', targetId);
 
-            const response = await performAuthenticated<undefined, any>({
+            const response = await performAuthenticated<undefined, GetEntitySyncResponse>({
                 endpoint: `/api/notifications/entity-sync?${params.toString()}`,
                 method: HTTPMethod.GET,
             });
 
             return {
-                synced: response.synced,
-                hasParentTemplates: response.hasParentTemplates
+                synced: response.synced
             };
         } catch (error) {
             console.error('Failed to get entity sync state:', error);
@@ -133,21 +114,21 @@ export function useNotifications(entityType: NotificationEntityType, entityId: s
         }
     }, [performAuthenticated]);
 
-    const updateEntitySync = useCallback(async (entityType: NotificationEntityType, entityId: string, synced: boolean): Promise<{
+    const updateEntitySync = useCallback(async (targetEntityType: NotificationEntityType, targetId: string, synced: boolean): Promise<{
         synced: boolean;
         templates: NotificationTemplateData[];
     }> => {
         return asyncOp.execute(async () => {
-            const response = await performAuthenticated<any, any>({
+            const response = await performAuthenticated<EntitySyncRequest, EntitySyncResponse>({
                 endpoint: '/api/notifications/entity-sync',
                 method: HTTPMethod.PUT,
-                body: { entityType, entityId, synced },
+                body: { targetEntityType, targetId, synced },
             });
 
             const templates = response.templates?.map((template: any) => Serializer.deserialize<NotificationTemplateData>(template)) || [];
 
             // Update local state if this matches current context
-            if (entityType === templates[0]?.entityType) {
+            if (templates.length > 0 && targetEntityType === templates[0]?.targetEntityType) {
                 setTemplates(templates);
             }
 
@@ -156,7 +137,11 @@ export function useNotifications(entityType: NotificationEntityType, entityId: s
                 templates
             };
         });
-    }, [asyncOp, performAuthenticated, templates, setTemplates]);
+    }, [asyncOp, performAuthenticated, setTemplates]);
+
+    const refreshTemplates = useCallback(async () => {
+        await getTemplates();
+    }, [getTemplates]);
 
     return {
         templates,
@@ -164,8 +149,8 @@ export function useNotifications(entityType: NotificationEntityType, entityId: s
         createTemplate,
         updateTemplate,
         deleteTemplate,
-        previewTemplate,
         getEntitySyncState,
         updateEntitySync,
+        refreshTemplates,
     };
 }

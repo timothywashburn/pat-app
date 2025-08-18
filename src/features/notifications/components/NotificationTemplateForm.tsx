@@ -1,105 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
-import { NotificationTemplateData, NotificationEntityType, CreateNotificationTemplateRequest } from '@timothyw/pat-common';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { NotificationTemplateData, CreateNotificationTemplateRequest, NotificationTemplateLevel, NotificationEntityType, NotificationTriggerType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 
 interface NotificationTemplateFormProps {
-    entityType: NotificationEntityType;
-    entityId: string;
+    targetEntityType: NotificationEntityType;
+    targetId: string;
+    targetLevel: NotificationTemplateLevel;
     template?: NotificationTemplateData; // For editing
     onSave: (template: NotificationTemplateData) => void;
     onCancel: () => void;
 }
 
 export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> = ({
-    entityType,
-    entityId,
+    targetEntityType,
+    targetId,
+    targetLevel,
     template,
     onSave,
     onCancel
 }) => {
     const { getColor } = useTheme();
     const [formData, setFormData] = useState({
-        name: template?.name || '',
-        description: template?.description || '',
-        title: template?.content.title || '',
-        body: template?.content.body || '',
         active: template?.active ?? true,
-        triggerType: template?.trigger.type || 'time_based',
-        customized: template?.customized ?? false,
+        triggerType: template?.trigger.type || NotificationTriggerType.TIME_BASED,
     });
     const [isLoading, setIsLoading] = useState(false);
-    const [preview, setPreview] = useState<any>(null);
-    const notifications = useNotifications(entityType, entityId);
+    const notifications = useNotifications(targetEntityType, targetId, targetLevel);
 
     const updateFormData = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const generatePreview = async () => {
-        if (!formData.title.trim() || !formData.body.trim()) {
-            setPreview(null);
-            return;
-        }
-
-        try {
-            const previewData = await notifications.previewTemplate({
-                templateTitle: formData.title,
-                templateBody: formData.body,
-                entityType,
-                entityId: entityId || 'sample-id',
-                variables: {}
-            });
-            setPreview(previewData);
-        } catch (error) {
-            console.error('Failed to generate preview:', error);
-        }
-    };
-
-    useEffect(() => {
-        const debounceTimer = setTimeout(generatePreview, 500);
-        return () => clearTimeout(debounceTimer);
-    }, [formData.title, formData.body]);
-
     const handleSave = async () => {
-        if (!formData.name.trim()) {
-            Alert.alert('Error', 'Please enter a template name');
-            return;
-        }
-
-        if (!formData.title.trim() || !formData.body.trim()) {
-            Alert.alert('Error', 'Please enter notification title and body');
-            return;
-        }
-
         setIsLoading(true);
         try {
             const templateData: CreateNotificationTemplateRequest = {
-                entityType,
-                entityId,
-                name: formData.name,
-                description: formData.description,
+                targetLevel,
+                targetEntityType,
+                targetId,
                 trigger: {
-                    type: formData.triggerType as any,
-                    conditions: {},
-                    timing: {
-                        testDelay: true // 5-second test trigger
-                    }
+                    type: formData.triggerType as NotificationTriggerType,
                 },
-                content: {
-                    title: formData.title,
-                    body: formData.body
-                },
-                active: formData.active,
-                customized: false
+                active: formData.active
             };
 
             let savedTemplate: NotificationTemplateData;
             if (template) {
                 // Update existing template
-                savedTemplate = await notifications.updateTemplate(template._id, templateData);
+                savedTemplate = await notifications.updateTemplate(template._id, {
+                    trigger: templateData.trigger,
+                    active: templateData.active
+                });
             } else {
                 // Create new template
                 savedTemplate = await notifications.createTemplate(templateData);
@@ -115,9 +69,9 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
     };
 
     const triggerOptions = [
-        { value: 'time_based', label: 'Time Based', icon: 'time' },
-        { value: 'event_based', label: 'Event Based', icon: 'flash' },
-        { value: 'recurring', label: 'Recurring', icon: 'refresh' },
+        { value: NotificationTriggerType.TIME_BASED, label: 'Time Based', icon: 'time' },
+        { value: NotificationTriggerType.EVENT_BASED, label: 'Event Based', icon: 'flash' },
+        { value: NotificationTriggerType.RECURRING, label: 'Recurring', icon: 'refresh' },
     ];
 
     return (
@@ -142,30 +96,18 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
 
             <ScrollView className="flex-1">
                 <View className="p-4 border-b border-divider">
-                    <Text className="text-on-surface text-base font-semibold mb-3">Template Info</Text>
+                    <Text className="text-on-surface text-base font-semibold mb-3">Template Settings</Text>
 
                     <View className="mb-4">
-                        <Text className="text-on-surface text-sm font-medium mb-1.5">Name</Text>
-                        <TextInput
-                            className="bg-surface border border-divider rounded-lg p-3 text-on-surface text-sm"
-                            value={formData.name}
-                            onChangeText={(text) => updateFormData('name', text)}
-                            placeholder="Template name..."
-                            placeholderTextColor={getColor('on-surface-variant')}
-                        />
+                        <Text className="text-on-surface text-sm font-medium mb-1.5">Target Level</Text>
+                        <Text className="text-on-surface-variant text-sm">
+                            {targetLevel === NotificationTemplateLevel.PARENT ? 'Parent Level' : 'Entity Level'}
+                        </Text>
                     </View>
 
                     <View className="mb-4">
-                        <Text className="text-on-surface text-sm font-medium mb-1.5">Description (optional)</Text>
-                        <TextInput
-                            className="bg-surface border border-divider rounded-lg p-3 text-on-surface text-sm min-h-[80px]"
-                            value={formData.description}
-                            onChangeText={(text) => updateFormData('description', text)}
-                            placeholder="Describe when this notification should be sent..."
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            multiline
-                            textAlignVertical="top"
-                        />
+                        <Text className="text-on-surface text-sm font-medium mb-1.5">Entity Type</Text>
+                        <Text className="text-on-surface-variant text-sm">{targetEntityType}</Text>
                     </View>
 
                     <View className="flex-row items-center justify-between">
@@ -177,7 +119,6 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
                             thumbColor={formData.active ? getColor('primary') : getColor('on-surface-variant')}
                         />
                     </View>
-
                 </View>
 
                 <View className="p-4 border-b border-divider">
@@ -205,64 +146,6 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
                         ))}
                     </View>
                 </View>
-
-                <View className="p-4 border-b border-divider">
-                    <Text className="text-on-surface text-base font-semibold mb-3">Notification Content</Text>
-
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-sm font-medium mb-1.5">Title</Text>
-                        <TextInput
-                            className="bg-surface border border-divider rounded-lg p-3 text-on-surface text-sm"
-                            value={formData.title}
-                            onChangeText={(text) => updateFormData('title', text)}
-                            placeholder="Notification title..."
-                            placeholderTextColor={getColor('on-surface-variant')}
-                        />
-                        <Text className="text-on-surface-variant text-xs mt-1 italic">
-                            Use variables like {"{{entity.name}}"} or {"{{timeUntilDue}}"}
-                        </Text>
-                    </View>
-
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-sm font-medium mb-1.5">Body</Text>
-                        <TextInput
-                            className="bg-surface border border-divider rounded-lg p-3 text-on-surface text-sm min-h-[80px]"
-                            value={formData.body}
-                            onChangeText={(text) => updateFormData('body', text)}
-                            placeholder="Notification message..."
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            multiline
-                            textAlignVertical="top"
-                        />
-                        <Text className="text-on-surface-variant text-xs mt-1 italic">
-                            Use variables like {"{{entity.name}}"} or {"{{timeUntilDue}}"}
-                        </Text>
-                    </View>
-                </View>
-
-                {preview && (
-                    <View className="bg-surface m-4 p-4 rounded-xl border border-divider">
-                        <View className="flex-row items-center justify-between">
-                            <Text className="text-on-surface text-sm font-semibold">Preview</Text>
-                            <TouchableOpacity
-                                className="flex-row items-center bg-primary/20 px-3 py-1.5 rounded-md"
-                                onPress={generatePreview}
-                            >
-                                <Ionicons name="refresh" size={12} color={getColor('primary')} />
-                                <Text className="text-primary text-xs ml-1">Refresh</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View className="bg-background p-3 rounded-lg border border-divider mt-2">
-                            <Text className="text-on-surface text-sm font-semibold mb-1">{preview.title}</Text>
-                            <Text className="text-on-surface-variant text-xs leading-4">{preview.body}</Text>
-                        </View>
-                        {preview.missingVariables?.length > 0 && (
-                            <Text className="text-warning text-xs mt-1 italic">
-                                Missing variables: {preview.missingVariables.join(', ')}
-                            </Text>
-                        )}
-                    </View>
-                )}
             </ScrollView>
         </View>
     );

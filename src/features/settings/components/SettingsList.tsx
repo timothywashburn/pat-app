@@ -8,6 +8,8 @@ interface SettingsListProps {
     items: string[];
     onUpdateItems: (updatedItems: string[]) => void;
     editMode: boolean;
+    showNotificationButtons?: boolean;
+    onNotificationPress?: (item: string) => void;
 }
 
 export const SettingsList: React.FC<SettingsListProps> = ({
@@ -15,6 +17,8 @@ export const SettingsList: React.FC<SettingsListProps> = ({
     items,
     onUpdateItems,
     editMode,
+    showNotificationButtons = false,
+    onNotificationPress,
 }) => {
     const { getColor } = useTheme();
     const [newItem, setNewItem] = useState('');
@@ -39,16 +43,27 @@ export const SettingsList: React.FC<SettingsListProps> = ({
 
             {items.map((item, index) => (
                 <View key={`${item}-${index}`} className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2">
-                    <Text className="text-on-surface text-base">{item}</Text>
+                    <Text className="text-on-surface text-base flex-1">{item}</Text>
 
-                    {editMode && (
-                        <TouchableOpacity
-                            onPress={() => handleDeleteItem(item)}
-                            className="p-1"
-                        >
-                            <Ionicons name="remove-circle" size={24} color={getColor("on-error")} />
-                        </TouchableOpacity>
-                    )}
+                    <View className="flex-row items-center">
+                        {showNotificationButtons && !editMode && (
+                            <TouchableOpacity
+                                onPress={() => onNotificationPress?.(item)}
+                                className="p-1 mr-2"
+                            >
+                                <Ionicons name="notifications" size={20} color={getColor("primary")} />
+                            </TouchableOpacity>
+                        )}
+
+                        {editMode && (
+                            <TouchableOpacity
+                                onPress={() => handleDeleteItem(item)}
+                                className="p-1"
+                            >
+                                <Ionicons name="remove-circle" size={24} color={getColor("on-error")} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
             ))}
 

@@ -12,7 +12,6 @@ interface AgendaItemCardProps {
 
 const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableView = false }) => {
     const { getColor } = useTheme();
-    console.log(`[AgendaItemCard] Rendering item: ${item.name} (id: ${item._id})`);
 
     if (isTableView) {
         return (

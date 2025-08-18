@@ -6,14 +6,17 @@ import { ModuleManagement } from '@/src/features/settings/components/ModuleManag
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
-import { UserModuleData, ModuleType } from "@timothyw/pat-common";
+import { UserModuleData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 
 export const SettingsPanel: React.FC = () => {
     const { errorToast, successToast } = useToast();
     const { signOut, authData } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [showNotificationConfig, setShowNotificationConfig] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const { data, updateUserData } = useUserDataStore();
 
@@ -63,6 +66,16 @@ export const SettingsPanel: React.FC = () => {
         setLocalModules(updatedModules);
     };
 
+    const handleCategoryNotificationPress = (category: string) => {
+        setSelectedCategory(category);
+        setShowNotificationConfig(true);
+    };
+
+    const handleNotificationConfigClose = () => {
+        setShowNotificationConfig(false);
+        setSelectedCategory(null);
+    };
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <CustomHeader
@@ -106,6 +119,8 @@ export const SettingsPanel: React.FC = () => {
                         items={editMode ? localItemCategories : data.config.agenda.itemCategories}
                         onUpdateItems={(updatedItems) => setLocalItemCategories(updatedItems)}
                         editMode={editMode}
+                        showNotificationButtons={true}
+                        onNotificationPress={handleCategoryNotificationPress}
                     />
 
                     <View className="h-px bg-surface my-4" />
@@ -141,6 +156,17 @@ export const SettingsPanel: React.FC = () => {
                     </Text>
                 </View>
             </ScrollView>
+
+            {/* Category notification config modal */}
+            {showNotificationConfig && selectedCategory && (
+                <NotificationConfigView
+                    targetEntityType={NotificationEntityType.AGENDA_ITEM}
+                    targetId={`agenda_item_${selectedCategory}`}
+                    targetLevel={NotificationTemplateLevel.PARENT}
+                    entityName={`${selectedCategory} Category`}
+                    onClose={handleNotificationConfigClose}
+                />
+            )}
         </GestureHandlerRootView>
     );
 }

@@ -7,7 +7,7 @@ import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormV
 import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import { AgendaItemData, ModuleType } from "@timothyw/pat-common";
+import { AgendaItemData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
@@ -16,7 +16,6 @@ export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
     const { items: agendaItems, isInitialized, loadItems, createItem, updateItem, deleteItem, setCompleted } = useAgendaStore();
-    console.log(`[Agenda] agendaItems from store: ${agendaItems.map((item: any) => item.name).join(', ')}`);
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);
 
@@ -81,8 +80,6 @@ export const AgendaPanel: React.FC = () => {
     const handleNotificationsDismiss = () => {
         setShowingNotifications(false);
     };
-
-    console.log(`[Agenda Component] re rendering with item names: ${agendaItems.map((item: any) => item.name).join(', ')}`);
 
     const filteredItems = agendaItems
         .filter(item => item.completed === showCompleted)
@@ -201,8 +198,9 @@ export const AgendaPanel: React.FC = () => {
             {/* Panel notifications view */}
             {showingNotifications && (
                 <NotificationConfigView
-                    entityType="agenda"
-                    entityId="agenda"
+                    targetEntityType={NotificationEntityType.AGENDA_PANEL}
+                    targetId="agenda_panel"
+                    targetLevel={NotificationTemplateLevel.PARENT}
                     entityName="Agenda Panel"
                     onClose={handleNotificationsDismiss}
                 />

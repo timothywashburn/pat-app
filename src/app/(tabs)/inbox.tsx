@@ -16,7 +16,7 @@ import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormV
 import ListItemFormView from '@/src/features/lists/components/ListItemFormView';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useToast } from "@/src/components/toast/ToastContext";
-import { ModuleType, ThoughtData } from "@timothyw/pat-common";
+import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
@@ -252,8 +252,9 @@ export const InboxPanel: React.FC = () => {
 
             {showingNotificationConfig && (
                 <NotificationConfigView
-                    entityType="inbox"
-                    entityId="inbox"
+                    targetEntityType={NotificationEntityType.INBOX_PANEL}
+                    targetId="inbox_panel"
+                    targetLevel={NotificationTemplateLevel.PARENT}
                     entityName="Inbox"
                     onClose={() => setShowingNotificationConfig(false)}
                 />

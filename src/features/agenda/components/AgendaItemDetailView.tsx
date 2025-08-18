@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import { AgendaItemData } from "@timothyw/pat-common";
+import { AgendaItemData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { NotificationsSection } from '@/src/features/notifications/components/NotificationsSection';
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 
@@ -125,8 +125,9 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                         )}
 
                 <NotificationsSection
-                    entityType="agenda_item"
-                    entityId={item._id}
+                    targetEntityType={NotificationEntityType.AGENDA_ITEM}
+                    targetId={item._id}
+                    targetLevel={NotificationTemplateLevel.ENTITY}
                     entityName={item.name}
                     onPress={() => setShowNotificationConfig(true)}
                 />
@@ -145,8 +146,9 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
 
             {showNotificationConfig && (
                 <NotificationConfigView
-                    entityType="agenda_item"
-                    entityId={item._id}
+                    targetEntityType={NotificationEntityType.AGENDA_ITEM}
+                    targetId={item._id}
+                    targetLevel={NotificationTemplateLevel.ENTITY}
                     entityName={item.name}
                     onClose={() => setShowNotificationConfig(false)}
                 />

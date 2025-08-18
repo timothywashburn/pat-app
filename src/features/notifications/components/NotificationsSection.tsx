@@ -1,32 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { NotificationTemplateData, NotificationEntityType } from '@timothyw/pat-common';
+import { NotificationTemplateData, NotificationEntityType, NotificationTemplateLevel } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 
 interface NotificationsSectionProps {
-    entityType: NotificationEntityType;
-    entityId: string;
+    targetEntityType: NotificationEntityType;
+    targetId: string;
+    targetLevel: NotificationTemplateLevel;
     entityName?: string;
     onPress?: () => void;
     compact?: boolean;
 }
 
 export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
-    entityType,
-    entityId,
+    targetEntityType,
+    targetId,
+    targetLevel,
     entityName,
     onPress,
     compact = false
 }) => {
     const { getColor } = useTheme();
-    const notifications = useNotifications(entityType, entityId);
+    const notifications = useNotifications(targetEntityType, targetId, targetLevel);
     const { templates } = notifications;
 
     useEffect(() => {
         loadTemplates();
-    }, [entityType, entityId]);
+    }, [targetEntityType, targetId, targetLevel]);
 
     const loadTemplates = async () => {
         try {
@@ -36,17 +38,11 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         }
     };
 
-    const getStatusIcon = (template: NotificationTemplateData) => {
-        if (template.inheritedFrom && !template.customized) {
-            return 'link'; // Synced/inherited
-        }
-        return 'checkmark-circle'; // Custom/active
+    const getStatusIcon = (): keyof typeof Ionicons.glyphMap => {
+        return 'checkmark-circle'; // Active template
     };
 
-    const getStatusColor = (template: NotificationTemplateData) => {
-        if (template.inheritedFrom && !template.customized) {
-            return getColor('warning');
-        }
+    const getStatusColor = () => {
         return getColor('success');
     };
 
@@ -94,20 +90,20 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                                 color={getColor('on-surface-variant')}
                             />
                             <Text className={`text-on-surface-variant italic ml-1 ${compact ? 'text-xs' : 'text-sm'}`}>
-                                {entityId ? 'No custom notifications' : 'No panel notifications'}
+                                No notifications configured
                             </Text>
                         </View>
                     ) : (
                         activeTemplates.slice(0, 3).map(template => (
                             <View key={template._id} className="flex-row items-center py-1">
                                 <Ionicons
-                                    name={getStatusIcon(template)}
+                                    name={getStatusIcon()}
                                     size={12}
-                                    color={getStatusColor(template)}
+                                    color={getStatusColor()}
                                     className="mr-1.5"
                                 />
                                 <Text className={`text-on-surface-variant flex-1 ${compact ? 'text-xs' : 'text-sm'}`} numberOfLines={1}>
-                                    {template.name}
+                                    {template.targetLevel} - {template.trigger.type}
                                 </Text>
                                 <Text className="text-success text-xs">Active</Text>
                             </View>
