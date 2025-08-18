@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { NotificationTemplateData, NotificationTriggerType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
+import { useAlert } from '@/src/components/alert';
 import { Ionicons } from '@expo/vector-icons';
 
 interface NotificationTemplateCardProps {
@@ -20,19 +21,13 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
     readOnly = false
 }) => {
     const { getColor } = useTheme();
+    const { confirmAlert } = useAlert();
 
     const handleDelete = () => {
-        Alert.alert(
+        confirmAlert(
             'Delete Template',
             'Are you sure you want to delete this notification template?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: () => onDelete(template._id)
-                }
-            ]
+            () => onDelete(template._id)
         );
     };
 

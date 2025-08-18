@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { NotificationTemplateData, CreateNotificationTemplateRequest, NotificationTemplateLevel, NotificationEntityType, NotificationTriggerType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
+import { useToast } from '@/src/components/toast/ToastContext';
 
 interface NotificationTemplateFormProps {
     targetEntityType: NotificationEntityType;
@@ -29,6 +30,7 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
     });
     const [isLoading, setIsLoading] = useState(false);
     const notifications = useNotifications(targetEntityType, targetId, targetLevel);
+    const { errorToast } = useToast();
 
     const updateFormData = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -62,7 +64,7 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
             onSave(savedTemplate);
         } catch (error) {
             console.error('Failed to save template:', error);
-            Alert.alert('Error', 'Failed to save notification template');
+            errorToast('Failed to save notification template');
         } finally {
             setIsLoading(false);
         }

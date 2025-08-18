@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, Switch } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, Switch } from 'react-native';
 import { NotificationTemplateData, NotificationEntityType, NotificationTemplateLevel } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
+import { useToast } from '@/src/components/toast/ToastContext';
 import { NotificationTemplateCard } from './NotificationTemplateCard';
 import { NotificationTemplateForm } from './NotificationTemplateForm';
 
@@ -30,6 +31,7 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
     
     const notifications = useNotifications(targetEntityType, targetId, targetLevel);
     const { templates, refreshTemplates } = notifications;
+    const { errorToast, successToast } = useToast();
 
     useEffect(() => {
         loadTemplates();
@@ -43,7 +45,7 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
             await notifications.getTemplates();
         } catch (error) {
             console.error('Failed to load templates:', error);
-            Alert.alert('Error', 'Failed to load notification templates');
+            errorToast('Failed to load notification templates');
         }
     };
 
@@ -79,7 +81,7 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
             await refreshTemplates();
         } catch (error) {
             console.error('Failed to delete template:', error);
-            Alert.alert('Error', 'Failed to delete notification template');
+            errorToast('Failed to delete notification template');
         }
     };
 
@@ -93,13 +95,12 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
             setIsSynced(result.synced);
             await refreshTemplates();
 
-            Alert.alert(
-                'Sync Updated',
+            successToast(
                 newSyncState ? 'Now inheriting templates from parent' : 'Created custom templates'
             );
         } catch (error) {
             console.error('Failed to update sync state:', error);
-            Alert.alert('Error', 'Failed to update sync state');
+            errorToast('Failed to update sync state');
         }
     };
 

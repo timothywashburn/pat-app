@@ -11,6 +11,7 @@ import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { ThemeProvider } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/context/ThemeContext";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
+import { AlertProvider } from "@/src/components/alert";
 import AppNavigator from "@/src/components/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
@@ -223,15 +224,17 @@ const AppContent: React.FC = () => {
     return (
         <ModuleProvider>
             <ToastProvider>
-                <ThemeProvider value={theme}>
-                    <AppNavigator onLayout={hidesplash}>
-                        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                        <Stack screenOptions={{ header: () => null }}>
-                            <Stack.Screen name="(auth)" />
-                            <Stack.Screen name="(tabs)" />
-                        </Stack>
-                    </AppNavigator>
-                </ThemeProvider>
+                <AlertProvider>
+                    <ThemeProvider value={theme}>
+                        <AppNavigator onLayout={hidesplash}>
+                            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                            <Stack screenOptions={{ header: () => null }}>
+                                <Stack.Screen name="(auth)" />
+                                <Stack.Screen name="(tabs)" />
+                            </Stack>
+                        </AppNavigator>
+                    </ThemeProvider>
+                </AlertProvider>
             </ToastProvider>
         </ModuleProvider>
     );

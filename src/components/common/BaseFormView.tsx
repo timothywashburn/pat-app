@@ -1,7 +1,8 @@
 import React from 'react';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
+import { useAlert } from '@/src/components/alert';
 import FormViewHeader from './FormViewHeader';
 
 interface BaseFormViewProps {
@@ -51,6 +52,7 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     children
 }) => {
     const { getColor } = useTheme();
+    const { confirmAlert } = useAlert();
 
     if (!isPresented) {
         return null;
@@ -59,19 +61,12 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     const handleDelete = () => {
         if (!existingItem || !onDelete) return;
 
-        Alert.alert(
+        confirmAlert(
             deleteConfirmTitle,
             deleteConfirmMessage,
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        await onDelete();
-                    }
-                }
-            ]
+            async () => {
+                await onDelete();
+            }
         );
     };
 

@@ -2,13 +2,13 @@ import React from 'react';
 import {
     Text,
     View,
-    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { ListData, ListItemData, ListType } from '@timothyw/pat-common';
 import { useListsStore } from '@/src/stores/useListsStore';
+import { useAlert } from '@/src/components/alert';
 
 interface ListItemDetailViewProps {
     listItem: ListItemData;
@@ -33,6 +33,7 @@ const ListItemDetailView: React.FC<ListItemDetailViewProps> = ({
     
     const isNoteList = list.type === ListType.NOTES;
     const { setListItemCompleted, deleteListItem } = useListsStore();
+    const { confirmAlert } = useAlert();
 
     if (!isPresented) {
         return null;
@@ -53,33 +54,23 @@ const ListItemDetailView: React.FC<ListItemDetailViewProps> = ({
     };
 
     const handleDeleteListItem = () => {
-        Alert.alert(
+        confirmAlert(
             'Delete List Item',
             'Are you sure you want to delete this list item? This action cannot be undone.',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        setErrorMessage(null);
+            async () => {
+                setIsLoading(true);
+                setErrorMessage(null);
 
-                        try {
-                            await deleteListItem(listItem._id);
-                            onListItemUpdated?.();
-                            onDismiss();
-                        } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
-                        } finally {
-                            setIsLoading(false);
-                        }
-                    },
-                },
-            ]
+                try {
+                    await deleteListItem(listItem._id);
+                    onListItemUpdated?.();
+                    onDismiss();
+                } catch (error) {
+                    setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
+                } finally {
+                    setIsLoading(false);
+                }
+            }
         );
     };
 

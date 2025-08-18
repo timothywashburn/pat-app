@@ -3,7 +3,6 @@ import {
     Text,
     TouchableOpacity,
     View,
-    Alert,
     Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +11,7 @@ import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { ListWithItems, sortListItems } from '@/src/features/lists/models';
 import { ListItemData, ListType } from '@timothyw/pat-common';
 import { useListsStore } from '@/src/stores/useListsStore';
+import { useAlert } from '@/src/components/alert';
 import ListItemCard from './ListItemCard';
 
 interface ListDetailViewProps {
@@ -38,6 +38,7 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
     const [rotateAnimation] = React.useState(new Animated.Value(0));
 
     const { deleteList, deleteListItem } = useListsStore();
+    const { confirmAlert } = useAlert();
 
     if (!isPresented) {
         return null;
@@ -49,33 +50,23 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
             ? `This will delete "${list.name}" and all ${listItemCount} items in it. This action cannot be undone.`
             : `This will delete "${list.name}". This action cannot be undone.`;
 
-        Alert.alert(
+        confirmAlert(
             'Delete List',
             message,
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        setErrorMessage(null);
+            async () => {
+                setIsLoading(true);
+                setErrorMessage(null);
 
-                        try {
-                            await deleteList(list._id);
-                            onListUpdated?.();
-                            onDismiss();
-                        } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
-                        } finally {
-                            setIsLoading(false);
-                        }
-                    },
-                },
-            ]
+                try {
+                    await deleteList(list._id);
+                    onListUpdated?.();
+                    onDismiss();
+                } catch (error) {
+                    setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
+                } finally {
+                    setIsLoading(false);
+                }
+            }
         );
     };
 
@@ -107,35 +98,25 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
     const handleDeleteCompletedListItems = () => {
         if (completedListItems.length === 0) return;
 
-        Alert.alert(
+        confirmAlert(
             'Delete Completed Items',
             `This will delete ${completedListItems.length} completed ${completedListItems.length === 1 ? 'item' : 'items'}. This action cannot be undone.`,
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        setErrorMessage(null);
+            async () => {
+                setIsLoading(true);
+                setErrorMessage(null);
 
-                        try {
-                            // Delete all completed list items
-                            await Promise.all(
-                                completedListItems.map(listItems => deleteListItem(listItems._id))
-                            );
-                            onListUpdated?.();
-                        } catch (error) {
-                            setErrorMessage(error instanceof Error ? error.message : 'Failed to delete completed list items');
-                        } finally {
-                            setIsLoading(false);
-                        }
-                    },
-                },
-            ]
+                try {
+                    // Delete all completed list items
+                    await Promise.all(
+                        completedListItems.map(listItems => deleteListItem(listItems._id))
+                    );
+                    onListUpdated?.();
+                } catch (error) {
+                    setErrorMessage(error instanceof Error ? error.message : 'Failed to delete completed list items');
+                } finally {
+                    setIsLoading(false);
+                }
+            }
         );
     };
 
