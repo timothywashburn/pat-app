@@ -6,7 +6,7 @@ interface PersonItemViewProps {
     person: Person;
 }
 
-const PersonItemView: React.FC<PersonItemViewProps> = ({ person }) => {
+const PersonCard: React.FC<PersonItemViewProps> = ({ person }) => {
     return (
         <View className="bg-surface rounded-lg p-4 mb-3">
             <Text className="text-on-surface text-base font-semibold mb-2">{person.name}</Text>
@@ -29,4 +29,4 @@ const PersonItemView: React.FC<PersonItemViewProps> = ({ person }) => {
     );
 };
 
-export default PersonItemView;
+export default PersonCard;

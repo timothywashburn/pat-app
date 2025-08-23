@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import CustomHeader from '@/src/components/CustomHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCard from '@/src/features/habits/components/HabitCard';
-import HabitFormView from '@/src/features/habits/components/HabitFormView';
-import HabitDetailView from '@/src/features/habits/components/HabitDetailView';
 import { getActiveHabitDate, toDateOnlyString } from '@/src/features/habits/models';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
+import { HabitsStackParamList } from '@/src/navigation/HabitsStack';
+
+type HabitsNavigationProp = StackNavigationProp<HabitsStackParamList, 'HabitsList'>;
 
 export const HabitsPanel: React.FC = () => {
+    const navigation = useNavigation<HabitsNavigationProp>();
     const { habits, isInitialized, loadHabits, getHabitById } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
 
@@ -19,68 +23,22 @@ export const HabitsPanel: React.FC = () => {
         }
     }, [isInitialized, loadHabits]);
     const [showUnmarkedOnly, setShowUnmarkedOnly] = useState(false);
-    // State for the create/edit form
-    const [showingCreateForm, setShowingCreateForm] = useState(false);
-    const [showingEditForm, setShowingEditForm] = useState(false);
-    const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
-    // State for detail view
-    const [showHabitDetail, setShowHabitDetail] = useState(false);
-    const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-    const [editFromDetailView, setEditFromDetailView] = useState(false);
 
     const handleAddHabit = () => {
-        setShowingCreateForm(true);
-        setEditFromDetailView(false);
+        navigation.navigate('HabitForm', {});
     };
 
     const handleEditHabit = (habit: Habit) => {
-        setEditingHabit(habit);
-        setShowingEditForm(true);
-        setEditFromDetailView(false);
+        navigation.navigate('HabitForm', { habit, isEditing: true });
     };
 
     const handleHabitPress = (habit: Habit) => {
-        setSelectedHabit(habit);
-        setShowHabitDetail(true);
-    };
-
-    const handleEditHabitFromDetail = (habit: Habit) => {
-        setShowHabitDetail(false);
-        setEditingHabit(habit);
-        setShowingEditForm(true);
-        setEditFromDetailView(true);
-    };
-
-    const handleFormDismiss = () => {
-        setShowingCreateForm(false);
-        setShowingEditForm(false);
-        
-        if (editFromDetailView) {
-            // Return to detail view if edit was opened from detail
-            setEditFromDetailView(false);
-            setShowHabitDetail(true);
-        } else {
-            // Clear selected habit and return to list if this was a create form
-            setEditingHabit(null);
-        }
-    };
-
-    const handleCloseDetail = () => {
-        setShowHabitDetail(false);
-        setSelectedHabit(null);
+        navigation.navigate('HabitDetail', { habit });
     };
 
     const handleHabitUpdated = async () => {
         try {
             await loadHabits();
-            
-            // If we have a selected habit, update it with fresh data
-            if (selectedHabit) {
-                const updatedSelectedHabit = getHabitById(selectedHabit._id);
-                if (updatedSelectedHabit) {
-                    setSelectedHabit(updatedSelectedHabit);
-                }
-            }
         } catch (error) {
             console.error('Failed to update habits:', error);
         }
@@ -117,7 +75,7 @@ export const HabitsPanel: React.FC = () => {
                 className="flex-1 p-5"
                 refreshControl={refreshControl}
             >
-                {isInitialized && habits.length === 0 ? (
+                {!isInitialized && habits.length === 0 ? (
                     <View className="flex-1 items-center justify-center">
                         <Text className="text-on-background-variant">Loading habits...</Text>
                     </View>
@@ -153,32 +111,6 @@ export const HabitsPanel: React.FC = () => {
                     </View>
                 )}
             </ScrollView>
-
-            {/* Create new habit view */}
-            <HabitFormView
-                isPresented={showingCreateForm}
-                onDismiss={handleFormDismiss}
-                onHabitSaved={() => {}}
-            />
-
-            {/* Edit habit view */}
-            {editingHabit && (
-                <HabitFormView
-                    isPresented={showingEditForm}
-                    onDismiss={handleFormDismiss}
-                    onHabitSaved={() => {}}
-                    existingHabit={editingHabit}
-                    isEditMode={true}
-                />
-            )}
-
-            <HabitDetailView
-                isPresented={showHabitDetail}
-                onDismiss={handleCloseDetail}
-                habit={selectedHabit}
-                onEditPress={handleEditHabitFromDetail}
-                onHabitUpdated={handleHabitUpdated}
-            />
         </>
     );
 }

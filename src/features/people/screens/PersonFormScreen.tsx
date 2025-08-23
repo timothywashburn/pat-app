@@ -12,48 +12,38 @@ import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import { Person, PersonNoteData, PersonNoteId, PersonPropertyData } from "@timothyw/pat-common";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { PeopleStackParamList } from "@/src/navigation/PeopleStack";
+import { RouteProp } from "@react-navigation/core";
 
 interface PersonFormViewProps {
-    isPresented: boolean;
-    onDismiss: () => void;
-    onCancel?: () => void;
-    onPersonSaved?: () => void;
-    existingPerson?: Person;
-    isEditMode?: boolean;
+    navigation: StackNavigationProp<PeopleStackParamList, 'PersonForm'>;
+    route: RouteProp<PeopleStackParamList, 'PersonForm'>;
 }
 
-const PersonFormView: React.FC<PersonFormViewProps> = ({
-    isPresented,
-    onDismiss,
-    onCancel,
-    onPersonSaved,
-    existingPerson,
-    isEditMode = false
+const PersonFormScreen: React.FC<PersonFormViewProps> = ({
+    navigation,
+    route,
 }) => {
     const { getColor } = useTheme();
 
-    const [name, setName] = useState(existingPerson?.name || '');
-    const [properties, setProperties] = useState<PersonPropertyData[]>(existingPerson?.properties || []);
-    const [notes, setNotes] = useState<PersonNoteData[]>(existingPerson?.notes || []);
+    const currentPerson = route.params.person;
+    const currentIsEditMode = route.params.isEditing || false;
+
+    const [name, setName] = useState(currentPerson?.name || '');
+    const [properties, setProperties] = useState<PersonPropertyData[]>(currentPerson?.properties || []);
+    const [notes, setNotes] = useState<PersonNoteData[]>(currentPerson?.notes || []);
     const [pendingNotes, setPendingNotes] = useState<{ content: string; tempId: PersonNoteId; isNew?: boolean }[]>([]);
     const [modifiedNoteIds, setModifiedNoteIds] = useState<Set<PersonNoteId>>(new Set());
     const [deletedNoteIds, setDeletedNoteIds] = useState<Set<PersonNoteId>>(new Set());
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // For adding new properties and notes
     const [newPropertyKey, setNewPropertyKey] = useState('');
     const [newPropertyValue, setNewPropertyValue] = useState('');
     const [newNote, setNewNote] = useState('');
 
-    // For editing existing properties and notes
-    // No separate editing state needed with direct editing
-
     const { createPerson, updatePerson, deletePerson, createPersonNote, updatePersonNote, deletePersonNote } = usePeopleStore();
-
-    if (!isPresented) {
-        return null;
-    }
 
     const handleSavePerson = async () => {
         if (!name.trim()) {
@@ -71,9 +61,9 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 notes,
             };
 
-            if (isEditMode && existingPerson) {
+            if (currentIsEditMode && currentPerson) {
                 // Save person data first, but don't auto-refresh until all note operations complete
-                await updatePerson(existingPerson._id, personData, false);
+                await updatePerson(currentPerson._id, personData, false);
                 
                 // Handle all note operations in parallel
                 const noteOperations = [];
@@ -92,7 +82,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 
                 // Create new notes
                 for (const pendingNote of pendingNotes) {
-                    noteOperations.push(createPersonNote(existingPerson._id, pendingNote.content));
+                    noteOperations.push(createPersonNote(currentPerson._id, pendingNote.content));
                 }
                 
                 // Wait for all note operations to complete
@@ -115,7 +105,7 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 }
             }
 
-            if (!isEditMode) {
+            if (!currentIsEditMode) {
                 setName('');
                 setProperties([]);
                 setNotes([]);
@@ -127,9 +117,12 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
                 setNewNote('');
             }
 
-            // Only call onPersonSaved after ALL operations (including notes) are complete
-            onPersonSaved?.();
-            onDismiss();
+            // Handle save completion
+            if (currentIsEditMode) {
+                navigation.goBack();
+            } else {
+                navigation.navigate('PeopleList');
+            }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save person');
         } finally {
@@ -138,15 +131,15 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     };
 
     const handleDelete = async () => {
-        if (!existingPerson) return;
+        if (!currentPerson) return;
 
         setIsLoading(true);
         setErrorMessage(null);
 
         try {
-            await deletePerson(existingPerson._id);
-            onPersonSaved?.();
-            onDismiss();
+            await deletePerson(currentPerson._id);
+            // Handle delete completion
+            navigation.navigate('PeopleList');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete person');
             setIsLoading(false);
@@ -219,45 +212,18 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
         }
     };
 
-    const handleCancel = () => {
-        if (isEditMode && existingPerson) {
-            setName(existingPerson.name);
-            setProperties(existingPerson.properties || []);
-            setNotes(existingPerson.notes || []);
-        } else {
-            setName('');
-            setProperties([]);
-            setNotes([]);
-        }
-        setPendingNotes([]);
-        setModifiedNoteIds(new Set());
-        setDeletedNoteIds(new Set());
-        setNewPropertyKey('');
-        setNewPropertyValue('');
-        setNewNote('');
-        setErrorMessage(null);
-        
-        // Use onCancel if provided (for edit mode navigation back to detail view)
-        // Otherwise use onDismiss (for create mode navigation back to list)
-        if (onCancel) {
-            onCancel();
-        } else {
-            onDismiss();
-        }
-    };
-
     return (
         <BaseFormView
-            isPresented={isPresented}
-            onDismiss={handleCancel}
-            title={isEditMode ? 'Edit Person' : 'New Person'}
-            isEditMode={isEditMode}
-            saveText={isEditMode ? 'Save' : 'Add'}
+            navigation={navigation}
+            route={route}
+            title={currentIsEditMode ? 'Edit Person' : 'New Person'}
+            isEditMode={currentIsEditMode}
+            saveText={currentIsEditMode ? 'Save' : 'Add'}
             onSave={handleSavePerson}
             isSaveDisabled={!name.trim()}
             isLoading={isLoading}
             errorMessage={errorMessage}
-            existingItem={existingPerson}
+            existingItem={currentPerson}
             onDelete={handleDelete}
             deleteButtonText="Delete Person"
             deleteConfirmTitle="Delete Person"
@@ -425,4 +391,4 @@ const PersonFormView: React.FC<PersonFormViewProps> = ({
     );
 };
 
-export default PersonFormView;
+export default PersonFormScreen;

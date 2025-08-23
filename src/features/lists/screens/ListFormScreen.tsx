@@ -5,34 +5,29 @@ import FormSection from '@/src/components/common/FormSection';
 import SelectionList from '@/src/components/common/SelectionList';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { ListData, ListType } from "@timothyw/pat-common";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { ListsStackParamList } from "@/src/navigation/ListsStack";
+import { RouteProp } from "@react-navigation/core";
 
 interface ListFormViewProps {
-    isPresented: boolean;
-    onDismiss: () => void;
-    onCancel?: () => void;
-    onListSaved?: () => void;
-    existingList?: ListData;
-    isEditMode?: boolean;
+    navigation: StackNavigationProp<ListsStackParamList, 'ListForm'>;
+    route: RouteProp<ListsStackParamList, 'ListForm'>;
 }
 
-const ListFormView: React.FC<ListFormViewProps> = ({
-    isPresented,
-    onDismiss,
-    onCancel,
-    onListSaved,
-    existingList,
-    isEditMode = false
+const ListFormScreen: React.FC<ListFormViewProps> = ({
+    navigation,
+    route,
 }) => {
-    const [name, setName] = useState(existingList?.name || '');
-    const [type, setType] = useState<ListType>(existingList?.type || ListType.TASKS);
+    const currentList = route.params.list;
+    const currentIsEditMode = route.params.isEditing || false;
+
+    const [name, setName] = useState(currentList?.name || '');
+    const [type, setType] = useState<ListType>(currentList?.type || ListType.TASKS);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const { createList, updateList, deleteList } = useListsStore();
 
-    if (!isPresented) {
-        return null;
-    }
 
     const handleSaveList = async () => {
         if (!name.trim()) {
@@ -44,8 +39,8 @@ const ListFormView: React.FC<ListFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            if (isEditMode && existingList) {
-                await updateList(existingList._id, {
+            if (currentIsEditMode && currentList) {
+                await updateList(currentList._id, {
                     name: name.trim(),
                     type: type
                 });
@@ -53,12 +48,15 @@ const ListFormView: React.FC<ListFormViewProps> = ({
                 await createList(name.trim(), type);
             }
 
-            if (!isEditMode) {
+            if (!currentIsEditMode) {
                 setName('');
             }
 
-            onListSaved?.();
-            onDismiss();
+            if (currentIsEditMode) {
+                navigation.goBack();
+            } else {
+                navigation.navigate('ListsList');
+            }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list');
         } finally {
@@ -67,51 +65,32 @@ const ListFormView: React.FC<ListFormViewProps> = ({
     };
 
     const handleDelete = async () => {
-        if (!existingList) return;
+        if (!currentList) return;
 
         setIsLoading(true);
         setErrorMessage(null);
 
         try {
-            await deleteList(existingList._id);
-            onListSaved?.();
-            onDismiss();
+            await deleteList(currentList._id);
+            navigation.navigate('ListsList');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
             setIsLoading(false);
         }
     };
 
-    const handleCancel = () => {
-        if (isEditMode && existingList) {
-            setName(existingList.name);
-            setType(existingList.type);
-        } else {
-            setName('');
-            setType(ListType.TASKS);
-        }
-        setErrorMessage(null);
-        
-        // Use onCancel if provided (for edit mode navigation back to detail view)
-        // Otherwise use onDismiss (for create mode navigation back to list)
-        if (onCancel) {
-            onCancel();
-        } else {
-            onDismiss();
-        }
-    };
 
     return (
         <BaseFormView
-            isPresented={isPresented}
-            onDismiss={handleCancel}
-            title={isEditMode ? 'Edit List' : 'New List'}
-            isEditMode={isEditMode}
+            navigation={navigation}
+            route={route}
+            title={currentIsEditMode ? 'Edit List' : 'New List'}
+            isEditMode={currentIsEditMode}
             onSave={handleSaveList}
             isSaveDisabled={!name.trim()}
             isLoading={isLoading}
             errorMessage={errorMessage}
-            existingItem={existingList}
+            existingItem={currentList}
             onDelete={handleDelete}
             deleteButtonText="Delete List"
             deleteConfirmTitle="Delete List"
@@ -124,7 +103,7 @@ const ListFormView: React.FC<ListFormViewProps> = ({
                         onChangeText={setName}
                         placeholder="Enter list name"
                         required
-                        autoFocus={!isEditMode}
+                        autoFocus={!currentIsEditMode}
                         maxLength={100}
                     />
                     
@@ -144,4 +123,4 @@ const ListFormView: React.FC<ListFormViewProps> = ({
     );
 };
 
-export default ListFormView;
+export default ListFormScreen;

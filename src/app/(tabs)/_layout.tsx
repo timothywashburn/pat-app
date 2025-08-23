@@ -57,15 +57,16 @@ export default function TabsLayout() {
 
     if (activeHiddenModule) {
         const { getComponent } = moduleInfo[activeHiddenModule.type];
+        
+        // Use stack navigator from moduleInfo
         const ModuleComponent = getComponent;
 
         return (
-            <View
-                className="flex-1"
-                style={{ backgroundColor: getColor("background") }}
+            <SafeAreaView
+                className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}
             >
                 <ModuleComponent />
-            </View>
+            </SafeAreaView>
         );
     }
 
@@ -102,11 +103,15 @@ export default function TabsLayout() {
                     if (!module.visible && module.type != ModuleType.SETTINGS) return;
                     const moduleType = module.type;
                     const { getComponent, icon, title } = moduleInfo[moduleType];
+                    
+                    // Use stack navigators for modules with detail/form views
+                    const Component = getComponent;
+                    
                     return (
                         <Tab.Screen
                             key={moduleType}
                             name={moduleType}
-                            component={getComponent}
+                            component={Component}
                             options={{
                                 title: title,
                                 tabBarIcon: ({ color }) => (

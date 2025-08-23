@@ -1,31 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
-import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
-import AgendaItemDetailView from '@/src/features/agenda/components/AgendaItemDetailView';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
+import { AgendaStackParamList } from '@/src/navigation/AgendaStack';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import { AgendaItemData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
+type AgendaNavigationProp = StackNavigationProp<AgendaStackParamList, 'AgendaList'>;
+
 export const AgendaPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
+    const navigation = useNavigation<AgendaNavigationProp>();
     const { items: agendaItems, isInitialized, loadItems, createItem, updateItem, deleteItem, setCompleted } = useAgendaStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);
-
-    // State for the create/edit form
-    const [showingCreateForm, setShowingCreateForm] = useState(false);
-    const [showingEditForm, setShowingEditForm] = useState(false);
-
-    // State for detail view
-    const [selectedItem, setSelectedItem] = useState<AgendaItemData | null>(null);
-    const [showingDetailView, setShowingDetailView] = useState(false);
 
     // State for notifications
     const [showingNotifications, setShowingNotifications] = useState(false);
@@ -40,37 +36,11 @@ export const AgendaPanel: React.FC = () => {
     }, [isInitialized, loadItems]);
 
     const handleAddItem = () => {
-        setShowingCreateForm(true);
+        navigation.navigate('AgendaItemForm', {});
     };
 
     const handleItemSelect = (item: AgendaItemData) => {
-        setSelectedItem(item);
-        setShowingDetailView(true);
-    };
-
-    const handleDetailDismiss = () => {
-        setShowingDetailView(false);
-        setSelectedItem(null);
-    };
-
-    const handleEditRequest = () => {
-        setShowingDetailView(false);
-        setShowingEditForm(true);
-    };
-
-    const handleFormDismiss = async () => {
-        setShowingCreateForm(false);
-        setShowingEditForm(false);
-        setSelectedItem(null);
-    };
-
-    const handleEditCancel = () => {
-        setShowingEditForm(false);
-        setShowingDetailView(true);
-    };
-
-    const handleItemUpdated = () => {
-        handleDetailDismiss();
+        navigation.navigate('AgendaItemDetail', { agendaItem: item });
     };
 
     const handleNotificationsPress = () => {
@@ -105,7 +75,7 @@ export const AgendaPanel: React.FC = () => {
                 onFilterTapped={() => setShowCompleted(!showCompleted)}
             />
 
-            {isInitialized && agendaItems.length === 0 ? (
+            {!isInitialized && agendaItems.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
@@ -163,36 +133,6 @@ export const AgendaPanel: React.FC = () => {
                         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
                     />
                 )
-            )}
-
-            {/* Create new item view */}
-            <AgendaItemFormView
-                isPresented={showingCreateForm}
-                onDismiss={handleFormDismiss}
-                onItemSaved={() => {}}
-            />
-
-            {/* Edit item view */}
-            {selectedItem && (
-                <AgendaItemFormView
-                    isPresented={showingEditForm}
-                    onDismiss={handleFormDismiss}
-                    onCancel={handleEditCancel}
-                    onItemSaved={() => {}}
-                    existingItem={selectedItem}
-                    isEditMode={true}
-                />
-            )}
-
-            {/* Item detail view */}
-            {selectedItem && (
-                <AgendaItemDetailView
-                    item={selectedItem}
-                    isPresented={showingDetailView}
-                    onDismiss={handleDetailDismiss}
-                    onEditRequest={handleEditRequest}
-                    onItemUpdated={handleItemUpdated}
-                />
             )}
 
             {/* Panel notifications view */}

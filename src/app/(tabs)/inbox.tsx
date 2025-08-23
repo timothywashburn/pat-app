@@ -8,21 +8,25 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import { useThoughtsStore } from '@/src/stores/useThoughtsStore';
 import CustomHeader from '@/src/components/CustomHeader';
-import AgendaItemFormView from '@/src/features/agenda/components/AgendaItemFormView';
-import ListItemFormView from '@/src/features/lists/components/ListItemFormView';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
+import { InboxStackParamList } from '@/src/navigation/InboxStack';
+
+type InboxNavigationProp = StackNavigationProp<InboxStackParamList, 'InboxList'>;
 
 export const InboxPanel: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
+    const navigation = useNavigation<InboxNavigationProp>();
     const { thoughts, isInitialized, loadThoughts, createThought, updateThought, deleteThought } = useThoughtsStore();
     const { refreshControl } = useRefreshControl(loadThoughts, 'Failed to refresh thoughts');
 
@@ -32,12 +36,9 @@ export const InboxPanel: React.FC = () => {
         }
     }, [isInitialized, loadThoughts]);
     const [newThought, setNewThought] = useState('');
-    const [selectedThought, setSelectedThought] = useState<ThoughtData | null>(null);
     const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
     const [editingThought, setEditingThought] = useState<ThoughtData | null>(null);
     const [editedContent, setEditedContent] = useState('');
-    const [showingCreateAgendaForm, setShowingCreateAgendaForm] = useState(false);
-    const [showingCreateListItemForm, setShowingCreateListItemForm] = useState(false);
     const [showingNotificationConfig, setShowingNotificationConfig] = useState(false);
 
     const { getListsWithItems } = useListsStore();
@@ -84,29 +85,6 @@ export const InboxPanel: React.FC = () => {
     };
 
 
-    const handleAgendaFormDismiss = () => {
-        setShowingCreateAgendaForm(false);
-        setSelectedThought(null);
-    };
-
-    const handleListItemFormDismiss = () => {
-        setShowingCreateListItemForm(false);
-        setSelectedThought(null);
-    };
-
-    const handleItemCreated = () => {
-        if (selectedThought) {
-            handleDeleteThought(selectedThought._id);
-            setSelectedThought(null);
-        }
-    };
-
-    const handleListItemCreated = async () => {
-        if (selectedThought) {
-            handleDeleteThought(selectedThought._id);
-            setSelectedThought(null);
-        }
-    };
 
     const toggleThoughtExpansion = (thought: ThoughtData) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -120,14 +98,16 @@ export const InboxPanel: React.FC = () => {
             setExpandedThoughtId(null);
         } else {
             setExpandedThoughtId(thought._id);
-            setSelectedThought(thought);
         }
     };
 
     const handleMoveToAgenda = (thought: ThoughtData) => {
-        setSelectedThought(thought);
-        setShowingCreateAgendaForm(true);
+        navigation.navigate('AgendaItemForm', {
+            initialName: thought.content
+        });
         setExpandedThoughtId(null);
+        // TODO: I think this is probably wrong now, it probably needs to be called from the callback of successful creation
+        handleDeleteThought(thought._id);
     };
 
     const handleMoveToLists = (thought: ThoughtData) => {
@@ -137,9 +117,12 @@ export const InboxPanel: React.FC = () => {
             return;
         }
 
-        setSelectedThought(thought);
-        setShowingCreateListItemForm(true);
+        navigation.navigate('ListItemForm', {
+            initialName: thought.content
+        });
         setExpandedThoughtId(null);
+        // TODO: I think this is probably wrong now, it probably needs to be called from the callback of successful creation
+        handleDeleteThought(thought._id);
     };
 
     const handleStartEdit = (thought: ThoughtData) => {
@@ -163,8 +146,7 @@ export const InboxPanel: React.FC = () => {
             <CustomHeader
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
-                showAddButton={true}
-                onAddTapped={() => setShowingCreateAgendaForm(true)}
+                showAddButton={false}
                 showNotificationsButton={true}
                 onNotificationsTapped={() => setShowingNotificationConfig(true)}
             />
@@ -181,9 +163,9 @@ export const InboxPanel: React.FC = () => {
                 <TouchableOpacity
                     className={`bg-primary rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-40' : ''}`}
                     onPress={handleAddThought}
-                    disabled={newThought.trim() === '' || isInitialized}
+                    disabled={newThought.trim() === '' || !isInitialized}
                 >
-                    {isInitialized ? (
+                    {!isInitialized ? (
                         <ActivityIndicator size="small" color={getColor("on-primary")} />
                     ) : (
                         <Text className="text-on-primary font-bold">Add</Text>
@@ -191,7 +173,7 @@ export const InboxPanel: React.FC = () => {
                 </TouchableOpacity>
             </View>
 
-            {isInitialized && thoughts.length === 0 ? (
+            {!isInitialized && thoughts.length === 0 ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
@@ -228,25 +210,6 @@ export const InboxPanel: React.FC = () => {
                     keyExtractor={item => item._id}
                     contentContainerClassName="px-4 pt-3"
                     refreshControl={refreshControl}
-                />
-            )}
-
-            <AgendaItemFormView
-                isPresented={showingCreateAgendaForm}
-                onDismiss={handleAgendaFormDismiss}
-                onItemSaved={handleItemCreated}
-                initialName={selectedThought?.content || ''}
-                isEditMode={false}
-            />
-
-            {showingCreateListItemForm && (
-                <ListItemFormView
-                    isPresented={showingCreateListItemForm}
-                    onDismiss={handleListItemFormDismiss}
-                    onListItemSaved={handleListItemCreated}
-                    Lists={listsWithItems}
-                    initialName={selectedThought?.content || ''}
-                    isEditMode={false}
                 />
             )}
 

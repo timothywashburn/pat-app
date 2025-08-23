@@ -10,21 +10,18 @@ import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import { AgendaItemData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { NotificationsSection } from '@/src/features/notifications/components/NotificationsSection';
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
+import { StackNavigationProp } from "@react-navigation/stack";
+import { AgendaStackParamList } from "@/src/navigation/AgendaStack";
+import { RouteProp } from "@react-navigation/core";
 
 interface AgendaItemDetailViewProps {
-    item: AgendaItemData;
-    isPresented: boolean;
-    onDismiss: () => void;
-    onEditRequest: () => void;
-    onItemUpdated?: () => void;
+    navigation: StackNavigationProp<AgendaStackParamList, 'AgendaItemDetail'>;
+    route: RouteProp<AgendaStackParamList, 'AgendaItemDetail'>;
 }
 
-const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
-    item,
-    isPresented,
-    onDismiss,
-    onEditRequest,
-    onItemUpdated,
+const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
+    navigation,
+    route,
 }) => {
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
@@ -33,7 +30,14 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
 
     const { setCompleted } = useAgendaStore();
 
-    if (!isPresented) {
+    const currentItem: AgendaItemData = route.params.agendaItem;
+    
+    // Handle edit request
+    const handleEditRequest = () => {
+        navigation.navigate('AgendaItemForm', { agendaItem: currentItem, isEditing: true });
+    };
+
+    if (!currentItem) {
         return null;
     }
 
@@ -42,10 +46,9 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
         setErrorMessage(null);
 
         try {
-            await setCompleted(item._id, !item.completed);
-            onItemUpdated?.();
+            await setCompleted(currentItem._id, !currentItem.completed);
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : 'Failed to update item');
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to update currentItem');
         } finally {
             setIsLoading(false);
         }
@@ -54,15 +57,15 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
     const actions = [
         {
             label: "Edit Item",
-            onPress: onEditRequest,
+            onPress: handleEditRequest,
             variant: 'outline' as const,
             icon: 'create-outline'
         },
         {
-            label: item.completed ? "Mark as Incomplete" : "Mark as Complete",
+            label: currentItem.completed ? "Mark as Incomplete" : "Mark as Complete",
             onPress: handleToggleCompleted,
             variant: 'primary' as const,
-            icon: item.completed ? 'refresh-circle' : 'checkmark-circle',
+            icon: currentItem.completed ? 'refresh-circle' : 'checkmark-circle',
             loading: isLoading
         }
     ];
@@ -70,21 +73,21 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
     return (
         <>
             <BaseDetailView
-                isPresented={isPresented}
-                onDismiss={onDismiss}
+                navigation={navigation}
+                route={route}
                 title="Details"
-                onEditRequest={onEditRequest}
+                onEditRequest={handleEditRequest}
                 errorMessage={errorMessage}
                 actions={actions}
             >
-                <Text className="text-on-surface text-xl font-bold mb-4">{item.name}</Text>
+                <Text className="text-on-surface text-xl font-bold mb-4">{currentItem.name}</Text>
 
                         <View className="mb-4">
-                            {item.dueDate && (
-                                <View className="flex-row items-center mb-2">
+                            {currentItem.dueDate && (
+                                <View className="flex-row currentItems-center mb-2">
                                     <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
                                     <Text className="text-on-surface-variant text-base ml-2">
-                                        {item.dueDate.toLocaleDateString()} at {item.dueDate.toLocaleTimeString([], {
+                                        {currentItem.dueDate.toLocaleDateString()} at {currentItem.dueDate.toLocaleTimeString([], {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}
@@ -92,54 +95,54 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
                                 </View>
                             )}
 
-                            {(item.category || item.type) && (
+                            {(currentItem.category || currentItem.type) && (
                                 <View className="flex-row flex-wrap mb-2">
-                                    {item.category && (
+                                    {currentItem.category && (
                                         <View className="bg-surface border border-primary rounded-2xl px-3 py-1 mr-2 mb-2">
-                                            <Text className="text-primary text-sm">{item.category}</Text>
+                                            <Text className="text-primary text-sm">{currentItem.category}</Text>
                                         </View>
                                     )}
 
-                                    {item.type && (
+                                    {currentItem.type && (
                                         <View className="bg-surface border border-on-surface-variant rounded-2xl px-3 py-1 mr-2 mb-2">
-                                            <Text className="text-on-surface-variant text-sm">{item.type}</Text>
+                                            <Text className="text-on-surface-variant text-sm">{currentItem.type}</Text>
                                         </View>
                                     )}
                                 </View>
                             )}
 
-                            {item.urgent && (
+                            {currentItem.urgent && (
                                 <View className="bg-error px-2 py-1 rounded self-start mb-2">
                                     <Text className="text-on-error text-sm font-semibold">Urgent</Text>
                                 </View>
                             )}
                         </View>
 
-                        {item.notes && (
+                        {currentItem.notes && (
                             <View className="mb-4">
                                 <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
                                 <View className="bg-surface border border-outline rounded-lg p-3">
-                                    <Text className="text-on-surface text-base">{item.notes}</Text>
+                                    <Text className="text-on-surface text-base">{currentItem.notes}</Text>
                                 </View>
                             </View>
                         )}
 
                 <NotificationsSection
                     targetEntityType={NotificationEntityType.AGENDA_ITEM}
-                    targetId={item._id}
+                    targetId={currentItem._id}
                     targetLevel={NotificationTemplateLevel.ENTITY}
-                    entityName={item.name}
+                    entityName={currentItem.name}
                     onPress={() => setShowNotificationConfig(true)}
                 />
 
-                <View className="flex-row items-center">
+                <View className="flex-row currentItems-center">
                     <Ionicons
-                        name={item.completed ? "checkmark-circle" : "ellipse-outline"}
+                        name={currentItem.completed ? "checkmark-circle" : "ellipse-outline"}
                         size={20}
-                        color={item.completed ? getColor("primary") : getColor("on-surface-variant")}
+                        color={currentItem.completed ? getColor("primary") : getColor("on-surface-variant")}
                     />
                     <Text className="text-on-surface text-base ml-2">
-                        {item.completed ? "Completed" : "Not completed"}
+                        {currentItem.completed ? "Completed" : "Not completed"}
                     </Text>
                 </View>
             </BaseDetailView>
@@ -147,9 +150,9 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
             {showNotificationConfig && (
                 <NotificationConfigView
                     targetEntityType={NotificationEntityType.AGENDA_ITEM}
-                    targetId={item._id}
+                    targetId={currentItem._id}
                     targetLevel={NotificationTemplateLevel.ENTITY}
-                    entityName={item.name}
+                    entityName={currentItem.name}
                     onClose={() => setShowNotificationConfig(false)}
                 />
             )}
@@ -157,4 +160,4 @@ const AgendaItemDetailView: React.FC<AgendaItemDetailViewProps> = ({
     );
 };
 
-export default AgendaItemDetailView;
+export default AgendaItemDetailScreen;

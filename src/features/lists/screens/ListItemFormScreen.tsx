@@ -3,56 +3,45 @@ import {
     Text,
     View,
 } from 'react-native';
-import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import { useListsStore } from '@/src/stores/useListsStore';
-import { ListItemData, ListId, UpdateListItemRequest } from "@timothyw/pat-common";
+import { ListId, UpdateListItemRequest } from "@timothyw/pat-common";
 import { ListWithItems } from "@/src/features/lists/models";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { ListsStackParamList } from "@/src/navigation/ListsStack";
+import { RouteProp } from "@react-navigation/core";
 
 interface ListItemFormViewProps {
-    isPresented: boolean;
-    onDismiss: () => void;
-    onCancel?: () => void;
-    onListItemSaved?: () => void;
-    existingListItem?: ListItemData;
-    Lists: ListWithItems[];
-    defaultListId?: ListId;
-    initialName?: string;
-    isEditMode?: boolean;
-    hideListSelection?: boolean;
+    navigation: StackNavigationProp<ListsStackParamList, 'ListItemForm'>;
+    route: RouteProp<ListsStackParamList, 'ListItemForm'>;
 }
 
-const ListItemFormView: React.FC<ListItemFormViewProps> = ({
-    isPresented,
-    onDismiss,
-    onCancel,
-    onListItemSaved,
-    existingListItem,
-    Lists,
-    defaultListId,
-    initialName = '',
-    isEditMode = false,
-    hideListSelection = false
+const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
+    navigation,
+    route,
 }) => {
-    const [name, setName] = useState(existingListItem?.name || initialName);
-    const [notes, setNotes] = useState(existingListItem?.notes || '');
+    const currentListItem = route.params.listItem;
+    const currentIsEditMode = route.params.isEditing || false;
+    const allowListChange = route.params.allowListChange || false;
+    const currentLists: ListWithItems[] = route.params.lists || [];
+
+    const [name, setName] = useState(currentListItem?.name || '');
+    const [notes, setNotes] = useState(currentListItem?.notes || '');
     const [selectedListId, setSelectedListId] = useState<ListId>(() => {
-        if (existingListItem?.listId) return existingListItem.listId;
-        if (defaultListId) return defaultListId;
-        return Lists[0]?._id!;
+        if (route.params.listId) return route.params.listId;
+        if (currentListItem?.listId) return currentListItem.listId;
+        return currentLists[0]?._id!;
     });
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const { createListItem, updateListItem, deleteListItem } = useListsStore();
 
-    if (!isPresented) {
-        return null;
-    }
+    const selectedList = currentLists.find(list => list._id === selectedListId);
 
     const handleSaveListItem = async () => {
         if (!name.trim()) {
@@ -60,6 +49,7 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
             return;
         }
 
+        // TODO: better handling, but this probably only happens if there are no lists if opening from inbox view
         if (!selectedListId) {
             setErrorMessage('Please select a list');
             return;
@@ -75,8 +65,8 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
                 listId: selectedListId,
             };
 
-            if (isEditMode && existingListItem) {
-                await updateListItem(existingListItem._id, listItemData);
+            if (currentIsEditMode && currentListItem) {
+                await updateListItem(currentListItem._id, listItemData);
             } else {
                 await createListItem({
                     name: name.trim(),
@@ -85,13 +75,16 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
                 });
             }
 
-            if (!isEditMode) {
-                setName(initialName);
+            if (!currentIsEditMode) {
+                // setName(currentInitialName);
                 setNotes('');
             }
 
-            onListItemSaved?.();
-            onDismiss();
+            if (currentIsEditMode) {
+                navigation.goBack();
+            } else {
+                navigation.navigate('ListDetail', { list: selectedList! });
+            }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list item');
         } finally {
@@ -100,58 +93,34 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
     };
 
     const handleDelete = async () => {
-        if (!existingListItem) return;
+        if (!currentListItem) return;
 
         setIsLoading(true);
         setErrorMessage(null);
 
         try {
-            await deleteListItem(existingListItem._id);
-            onListItemSaved?.();
-            onDismiss();
+            await deleteListItem(currentListItem._id);
+            navigation.navigate('ListDetail', { list: selectedList! });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
             setIsLoading(false);
         }
     };
 
-    const handleCancel = () => {
-        if (isEditMode && existingListItem) {
-            setName(existingListItem.name);
-            setNotes(existingListItem.notes || '');
-            setSelectedListId(existingListItem.listId);
-        } else {
-            setName(initialName);
-            setNotes('');
-            setSelectedListId(defaultListId || Lists[0]?._id!);
-        }
-        setErrorMessage(null);
-        
-        // Use onCancel if provided (for edit mode navigation back to detail view)
-        // Otherwise use onDismiss (for create mode navigation back to list)
-        if (onCancel) {
-            onCancel();
-        } else {
-            onDismiss();
-        }
-    };
-
-    const selectedList = Lists.find(list => list._id === selectedListId);
-
     return (
         <BaseFormView
-            isPresented={isPresented}
-            onDismiss={handleCancel}
-            title={isEditMode ? 'Edit List Item' : 'New List Item'}
-            isEditMode={isEditMode}
+            navigation={navigation}
+            route={route}
+            title={currentIsEditMode ? 'Edit List Item' : 'New List Item'}
+            isEditMode={currentIsEditMode}
             onSave={handleSaveListItem}
-            isSaveDisabled={!name.trim() || !selectedListId}
+            isSaveDisabled={!name.trim()}
             isLoading={isLoading}
             errorMessage={errorMessage}
-            existingItem={existingListItem}
+            existingItem={currentListItem}
             onDelete={handleDelete}
             deleteButtonText="Delete List Item"
-            deleteConfirmTitle="Delete List ITem"
+            deleteConfirmTitle="Delete List Item"
             deleteConfirmMessage="Are you sure you want to delete this item? This action cannot be undone."
         >
                 <FormSection title="List Item Details">
@@ -161,7 +130,7 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
                         onChangeText={setName}
                         placeholder="Enter item name"
                         required
-                        autoFocus={!isEditMode}
+                        autoFocus={!currentIsEditMode}
                         maxLength={200}
                     />
 
@@ -174,16 +143,10 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
                         numberOfLines={4}
                     />
 
-                    {hideListSelection ? (
-                        <View className="mb-4">
-                            <Text className="text-on-surface-variant text-sm mb-2">
-                                Creating list item in: <Text className="text-on-surface font-semibold">{selectedList?.name}</Text>
-                            </Text>
-                        </View>
-                    ) : (
+                    {allowListChange ? (
                         <SelectionList
                             label="List"
-                            options={Lists.map(list => ({
+                            options={currentLists.map(list => ({
                                 value: list._id,
                                 label: list.name,
                                 description: `${list.items.length} list items in this list`
@@ -192,6 +155,12 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
                             onSelectionChange={(value) => setSelectedListId(value as any)}
                             required
                         />
+                    ) : (
+                        <View className="mb-4">
+                            <Text className="text-on-surface-variant text-sm mb-2">
+                                Creating list item in: <Text className="text-on-surface font-semibold">{selectedList?.name}</Text>
+                            </Text>
+                        </View>
                     )}
                 </FormSection>
 
@@ -199,4 +168,4 @@ const ListItemFormView: React.FC<ListItemFormViewProps> = ({
     );
 };
 
-export default ListItemFormView;
+export default ListItemFormScreen;
