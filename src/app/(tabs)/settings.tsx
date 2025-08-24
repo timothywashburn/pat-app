@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import CustomHeader from '@/src/components/CustomHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
@@ -9,8 +11,17 @@ import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { UserModuleData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
-export const SettingsPanel: React.FC = () => {
+interface SettingsPanelProps {
+    navigation: StackNavigationProp<MainStackParamList, 'Settings'>;
+    route: RouteProp<MainStackParamList, 'Settings'>;
+}
+
+export const SettingsPanel: React.FC<SettingsPanelProps> = ({
+    navigation,
+    route
+}) => {
     const { errorToast, successToast } = useToast();
     const { signOut, authData } = useAuthStore();
     const [editMode, setEditMode] = useState(false);

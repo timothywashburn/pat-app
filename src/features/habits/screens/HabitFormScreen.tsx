@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
@@ -15,39 +14,33 @@ import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import { Habit, HabitFrequency } from "@timothyw/pat-common";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface HabitFormViewProps {
-    isPresented: boolean;
-    onDismiss: () => void;
-    onCancel?: () => void;
-    onHabitSaved?: () => void;
-    existingHabit?: Habit;
-    isEditMode?: boolean;
+    navigation: StackNavigationProp<MainStackParamList, 'HabitForm'>;
+    route: RouteProp<MainStackParamList, 'HabitForm'>;
 }
 
-const HabitFormView: React.FC<HabitFormViewProps> = ({
-    isPresented,
-    onDismiss,
-    onCancel,
-    onHabitSaved,
-    existingHabit,
-    isEditMode = false
+const HabitFormScreen: React.FC<HabitFormViewProps> = ({
+    navigation,
+    route,
 }) => {
     const { getColor } = useTheme();
+    
+    const { createHabit, updateHabit, deleteHabit, habits } = useHabitsStore();
+    const currentHabit = route.params.habitId ? habits.find(habit => habit._id === route.params.habitId) : undefined;
+    const currentIsEditMode = route.params.isEditing || false;
 
-    const [name, setName] = useState(existingHabit?.name || '');
-    const [description, setDescription] = useState(existingHabit?.description || '');
-    const [notes, setNotes] = useState(existingHabit?.notes || '');
-    const [frequency, setFrequency] = useState(existingHabit?.frequency || HabitFrequency.DAILY);
-    const [rolloverTime, setRolloverTime] = useState(existingHabit?.rolloverTime || '00:00');
+    const [name, setName] = useState(currentHabit?.name || '');
+    const [description, setDescription] = useState(currentHabit?.description || '');
+    const [notes, setNotes] = useState(currentHabit?.notes || '');
+    const [frequency, setFrequency] = useState(currentHabit?.frequency || HabitFrequency.DAILY);
+    const [rolloverTime, setRolloverTime] = useState(currentHabit?.rolloverTime || '00:00');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { createHabit, updateHabit, deleteHabit } = useHabitsStore();
-
-    if (!isPresented) {
-        return null;
-    }
 
     const handleSaveHabit = async () => {
         if (!name.trim()) {
@@ -74,8 +67,8 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
                 rolloverTime,
             };
 
-            if (isEditMode && existingHabit) {
-                await updateHabit(existingHabit._id, habitData);
+            if (currentIsEditMode && currentHabit) {
+                await updateHabit(currentHabit._id, habitData);
             } else {
                 await createHabit({
                     ...habitData,
@@ -84,15 +77,18 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
                 });
             }
 
-            if (!isEditMode) {
+            if (!currentIsEditMode) {
                 setName('');
                 setDescription('');
                 setFrequency(HabitFrequency.DAILY);
                 setRolloverTime('00:00');
             }
 
-            onHabitSaved?.();
-            onDismiss();
+            if (currentIsEditMode) {
+                navigation.goBack();
+            } else {
+                navigation.navigate('Habits');
+            }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save habit');
         } finally {
@@ -101,43 +97,20 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
     };
 
     const handleDelete = async () => {
-        if (!existingHabit) return;
+        if (!currentHabit) return;
 
         setIsLoading(true);
         setErrorMessage(null);
 
         try {
-            await deleteHabit(existingHabit._id);
-            onHabitSaved?.();
-            onDismiss();
+            await deleteHabit(currentHabit._id);
+            navigation.navigate('Habits');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete habit');
             setIsLoading(false);
         }
     };
 
-    const handleCancel = () => {
-        if (isEditMode && existingHabit) {
-            setName(existingHabit.name);
-            setDescription(existingHabit.description || '');
-            setFrequency(existingHabit.frequency);
-            setRolloverTime(existingHabit.rolloverTime);
-        } else {
-            setName('');
-            setDescription('');
-            setFrequency(HabitFrequency.DAILY);
-            setRolloverTime('00:00');
-        }
-        setErrorMessage(null);
-        
-        // Use onCancel if provided (for edit mode navigation back to detail view)
-        // Otherwise use onDismiss (for create mode navigation back to list)
-        if (onCancel) {
-            onCancel();
-        } else {
-            onDismiss();
-        }
-    };
 
     const frequencyOptions = [
         { value: HabitFrequency.DAILY, label: 'Daily', description: 'Every day' },
@@ -157,15 +130,15 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
 
     return (
         <BaseFormView
-            isPresented={isPresented}
-            onDismiss={handleCancel}
-            title={isEditMode ? 'Edit Habit' : 'New Habit'}
-            isEditMode={isEditMode}
+            navigation={navigation}
+            route={route}
+            title={currentIsEditMode ? 'Edit Habit' : 'New Habit'}
+            isEditMode={currentIsEditMode}
             onSave={handleSaveHabit}
             isSaveDisabled={!name.trim()}
             isLoading={isLoading}
             errorMessage={errorMessage}
-            existingItem={existingHabit}
+            existingItem={currentHabit}
             onDelete={handleDelete}
             deleteButtonText="Delete Habit"
             deleteConfirmTitle="Delete Habit"
@@ -178,7 +151,7 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
                         onChangeText={setName}
                         placeholder="e.g., Morning Exercise, Read for 20 minutes"
                         required
-                        autoFocus={!isEditMode}
+                        autoFocus={!currentIsEditMode}
                         maxLength={100}
                     />
 
@@ -257,4 +230,4 @@ const HabitFormView: React.FC<HabitFormViewProps> = ({
     );
 };
 
-export default HabitFormView;
+export default HabitFormScreen;

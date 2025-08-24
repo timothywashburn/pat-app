@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
-import PersonItemView from "@/src/features/people/components/PersonItemView";
-import PersonFormView from "@/src/features/people/components/PersonFormView";
-import PersonDetailView from "@/src/features/people/components/PersonDetailView";
-import { useToast } from "@/src/components/toast/ToastContext";
+import PersonCard from "@/src/features/people/components/PersonCard";
+import PersonFormScreen from "@/src/features/people/screens/PersonFormScreen";
 import { ModuleType, Person } from "@timothyw/pat-common";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
-export const PeoplePanel: React.FC = () => {
+interface PeoplePanelProps {
+    navigation: StackNavigationProp<MainStackParamList, 'People'>;
+    route: RouteProp<MainStackParamList, 'People'>;
+}
+
+export const PeoplePanel: React.FC<PeoplePanelProps> = ({
+    navigation,
+    route
+}) => {
     const { getColor } = useTheme();
     const { people, isInitialized, loadPeople } = usePeopleStore();
     const { refreshControl } = useRefreshControl(loadPeople, 'Failed to refresh people');
@@ -24,42 +31,19 @@ export const PeoplePanel: React.FC = () => {
         }
     }, [isInitialized, loadPeople]);
 
-    // State for the create/edit form
+    // State for the create form only
     const [showingCreateForm, setShowingCreateForm] = useState(false);
-    const [showingEditForm, setShowingEditForm] = useState(false);
-
-    // State for detail view
-    const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-    const [showingDetailView, setShowingDetailView] = useState(false);
 
     const handleAddPerson = () => {
-        setShowingCreateForm(true);
+        navigation.navigate('PersonForm', { isEditing: false });
     };
 
     const handlePersonSelect = (person: Person) => {
-        setSelectedPerson(person);
-        setShowingDetailView(true);
-    };
-
-    const handleDetailDismiss = () => {
-        setShowingDetailView(false);
-        setSelectedPerson(null);
-    };
-
-    const handleEditRequest = () => {
-        setShowingDetailView(false);
-        setShowingEditForm(true);
+        navigation.navigate('PersonDetail', { personId: person._id });
     };
 
     const handleFormDismiss = () => {
         setShowingCreateForm(false);
-        setShowingEditForm(false);
-        setSelectedPerson(null);
-    };
-
-    const handleEditCancel = () => {
-        setShowingEditForm(false);
-        setShowingDetailView(true);
     };
 
     return (
@@ -97,7 +81,7 @@ export const PeoplePanel: React.FC = () => {
                     data={people}
                     renderItem={({ item }) => (
                         <TouchableOpacity onPress={() => handlePersonSelect(item)}>
-                            <PersonItemView person={item} />
+                            <PersonCard person={item} />
                         </TouchableOpacity>
                     )}
                     keyExtractor={item => item._id}
@@ -106,34 +90,6 @@ export const PeoplePanel: React.FC = () => {
                 />
             )}
 
-            {/* Create new person view */}
-            <PersonFormView
-                isPresented={showingCreateForm}
-                onDismiss={handleFormDismiss}
-                onPersonSaved={() => {}}
-            />
-
-            {/* Edit person view */}
-            {selectedPerson && (
-                <PersonFormView
-                    isPresented={showingEditForm}
-                    onDismiss={handleFormDismiss}
-                    onCancel={handleEditCancel}
-                    onPersonSaved={() => {}}
-                    existingPerson={selectedPerson}
-                    isEditMode={true}
-                />
-            )}
-
-            {/* Person detail view */}
-            {selectedPerson && (
-                <PersonDetailView
-                    person={selectedPerson}
-                    isPresented={showingDetailView}
-                    onDismiss={handleDetailDismiss}
-                    onEditRequest={handleEditRequest}
-                />
-            )}
         </>
     );
 }

@@ -1,24 +1,55 @@
 import { ModuleType } from "@timothyw/pat-common";
 import { Ionicons } from "@expo/vector-icons";
-import AgendaPanel from "@/src/app/(tabs)/agenda";
-import InboxPanel from "@/src/app/(tabs)/inbox";
-import ListsPanel from "@/src/app/(tabs)/lists";
-import PeoplePanel from "@/src/app/(tabs)/people";
-import HabitsPanel from "@/src/app/(tabs)/habits";
-import SettingsPanel from "@/src/app/(tabs)/settings";
-import DevPanel from "@/src/app/(tabs)/dev";
+import MainStack from "@/src/navigation/MainStack";
 import React from "react";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 export const moduleInfo: Record<ModuleType, {
     getComponent: React.ComponentType;
     icon: keyof typeof Ionicons.glyphMap;
-    title: string
+    title: string;
+    initialRouteName?: keyof MainStackParamList;
 }> = {
-    agenda: { getComponent: AgendaPanel, icon: 'calendar', title: 'Agenda' },
-    inbox: { getComponent: InboxPanel, icon: 'mail', title: 'Inbox' },
-    lists: { getComponent: ListsPanel, icon: 'list', title: 'Lists' },
-    people: { getComponent: PeoplePanel, icon: 'people', title: 'People' },
-    habits: { getComponent: HabitsPanel, icon: 'repeat', title: 'Habits' },
-    settings: { getComponent: SettingsPanel, icon: 'settings', title: 'Settings' },
-    dev: { getComponent: DevPanel, icon: 'code-slash', title: 'Dev' },
+    agenda: { 
+        getComponent: () => <MainStack initialRouteName="Agenda" />, 
+        icon: 'calendar', 
+        title: 'Agenda',
+        initialRouteName: 'Agenda'
+    },
+    inbox: { 
+        getComponent: () => <MainStack initialRouteName="Inbox" />, 
+        icon: 'mail', 
+        title: 'Inbox',
+        initialRouteName: 'Inbox'
+    },
+    lists: { 
+        getComponent: () => <MainStack initialRouteName="Lists" />, 
+        icon: 'list', 
+        title: 'Lists',
+        initialRouteName: 'Lists'
+    },
+    people: { 
+        getComponent: () => <MainStack initialRouteName="People" />, 
+        icon: 'people', 
+        title: 'People',
+        initialRouteName: 'People'
+    },
+    habits: { 
+        getComponent: () => <MainStack initialRouteName="Habits" />, 
+        icon: 'repeat', 
+        title: 'Habits',
+        initialRouteName: 'Habits'
+    },
+    settings: { 
+        getComponent: () => <MainStack initialRouteName="Settings" />, 
+        icon: 'settings', 
+        title: 'Settings',
+        initialRouteName: 'Settings'
+    },
+    dev: { 
+        getComponent: () => <MainStack initialRouteName="Dev" />, 
+        icon: 'code-slash', 
+        title: 'Dev',
+        initialRouteName: 'Dev'
+    },
 };

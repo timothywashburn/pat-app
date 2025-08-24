@@ -5,12 +5,12 @@ import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
 import FormViewHeader from './FormViewHeader';
 
-interface BaseFormViewProps {
-    // Presentation props
-    isPresented: boolean;
-    onDismiss: () => void;
-    onCancel?: () => void;
-    
+interface NavigationProps {
+    navigation?: any;
+    route?: any;
+}
+
+interface BaseFormViewProps extends NavigationProps {
     // Header props
     title: string;
     isEditMode?: boolean;
@@ -34,9 +34,8 @@ interface BaseFormViewProps {
 }
 
 const BaseFormView: React.FC<BaseFormViewProps> = ({
-    isPresented,
-    onDismiss,
-    onCancel,
+    navigation,
+    route,
     title,
     isEditMode = false,
     saveText,
@@ -54,9 +53,15 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     const { getColor } = useTheme();
     const { confirmAlert } = useAlert();
 
-    if (!isPresented) {
-        return null;
-    }
+    // Handle dismiss
+    const handleDismiss = () => {
+        navigation.goBack();
+    };
+
+    // Handle cancel
+    const handleCancel = () => {
+        navigation.goBack();
+    };
 
     const handleDelete = () => {
         if (!existingItem || !onDelete) return;
@@ -71,12 +76,10 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     };
 
     return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-        >
+        <View className="bg-background flex-1">
             <FormViewHeader
                 title={title}
-                onCancel={onCancel || onDismiss}
+                onCancel={handleCancel}
                 onSave={onSave}
                 isEditMode={isEditMode}
                 isSaveDisabled={isSaveDisabled}

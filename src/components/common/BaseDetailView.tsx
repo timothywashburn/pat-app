@@ -19,11 +19,12 @@ interface ContentSection {
     showCard?: boolean; // whether to wrap in bg-surface card styling
 }
 
-interface BaseDetailViewProps {
-    // Presentation props
-    isPresented: boolean;
-    onDismiss: () => void;
-    
+interface NavigationProps {
+    navigation?: any;
+    route?: any;
+}
+
+interface BaseDetailViewProps extends NavigationProps {
     // Header props
     title?: string;
     onEditRequest?: () => void;
@@ -41,8 +42,8 @@ interface BaseDetailViewProps {
 }
 
 const BaseDetailView: React.FC<BaseDetailViewProps> = ({
-    isPresented,
-    onDismiss,
+    navigation,
+    route,
     title = "Details",
     onEditRequest,
     showEdit = true,
@@ -53,9 +54,10 @@ const BaseDetailView: React.FC<BaseDetailViewProps> = ({
 }) => {
     const { getColor } = useTheme();
 
-    if (!isPresented) {
-        return null;
-    }
+    // Handle dismiss
+    const handleDismiss = () => {
+        navigation.goBack();
+    };
 
     const getButtonStyle = (variant: ActionButton['variant'] = 'primary', isDestructive?: boolean) => {
         if (isDestructive) {
@@ -97,12 +99,10 @@ const BaseDetailView: React.FC<BaseDetailViewProps> = ({
     };
 
     return (
-        <View
-            className="bg-background absolute inset-0 z-50"
-        >
+        <View className="bg-background flex-1">
             <DetailViewHeader
                 title={title}
-                onBack={onDismiss}
+                onBack={handleDismiss}
                 onEdit={onEditRequest || (() => {})}
                 showEdit={showEdit && !!onEditRequest}
             />

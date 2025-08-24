@@ -6,43 +6,41 @@ import {
 } from 'react-native';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import {
-    getActiveHabitDate,
-    getPreviousHabitDate,
-    fromDateOnlyString
-} from '@/src/features/habits/models';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
-import HabitCalendarGrid from './HabitCalendarGrid';
-import HabitActionButtons from './HabitActionButtons';
-import TimeRemainingIndicator from './TimeRemainingIndicator';
-import { fromDateString, Habit } from "@timothyw/pat-common";
+import HabitCalendarGrid from '../components/HabitCalendarGrid';
+import HabitActionButtons from '../components/HabitActionButtons';
+import TimeRemainingIndicator from '../components/TimeRemainingIndicator';
+import { fromDateOnlyString, getActiveHabitDate, getPreviousHabitDate } from "@/src/features/habits/models";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface HabitDetailViewProps {
-    isPresented: boolean;
-    onDismiss: () => void;
-    habit: Habit | null;
-    onEditPress?: (habit: Habit) => void;
-    onHabitUpdated?: () => void;
+    navigation: StackNavigationProp<MainStackParamList, 'HabitDetail'>;
+    route: RouteProp<MainStackParamList, 'HabitDetail'>;
 }
 
-const HabitDetailView: React.FC<HabitDetailViewProps> = ({
-    isPresented,
-    onDismiss,
-    habit,
-    onEditPress,
-    onHabitUpdated,
+const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
+    navigation,
+    route,
 }) => {
     const { getColor } = useTheme();
-    const habitStore = useHabitsStore();
+    const { habits } = useHabitsStore();
     const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
 
-    if (!isPresented || !habit) {
+    const currentHabit = habits.find(habit => habit._id === route.params.habitId);
+    
+    if (!currentHabit) {
         return null;
     }
+    
+    // Handle edit request
+    const handleEditRequest = () => {
+        navigation.navigate('HabitForm', { habitId: currentHabit._id, isEditing: true });
+    };
 
-
-    const currentDate = getActiveHabitDate(habit);
-    const previousDate = getPreviousHabitDate(habit);
+    const currentDate = getActiveHabitDate(currentHabit);
+    const previousDate = getPreviousHabitDate(currentHabit);
     
     const handleTimeframeChange = (timeframe: 'current' | 'previous') => {
         setSelectedTimeframe(timeframe);
@@ -54,39 +52,39 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
             content: (
                 <>
                     <Text className="text-on-surface text-2xl font-bold mb-2">
-                        {habit.name}
+                        {currentHabit.name}
                     </Text>
 
-                    {habit.description && (
+                    {currentHabit.description && (
                         <Text className="text-on-surface-variant text-base mb-4">
-                            {habit.description}
+                            {currentHabit.description}
                         </Text>
                     )}
 
-                    {habit.notes && (
+                    {currentHabit.notes && (
                         <Text className="text-on-surface-variant text-base mb-4">
-                            {habit.notes}
+                            {currentHabit.notes}
                         </Text>
                     )}
 
                     <View className="flex-row justify-between mb-4">
                         <View>
                             <Text className="text-on-surface-variant text-xs">
-                                Frequency: {habit.frequency}
+                                Frequency: {currentHabit.frequency}
                             </Text>
                             <Text className="text-on-surface-variant text-xs">
-                                Rollover: {habit.rolloverTime}
+                                Rollover: {currentHabit.rolloverTime}
                             </Text>
                         </View>
 
                         <View className="mb-4">
                             <Text className="text-primary text-xl font-bold">
-                                {habit.stats.completedDays}/{habit.stats.totalDays - habit.stats.excusedDays} Completions
+                                {currentHabit.stats.completedDays}/{currentHabit.stats.totalDays - currentHabit.stats.excusedDays} Completions
                             </Text>
                         </View>
                     </View>
 
-                    <TimeRemainingIndicator rolloverTime={habit.rolloverTime} />
+                    <TimeRemainingIndicator rolloverTime={currentHabit.rolloverTime} />
 
                     {/* Timeframe Toggle and Buttons */}
                     <View className="mt-4">
@@ -125,9 +123,8 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                                 {selectedTimeframe === 'current' ? 'Current Timeframe' : 'Previous Timeframe'}
                             </Text>
                             <HabitActionButtons
-                                habit={habit}
+                                habit={currentHabit}
                                 targetDate={selectedTimeframe === 'current' ? currentDate : previousDate}
-                                onHabitUpdated={onHabitUpdated}
                                 showDateInfo={true}
                             />
                         </View>
@@ -139,7 +136,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
         {
             content: (
                 <HabitCalendarGrid
-                    habit={habit}
+                    habit={currentHabit}
                     viewMode="weeks" // Default to last 52 weeks
                 />
             )
@@ -155,34 +152,34 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                     <View className="space-y-2">
                         <View className="flex-row justify-between">
                             <Text className="text-on-surface-variant">Success Rate</Text>
-                            <Text className="text-on-surface">{habit.stats.completionRate == -1 ? "-" : habit.stats.completionRate.toFixed(1) + "%"}</Text>
+                            <Text className="text-on-surface">{currentHabit.stats.completionRate == -1 ? "-" : currentHabit.stats.completionRate.toFixed(1) + "%"}</Text>
                         </View>
                         
                         <View className="flex-row justify-between">
                             <Text className="text-on-surface-variant">Completed</Text>
-                            <Text className="text-on-surface">{habit.stats.completedDays}</Text>
+                            <Text className="text-on-surface">{currentHabit.stats.completedDays}</Text>
                         </View>
                         
                         <View className="flex-row justify-between">
                             <Text className="text-on-surface-variant">Excused</Text>
-                            <Text className="text-on-surface">{habit.stats.excusedDays}</Text>
+                            <Text className="text-on-surface">{currentHabit.stats.excusedDays}</Text>
                         </View>
                         
                         <View className="flex-row justify-between">
                             <Text className="text-on-surface-variant">Missed</Text>
-                            <Text className="text-on-surface">{habit.stats.missedDays}</Text>
+                            <Text className="text-on-surface">{currentHabit.stats.missedDays}</Text>
                         </View>
                         
                         <View className="flex-row justify-between">
                             <Text className="text-on-surface-variant">Created</Text>
                             <Text className="text-on-surface">
-                                {fromDateOnlyString(habit.firstDay).toLocaleDateString()}
+                                {fromDateOnlyString(currentHabit.firstDay).toLocaleDateString()}
                             </Text>
                         </View>
                         
                         <View className="flex-row justify-between">
                             <Text className="text-on-surface-variant">Total Days</Text>
-                            <Text className="text-on-surface">{habit.stats.totalDays}</Text>
+                            <Text className="text-on-surface">{currentHabit.stats.totalDays}</Text>
                         </View>
                     </View>
                 </>
@@ -192,14 +189,13 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
 
     return (
         <BaseDetailView
-            isPresented={isPresented}
-            onDismiss={onDismiss}
-            title={habit.name}
-            onEditRequest={() => onEditPress?.(habit)}
-            showEdit={!!onEditPress}
+            navigation={navigation}
+            route={route}
+            title={currentHabit.name}
+            onEditRequest={handleEditRequest}
             sections={sections}
         />
     );
 };
 
-export default HabitDetailView;
+export default HabitDetailScreen;

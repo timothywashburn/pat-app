@@ -8,28 +8,23 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { ListWithItems, sortListItems } from '@/src/features/lists/models';
 import { ListItemData, ListType } from '@timothyw/pat-common';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useAlert } from '@/src/components/alert';
-import ListItemCard from './ListItemCard';
+import ListItemCard from '../components/ListItemCard';
+import { sortListItems } from "@/src/features/lists/models";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface ListDetailViewProps {
-    list: ListWithItems;
-    isPresented: boolean;
-    onDismiss: () => void;
-    onEditRequest: () => void;
-    onListItemPress: (listItem: ListItemData) => void;
-    onListUpdated?: () => void;
+    navigation: StackNavigationProp<MainStackParamList, 'ListDetail'>;
+    route: RouteProp<MainStackParamList, 'ListDetail'>;
 }
 
-const ListDetailView: React.FC<ListDetailViewProps> = ({
-    list,
-    isPresented,
-    onDismiss,
-    onEditRequest,
-    onListItemPress,
-    onListUpdated,
+const ListDetailScreen: React.FC<ListDetailViewProps> = ({
+    navigation,
+    route,
 }) => {
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
@@ -37,18 +32,33 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
     const [showListItems, setShowListItems] = React.useState(false);
     const [rotateAnimation] = React.useState(new Animated.Value(0));
 
-    const { deleteList, deleteListItem } = useListsStore();
+    const { deleteList, deleteListItem, getListsWithItems } = useListsStore();
     const { confirmAlert } = useAlert();
 
-    if (!isPresented) {
+    const listsWithItems = getListsWithItems();
+    const currentList = listsWithItems.find(list => list._id === route.params.listId);
+    
+    const handleEditRequest = () => {
+        if (currentList) {
+            navigation.navigate('ListForm', { listId: currentList._id, isEditing: true });
+        }
+    };
+
+    const handleListItemPress = (listItem: ListItemData) => {
+        if (currentList) {
+            navigation.navigate('ListItemDetail', { listItemId: listItem._id, listId: currentList._id });
+        }
+    };
+
+    if (!currentList) {
         return null;
     }
 
     const handleDeleteList = () => {
-        const listItemCount = list.items.length;
-        const message = listItemCount > 0
-            ? `This will delete "${list.name}" and all ${listItemCount} items in it. This action cannot be undone.`
-            : `This will delete "${list.name}". This action cannot be undone.`;
+        const currentListItemCount = currentList.items.length;
+        const message = currentListItemCount > 0
+            ? `This will delete "${currentList.name}" and all ${currentListItemCount} items in it. This action cannot be undone.`
+            : `This will delete "${currentList.name}". This action cannot be undone.`;
 
         confirmAlert(
             'Delete List',
@@ -58,9 +68,8 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
                 setErrorMessage(null);
 
                 try {
-                    await deleteList(list._id);
-                    onListUpdated?.();
-                    onDismiss();
+                    await deleteList(currentList._id);
+                    navigation.navigate('Lists');
                 } catch (error) {
                     setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
                 } finally {
@@ -70,8 +79,8 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
         );
     };
 
-    const completedListItems = list.items.filter(item => item.completed);
-    const totalListItems = list.items.length;
+    const completedListItems = currentList.items.filter(item => item.completed);
+    const totalListItems = currentList.items.length;
 
     const handleToggleListItems = () => {
         const newShowListItems = !showListItems;
@@ -108,9 +117,8 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
                 try {
                     // Delete all completed list items
                     await Promise.all(
-                        completedListItems.map(listItems => deleteListItem(listItems._id))
+                        completedListItems.map(listItem => deleteListItem(listItem._id))
                     );
-                    onListUpdated?.();
                 } catch (error) {
                     setErrorMessage(error instanceof Error ? error.message : 'Failed to delete completed list items');
                 } finally {
@@ -124,24 +132,24 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
         {
             content: (
                 <>
-                    <Text className="text-on-surface text-xl font-bold mb-4">{list.name}</Text>
+                    <Text className="text-on-surface text-xl font-bold mb-4">{currentList.name}</Text>
 
                     <View className="mb-4">
                         <View className="flex-row items-center mb-2">
                             <Ionicons 
-                                name={list.type === ListType.NOTES ? 'document-text' : 'checkbox'}
+                                name={currentList.type === ListType.NOTES ? 'document-text' : 'checkbox'}
                                 size={20} 
                                 color={getColor("on-surface-variant")} 
                             />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                {list.type === ListType.NOTES ? 'Note List' : 'Task List'}
+                                {currentList.type === ListType.NOTES ? 'Note List' : 'Task List'}
                             </Text>
                         </View>
 
                         <View className="flex-row items-center mb-2">
                             <Ionicons name="list-outline" size={20} color={getColor("on-surface-variant")} />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                {list.type === ListType.NOTES
+                                {currentList.type === ListType.NOTES
                                     ? `${totalListItems} note${totalListItems !== 1 ? 's' : ''}`
                                     : `${completedListItems.length}/${totalListItems} completed`
                                 }
@@ -151,15 +159,15 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
                         <View className="flex-row items-center mb-2">
                             <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
                             <Text className="text-on-surface-variant text-base ml-2">
-                                Created {new Date(list.createdAt).toLocaleDateString()}
+                                Created {new Date(currentList.createdAt).toLocaleDateString()}
                             </Text>
                         </View>
 
-                        {list.updatedAt.getTime() !== list.createdAt.getTime() && (
+                        {currentList.updatedAt.getTime() !== currentList.createdAt.getTime() && (
                             <View className="flex-row items-center">
                                 <Ionicons name="time-outline" size={20} color={getColor("on-surface-variant")} />
                                 <Text className="text-on-surface-variant text-base ml-2">
-                                    Updated {new Date(list.updatedAt).toLocaleDateString()}
+                                    Updated {new Date(currentList.updatedAt).toLocaleDateString()}
                                 </Text>
                             </View>
                         )}
@@ -182,7 +190,7 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
                             />
                         </Animated.View>
                         <Text className="text-on-surface text-lg font-semibold">
-                            {list.type === ListType.NOTES ? 'Notes' : 'Tasks'}{' '}
+                            {currentList.type === ListType.NOTES ? 'Notes' : 'Tasks'}{' '}
                             <Text className="text-on-surface-variant font-normal">
                                 {totalListItems}
                             </Text>
@@ -193,16 +201,16 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
                         <View className="p-4">
                             {totalListItems === 0 ? (
                                 <Text className="text-on-surface-variant text-center py-4">
-                                    {list.type === ListType.NOTES ? 'No notes in this list' : 'No tasks in this list'}
+                                    {currentList.type === ListType.NOTES ? 'No notes in this list' : 'No tasks in this list'}
                                 </Text>
                             ) : (
-                                sortListItems(list.items, list.type).map((item, index) => (
+                                sortListItems(currentList.items, currentList.type).map((item, index) => (
                                         <ListItemCard
                                             key={item._id}
                                             listItem={item}
-                                            list={list}
-                                            onPress={onListItemPress}
-                                            isLast={index === list.items.length - 1}
+                                            list={currentList}
+                                            onPress={handleListItemPress}
+                                            isLast={index === currentList.items.length - 1}
                                         />
                                     ))
                             )}
@@ -225,14 +233,14 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
     }> = [
         {
             label: "Edit List",
-            onPress: onEditRequest,
+            onPress: handleEditRequest,
             variant: 'outline',
             icon: 'create-outline'
         }
     ];
 
     // Add delete completed items action if there are completed items
-    if (completedListItems.length > 0 && list.type === ListType.TASKS) {
+    if (completedListItems.length > 0 && currentList.type === ListType.TASKS) {
         actions.push({
             label: "Delete Completed List Items",
             onPress: handleDeleteCompletedListItems,
@@ -242,7 +250,7 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
         });
     }
 
-    // Add delete list action
+    // Add delete currentList action
     actions.push({
         label: "Delete List",
         onPress: handleDeleteList,
@@ -254,10 +262,10 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
 
     return (
         <BaseDetailView
-            isPresented={isPresented}
-            onDismiss={onDismiss}
-            title={list.type === ListType.NOTES ? "Note List" : "Task List"}
-            onEditRequest={onEditRequest}
+            navigation={navigation}
+            route={route}
+            title={currentList.type === ListType.NOTES ? "Note List" : "Task List"}
+            onEditRequest={handleEditRequest}
             errorMessage={errorMessage}
             sections={sections}
             actions={actions}
@@ -265,4 +273,4 @@ const ListDetailView: React.FC<ListDetailViewProps> = ({
     );
 };
 
-export default ListDetailView;
+export default ListDetailScreen;

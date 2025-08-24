@@ -11,8 +11,8 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { ModuleType } from "@timothyw/pat-common";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
 import { useModuleContext } from "@/src/components/ModuleContext";
-import { moduleInfo } from "@/src/components/ModuleInfo";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { moduleInfo } from "@/src/components/ModuleInfo";
 
 export type ModuleProps = {
     isModuleView: boolean;
@@ -56,16 +56,18 @@ export default function TabsLayout() {
     }
 
     if (activeHiddenModule) {
-        const { getComponent } = moduleInfo[activeHiddenModule.type];
-        const ModuleComponent = getComponent;
+        const moduleConfig = moduleInfo[activeHiddenModule.type];
+        
+        if (!moduleConfig) return null;
+        
+        const ModuleComponent = moduleConfig.getComponent;
 
         return (
-            <View
-                className="flex-1"
-                style={{ backgroundColor: getColor("background") }}
+            <SafeAreaView
+                className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}
             >
                 <ModuleComponent />
-            </View>
+            </SafeAreaView>
         );
     }
 
@@ -101,16 +103,21 @@ export default function TabsLayout() {
                 {data.config.modules.map((module) => {
                     if (!module.visible && module.type != ModuleType.SETTINGS) return;
                     const moduleType = module.type;
-                    const { getComponent, icon, title } = moduleInfo[moduleType];
+                    const moduleConfig = moduleInfo[moduleType];
+                    
+                    if (!moduleConfig) return null;
+                    
+                    const { getComponent: Component, icon, title } = moduleConfig;
+                    
                     return (
                         <Tab.Screen
                             key={moduleType}
                             name={moduleType}
-                            component={getComponent}
+                            component={Component}
                             options={{
                                 title: title,
                                 tabBarIcon: ({ color }) => (
-                                    <Ionicons name={icon} size={24} color={color} />
+                                    <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={24} color={color} />
                                 ),
                             }}
                         />

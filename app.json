@@ -9,6 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": {
+        "light": "./assets/images/icon.png",
+        "dark": "./assets/images/icon.png",
+        "tinted": "./assets/images/icon.png"
+      },
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -23,7 +28,7 @@
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#F5F7FA"
       },
       "package": "dev.timothyw.patapp"
     },
@@ -39,10 +44,10 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash.png",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F5F7FA",
           "dark": {
             "image": "./assets/images/splash.png",
-            "backgroundColor": "#000000"
+            "backgroundColor": "#1A1D21"
           },
           "imageWidth": 200,
           "resizeMode": "contain"

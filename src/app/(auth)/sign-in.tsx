@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from '@/src/components/toast/ToastContext';
@@ -13,6 +13,7 @@ export default function SignInScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const { errorToast } = useToast();
     const { signIn } = useAuthStore();
+    const router = useRouter();
 
     const handleSignIn = async () => {
         if (!email || !password) {
@@ -78,11 +79,9 @@ export default function SignInScreen() {
 
                 <View className="flex-row justify-center mt-5">
                     <Text className="text-on-background-variant">Don't have an account? </Text>
-                    <Link href="/(auth)/create-account" asChild>
-                        <TouchableOpacity>
-                            <Text className="text-primary font-semibold">Create an account</Text>
-                        </TouchableOpacity>
-                    </Link>
+                    <TouchableOpacity onPress={() => router.replace('/(auth)/create-account')}>
+                        <Text className="text-primary font-semibold">Create an account</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>

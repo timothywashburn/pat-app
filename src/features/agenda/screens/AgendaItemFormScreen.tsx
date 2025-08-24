@@ -15,30 +15,30 @@ import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import WebDateTimePicker from './WebDateTimePicker';
+import WebDateTimePicker from '../components/WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest } from "@timothyw/pat-common";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface AgendaItemFormViewProps {
-    isPresented: boolean;
-    onDismiss: () => void;
-    onCancel?: () => void;
-    onItemSaved?: () => void;
-    initialName?: string;
-    existingItem?: AgendaItemData;
-    isEditMode?: boolean;
+    navigation: StackNavigationProp<MainStackParamList, 'AgendaItemForm'>;
+    route: RouteProp<MainStackParamList, 'AgendaItemForm'>;
 }
 
-const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
-    isPresented,
-    onDismiss,
-    onCancel,
-    onItemSaved,
-    initialName = '',
-    existingItem,
-    isEditMode = false
+const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
+    navigation,
+    route,
 }) => {
     const { getColor } = useTheme();
+
+    const items = useAgendaStore(state => state.items);
+    const currentItem = route.params.itemId ? items.find(item => item._id === route.params.itemId) : undefined;
+
+    const currentIsEditMode = route.params.isEditing || false;
+    const currentInitialName = route.params.initialName || '';
+    const thoughtId = route.params.thoughtId;
 
     const getTonight = () => {
         const today = new Date();
@@ -46,12 +46,12 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         return today;
     };
 
-    const [name, setName] = useState(existingItem?.name || initialName);
-    const [date, setDate] = useState<Date | undefined>(existingItem?.dueDate);
-    const [notes, setNotes] = useState(existingItem?.notes || '');
-    const [urgent, setUrgent] = useState(existingItem?.urgent || false);
-    const [category, setCategory] = useState<string | undefined>(existingItem?.category);
-    const [type, setType] = useState<string | undefined>(existingItem?.type);
+    const [name, setName] = useState(currentItem?.name || currentInitialName);
+    const [date, setDate] = useState<Date | undefined>(currentItem?.dueDate);
+    const [notes, setNotes] = useState(currentItem?.notes || '');
+    const [urgent, setUrgent] = useState(currentItem?.urgent || false);
+    const [category, setCategory] = useState<string | undefined>(currentItem?.category);
+    const [type, setType] = useState<string | undefined>(currentItem?.type);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -64,10 +64,6 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
     const { createItem, updateItem, deleteItem } = useAgendaStore();
 
-    if (!isPresented) {
-        return null;
-    }
-
     const handleSaveItem = async () => {
         if (!name.trim()) {
             setErrorMessage('Name is required');
@@ -78,7 +74,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
         setErrorMessage(null);
 
         try {
-            if (isEditMode && existingItem) {
+            if (currentIsEditMode && currentItem) {
                 const itemData: UpdateAgendaItemRequest = {
                     name: name.trim(),
                     dueDate: date?.toISOString() || null,
@@ -88,7 +84,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                     type: type || null,
                 };
 
-                await updateItem(existingItem._id, itemData);
+                await updateItem(currentItem._id, itemData);
             } else {
                 const itemData: CreateAgendaItemRequest = {
                     name: name.trim(),
@@ -102,7 +98,7 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                 await createItem(itemData);
             }
 
-            if (!isEditMode) {
+            if (!currentIsEditMode) {
                 setName('');
                 setDate(getTonight());
                 setNotes('');
@@ -111,8 +107,19 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
                 setType(undefined);
             }
 
-            onItemSaved?.();
-            onDismiss();
+            if (currentIsEditMode) {
+                navigation.goBack();
+            } else {
+                // If this was created from a thought (inbox), navigate back to inbox with success info
+                if (thoughtId) {
+                    navigation.navigate('Inbox', {
+                        thoughtProcessed: true, 
+                        thoughtId: thoughtId 
+                    });
+                } else {
+                    navigation.navigate('Agenda');
+                }
+            }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save item');
         } finally {
@@ -121,15 +128,14 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     };
 
     const handleDelete = async () => {
-        if (!existingItem) return;
+        if (!currentItem) return;
 
         setIsLoading(true);
         setErrorMessage(null);
 
         try {
-            await deleteItem(existingItem._id);
-            onItemSaved?.();
-            onDismiss();
+            await deleteItem(currentItem._id);
+            navigation.navigate('Agenda');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
             setIsLoading(false);
@@ -179,17 +185,16 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
 
     return (
         <BaseFormView
-            isPresented={isPresented}
-            onDismiss={onDismiss}
-            onCancel={onCancel}
-            title={isEditMode ? 'Edit Item' : 'New Item'}
-            isEditMode={isEditMode}
-            saveText={isEditMode ? 'Save' : 'Add'}
+            navigation={navigation}
+            route={route}
+            title={currentIsEditMode ? 'Edit Item' : 'New Item'}
+            isEditMode={currentIsEditMode}
+            saveText={currentIsEditMode ? 'Save' : 'Add'}
             onSave={handleSaveItem}
             isSaveDisabled={!name.trim()}
             isLoading={isLoading}
             errorMessage={errorMessage}
-            existingItem={existingItem}
+            existingItem={currentItem}
             onDelete={handleDelete}
             deleteButtonText="Delete Item"
             deleteConfirmTitle="Delete Item"
@@ -383,4 +388,4 @@ const AgendaItemFormView: React.FC<AgendaItemFormViewProps> = ({
     );
 };
 
-export default AgendaItemFormView;
+export default AgendaItemFormScreen;
