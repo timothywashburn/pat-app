@@ -12,7 +12,7 @@ import { ThemeProvider } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/context/ThemeContext";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import { AlertProvider } from "@/src/components/alert";
-import AppNavigator from "@/src/components/AppNavigator";
+import AppNavigator from "@/src/navigation/AppNavigator";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { UserDataStoreStatus, useUserDataStore } from "@/src/stores/useUserDataStore";
