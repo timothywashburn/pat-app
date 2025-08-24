@@ -26,8 +26,9 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
     route,
 }) => {
     const { getColor } = useTheme();
-
-    const currentPerson = route.params.person;
+    
+    const { createPerson, updatePerson, deletePerson, createPersonNote, updatePersonNote, deletePersonNote, people } = usePeopleStore();
+    const currentPerson = route.params.personId ? people.find(person => person._id === route.params.personId) : undefined;
     const currentIsEditMode = route.params.isEditing || false;
 
     const [name, setName] = useState(currentPerson?.name || '');
@@ -42,8 +43,6 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
     const [newPropertyKey, setNewPropertyKey] = useState('');
     const [newPropertyValue, setNewPropertyValue] = useState('');
     const [newNote, setNewNote] = useState('');
-
-    const { createPerson, updatePerson, deletePerson, createPersonNote, updatePersonNote, deletePersonNote } = usePeopleStore();
 
     const handleSavePerson = async () => {
         if (!name.trim()) {

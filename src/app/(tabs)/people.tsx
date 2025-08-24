@@ -34,7 +34,7 @@ export const PeoplePanel: React.FC = () => {
     };
 
     const handlePersonSelect = (person: Person) => {
-        navigation.navigate('PersonDetail', { person });
+        navigation.navigate('PersonDetail', { personId: person._id });
     };
 
     const handleFormDismiss = () => {

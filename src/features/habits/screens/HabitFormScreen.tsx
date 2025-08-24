@@ -29,8 +29,9 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
     route,
 }) => {
     const { getColor } = useTheme();
-
-    const currentHabit = route.params.habit;
+    
+    const { createHabit, updateHabit, deleteHabit, habits } = useHabitsStore();
+    const currentHabit = route.params.habitId ? habits.find(habit => habit._id === route.params.habitId) : undefined;
     const currentIsEditMode = route.params.isEditing || false;
 
     const [name, setName] = useState(currentHabit?.name || '');
@@ -40,8 +41,6 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
     const [rolloverTime, setRolloverTime] = useState(currentHabit?.rolloverTime || '00:00');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const { createHabit, updateHabit, deleteHabit } = useHabitsStore();
 
 
     const handleSaveHabit = async () => {

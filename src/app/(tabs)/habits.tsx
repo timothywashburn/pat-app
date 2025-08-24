@@ -29,11 +29,11 @@ export const HabitsPanel: React.FC = () => {
     };
 
     const handleEditHabit = (habit: Habit) => {
-        navigation.navigate('HabitForm', { habit, isEditing: true });
+        navigation.navigate('HabitForm', { habitId: habit._id, isEditing: true });
     };
 
     const handleHabitPress = (habit: Habit) => {
-        navigation.navigate('HabitDetail', { habit });
+        navigation.navigate('HabitDetail', { habitId: habit._id });
     };
 
     const handleHabitUpdated = async () => {

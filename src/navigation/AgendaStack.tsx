@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { AgendaItemData } from '@timothyw/pat-common';
+import { AgendaItemData, ItemId } from '@timothyw/pat-common';
 import AgendaPanel from '@/src/app/(tabs)/agenda';
 import AgendaItemDetailScreen from '@/src/features/agenda/screens/AgendaItemDetailScreen';
 import AgendaItemFormScreen from '@/src/features/agenda/screens/AgendaItemFormScreen';
@@ -8,10 +8,10 @@ import AgendaItemFormScreen from '@/src/features/agenda/screens/AgendaItemFormSc
 export type AgendaStackParamList = {
     AgendaList: undefined;
     AgendaItemDetail: {
-        agendaItem: AgendaItemData
+        itemId: ItemId
     };
     AgendaItemForm: {
-        agendaItem?: AgendaItemData;
+        itemId?: ItemId;
         isEditing?: boolean
         initialName?: string;
     };

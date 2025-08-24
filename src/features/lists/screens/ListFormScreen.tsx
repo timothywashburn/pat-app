@@ -18,15 +18,15 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
     navigation,
     route,
 }) => {
-    const currentList = route.params.list;
+    const { createList, updateList, deleteList, getListsWithItems } = useListsStore();
+    const listsWithItems = getListsWithItems();
+    const currentList = route.params.listId ? listsWithItems.find(list => list._id === route.params.listId) : undefined;
     const currentIsEditMode = route.params.isEditing || false;
 
     const [name, setName] = useState(currentList?.name || '');
     const [type, setType] = useState<ListType>(currentList?.type || ListType.TASKS);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const { createList, updateList, deleteList } = useListsStore();
 
 
     const handleSaveList = async () => {

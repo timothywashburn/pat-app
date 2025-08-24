@@ -26,18 +26,22 @@ const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     
-    const currentListItem = route.params.listItem;
-    const currentList = route.params.list;
+    const { setListItemCompleted, deleteListItem, getListsWithItems, listItems } = useListsStore();
+    const listsWithItems = getListsWithItems();
+    const currentListItem = listItems.find(item => item._id === route.params.listItemId);
+    const currentList = listsWithItems.find(list => list._id === route.params.listId);
     
     const handleEditRequest = () => {
-        navigation.navigate('ListItemForm', {
-            listItem: currentListItem,
-            isEditing: true,
-        });
+        if (currentListItem && currentList) {
+            navigation.navigate('ListItemForm', {
+                listItemId: currentListItem._id,
+                listId: currentList._id,
+                isEditing: true,
+            });
+        }
     };
     
     const isNoteList = currentList?.type === ListType.NOTES;
-    const { setListItemCompleted, deleteListItem } = useListsStore();
     const { confirmAlert } = useAlert();
 
     if (!currentListItem || !currentList) {

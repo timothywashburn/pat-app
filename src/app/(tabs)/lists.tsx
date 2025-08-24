@@ -49,15 +49,14 @@ export const ListsPanel: React.FC = () => {
 
     const handleListSelect = (list: ListWithItems) => {
         navigation.navigate('ListDetail', {
-            list
+            listId: list._id
         });
     };
 
     const handleListItemSelect = (listItem: ListItemData) => {
-        const list = lists.find(l => l._id === listItem.listId)!;
         navigation.navigate('ListItemDetail', {
-            listItem,
-            list
+            listItemId: listItem._id,
+            listId: listItem.listId
         });
     };
 

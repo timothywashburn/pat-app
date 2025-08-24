@@ -24,24 +24,23 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
     navigation,
     route,
 }) => {
-    const currentListItem = route.params.listItem;
+    const { createListItem, updateListItem, deleteListItem, getListsWithItems, listItems } = useListsStore();
+    const listsWithItems = getListsWithItems();
+    const currentListItem = route.params.listItemId ? listItems.find(item => item._id === route.params.listItemId) : undefined;
     const currentIsEditMode = route.params.isEditing || false;
     const allowListChange = route.params.allowListChange || false;
-    const currentLists: ListWithItems[] = route.params.lists || [];
 
     const [name, setName] = useState(currentListItem?.name || '');
     const [notes, setNotes] = useState(currentListItem?.notes || '');
     const [selectedListId, setSelectedListId] = useState<ListId>(() => {
         if (route.params.listId) return route.params.listId;
         if (currentListItem?.listId) return currentListItem.listId;
-        return currentLists[0]?._id!;
+        return listsWithItems[0]?._id!;
     });
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { createListItem, updateListItem, deleteListItem } = useListsStore();
-
-    const selectedList = currentLists.find(list => list._id === selectedListId);
+    const selectedList = listsWithItems.find(list => list._id === selectedListId);
 
     const handleSaveListItem = async () => {
         if (!name.trim()) {
@@ -83,7 +82,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
             if (currentIsEditMode) {
                 navigation.goBack();
             } else {
-                navigation.navigate('ListDetail', { list: selectedList! });
+                navigation.navigate('ListDetail', { listId: selectedListId });
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list item');
@@ -100,7 +99,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
 
         try {
             await deleteListItem(currentListItem._id);
-            navigation.navigate('ListDetail', { list: selectedList! });
+            navigation.navigate('ListDetail', { listId: selectedListId });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
             setIsLoading(false);
@@ -146,7 +145,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
                     {allowListChange ? (
                         <SelectionList
                             label="List"
-                            options={currentLists.map(list => ({
+                            options={listsWithItems.map(list => ({
                                 value: list._id,
                                 label: list.name,
                                 description: `${list.items.length} list items in this list`

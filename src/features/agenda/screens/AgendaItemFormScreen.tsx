@@ -33,7 +33,9 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 }) => {
     const { getColor } = useTheme();
 
-    const currentItem = route.params.agendaItem;
+    const items = useAgendaStore(state => state.items);
+    const currentItem = route.params.itemId ? items.find(item => item._id === route.params.itemId) : undefined;
+
     const currentIsEditMode = route.params.isEditing || false;
     const currentInitialName = route.params.initialName || '';
 

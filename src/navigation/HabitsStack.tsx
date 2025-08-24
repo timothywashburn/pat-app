@@ -8,10 +8,10 @@ import HabitFormScreen from '@/src/features/habits/screens/HabitFormScreen';
 export type HabitsStackParamList = {
     HabitsList: undefined;
     HabitDetail: {
-        habit: Habit
+        habitId: string
     };
     HabitForm: {
-        habit?: Habit;
+        habitId?: string;
         isEditing?: boolean
     };
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Person } from '@timothyw/pat-common';
+import { PersonId } from '@timothyw/pat-common';
 import PeoplePanel from '@/src/app/(tabs)/people';
 import PersonDetailScreen from '@/src/features/people/screens/PersonDetailScreen';
 import PersonFormScreen from '@/src/features/people/screens/PersonFormScreen';
@@ -8,10 +8,10 @@ import PersonFormScreen from '@/src/features/people/screens/PersonFormScreen';
 export type PeopleStackParamList = {
     PeopleList: undefined;
     PersonDetail: {
-        person: Person
+        personId: PersonId
     };
     PersonForm: {
-        person?: Person;
+        personId?: PersonId;
         isEditing?: boolean
     };
 };

@@ -6,6 +6,7 @@ import {
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { Person } from "@timothyw/pat-common";
+import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ListsStackParamList } from "@/src/navigation/ListsStack";
 import { RouteProp } from "@react-navigation/core";
@@ -20,10 +21,15 @@ const PersonDetailScreen: React.FC<PersonDetailViewProps> = ({
     navigation,
     route,
 }) => {
-    const currentPerson = route.params.person;
+    const { people } = usePeopleStore();
+    const currentPerson = people.find(person => person._id === route.params.personId);
+    
+    if (!currentPerson) {
+        return null;
+    }
     
     const handleEditRequest = () => {
-        navigation.navigate('PersonForm', { person: currentPerson, isEditing: true });
+        navigation.navigate('PersonForm', { personId: currentPerson._id, isEditing: true });
     };
 
     const actions = [

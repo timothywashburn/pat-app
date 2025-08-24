@@ -33,17 +33,22 @@ const ListDetailScreen: React.FC<ListDetailViewProps> = ({
     const [showListItems, setShowListItems] = React.useState(false);
     const [rotateAnimation] = React.useState(new Animated.Value(0));
 
-    const { deleteList, deleteListItem } = useListsStore();
+    const { deleteList, deleteListItem, getListsWithItems } = useListsStore();
     const { confirmAlert } = useAlert();
 
-    const currentList: ListWithItems = route.params.list;
+    const listsWithItems = getListsWithItems();
+    const currentList = listsWithItems.find(list => list._id === route.params.listId);
     
     const handleEditRequest = () => {
-        navigation.navigate('ListForm', { list: currentList, isEditing: true });
+        if (currentList) {
+            navigation.navigate('ListForm', { listId: currentList._id, isEditing: true });
+        }
     };
 
     const handleListItemPress = (listItem: ListItemData) => {
-        navigation.navigate('ListItemDetail', { listItem: listItem, list: currentList });
+        if (currentList) {
+            navigation.navigate('ListItemDetail', { listItemId: listItem._id, listId: currentList._id });
+        }
     };
 
     if (!currentList) {

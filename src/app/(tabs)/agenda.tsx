@@ -40,7 +40,7 @@ export const AgendaPanel: React.FC = () => {
     };
 
     const handleItemSelect = (item: AgendaItemData) => {
-        navigation.navigate('AgendaItemDetail', { agendaItem: item });
+        navigation.navigate('AgendaItemDetail', { itemId: item._id });
     };
 
     const handleNotificationsPress = () => {

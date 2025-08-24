@@ -28,14 +28,18 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
     route,
 }) => {
     const { getColor } = useTheme();
-    const habitStore = useHabitsStore();
+    const { habits } = useHabitsStore();
     const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
 
-    const currentHabit: Habit = route.params.habit;
+    const currentHabit = habits.find(habit => habit._id === route.params.habitId);
+    
+    if (!currentHabit) {
+        return null;
+    }
     
     // Handle edit request
     const handleEditRequest = () => {
-        navigation.navigate('HabitForm', { habit: currentHabit, isEditing: true });
+        navigation.navigate('HabitForm', { habitId: currentHabit._id, isEditing: true });
     };
 
     const currentDate = getActiveHabitDate(currentHabit);

@@ -28,13 +28,14 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     const [showNotificationConfig, setShowNotificationConfig] = React.useState(false);
 
-    const { setCompleted } = useAgendaStore();
-
-    const currentItem: AgendaItemData = route.params.agendaItem;
+    const { setCompleted, items } = useAgendaStore();
+    const currentItem = items.find(item => item._id === route.params.itemId);
     
     // Handle edit request
     const handleEditRequest = () => {
-        navigation.navigate('AgendaItemForm', { agendaItem: currentItem, isEditing: true });
+        if (currentItem) {
+            navigation.navigate('AgendaItemForm', { itemId: currentItem._id, isEditing: true });
+        }
     };
 
     if (!currentItem) {
