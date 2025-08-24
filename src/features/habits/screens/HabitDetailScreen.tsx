@@ -10,17 +10,14 @@ import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCalendarGrid from '../components/HabitCalendarGrid';
 import HabitActionButtons from '../components/HabitActionButtons';
 import TimeRemainingIndicator from '../components/TimeRemainingIndicator';
-import { fromDateString, Habit, HabitData } from "@timothyw/pat-common";
 import { fromDateOnlyString, getActiveHabitDate, getPreviousHabitDate } from "@/src/features/habits/models";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { AgendaStackParamList } from "@/src/navigation/AgendaStack";
 import { RouteProp } from "@react-navigation/core";
-import { ListsStackParamList } from "@/src/navigation/ListsStack";
-import { HabitsStackParamList } from "@/src/navigation/HabitsStack";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface HabitDetailViewProps {
-    navigation: StackNavigationProp<HabitsStackParamList, 'HabitDetail'>;
-    route: RouteProp<HabitsStackParamList, 'HabitDetail'>;
+    navigation: StackNavigationProp<MainStackParamList, 'HabitDetail'>;
+    route: RouteProp<MainStackParamList, 'HabitDetail'>;
 }
 
 const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({

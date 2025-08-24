@@ -10,14 +10,13 @@ import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { ListId, UpdateListItemRequest } from "@timothyw/pat-common";
-import { ListWithItems } from "@/src/features/lists/models";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ListsStackParamList } from "@/src/navigation/ListsStack";
 import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface ListItemFormViewProps {
-    navigation: StackNavigationProp<ListsStackParamList, 'ListItemForm'>;
-    route: RouteProp<ListsStackParamList, 'ListItemForm'>;
+    navigation: StackNavigationProp<MainStackParamList, 'ListItemForm'>;
+    route: RouteProp<MainStackParamList, 'ListItemForm'>;
 }
 
 const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
@@ -29,8 +28,10 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
     const currentListItem = route.params.listItemId ? listItems.find(item => item._id === route.params.listItemId) : undefined;
     const currentIsEditMode = route.params.isEditing || false;
     const allowListChange = route.params.allowListChange || false;
+    const thoughtId = route.params.thoughtId;
+    const initialName = route.params.initialName || '';
 
-    const [name, setName] = useState(currentListItem?.name || '');
+    const [name, setName] = useState(currentListItem?.name || initialName);
     const [notes, setNotes] = useState(currentListItem?.notes || '');
     const [selectedListId, setSelectedListId] = useState<ListId>(() => {
         if (route.params.listId) return route.params.listId;
@@ -82,7 +83,15 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
             if (currentIsEditMode) {
                 navigation.goBack();
             } else {
-                navigation.navigate('ListDetail', { listId: selectedListId });
+                // If this was created from a thought (inbox), navigate back to inbox with success info
+                if (thoughtId) {
+                    navigation.navigate('Inbox', {
+                        thoughtProcessed: true, 
+                        thoughtId: thoughtId 
+                    });
+                } else {
+                    navigation.navigate('ListDetail', { listId: selectedListId });
+                }
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list item');

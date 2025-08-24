@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
@@ -11,14 +10,14 @@ import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
-import { Person, PersonNoteData, PersonNoteId, PersonPropertyData } from "@timothyw/pat-common";
+import { PersonNoteData, PersonNoteId, PersonPropertyData } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { PeopleStackParamList } from "@/src/navigation/PeopleStack";
 import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface PersonFormViewProps {
-    navigation: StackNavigationProp<PeopleStackParamList, 'PersonForm'>;
-    route: RouteProp<PeopleStackParamList, 'PersonForm'>;
+    navigation: StackNavigationProp<MainStackParamList, 'PersonForm'>;
+    route: RouteProp<MainStackParamList, 'PersonForm'>;
 }
 
 const PersonFormScreen: React.FC<PersonFormViewProps> = ({
@@ -120,7 +119,7 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
             if (currentIsEditMode) {
                 navigation.goBack();
             } else {
-                navigation.navigate('PeopleList');
+                navigation.navigate('People');
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save person');
@@ -138,7 +137,7 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
         try {
             await deletePerson(currentPerson._id);
             // Handle delete completion
-            navigation.navigate('PeopleList');
+            navigation.navigate('People');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete person');
             setIsLoading(false);

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
@@ -10,15 +10,20 @@ import PersonCard from "@/src/features/people/components/PersonCard";
 import PersonFormScreen from "@/src/features/people/screens/PersonFormScreen";
 import { ModuleType, Person } from "@timothyw/pat-common";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
-import { PeopleStackParamList } from '@/src/navigation/PeopleStack';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
-type PeopleNavigationProp = StackNavigationProp<PeopleStackParamList, 'PeopleList'>;
+interface PeoplePanelProps {
+    navigation: StackNavigationProp<MainStackParamList, 'People'>;
+    route: RouteProp<MainStackParamList, 'People'>;
+}
 
-export const PeoplePanel: React.FC = () => {
+export const PeoplePanel: React.FC<PeoplePanelProps> = ({
+    navigation,
+    route
+}) => {
     const { getColor } = useTheme();
     const { people, isInitialized, loadPeople } = usePeopleStore();
     const { refreshControl } = useRefreshControl(loadPeople, 'Failed to refresh people');
-    const navigation = useNavigation<PeopleNavigationProp>();
 
     useEffect(() => {
         if (!isInitialized) {

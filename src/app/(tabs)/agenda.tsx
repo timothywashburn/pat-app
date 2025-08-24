@@ -1,24 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import CustomHeader from '@/src/components/CustomHeader';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
-import { AgendaStackParamList } from '@/src/navigation/AgendaStack';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import { AgendaItemData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
-type AgendaNavigationProp = StackNavigationProp<AgendaStackParamList, 'AgendaList'>;
+interface AgendaPanelProps {
+    navigation: StackNavigationProp<MainStackParamList, 'Agenda'>;
+    route: RouteProp<MainStackParamList, 'Agenda'>;
+}
 
-export const AgendaPanel: React.FC = () => {
+export const AgendaPanel: React.FC<AgendaPanelProps> = ({
+    navigation,
+    route
+}) => {
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
-    const navigation = useNavigation<AgendaNavigationProp>();
     const { items: agendaItems, isInitialized, loadItems, createItem, updateItem, deleteItem, setCompleted } = useAgendaStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);

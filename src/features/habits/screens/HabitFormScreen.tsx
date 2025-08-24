@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
@@ -16,12 +15,12 @@ import FormSection from '@/src/components/common/FormSection';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import { Habit, HabitFrequency } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { HabitsStackParamList } from "@/src/navigation/HabitsStack";
 import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface HabitFormViewProps {
-    navigation: StackNavigationProp<HabitsStackParamList, 'HabitForm'>;
-    route: RouteProp<HabitsStackParamList, 'HabitForm'>;
+    navigation: StackNavigationProp<MainStackParamList, 'HabitForm'>;
+    route: RouteProp<MainStackParamList, 'HabitForm'>;
 }
 
 const HabitFormScreen: React.FC<HabitFormViewProps> = ({
@@ -88,7 +87,7 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
             if (currentIsEditMode) {
                 navigation.goBack();
             } else {
-                navigation.navigate('HabitsList');
+                navigation.navigate('Habits');
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save habit');
@@ -105,7 +104,7 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
 
         try {
             await deleteHabit(currentHabit._id);
-            navigation.navigate('HabitsList');
+            navigation.navigate('Habits');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete habit');
             setIsLoading(false);

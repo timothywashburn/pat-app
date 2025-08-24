@@ -6,16 +6,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { ListData, ListItemData, ListType } from '@timothyw/pat-common';
+import { ListType } from '@timothyw/pat-common';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useAlert } from '@/src/components/alert';
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ListsStackParamList } from "@/src/navigation/ListsStack";
 import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface ListItemDetailViewProps {
-    navigation: StackNavigationProp<ListsStackParamList, 'ListItemDetail'>;
-    route: RouteProp<ListsStackParamList, 'ListItemDetail'>;
+    navigation: StackNavigationProp<MainStackParamList, 'ListItemDetail'>;
+    route: RouteProp<MainStackParamList, 'ListItemDetail'>;
 }
 
 const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({

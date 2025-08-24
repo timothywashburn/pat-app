@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import CustomHeader from '@/src/components/CustomHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCard from '@/src/features/habits/components/HabitCard';
 import { getActiveHabitDate, toDateOnlyString } from '@/src/features/habits/models';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
-import { HabitsStackParamList } from '@/src/navigation/HabitsStack';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
-type HabitsNavigationProp = StackNavigationProp<HabitsStackParamList, 'HabitsList'>;
+interface HabitsPanelProps {
+    navigation: StackNavigationProp<MainStackParamList, 'Habits'>;
+    route: RouteProp<MainStackParamList, 'Habits'>;
+}
 
-export const HabitsPanel: React.FC = () => {
-    const navigation = useNavigation<HabitsNavigationProp>();
+export const HabitsPanel: React.FC<HabitsPanelProps> = ({
+    navigation,
+    route
+}) => {
     const { habits, isInitialized, loadHabits, getHabitById } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
 

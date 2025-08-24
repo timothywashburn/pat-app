@@ -7,16 +7,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import { AgendaItemData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
+import { NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { NotificationsSection } from '@/src/features/notifications/components/NotificationsSection';
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { StackNavigationProp } from "@react-navigation/stack";
-import { AgendaStackParamList } from "@/src/navigation/AgendaStack";
 import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface AgendaItemDetailViewProps {
-    navigation: StackNavigationProp<AgendaStackParamList, 'AgendaItemDetail'>;
-    route: RouteProp<AgendaStackParamList, 'AgendaItemDetail'>;
+    navigation: StackNavigationProp<MainStackParamList, 'AgendaItemDetail'>;
+    route: RouteProp<MainStackParamList, 'AgendaItemDetail'>;
 }
 
 const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
@@ -29,18 +29,13 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
     const [showNotificationConfig, setShowNotificationConfig] = React.useState(false);
 
     const { setCompleted, items } = useAgendaStore();
-    const currentItem = items.find(item => item._id === route.params.itemId);
+    const currentItem = items.find(item => item._id === route.params.itemId)!;
     
-    // Handle edit request
     const handleEditRequest = () => {
         if (currentItem) {
             navigation.navigate('AgendaItemForm', { itemId: currentItem._id, isEditing: true });
         }
     };
-
-    if (!currentItem) {
-        return null;
-    }
 
     const handleToggleCompleted = async () => {
         setIsLoading(true);

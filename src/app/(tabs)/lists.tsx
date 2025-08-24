@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/context/ThemeContext';
@@ -12,14 +13,19 @@ import ListCard from '@/src/features/lists/components/ListCard';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ListWithItems } from "@/src/features/lists/models";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
-import { ListsStackParamList } from '@/src/navigation/ListsStack';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
-type ListsNavigationProp = StackNavigationProp<ListsStackParamList, 'ListsList'>;
+interface ListsPanelProps {
+    navigation: StackNavigationProp<MainStackParamList, 'Lists'>;
+    route: RouteProp<MainStackParamList, 'Lists'>;
+}
 
-export const ListsPanel: React.FC = () => {
+export const ListsPanel: React.FC<ListsPanelProps> = ({
+    navigation,
+    route
+}) => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const navigation = useNavigation<ListsNavigationProp>();
     const { getListsWithItems, isInitialized, loadAll } = useListsStore();
     const lists = getListsWithItems();
     const { isRefreshing, refreshControl } = useRefreshControl(loadAll, 'Failed to refresh lists');

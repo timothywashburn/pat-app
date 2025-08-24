@@ -8,19 +8,18 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { ListData, ListItemData, ListType } from '@timothyw/pat-common';
+import { ListItemData, ListType } from '@timothyw/pat-common';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useAlert } from '@/src/components/alert';
 import ListItemCard from '../components/ListItemCard';
-import { ListWithItems, sortListItems } from "@/src/features/lists/models";
+import { sortListItems } from "@/src/features/lists/models";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { HabitsStackParamList } from "@/src/navigation/HabitsStack";
 import { RouteProp } from "@react-navigation/core";
-import { ListsStackParamList } from "@/src/navigation/ListsStack";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface ListDetailViewProps {
-    navigation: StackNavigationProp<ListsStackParamList, 'ListDetail'>;
-    route: RouteProp<ListsStackParamList, 'ListDetail'>;
+    navigation: StackNavigationProp<MainStackParamList, 'ListDetail'>;
+    route: RouteProp<MainStackParamList, 'ListDetail'>;
 }
 
 const ListDetailScreen: React.FC<ListDetailViewProps> = ({
@@ -70,7 +69,7 @@ const ListDetailScreen: React.FC<ListDetailViewProps> = ({
 
                 try {
                     await deleteList(currentList._id);
-                    navigation.navigate('ListsList');
+                    navigation.navigate('Lists');
                 } catch (error) {
                     setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
                 } finally {

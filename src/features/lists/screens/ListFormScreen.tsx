@@ -4,14 +4,14 @@ import FormField from '@/src/components/common/FormField';
 import FormSection from '@/src/components/common/FormSection';
 import SelectionList from '@/src/components/common/SelectionList';
 import { useListsStore } from '@/src/stores/useListsStore';
-import { ListData, ListType } from "@timothyw/pat-common";
+import { ListType } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ListsStackParamList } from "@/src/navigation/ListsStack";
 import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface ListFormViewProps {
-    navigation: StackNavigationProp<ListsStackParamList, 'ListForm'>;
-    route: RouteProp<ListsStackParamList, 'ListForm'>;
+    navigation: StackNavigationProp<MainStackParamList, 'ListForm'>;
+    route: RouteProp<MainStackParamList, 'ListForm'>;
 }
 
 const ListFormScreen: React.FC<ListFormViewProps> = ({
@@ -55,7 +55,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
             if (currentIsEditMode) {
                 navigation.goBack();
             } else {
-                navigation.navigate('ListsList');
+                navigation.navigate('Lists');
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list');
@@ -72,7 +72,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
 
         try {
             await deleteList(currentList._id);
-            navigation.navigate('ListsList');
+            navigation.navigate('Lists');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
             setIsLoading(false);

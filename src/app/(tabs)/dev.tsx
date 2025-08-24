@@ -1,14 +1,25 @@
 import React, { useState } from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import CustomHeader from '@/src/components/CustomHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
 import DevicesSection from "@/src/features/dev/components/DevicesSection";
 import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
 import { ModuleType } from "@timothyw/pat-common";
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
-export const DevPanel: React.FC = () => {
+interface DevPanelProps {
+    navigation: StackNavigationProp<MainStackParamList, 'Dev'>;
+    route: RouteProp<MainStackParamList, 'Dev'>;
+}
+
+export const DevPanel: React.FC<DevPanelProps> = ({
+    navigation,
+    route
+}) => {
     const [logViewerPanelVisible, setLogViewerPanelVisible] = useState(false);
 
     return (

@@ -19,12 +19,12 @@ import WebDateTimePicker from '../components/WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { AgendaStackParamList } from "@/src/navigation/AgendaStack";
 import { RouteProp } from "@react-navigation/core";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface AgendaItemFormViewProps {
-    navigation: StackNavigationProp<AgendaStackParamList, 'AgendaItemForm'>;
-    route: RouteProp<AgendaStackParamList, 'AgendaItemForm'>;
+    navigation: StackNavigationProp<MainStackParamList, 'AgendaItemForm'>;
+    route: RouteProp<MainStackParamList, 'AgendaItemForm'>;
 }
 
 const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
@@ -38,6 +38,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
     const currentIsEditMode = route.params.isEditing || false;
     const currentInitialName = route.params.initialName || '';
+    const thoughtId = route.params.thoughtId;
 
     const getTonight = () => {
         const today = new Date();
@@ -62,7 +63,6 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
     const types = data.config.agenda.itemTypes;
 
     const { createItem, updateItem, deleteItem } = useAgendaStore();
-
 
     const handleSaveItem = async () => {
         if (!name.trim()) {
@@ -110,7 +110,15 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
             if (currentIsEditMode) {
                 navigation.goBack();
             } else {
-                navigation.navigate('AgendaList');
+                // If this was created from a thought (inbox), navigate back to inbox with success info
+                if (thoughtId) {
+                    navigation.navigate('Inbox', {
+                        thoughtProcessed: true, 
+                        thoughtId: thoughtId 
+                    });
+                } else {
+                    navigation.navigate('Agenda');
+                }
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save item');
@@ -127,7 +135,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
         try {
             await deleteItem(currentItem._id);
-            navigation.navigate('AgendaList');
+            navigation.navigate('Agenda');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
             setIsLoading(false);

@@ -3,18 +3,15 @@ import {
     Text,
     View,
 } from 'react-native';
-import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { Person } from "@timothyw/pat-common";
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ListsStackParamList } from "@/src/navigation/ListsStack";
 import { RouteProp } from "@react-navigation/core";
-import { PeopleStackParamList } from "@/src/navigation/PeopleStack";
+import { MainStackParamList } from "@/src/navigation/MainStack";
 
 interface PersonDetailViewProps {
-    navigation: StackNavigationProp<PeopleStackParamList, 'PersonDetail'>;
-    route: RouteProp<PeopleStackParamList, 'PersonDetail'>;
+    navigation: StackNavigationProp<MainStackParamList, 'PersonDetail'>;
+    route: RouteProp<MainStackParamList, 'PersonDetail'>;
 }
 
 const PersonDetailScreen: React.FC<PersonDetailViewProps> = ({

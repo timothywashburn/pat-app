@@ -8,8 +8,9 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import { useThoughtsStore } from '@/src/stores/useThoughtsStore';
@@ -19,14 +20,19 @@ import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
-import { InboxStackParamList } from '@/src/navigation/InboxStack';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
-type InboxNavigationProp = StackNavigationProp<InboxStackParamList, 'InboxList'>;
+interface AgendaItemDetailViewProps {
+    navigation: StackNavigationProp<MainStackParamList, 'Inbox'>;
+    route: RouteProp<MainStackParamList, 'Inbox'>;
+}
 
-export const InboxPanel: React.FC = () => {
+export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
+    navigation,
+    route
+}) => {
     const { getColor } = useTheme();
     const { errorToast } = useToast();
-    const navigation = useNavigation<InboxNavigationProp>();
     const { thoughts, isInitialized, loadThoughts, createThought, updateThought, deleteThought } = useThoughtsStore();
     const { refreshControl } = useRefreshControl(loadThoughts, 'Failed to refresh thoughts');
 
@@ -35,6 +41,23 @@ export const InboxPanel: React.FC = () => {
             loadThoughts();
         }
     }, [isInitialized, loadThoughts]);
+
+    // Handle thought deletion when returning from form screens
+    useFocusEffect(
+        React.useCallback(() => {
+            if (route.params?.thoughtProcessed && route.params?.thoughtId) {
+                // Delete the thought that was successfully converted to an agenda item or list item
+                handleDeleteThought(route.params.thoughtId);
+                
+                // Clear the params to prevent re-deletion
+                navigation.setParams({
+                    thoughtProcessed: undefined,
+                    thoughtId: undefined
+                });
+            }
+        }, [route.params?.thoughtProcessed, route.params?.thoughtId, navigation])
+    );
+
     const [newThought, setNewThought] = useState('');
     const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
     const [editingThought, setEditingThought] = useState<ThoughtData | null>(null);
@@ -103,11 +126,10 @@ export const InboxPanel: React.FC = () => {
 
     const handleMoveToAgenda = (thought: ThoughtData) => {
         navigation.navigate('AgendaItemForm', {
-            initialName: thought.content
+            initialName: thought.content,
+            thoughtId: thought._id
         });
         setExpandedThoughtId(null);
-        // TODO: I think this is probably wrong now, it probably needs to be called from the callback of successful creation
-        handleDeleteThought(thought._id);
     };
 
     const handleMoveToLists = (thought: ThoughtData) => {
@@ -118,11 +140,11 @@ export const InboxPanel: React.FC = () => {
         }
 
         navigation.navigate('ListItemForm', {
-            initialName: thought.content
+            initialName: thought.content,
+            thoughtId: thought._id,
+            allowListChange: true
         });
         setExpandedThoughtId(null);
-        // TODO: I think this is probably wrong now, it probably needs to be called from the callback of successful creation
-        handleDeleteThought(thought._id);
     };
 
     const handleStartEdit = (thought: ThoughtData) => {
