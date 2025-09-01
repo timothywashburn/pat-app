@@ -68,12 +68,6 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
         setIsRefreshing(false);
     };
 
-    const handleTemplateUpdate = (updatedTemplate: NotificationTemplateData) => {
-        // The hook already handles state updates automatically
-        // This function is kept for compatibility but the state is managed by the hook
-        console.log('Template updated:', updatedTemplate);
-    };
-
     const handleTemplateDelete = async (templateId: string) => {
         try {
             await notifications.deleteTemplate(templateId);
@@ -137,30 +131,15 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
         }
     };
 
-    const getEntityIcon = (): keyof typeof Ionicons.glyphMap => {
-        // Simple icon mapping
-        switch (targetEntityType) {
-            case NotificationEntityType.AGENDA_ITEM:
-                return 'list';
-            case NotificationEntityType.AGENDA_PANEL:
-                return 'calendar';
-            case NotificationEntityType.INBOX_PANEL:
-                return 'mail';
-            default:
-                return 'notifications';
-        }
-    };
-
     const isPanelLevel = targetLevel === NotificationTemplateLevel.PARENT;
     const isIndividualEntity = targetLevel === NotificationTemplateLevel.ENTITY;
 
     const renderTemplate = ({ item }: { item: NotificationTemplateData }) => (
         <NotificationTemplateCard
             template={item}
-            onUpdate={handleTemplateUpdate}
             onDelete={handleTemplateDelete}
             onEdit={handleTemplateEdit}
-            readOnly={isIndividualEntity && isSynced} // Read-only if synced with parent
+            readOnly={isIndividualEntity && isSynced}
         />
     );
 

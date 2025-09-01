@@ -7,7 +7,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface NotificationTemplateCardProps {
     template: NotificationTemplateData;
-    onUpdate: (template: NotificationTemplateData) => void;
     onDelete: (templateId: string) => void;
     onEdit?: (template: NotificationTemplateData) => void;
     readOnly?: boolean;
@@ -15,7 +14,6 @@ interface NotificationTemplateCardProps {
 
 export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> = ({
     template,
-    onUpdate,
     onDelete,
     onEdit,
     readOnly = false
