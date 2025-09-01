@@ -103,7 +103,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                                     className="mr-1.5"
                                 />
                                 <Text className={`text-on-surface-variant flex-1 ${compact ? 'text-xs' : 'text-sm'}`} numberOfLines={1}>
-                                    {template.targetLevel} - {template.trigger.type}
+                                    {template.targetLevel} - {template.schedulerData.type}
                                 </Text>
                                 <Text className="text-success text-xs">Active</Text>
                             </View>

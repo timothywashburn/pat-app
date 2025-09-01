@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { NotificationTemplateData, NotificationTriggerType } from '@timothyw/pat-common';
+import { NotificationTemplateData, NotificationSchedulerType } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,16 +32,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
     };
 
     const getTriggerDisplayText = () => {
-        switch (template.trigger.type) {
-            case NotificationTriggerType.TIME_BASED:
-                return 'Time-based';
-            case NotificationTriggerType.EVENT_BASED:
-                return 'Event-based';
-            case NotificationTriggerType.RECURRING:
-                return 'Recurring';
-            default:
-                return template.trigger.type;
-        }
+        return template.schedulerData.type;
     };
 
     return (

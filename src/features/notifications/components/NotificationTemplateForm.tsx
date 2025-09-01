@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Switch } from 'react-native';
-import { NotificationTemplateData, CreateNotificationTemplateRequest, NotificationTemplateLevel, NotificationEntityType, NotificationTriggerType } from '@timothyw/pat-common';
+import { ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import {
+    CreateNotificationTemplateRequest,
+    NotificationEntityType,
+    NotificationSchedulerType,
+    NotificationTemplateData,
+    NotificationTemplateLevel,
+    NotificationVariantType
+} from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
@@ -24,9 +31,12 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
     onCancel
 }) => {
     const { getColor } = useTheme();
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        active: boolean;
+        schedulerType: NotificationSchedulerType;
+    }>({
         active: template?.active ?? true,
-        triggerType: template?.trigger.type || NotificationTriggerType.TIME_BASED,
+        schedulerType: NotificationSchedulerType.RELATIVE_DATE,
     });
     const [isLoading, setIsLoading] = useState(false);
     const notifications = useNotifications(targetEntityType, targetId, targetLevel);
@@ -43,8 +53,12 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
                 targetLevel,
                 targetEntityType,
                 targetId,
-                trigger: {
-                    type: formData.triggerType as NotificationTriggerType,
+                schedulerData: {
+                    type: NotificationSchedulerType.RELATIVE_DATE,
+                    offsetMinutes: 1
+                },
+                variantData: {
+                    type: NotificationVariantType.AGENDA_ITEM_UPCOMING_DEADLINE,
                 },
                 active: formData.active
             };
@@ -53,7 +67,13 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
             if (template) {
                 // Update existing template
                 savedTemplate = await notifications.updateTemplate(template._id, {
-                    trigger: templateData.trigger,
+                    schedulerData: {
+                        type: NotificationSchedulerType.RELATIVE_DATE,
+                        offsetMinutes: 1
+                    },
+                    variantData: {
+                        type: NotificationVariantType.AGENDA_ITEM_UPCOMING_DEADLINE,
+                    },
                     active: templateData.active
                 });
             } else {
@@ -71,9 +91,9 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
     };
 
     const triggerOptions = [
-        { value: NotificationTriggerType.TIME_BASED, label: 'Time Based', icon: 'time' },
-        { value: NotificationTriggerType.EVENT_BASED, label: 'Event Based', icon: 'flash' },
-        { value: NotificationTriggerType.RECURRING, label: 'Recurring', icon: 'refresh' },
+        { value: NotificationSchedulerType.DAY_TIME, label: 'Date and Time', icon: 'time' },
+        { value: NotificationSchedulerType.RELATIVE_DATE, label: 'Relative Date', icon: 'flash' },
+        // { value: NotificationSchedulerType.RECURRING, label: 'Recurring', icon: 'refresh' },
     ];
 
     return (
@@ -131,16 +151,16 @@ export const NotificationTemplateForm: React.FC<NotificationTemplateFormProps> =
                                 key={option.value}
                                 className={`flex-1 py-2 px-3 border border-divider rounded-md items-center ${
                                     index < triggerOptions.length - 1 ? 'mr-2' : ''
-                                } ${formData.triggerType === option.value ? 'bg-primary/20 border-primary' : ''}`}
+                                } ${formData.schedulerType === option.value ? 'bg-primary/20 border-primary' : ''}`}
                                 onPress={() => updateFormData('triggerType', option.value)}
                             >
                                 <Ionicons
                                     name={option.icon as any}
                                     size={16}
-                                    color={formData.triggerType === option.value ? getColor('primary') : getColor('on-surface-variant')}
+                                    color={formData.schedulerType === option.value ? getColor('primary') : getColor('on-surface-variant')}
                                 />
                                 <Text className={`text-xs mt-1 ${
-                                    formData.triggerType === option.value ? 'text-primary font-medium' : 'text-on-surface-variant'
+                                    formData.schedulerType === option.value ? 'text-primary font-medium' : 'text-on-surface-variant'
                                 }`}>
                                     {option.label}
                                 </Text>

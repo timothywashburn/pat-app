@@ -43,6 +43,7 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
 
         try {
             await setCompleted(currentItem._id, !currentItem.completed);
+            if (!currentItem.completed) navigation.goBack();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update currentItem');
         } finally {
