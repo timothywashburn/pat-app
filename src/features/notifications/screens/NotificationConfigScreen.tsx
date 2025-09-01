@@ -1,28 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, Switch } from 'react-native';
 import { NotificationTemplateData, NotificationEntityType, NotificationTemplateLevel } from '@timothyw/pat-common';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 import { useToast } from '@/src/components/toast/ToastContext';
-import { NotificationTemplateCard } from './NotificationTemplateCard';
-import { NotificationTemplateForm } from './NotificationTemplateForm';
+import { MainStackParamList } from '@/src/navigation/MainStack';
+import { NotificationTemplateCard } from '../components/NotificationTemplateCard';
+import { NotificationTemplateForm } from '../components/NotificationTemplateForm';
 
-interface NotificationConfigViewProps {
-    targetEntityType: NotificationEntityType;
-    targetId: string;
-    targetLevel: NotificationTemplateLevel;
-    entityName?: string;
-    onClose?: () => void;
+interface NotificationConfigScreenProps {
+    navigation: StackNavigationProp<MainStackParamList, 'NotificationConfig'>;
+    route: RouteProp<MainStackParamList, 'NotificationConfig'>;
 }
 
-export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
-    targetEntityType,
-    targetId,
-    targetLevel,
-    entityName,
-    onClose
+export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> = ({
+    navigation,
+    route
 }) => {
+    const { targetEntityType, targetId, targetLevel, entityName } = route.params;
     const { getColor } = useTheme();
     const [showTemplateForm, setShowTemplateForm] = useState(false);
     const [editingTemplate, setEditingTemplate] = useState<NotificationTemplateData | null>(null);
@@ -217,12 +215,8 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
         );
     };
 
-    const containerClassName = onClose
-        ? "bg-background absolute inset-0 z-50"  // Modal style
-        : "flex-1 bg-background";  // Regular view style
-
     return (
-        <View className={containerClassName}>
+        <View className="flex-1 bg-background">
             <View className="flex-row items-center justify-between p-4 border-b border-divider">
                 <View className="flex-row items-center flex-1">
                     <Ionicons
@@ -246,11 +240,9 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
                     </TouchableOpacity>
                 )}
 
-                {onClose && (
-                    <TouchableOpacity className="p-2" onPress={onClose}>
-                        <Ionicons name="close" size={24} color={getColor('on-surface-variant')} />
-                    </TouchableOpacity>
-                )}
+                <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={24} color={getColor('on-surface-variant')} />
+                </TouchableOpacity>
             </View>
 
 
@@ -292,3 +284,5 @@ export const NotificationConfigView: React.FC<NotificationConfigViewProps> = ({
         </View>
     );
 };
+
+export default NotificationConfigScreen;

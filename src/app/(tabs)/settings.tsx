@@ -10,7 +10,6 @@ import { useToast } from "@/src/components/toast/ToastContext";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { UserModuleData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 
 interface SettingsPanelProps {
@@ -26,7 +25,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     const { signOut, authData } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [showNotificationConfig, setShowNotificationConfig] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const { data, updateUserData } = useUserDataStore();
@@ -78,13 +76,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     };
 
     const handleCategoryNotificationPress = (category: string) => {
-        setSelectedCategory(category);
-        setShowNotificationConfig(true);
-    };
-
-    const handleNotificationConfigClose = () => {
-        setShowNotificationConfig(false);
-        setSelectedCategory(null);
+        navigation.navigate('NotificationConfig', {
+            targetEntityType: NotificationEntityType.AGENDA_ITEM,
+            targetId: `agenda_item_${category}`,
+            targetLevel: NotificationTemplateLevel.PARENT,
+            entityName: `${category} Category`
+        });
     };
 
     return (
@@ -168,16 +165,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </View>
             </ScrollView>
 
-            {/* Category notification config modal */}
-            {showNotificationConfig && selectedCategory && (
-                <NotificationConfigView
-                    targetEntityType={NotificationEntityType.AGENDA_ITEM}
-                    targetId={`agenda_item_${selectedCategory}`}
-                    targetLevel={NotificationTemplateLevel.PARENT}
-                    entityName={`${selectedCategory} Category`}
-                    onClose={handleNotificationConfigClose}
-                />
-            )}
         </GestureHandlerRootView>
     );
 }

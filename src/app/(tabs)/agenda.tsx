@@ -10,7 +10,6 @@ import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import { AgendaItemData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
-import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 interface AgendaPanelProps {
@@ -24,12 +23,9 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
 }) => {
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
-    const { items: agendaItems, isInitialized, loadItems, createItem, updateItem, deleteItem, setCompleted } = useAgendaStore();
+    const { items, isInitialized, loadItems } = useAgendaStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [showCompleted, setShowCompleted] = useState(false);
-
-    // State for notifications
-    const [showingNotifications, setShowingNotifications] = useState(false);
 
     const isTableView = width >= 768;
 
@@ -49,14 +45,15 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     };
 
     const handleNotificationsPress = () => {
-        setShowingNotifications(true);
+        navigation.navigate('NotificationConfig', {
+            targetEntityType: NotificationEntityType.AGENDA_PANEL,
+            targetId: "agenda_panel",
+            targetLevel: NotificationTemplateLevel.PARENT,
+            entityName: "Agenda Panel"
+        });
     };
 
-    const handleNotificationsDismiss = () => {
-        setShowingNotifications(false);
-    };
-
-    const filteredItems = agendaItems
+    const filteredItems = items
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
             if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
@@ -80,7 +77,7 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
                 onFilterTapped={() => setShowCompleted(!showCompleted)}
             />
 
-            {!isInitialized && agendaItems.length === 0 ? (
+            {!isInitialized && items.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
@@ -138,17 +135,6 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
                         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
                     />
                 )
-            )}
-
-            {/* Panel notifications view */}
-            {showingNotifications && (
-                <NotificationConfigView
-                    targetEntityType={NotificationEntityType.AGENDA_PANEL}
-                    targetId="agenda_panel"
-                    targetLevel={NotificationTemplateLevel.PARENT}
-                    entityName="Agenda Panel"
-                    onClose={handleNotificationsDismiss}
-                />
             )}
         </>
     );

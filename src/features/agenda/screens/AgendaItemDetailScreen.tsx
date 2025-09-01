@@ -9,7 +9,6 @@ import BaseDetailView from '@/src/components/common/BaseDetailView';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import { NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { NotificationsSection } from '@/src/features/notifications/components/NotificationsSection';
-import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
@@ -26,7 +25,6 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-    const [showNotificationConfig, setShowNotificationConfig] = React.useState(false);
 
     const { setCompleted, items } = useAgendaStore();
     const currentItem = items.find(item => item._id === route.params.itemId)!;
@@ -129,7 +127,12 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
                     targetId={currentItem._id}
                     targetLevel={NotificationTemplateLevel.ENTITY}
                     entityName={currentItem.name}
-                    onPress={() => setShowNotificationConfig(true)}
+                    onPress={() => navigation.navigate('NotificationConfig', {
+                        targetEntityType: NotificationEntityType.AGENDA_ITEM,
+                        targetId: currentItem._id,
+                        targetLevel: NotificationTemplateLevel.ENTITY,
+                        entityName: currentItem.name
+                    })}
                 />
 
                 <View className="flex-row currentItems-center">
@@ -144,15 +147,6 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
                 </View>
             </BaseDetailView>
 
-            {showNotificationConfig && (
-                <NotificationConfigView
-                    targetEntityType={NotificationEntityType.AGENDA_ITEM}
-                    targetId={currentItem._id}
-                    targetLevel={NotificationTemplateLevel.ENTITY}
-                    entityName={currentItem.name}
-                    onClose={() => setShowNotificationConfig(false)}
-                />
-            )}
         </>
     );
 };
