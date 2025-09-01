@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
-import CustomHeader from '@/src/components/CustomHeader';
+import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
 import { useAuthStore } from "@/src/stores/useAuthStore";
@@ -86,7 +86,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <CustomHeader
+            <MainViewHeader
                 moduleType={ModuleType.SETTINGS}
                 title="Settings"
                 showAddButton={false}

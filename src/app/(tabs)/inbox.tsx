@@ -14,7 +14,7 @@ import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import { useThoughtsStore } from '@/src/stores/useThoughtsStore';
-import CustomHeader from '@/src/components/CustomHeader';
+import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
@@ -163,7 +163,7 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
 
     return (
         <>
-            <CustomHeader
+            <MainViewHeader
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
                 showAddButton={false}

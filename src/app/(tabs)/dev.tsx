@@ -3,7 +3,7 @@ import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
-import CustomHeader from '@/src/components/CustomHeader';
+import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
 import DevicesSection from "@/src/features/dev/components/DevicesSection";
@@ -24,7 +24,7 @@ export const DevPanel: React.FC<DevPanelProps> = ({
 
     return (
         <>
-            <CustomHeader
+            <MainViewHeader
                 moduleType={ModuleType.DEV}
                 title="Dev"
                 showAddButton

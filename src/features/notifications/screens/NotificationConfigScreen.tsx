@@ -10,6 +10,7 @@ import { useToast } from '@/src/components/toast/ToastContext';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { NotificationTemplateCard } from '../components/NotificationTemplateCard';
 import { NotificationTemplateForm } from '../components/NotificationTemplateForm';
+import NotificationViewHeader from '@/src/components/headers/NotificationViewHeader';
 
 interface NotificationConfigScreenProps {
     navigation: StackNavigationProp<MainStackParamList, 'NotificationConfig'>;
@@ -217,33 +218,13 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
 
     return (
         <View className="flex-1 bg-background">
-            <View className="flex-row items-center justify-between p-4 border-b border-divider">
-                <View className="flex-row items-center flex-1">
-                    <Ionicons
-                        name={getEntityIcon()}
-                        size={24}
-                        color={getColor('primary')}
-                    />
-                    <View className="ml-2">
-                        <Text className="text-on-surface text-lg font-semibold">Notifications</Text>
-                        <Text className="text-on-surface-variant text-sm">{getEntityDisplayName()}</Text>
-                    </View>
-                </View>
-
-                {!(isIndividualEntity && isSynced) && (
-                    <TouchableOpacity
-                        className="flex-row items-center bg-primary px-4 py-2 rounded-lg mr-2"
-                        onPress={() => setShowTemplateForm(true)}
-                    >
-                        <Ionicons name="add" size={16} color="white" />
-                        <Text className="text-white font-medium ml-1">Add Template</Text>
-                    </TouchableOpacity>
-                )}
-
-                <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={24} color={getColor('on-surface-variant')} />
-                </TouchableOpacity>
-            </View>
+            <NotificationViewHeader
+                title={`Notifications - ${getEntityDisplayName()}`}
+                onBack={() => navigation.goBack()}
+                showAddButton={!(isIndividualEntity && isSynced)}
+                onAdd={() => setShowTemplateForm(true)}
+                addButtonText="Add"
+            />
 
 
             {isIndividualEntity && (

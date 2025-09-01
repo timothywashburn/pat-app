@@ -3,7 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
-import FormViewHeader from './FormViewHeader';
+import FormViewHeader from '../headers/FormViewHeader';
 
 interface NavigationProps {
     navigation?: any;

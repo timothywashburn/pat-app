@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
-import CustomHeader from '@/src/components/CustomHeader';
+import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
@@ -65,7 +65,7 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
 
     return (
         <>
-            <CustomHeader
+            <MainViewHeader
                 moduleType={ModuleType.AGENDA}
                 title="Agenda"
                 showNotificationsButton
