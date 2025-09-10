@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, Switch } from 'react-native';
 import { NotificationTemplateData, NotificationEntityType, NotificationTemplateLevel } from '@timothyw/pat-common';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, useFocusEffect } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifications } from '@/src/features/notifications/hooks/useNotifications';
 import { useToast } from '@/src/components/toast/ToastContext';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { NotificationTemplateCard } from '../components/NotificationTemplateCard';
-import { NotificationTemplateForm } from '../components/NotificationTemplateForm';
 import NotificationViewHeader from '@/src/components/headers/NotificationViewHeader';
 
 interface NotificationConfigScreenProps {
@@ -23,8 +22,6 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
 }) => {
     const { targetEntityType, targetId, targetLevel, entityName } = route.params;
     const { getColor } = useTheme();
-    const [showTemplateForm, setShowTemplateForm] = useState(false);
-    const [editingTemplate, setEditingTemplate] = useState<NotificationTemplateData | null>(null);
     const [isSynced, setIsSynced] = useState<boolean>(true); // For individual entities
     const [isRefreshing, setIsRefreshing] = useState(false);
     
@@ -38,6 +35,16 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
             loadSyncState();
         }
     }, [targetEntityType, targetId, targetLevel]);
+
+    // Refresh templates when screen comes into focus (e.g., returning from form screen)
+    useFocusEffect(
+        React.useCallback(() => {
+            loadTemplates();
+            if (targetLevel === NotificationTemplateLevel.ENTITY) {
+                loadSyncState();
+            }
+        }, [targetEntityType, targetId, targetLevel])
+    );
 
     const loadTemplates = async () => {
         try {
@@ -97,22 +104,13 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
         }
     };
 
-    const handleTemplateSave = async (savedTemplate: NotificationTemplateData) => {
-        // Refresh templates to ensure UI is updated
-        await refreshTemplates();
-        // Close the form
-        setShowTemplateForm(false);
-        setEditingTemplate(null);
-    };
-
-    const handleTemplateFormCancel = () => {
-        setShowTemplateForm(false);
-        setEditingTemplate(null);
-    };
-
     const handleTemplateEdit = (template: NotificationTemplateData) => {
-        setEditingTemplate(template);
-        setShowTemplateForm(true);
+        navigation.navigate('NotificationTemplateForm', {
+            targetEntityType,
+            targetId,
+            targetLevel,
+            template
+        });
     };
 
     const getEntityDisplayName = () => {
@@ -201,7 +199,11 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
                 title={`Notifications - ${getEntityDisplayName()}`}
                 onBack={() => navigation.goBack()}
                 showAddButton={!(isIndividualEntity && isSynced)}
-                onAdd={() => setShowTemplateForm(true)}
+                onAdd={() => navigation.navigate('NotificationTemplateForm', {
+                    targetEntityType,
+                    targetId,
+                    targetLevel
+                })}
                 addButtonText="Add"
             />
 
@@ -230,17 +232,6 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
             <View className="flex-1 p-4">
                 {renderContent()}
             </View>
-
-            {showTemplateForm && (
-                <NotificationTemplateForm
-                    targetEntityType={targetEntityType}
-                    targetId={targetId}
-                    targetLevel={targetLevel}
-                    template={editingTemplate || undefined}
-                    onSave={handleTemplateSave}
-                    onCancel={handleTemplateFormCancel}
-                />
-            )}
         </View>
     );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { ItemId, ListId, PersonId, NotificationEntityType, NotificationTemplateLevel } from '@timothyw/pat-common';
+import { ItemId, ListId, PersonId, NotificationEntityType, NotificationTemplateLevel, NotificationTemplateData } from '@timothyw/pat-common';
 import AgendaPanel from '@/src/app/(tabs)/agenda';
 import InboxPanel from '@/src/app/(tabs)/inbox';
 import ListsPanel from '@/src/app/(tabs)/lists';
@@ -19,6 +19,7 @@ import HabitFormScreen from '@/src/features/habits/screens/HabitFormScreen';
 import SettingsPanel from '@/src/app/(tabs)/settings';
 import DevPanel from '@/src/app/(tabs)/dev';
 import NotificationConfigScreen from '@/src/features/notifications/screens/NotificationConfigScreen';
+import NotificationTemplateFormScreen from '@/src/features/notifications/screens/NotificationTemplateFormScreen';
 
 export type MainStackParamList = {
     Agenda: {
@@ -91,6 +92,13 @@ export type MainStackParamList = {
         targetLevel: NotificationTemplateLevel;
         entityName: string;
     };
+
+    NotificationTemplateForm: {
+        targetEntityType: NotificationEntityType;
+        targetId: string;
+        targetLevel: NotificationTemplateLevel;
+        template?: NotificationTemplateData;
+    };
 };
 
 const Stack = createStackNavigator<MainStackParamList>();
@@ -132,6 +140,7 @@ export default function MainStack({ initialRouteName }: MainStackProps) {
             <Stack.Screen name="Dev" component={DevPanel} />
             
             <Stack.Screen name="NotificationConfig" component={NotificationConfigScreen} />
+            <Stack.Screen name="NotificationTemplateForm" component={NotificationTemplateFormScreen} />
         </Stack.Navigator>
     );
 }
