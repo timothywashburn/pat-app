@@ -45,7 +45,7 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     };
 
     const handleNotificationsPress = () => {
-        navigation.navigate('NotificationConfig', {
+        navigation.navigate('NotificationInfo', {
             targetEntityType: NotificationEntityType.AGENDA_PANEL,
             targetId: "agenda_panel",
             targetLevel: NotificationTemplateLevel.PARENT,

@@ -18,8 +18,8 @@ import PersonFormScreen from '@/src/features/people/screens/PersonFormScreen';
 import HabitFormScreen from '@/src/features/habits/screens/HabitFormScreen';
 import SettingsPanel from '@/src/app/(tabs)/settings';
 import DevPanel from '@/src/app/(tabs)/dev';
-import NotificationConfigScreen from '@/src/features/notifications/screens/NotificationConfigScreen';
-import NotificationTemplateFormScreen from '@/src/features/notifications/screens/NotificationTemplateFormScreen';
+import NotificationInfoScreen from '@/src/features/notifications/screens/NotificationInfoScreen';
+import NotificationFormScreen from '@/src/features/notifications/screens/NotificationFormScreen';
 
 export type MainStackParamList = {
     Agenda: {
@@ -86,14 +86,14 @@ export type MainStackParamList = {
 
     Dev: undefined;
 
-    NotificationConfig: {
+    NotificationInfo: {
         targetLevel: NotificationTemplateLevel;
         targetEntityType: NotificationEntityType;
         targetId: string;
         entityName: string;
     };
 
-    NotificationTemplateForm: {
+    NotificationForm: {
         targetEntityType: NotificationEntityType;
         targetId: string;
         targetLevel: NotificationTemplateLevel;
@@ -139,8 +139,8 @@ export default function MainStack({ initialRouteName }: MainStackProps) {
 
             <Stack.Screen name="Dev" component={DevPanel} />
             
-            <Stack.Screen name="NotificationConfig" component={NotificationConfigScreen} />
-            <Stack.Screen name="NotificationTemplateForm" component={NotificationTemplateFormScreen} />
+            <Stack.Screen name="NotificationInfo" component={NotificationInfoScreen} />
+            <Stack.Screen name="NotificationForm" component={NotificationFormScreen} />
         </Stack.Navigator>
     );
 }

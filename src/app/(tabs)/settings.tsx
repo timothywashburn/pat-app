@@ -76,7 +76,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     };
 
     const handleCategoryNotificationPress = (category: string) => {
-        navigation.navigate('NotificationConfig', {
+        navigation.navigate('NotificationInfo', {
             targetEntityType: NotificationEntityType.AGENDA_ITEM,
             targetId: `agenda_item_${category}`,
             targetLevel: NotificationTemplateLevel.PARENT,

@@ -127,7 +127,7 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
                     targetId={currentItem._id}
                     targetLevel={NotificationTemplateLevel.ENTITY}
                     entityName={currentItem.name}
-                    onPress={() => navigation.navigate('NotificationConfig', {
+                    onPress={() => navigation.navigate('NotificationInfo', {
                         targetEntityType: NotificationEntityType.AGENDA_ITEM,
                         targetId: currentItem._id,
                         targetLevel: NotificationTemplateLevel.ENTITY,

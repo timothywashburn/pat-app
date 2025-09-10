@@ -18,11 +18,11 @@ import { RouteProp } from '@react-navigation/core';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 
 interface NotificationTemplateFormScreenProps {
-    navigation: StackNavigationProp<MainStackParamList, 'NotificationTemplateForm'>;
-    route: RouteProp<MainStackParamList, 'NotificationTemplateForm'>;
+    navigation: StackNavigationProp<MainStackParamList, 'NotificationForm'>;
+    route: RouteProp<MainStackParamList, 'NotificationForm'>;
 }
 
-export const NotificationTemplateFormScreen: React.FC<NotificationTemplateFormScreenProps> = ({
+export const NotificationFormScreen: React.FC<NotificationTemplateFormScreenProps> = ({
     navigation,
     route
 }) => {
@@ -187,4 +187,4 @@ export const NotificationTemplateFormScreen: React.FC<NotificationTemplateFormSc
     );
 };
 
-export default NotificationTemplateFormScreen;
+export default NotificationFormScreen;

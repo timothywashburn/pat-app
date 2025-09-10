@@ -12,11 +12,11 @@ import NotificationViewHeader from '@/src/components/headers/NotificationViewHea
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 
 interface NotificationConfigScreenProps {
-    navigation: StackNavigationProp<MainStackParamList, 'NotificationConfig'>;
-    route: RouteProp<MainStackParamList, 'NotificationConfig'>;
+    navigation: StackNavigationProp<MainStackParamList, 'NotificationInfo'>;
+    route: RouteProp<MainStackParamList, 'NotificationInfo'>;
 }
 
-export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> = ({
+export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = ({
     navigation,
     route
 }) => {
@@ -52,7 +52,7 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
                         template={item}
                         onDelete={notifications.deleteTemplate}
                         onEdit={(template: NotificationTemplateData) => {
-                            navigation.navigate('NotificationTemplateForm', {
+                            navigation.navigate('NotificationForm', {
                                 targetEntityType,
                                 targetId,
                                 targetLevel,
@@ -92,7 +92,7 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
                 title={`Notifications - ${entityName}`}
                 onBack={() => navigation.goBack()}
                 showAddButton={!(isIndividualEntity && notifications.synced)}
-                onAdd={() => navigation.navigate('NotificationTemplateForm', {
+                onAdd={() => navigation.navigate('NotificationForm', {
                     targetEntityType,
                     targetId,
                     targetLevel
@@ -128,4 +128,4 @@ export const NotificationConfigScreen: React.FC<NotificationConfigScreenProps> =
     );
 };
 
-export default NotificationConfigScreen;
+export default NotificationInfoScreen;
