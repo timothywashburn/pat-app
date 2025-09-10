@@ -87,9 +87,9 @@ export type MainStackParamList = {
     Dev: undefined;
 
     NotificationConfig: {
+        targetLevel: NotificationTemplateLevel;
         targetEntityType: NotificationEntityType;
         targetId: string;
-        targetLevel: NotificationTemplateLevel;
         entityName: string;
     };
 

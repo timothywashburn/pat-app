@@ -32,7 +32,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
 
     const loadTemplates = async () => {
         try {
-            await notifications.getTemplates();
+            await notifications.loadTemplates();
         } catch (error) {
             console.error('Failed to load templates:', error);
         }
