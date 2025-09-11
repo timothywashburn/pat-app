@@ -5,20 +5,21 @@ import {
     CreateNotificationTemplateRequest,
     CreateNotificationTemplateResponse,
     DeleteNotificationTemplateResponse,
-    SetEntitySyncRequest,
-    SetEntitySyncResponse,
     GetEntitySyncResponse,
     GetNotificationTemplatesResponse,
     NotificationEntityType,
     NotificationTemplateData,
     NotificationTemplateLevel,
+    NotificationTemplateSyncState,
     Serializer,
+    SetEntitySyncRequest,
+    SetEntitySyncResponse,
     UpdateNotificationTemplateRequest,
     UpdateNotificationTemplateResponse,
 } from '@timothyw/pat-common';
 
 export function useNotifications(targetEntityType: NotificationEntityType, targetId: string, targetLevel: NotificationTemplateLevel) {
-    const [ synced, setSynced ] = useState<boolean>(true);
+    const [ syncState, setSyncState ] = useState<NotificationTemplateSyncState | null>(null);
     const [ templates, setTemplates ] = useState<NotificationTemplateData[]>([]);
 
     const { performAuthenticated } = useNetworkRequest();
@@ -94,7 +95,7 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
                 method: HTTPMethod.GET,
             });
 
-            setSynced(response.synced);
+            setSyncState(response.syncState);
         } catch (error) {
             console.error('Failed to get entity sync state:', error);
             throw error;
@@ -106,8 +107,13 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
             const response = await performAuthenticated<SetEntitySyncRequest, SetEntitySyncResponse>({
                 endpoint: '/api/notifications/entity-sync',
                 method: HTTPMethod.PUT,
-                body: { targetEntityType, targetId, synced },
+                body: {
+                    targetEntityType,
+                    targetId,
+                    synced
+                },
             });
+            setSyncState(response.synced ? NotificationTemplateSyncState.SYNCED : NotificationTemplateSyncState.DESYNCED);
             await loadTemplates();
             await loadEntitySyncState(targetEntityType, targetId);
         });
@@ -115,7 +121,7 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
 
     return {
         templates,
-        synced,
+        syncState,
         loadTemplates,
         createTemplate,
         updateTemplate,

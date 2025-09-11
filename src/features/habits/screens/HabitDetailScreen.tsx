@@ -14,6 +14,8 @@ import { fromDateOnlyString, getActiveHabitDate, getPreviousHabitDate } from "@/
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { NotificationsSection } from "@/src/features/notifications/components/NotificationsSection";
+import { NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 
 interface HabitDetailViewProps {
     navigation: StackNavigationProp<MainStackParamList, 'HabitDetail'>;
@@ -138,6 +140,17 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                 <HabitCalendarGrid
                     habit={currentHabit}
                     viewMode="weeks" // Default to last 52 weeks
+                />
+            )
+        },
+        // Notifications
+        {
+            content: (
+                <NotificationsSection
+                    targetEntityType={NotificationEntityType.HABIT}
+                    targetId={currentHabit._id}
+                    targetLevel={NotificationTemplateLevel.ENTITY}
+                    entityName={currentHabit.name}
                 />
             )
         },

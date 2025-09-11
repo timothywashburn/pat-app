@@ -48,7 +48,7 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
         navigation.navigate('NotificationInfo', {
             targetEntityType: NotificationEntityType.AGENDA_PANEL,
             targetId: "agenda_panel",
-            targetLevel: NotificationTemplateLevel.PARENT,
+            targetLevel: NotificationTemplateLevel.ENTITY,
             entityName: "Agenda Panel"
         });
     };

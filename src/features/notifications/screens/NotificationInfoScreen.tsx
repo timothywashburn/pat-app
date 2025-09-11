@@ -1,6 +1,10 @@
-import React, { useEffect, useCallback } from 'react';
-import { View, Text, FlatList, Switch } from 'react-native';
-import { NotificationTemplateData, NotificationTemplateLevel } from '@timothyw/pat-common';
+import React, { useCallback, useEffect } from 'react';
+import { FlatList, Switch, Text, View } from 'react-native';
+import {
+    NotificationTemplateData,
+    NotificationTemplateLevel,
+    NotificationTemplateSyncState
+} from '@timothyw/pat-common';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp, useFocusEffect } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
@@ -10,6 +14,7 @@ import { MainStackParamList } from '@/src/navigation/MainStack';
 import { NotificationTemplateCard } from '../components/NotificationTemplateCard';
 import NotificationViewHeader from '@/src/components/headers/NotificationViewHeader';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
+import { isParenthesizedExpression } from "@babel/types";
 
 interface NotificationConfigScreenProps {
     navigation: StackNavigationProp<MainStackParamList, 'NotificationInfo'>;
@@ -22,15 +27,14 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
 }) => {
     const { targetEntityType, targetId, targetLevel, entityName } = route.params;
     const { getColor } = useTheme();
-    
+
     const notifications = useNotifications(targetEntityType, targetId, targetLevel);
 
-    const isPanelLevel = targetLevel === NotificationTemplateLevel.PARENT;
-    const isIndividualEntity = targetLevel === NotificationTemplateLevel.ENTITY;
+    const isParent = targetLevel === NotificationTemplateLevel.PARENT;
 
     const loadData = useCallback(async () => {
         await notifications.loadTemplates();
-        if (isIndividualEntity) await notifications.loadEntitySyncState(targetEntityType, targetId);
+        if (!isParent) await notifications.loadEntitySyncState(targetEntityType, targetId);
     }, [targetEntityType, targetId, targetLevel]);
     
     const { refreshControl } = useRefreshControl(loadData, 'Failed to refresh notification templates');
@@ -44,9 +48,15 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
     }, [loadData]));
 
     const renderContent = () => {
+        const sortedTemplates = notifications.templates.sort((a, b) => {
+            if (a.active && !b.active) return -1;
+            if (!a.active && b.active) return 1;
+            return 0;
+        });
+
         return (
             <FlatList
-                data={notifications.templates}
+                data={sortedTemplates}
                 renderItem={({ item }: { item: NotificationTemplateData }) => (
                     <NotificationTemplateCard
                         template={item}
@@ -59,7 +69,7 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
                                 template
                             });
                         }}
-                        readOnly={isIndividualEntity && notifications.synced}
+                        readOnly={!isParent && notifications.syncState != NotificationTemplateSyncState.DESYNCED}
                     />
                 )}
                 keyExtractor={(item) => item._id}
@@ -75,7 +85,7 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
                         />
                         <Text className="text-on-surface text-lg font-semibold text-center mb-2">No Notifications Set Up</Text>
                         <Text className="text-on-surface-variant text-sm text-center leading-5">
-                            {isPanelLevel
+                            {isParent
                                 ? `Create notification templates for ${entityName.toLowerCase()} that will automatically apply to new items.`
                                 : `Set up custom notifications for this ${entityName.toLowerCase()}, or sync with ${entityName} panel notifications.`
                             }
@@ -91,7 +101,7 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
             <NotificationViewHeader
                 title={`Notifications - ${entityName}`}
                 onBack={() => navigation.goBack()}
-                showAddButton={!(isIndividualEntity && notifications.synced)}
+                showAddButton={isParent || notifications.syncState != NotificationTemplateSyncState.SYNCED}
                 onAdd={() => navigation.navigate('NotificationForm', {
                     targetEntityType,
                     targetId,
@@ -100,23 +110,26 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
                 addButtonText="Add"
             />
 
-            {isIndividualEntity && (
+            {!isParent && notifications.syncState != NotificationTemplateSyncState.NO_PARENT && (
                 <View className="flex-row items-center justify-between p-4 bg-surface-variant border-b border-divider">
                     <View className="flex-1">
                         <Text className="text-on-surface text-sm font-medium">
-                            {notifications.synced ? 'Synced with Parent' : 'Not Synced'}
+                            {notifications.syncState == NotificationTemplateSyncState.SYNCED ? 'Synced with Parent' : 'Not Synced'}
                         </Text>
                         <Text className="text-on-surface-variant text-xs">
-                            {notifications.synced
+                            {notifications.syncState == NotificationTemplateSyncState.SYNCED
                                 ? 'Inheriting templates from parent settings'
                                 : 'Using custom notification templates'}
                         </Text>
                     </View>
                     <Switch
-                        value={notifications.synced}
-                        onValueChange={() => notifications.updateEntitySync(targetEntityType, targetId, !notifications.synced)}
+                        value={notifications.syncState === NotificationTemplateSyncState.SYNCED}
+                        onValueChange={async () => {
+                            let newState = notifications.syncState !== NotificationTemplateSyncState.SYNCED;
+                            await notifications.updateEntitySync(targetEntityType, targetId, newState);
+                        }}
                         trackColor={{ false: getColor('divider'), true: getColor('primary') + '40' }}
-                        thumbColor={notifications.synced ? getColor('primary') : getColor('on-surface-variant')}
+                        thumbColor={notifications.syncState == NotificationTemplateSyncState.SYNCED ? getColor('primary') : getColor('on-surface-variant')}
                     />
                 </View>
             )}

@@ -35,7 +35,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
 
     return (
         <View className={`bg-surface rounded-xl p-4 my-1.5 border ${
-            template.active ? 'border-divider' : 'border-warning'
+            template.active ? 'border-primary' : ''
         } ${readOnly ? 'opacity-75 border-l-4 border-l-success/40' : ''}`}>
             <View className="flex-row justify-between items-center mb-2">
                 <View className="flex-row items-center flex-1">
@@ -43,15 +43,13 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
                         {template.targetLevel}:{template.targetEntityType}
                     </Text>
                     {readOnly && (
-                        <View className="flex-row items-center ml-2 bg-success/20 px-2 py-0.5 rounded">
+                        <View className="flex-row items-center ml-2 px-2 py-0.5 rounded">
                             <Ionicons name="lock-closed" size={10} color={getColor('success')} />
                             <Text className="text-success text-xs font-medium ml-1">Inherited</Text>
                         </View>
                     )}
                 </View>
-                <View className={`flex-row items-center px-1.5 py-0.5 rounded ml-2 ${
-                    template.active ? 'bg-success/20' : 'bg-error/20'
-                }`}>
+                <View className={`flex-row items-center px-1.5 py-0.5 rounded ml-2`}>
                     <Ionicons
                         name={template.active ? 'checkmark-circle' : 'pause-circle'}
                         size={10}
@@ -69,7 +67,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
                 Target: {template.targetId}
             </Text>
 
-            <Text className="text-primary text-xs bg-primary/20 py-1 rounded-md self-start overflow-hidden">
+            <Text className="text-primary text-xs py-1 rounded-md self-start overflow-hidden">
                 {getTriggerDisplayText()}
             </Text>
 
@@ -77,7 +75,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
                 {!readOnly && (
                     <>
                         <TouchableOpacity
-                            className="flex-row items-center px-3 py-1.5 rounded-md ml-2 bg-primary/20"
+                            className="flex-row items-center px-3 py-1.5 rounded-md ml-2"
                             onPress={() => onEdit?.(template)}
                         >
                             <Ionicons name="pencil" size={14} color={getColor('primary')} />
@@ -87,7 +85,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            className="flex-row items-center px-3 py-1.5 rounded-md ml-2 bg-error/20"
+                            className="flex-row items-center px-3 py-1.5 rounded-md ml-2"
                             onPress={handleDelete}
                         >
                             <Ionicons name="trash" size={14} color={getColor('error')} />
