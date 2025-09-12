@@ -20,6 +20,7 @@ interface BaseFormViewProps extends NavigationProps {
     onSave: () => Promise<void> | void;
     isSaveDisabled?: boolean;
     isLoading?: boolean;
+    // TODO: this should be removed and replaced with errorToast
     errorMessage?: string | null;
     
     // Delete functionality (for edit mode)

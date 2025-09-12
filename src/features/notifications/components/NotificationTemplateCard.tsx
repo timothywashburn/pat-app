@@ -29,8 +29,8 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
         );
     };
 
-    const getTriggerDisplayText = () => {
-        return template.schedulerData.type;
+    const getVariantText = () => {
+        return `${template.schedulerData.type} : ${template.variantData.type}`;
     };
 
     return (
@@ -68,7 +68,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
             </Text>
 
             <Text className="text-primary text-xs py-1 rounded-md self-start overflow-hidden">
-                {getTriggerDisplayText()}
+                {getVariantText()}
             </Text>
 
             <View className="flex-row justify-end items-center mt-3">
