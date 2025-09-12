@@ -80,6 +80,11 @@ export const NotificationFormScreen: React.FC<NotificationTemplateFormScreenProp
         [targetEntityType]
     );
 
+    const selectedVariantDefinition = useMemo(() => 
+        formData.selectedVariant ? getVariantDefinition(formData.selectedVariant) : null,
+        [formData.selectedVariant]
+    );
+
     const updateFormData = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -94,10 +99,26 @@ export const NotificationFormScreen: React.FC<NotificationTemplateFormScreenProp
         }));
     };
 
+    const handleSchedulerDataChange = (schedulerData: z.infer<typeof notificationSchedulerDataSchema>) => {
+        setFormData(prev => ({
+            ...prev,
+            schedulerData
+        }));
+    };
+
     const handleSave = async () => {
         if (!formData.selectedVariant || !formData.variantData || !formData.schedulerData) {
             errorToast('Please select a notification type');
             return;
+        }
+
+        // Validate scheduler data
+        if (formData.schedulerData.type === NotificationSchedulerType.RELATIVE_DATE) {
+            const offsetMinutes = formData.schedulerData.offsetMinutes;
+            if (offsetMinutes < -1440 || offsetMinutes > 0) {
+                errorToast('Please enter a valid offset between 0 and 1440 minutes before the deadline');
+                return;
+            }
         }
 
         setIsLoading(true);
@@ -230,6 +251,17 @@ export const NotificationFormScreen: React.FC<NotificationTemplateFormScreenProp
                     </View>
                 )}
             </View>
+
+            {/* Data form */}
+            {formData.selectedVariant && selectedVariantDefinition?.dataForm && (
+                <View className="border-b border-divider pb-4 mb-4">
+                    <Text className="text-on-surface text-base font-semibold mb-3">Schedule Settings</Text>
+                    <selectedVariantDefinition.dataForm
+                        schedulerData={formData.schedulerData!}
+                        onSchedulerDataChange={handleSchedulerDataChange}
+                    />
+                </View>
+            )}
         </BaseFormView>
     );
 };

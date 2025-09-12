@@ -7,6 +7,12 @@ import { agendaItemUpcomingDeadlineVariant } from './agenda-item-upcoming-deadli
 import { habitIncompleteVariant } from './habit-incomplete';
 import { z } from "zod";
 import { Ionicons } from "@expo/vector-icons";
+import React from 'react';
+
+export interface SchedulerFormProps {
+    schedulerData: z.infer<typeof notificationSchedulerDataSchema>;
+    onSchedulerDataChange: (data: z.infer<typeof notificationSchedulerDataSchema>) => void;
+}
 
 export interface NotificationVariantInformation {
     type: NotificationVariantType;
@@ -15,6 +21,7 @@ export interface NotificationVariantInformation {
     icon: keyof typeof Ionicons.glyphMap;
     defaultSchedulerData: z.infer<typeof notificationSchedulerDataSchema>;
     defaultVariantData: any;
+    dataForm?: React.ComponentType<SchedulerFormProps>;
 }
 
 export const VARIANT_REGISTRY = {
