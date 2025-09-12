@@ -69,7 +69,7 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
                                 template
                             });
                         }}
-                        readOnly={!isParent && notifications.syncState != NotificationTemplateSyncState.DESYNCED}
+                        readOnly={!isParent && notifications.syncState == NotificationTemplateSyncState.SYNCED}
                     />
                 )}
                 keyExtractor={(item) => item._id}
