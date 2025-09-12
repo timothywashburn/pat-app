@@ -3,8 +3,8 @@ import {
     NotificationEntityType,
     ENTITY_TYPE_VARIANT_MAP, notificationSchedulerDataSchema
 } from '@timothyw/pat-common';
-import { agendaItemUpcomingDeadlineVariant } from './agenda-item-upcoming-deadline';
-import { habitIncompleteVariant } from './habit-incomplete';
+import { agendaItemUpcomingDeadlineVariant } from './AgendaItemUpcomingDeadline';
+import { habitIncompleteVariant } from './HabitIncomplete';
 import { z } from "zod";
 import { Ionicons } from "@expo/vector-icons";
 import React from 'react';
@@ -50,5 +50,5 @@ export function getDefaultDataForVariant(variantType: NotificationVariantType) {
     };
 }
 
-export * from './agenda-item-upcoming-deadline';
-export * from './habit-incomplete';
+export * from './AgendaItemUpcomingDeadline';
+export * from './HabitIncomplete';
