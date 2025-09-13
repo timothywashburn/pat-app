@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import DetailViewHeader from '@/src/components/common/DetailViewHeader';
+import DetailViewHeader from '@/src/components/headers/DetailViewHeader';
 import LogViewer from './LogViewer';
 import DevPanelSection from './DevPanelSection';
 

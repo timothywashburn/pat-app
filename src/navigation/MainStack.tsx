@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { ItemId, ListId, PersonId } from '@timothyw/pat-common';
+import { ItemId, ListId, PersonId, NotificationEntityType, NotificationTemplateLevel, NotificationTemplateData } from '@timothyw/pat-common';
 import AgendaPanel from '@/src/app/(tabs)/agenda';
 import InboxPanel from '@/src/app/(tabs)/inbox';
 import ListsPanel from '@/src/app/(tabs)/lists';
@@ -18,6 +18,8 @@ import PersonFormScreen from '@/src/features/people/screens/PersonFormScreen';
 import HabitFormScreen from '@/src/features/habits/screens/HabitFormScreen';
 import SettingsPanel from '@/src/app/(tabs)/settings';
 import DevPanel from '@/src/app/(tabs)/dev';
+import NotificationInfoScreen from '@/src/features/notifications/screens/NotificationInfoScreen';
+import NotificationFormScreen from '@/src/features/notifications/screens/NotificationFormScreen';
 
 export type MainStackParamList = {
     Agenda: {
@@ -83,6 +85,20 @@ export type MainStackParamList = {
     Settings: undefined;
 
     Dev: undefined;
+
+    NotificationInfo: {
+        targetLevel: NotificationTemplateLevel;
+        targetEntityType: NotificationEntityType;
+        targetId: string;
+        entityName: string;
+    };
+
+    NotificationForm: {
+        targetEntityType: NotificationEntityType;
+        targetId: string;
+        targetLevel: NotificationTemplateLevel;
+        template?: NotificationTemplateData;
+    };
 };
 
 const Stack = createStackNavigator<MainStackParamList>();
@@ -122,6 +138,9 @@ export default function MainStack({ initialRouteName }: MainStackProps) {
             <Stack.Screen name="Settings" component={SettingsPanel} />
 
             <Stack.Screen name="Dev" component={DevPanel} />
+            
+            <Stack.Screen name="NotificationInfo" component={NotificationInfoScreen} />
+            <Stack.Screen name="NotificationForm" component={NotificationFormScreen} />
         </Stack.Navigator>
     );
 }

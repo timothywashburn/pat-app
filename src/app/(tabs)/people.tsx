@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
-import CustomHeader from '@/src/components/CustomHeader';
+import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import PersonCard from "@/src/features/people/components/PersonCard";
 import PersonFormScreen from "@/src/features/people/screens/PersonFormScreen";
@@ -48,7 +48,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({
 
     return (
         <>
-            <CustomHeader
+            <MainViewHeader
                 moduleType={ModuleType.PEOPLE}
                 title="People"
                 showAddButton

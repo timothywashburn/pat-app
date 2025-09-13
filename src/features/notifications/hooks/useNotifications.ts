@@ -5,26 +5,27 @@ import {
     CreateNotificationTemplateRequest,
     CreateNotificationTemplateResponse,
     DeleteNotificationTemplateResponse,
+    GetEntitySyncResponse,
     GetNotificationTemplatesResponse,
+    NotificationEntityType,
     NotificationTemplateData,
+    NotificationTemplateLevel,
+    NotificationTemplateSyncState,
     Serializer,
+    SetEntitySyncRequest,
+    SetEntitySyncResponse,
     UpdateNotificationTemplateRequest,
     UpdateNotificationTemplateResponse,
-    EntitySyncRequest,
-    EntitySyncResponse,
-    GetEntitySyncRequest,
-    GetEntitySyncResponse,
-    NotificationEntityType,
-    NotificationTemplateLevel,
 } from '@timothyw/pat-common';
 
 export function useNotifications(targetEntityType: NotificationEntityType, targetId: string, targetLevel: NotificationTemplateLevel) {
+    const [ syncState, setSyncState ] = useState<NotificationTemplateSyncState | null>(null);
     const [ templates, setTemplates ] = useState<NotificationTemplateData[]>([]);
 
     const { performAuthenticated } = useNetworkRequest();
     const asyncOp = useAsyncOperation();
 
-    const getTemplates = useCallback(async (): Promise<NotificationTemplateData[]> => {
+    const loadTemplates = useCallback(async (): Promise<void> => {
         return asyncOp.execute(async () => {
             const params = new URLSearchParams();
             if (targetLevel) params.append('targetLevel', targetLevel);
@@ -38,9 +39,7 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
                 method: HTTPMethod.GET,
             });
 
-            const templates = response.templates.map(template => Serializer.deserialize<NotificationTemplateData>(template));
-            setTemplates(templates);
-            return templates;
+            setTemplates(response.templates.map(template => Serializer.deserialize<NotificationTemplateData>(template)));
         });
     }, [asyncOp, performAuthenticated, targetLevel, targetEntityType, targetId, setTemplates]);
 
@@ -52,16 +51,10 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
                 body: templateData,
             });
 
-            const newTemplate = Serializer.deserialize<NotificationTemplateData>(response.template);
+            // setTemplates(prev => [...prev, newTemplate]);
+            await loadTemplates();
 
-            // Add to current templates if they match the current context
-            if (templateData.targetEntityType === targetEntityType && 
-                templateData.targetId === targetId &&
-                templateData.targetLevel === targetLevel) {
-                setTemplates(prev => [...prev, newTemplate]);
-            }
-
-            return newTemplate;
+            return Serializer.deserialize<NotificationTemplateData>(response.template);
         });
     }, [asyncOp, performAuthenticated, targetEntityType, targetId, targetLevel]);
 
@@ -73,11 +66,10 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
                 body: updates,
             });
 
-            const updatedTemplate = Serializer.deserialize<NotificationTemplateData>(response.template);
+            // setTemplates(prev => prev.map(t => t._id === templateId ? updatedTemplate : t));
+            await loadTemplates();
 
-            setTemplates(prev => prev.map(t => t._id === templateId ? updatedTemplate : t));
-
-            return updatedTemplate;
+            return Serializer.deserialize<NotificationTemplateData>(response.template);
         });
     }, [asyncOp, performAuthenticated]);
 
@@ -88,13 +80,11 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
                 method: HTTPMethod.DELETE,
             });
 
-            setTemplates(prev => prev.filter(t => t._id !== templateId));
+            await loadTemplates();
         });
     }, [asyncOp, performAuthenticated]);
 
-    const getEntitySyncState = useCallback(async (targetEntityType: NotificationEntityType, targetId: string): Promise<{
-        synced: boolean;
-    }> => {
+    const loadEntitySyncState = useCallback(async (targetEntityType: NotificationEntityType, targetId: string): Promise<void> => {
         try {
             const params = new URLSearchParams();
             params.append('targetEntityType', targetEntityType);
@@ -105,52 +95,38 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
                 method: HTTPMethod.GET,
             });
 
-            return {
-                synced: response.synced
-            };
+            setSyncState(response.syncState);
         } catch (error) {
             console.error('Failed to get entity sync state:', error);
             throw error;
         }
     }, [performAuthenticated]);
 
-    const updateEntitySync = useCallback(async (targetEntityType: NotificationEntityType, targetId: string, synced: boolean): Promise<{
-        synced: boolean;
-        templates: NotificationTemplateData[];
-    }> => {
+    const updateEntitySync = useCallback(async (targetEntityType: NotificationEntityType, targetId: string, synced: boolean): Promise<void> => {
         return asyncOp.execute(async () => {
-            const response = await performAuthenticated<EntitySyncRequest, EntitySyncResponse>({
+            const response = await performAuthenticated<SetEntitySyncRequest, SetEntitySyncResponse>({
                 endpoint: '/api/notifications/entity-sync',
                 method: HTTPMethod.PUT,
-                body: { targetEntityType, targetId, synced },
+                body: {
+                    targetEntityType,
+                    targetId,
+                    synced
+                },
             });
-
-            const templates = response.templates?.map((template: any) => Serializer.deserialize<NotificationTemplateData>(template)) || [];
-
-            // Update local state if this matches current context
-            if (templates.length > 0 && targetEntityType === templates[0]?.targetEntityType) {
-                setTemplates(templates);
-            }
-
-            return {
-                synced: response.synced,
-                templates
-            };
+            setSyncState(response.synced ? NotificationTemplateSyncState.SYNCED : NotificationTemplateSyncState.DESYNCED);
+            await loadTemplates();
+            await loadEntitySyncState(targetEntityType, targetId);
         });
     }, [asyncOp, performAuthenticated, setTemplates]);
 
-    const refreshTemplates = useCallback(async () => {
-        await getTemplates();
-    }, [getTemplates]);
-
     return {
         templates,
-        getTemplates,
+        syncState,
+        loadTemplates,
         createTemplate,
         updateTemplate,
         deleteTemplate,
-        getEntitySyncState,
+        loadEntitySyncState,
         updateEntitySync,
-        refreshTemplates,
     };
 }

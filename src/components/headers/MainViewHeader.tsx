@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
-import HamburgerMenu from './HamburgerMenu';
+import HamburgerMenu from '../HamburgerMenu';
 import { useModuleContext } from "@/src/components/ModuleContext";
 import { ModuleType } from "@timothyw/pat-common";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
@@ -15,13 +15,11 @@ interface CustomHeaderProps {
     showFilterButton?: boolean;
     isFilterActive?: boolean;
     onFilterTapped?: () => void;
-    showNotificationsButton?: boolean;
-    onNotificationsTapped?: () => void;
     trailing?: () => React.ReactNode;
     isModuleView?: boolean;
 }
 
-const CustomHeader: React.FC<CustomHeaderProps> = ({
+const MainViewHeader: React.FC<CustomHeaderProps> = ({
     moduleType,
     title,
     showAddButton = false,
@@ -29,8 +27,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     showFilterButton = false,
     isFilterActive = false,
     onFilterTapped,
-    showNotificationsButton = false,
-    onNotificationsTapped,
     trailing,
 }) => {
     const { getColor } = useTheme();
@@ -63,12 +59,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                     <Text className="text-on-surface text-lg font-bold flex-2 text-center">{title}</Text>
 
                     <View className="flex-1 flex-row justify-end items-center">
-                        {showNotificationsButton && (
-                            <TouchableOpacity onPress={onNotificationsTapped} className="ml-4 p-1">
-                                <Ionicons name="notifications-outline" size={24} color={getColor("on-surface")} />
-                            </TouchableOpacity>
-                        )}
-
                         {showFilterButton && (
                             <TouchableOpacity onPress={onFilterTapped} className="ml-4 p-1">
                                 <Ionicons
@@ -98,4 +88,4 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     );
 };
 
-export default CustomHeader;
+export default MainViewHeader;

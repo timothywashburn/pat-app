@@ -3,7 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
-import FormViewHeader from './FormViewHeader';
+import FormViewHeader from '../headers/FormViewHeader';
 
 interface NavigationProps {
     navigation?: any;
@@ -20,6 +20,7 @@ interface BaseFormViewProps extends NavigationProps {
     onSave: () => Promise<void> | void;
     isSaveDisabled?: boolean;
     isLoading?: boolean;
+    // TODO: this should be removed and replaced with errorToast
     errorMessage?: string | null;
     
     // Delete functionality (for edit mode)

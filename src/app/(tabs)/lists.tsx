@@ -6,7 +6,7 @@ import { RouteProp } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/context/ThemeContext';
-import CustomHeader from '@/src/components/CustomHeader';
+import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { ListId, ListItemData, ModuleType } from "@timothyw/pat-common";
 import { useListsStore } from '@/src/stores/useListsStore';
 import ListCard from '@/src/features/lists/components/ListCard';
@@ -74,7 +74,7 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
 
     return (
         <>
-            <CustomHeader
+            <MainViewHeader
                 moduleType={ModuleType.LISTS}
                 title="Lists"
                 showAddButton

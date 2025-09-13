@@ -14,11 +14,10 @@ import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import { useThoughtsStore } from '@/src/stores/useThoughtsStore';
-import CustomHeader from '@/src/components/CustomHeader';
+import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
-import { NotificationConfigView } from '@/src/features/notifications/components/NotificationConfigView';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 
@@ -62,7 +61,6 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
     const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
     const [editingThought, setEditingThought] = useState<ThoughtData | null>(null);
     const [editedContent, setEditedContent] = useState('');
-    const [showingNotificationConfig, setShowingNotificationConfig] = useState(false);
 
     const { getListsWithItems } = useListsStore();
     const listsWithItems = getListsWithItems();
@@ -165,12 +163,10 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
 
     return (
         <>
-            <CustomHeader
+            <MainViewHeader
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
                 showAddButton={false}
-                showNotificationsButton={true}
-                onNotificationsTapped={() => setShowingNotificationConfig(true)}
             />
 
             <View className="flex-row p-4 py-2 items-center">
@@ -235,15 +231,6 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
                 />
             )}
 
-            {showingNotificationConfig && (
-                <NotificationConfigView
-                    targetEntityType={NotificationEntityType.INBOX_PANEL}
-                    targetId="inbox_panel"
-                    targetLevel={NotificationTemplateLevel.PARENT}
-                    entityName="Inbox"
-                    onClose={() => setShowingNotificationConfig(false)}
-                />
-            )}
         </>
     );
 }
