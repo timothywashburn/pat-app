@@ -8,8 +8,8 @@ import {
 } from '@timothyw/pat-common';
 import { NotificationVariantInformation } from "@/src/features/notifications/variants/index";
 
-export const agendaItemUpcomingDeadlineVariant: NotificationVariantInformation = {
-    type: NotificationVariantType.AGENDA_ITEM_UPCOMING_DEADLINE,
+export const agendaItemDueVariant: NotificationVariantInformation = {
+    type: NotificationVariantType.AGENDA_ITEM_DUE,
     displayName: 'Upcoming Deadline',
     description: 'Get notified before an agenda item\'s deadline',
     icon: 'alarm',
@@ -18,7 +18,7 @@ export const agendaItemUpcomingDeadlineVariant: NotificationVariantInformation =
         offsetMinutes: -60
     },
     defaultVariantData: {
-        type: NotificationVariantType.AGENDA_ITEM_UPCOMING_DEADLINE,
+        type: NotificationVariantType.AGENDA_ITEM_DUE,
     },
     dataForm: ({
         schedulerData,

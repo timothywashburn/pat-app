@@ -3,8 +3,9 @@ import {
     NotificationEntityType,
     ENTITY_TYPE_VARIANT_MAP, notificationSchedulerDataSchema
 } from '@timothyw/pat-common';
-import { agendaItemUpcomingDeadlineVariant } from './AgendaItemUpcomingDeadline';
-import { habitIncompleteVariant } from './HabitIncomplete';
+import { agendaItemDueVariant } from './AgendaItemDue';
+import { habitDueVariant } from './HabitDue';
+import { habitTimedReminderVariant } from './HabitTimedReminder';
 import { z } from "zod";
 import { Ionicons } from "@expo/vector-icons";
 import React from 'react';
@@ -25,8 +26,9 @@ export interface NotificationVariantInformation {
 }
 
 export const VARIANT_REGISTRY = {
-    [NotificationVariantType.AGENDA_ITEM_UPCOMING_DEADLINE]: agendaItemUpcomingDeadlineVariant,
-    [NotificationVariantType.HABIT_INCOMPLETE]: habitIncompleteVariant,
+    [NotificationVariantType.AGENDA_ITEM_DUE]: agendaItemDueVariant,
+    [NotificationVariantType.HABIT_TIMED_REMINDER]: habitTimedReminderVariant,
+    [NotificationVariantType.HABIT_DUE]: habitDueVariant,
 };
 
 export function getVariantDefinition(variantType: NotificationVariantType): NotificationVariantInformation | undefined {
@@ -43,12 +45,13 @@ export function getAvailableVariantsForEntity(entityType: NotificationEntityType
 export function getDefaultDataForVariant(variantType: NotificationVariantType) {
     const variant = getVariantDefinition(variantType);
     if (!variant) return { variantData: null, schedulerData: null };
-    
+
     return {
         variantData: variant.defaultVariantData,
         schedulerData: variant.defaultSchedulerData
     };
 }
 
-export * from './AgendaItemUpcomingDeadline';
-export * from './HabitIncomplete';
+export * from './AgendaItemDue';
+export * from './HabitDue';
+export * from './HabitTimedReminder';
