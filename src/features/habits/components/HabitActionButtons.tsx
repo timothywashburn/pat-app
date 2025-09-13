@@ -96,8 +96,8 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
                 <TouchableOpacity
                     className={`flex-1 rounded-lg py-3 mr-1 ${
                         currentEntry?.status === HabitEntryStatus.MISSED 
-                            ? 'bg-secondary' 
-                            : !currentEntry ? 'bg-transparent border border-secondary' : 'bg-transparent border border-outline'
+                            ? 'bg-error' 
+                            : !currentEntry ? 'bg-transparent border border-error' : 'bg-transparent border border-outline'
                     }`}
                     onPress={() => handleMarkHabit(HabitEntryStatus.MISSED)}
                 >
@@ -106,14 +106,14 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
                             name={currentEntry?.status === HabitEntryStatus.MISSED ? "close-circle" : "close-circle-outline"}
                             size={16}
                             color={currentEntry?.status === HabitEntryStatus.MISSED 
-                                ? getColor('on-secondary')
-                                : !currentEntry ? getColor('secondary') : getColor('outline')
+                                ? getColor('on-error')
+                                : !currentEntry ? getColor('error') : getColor('outline')
                             }
                         />
                         <Text className={`text-sm font-medium ml-1 ${
                             currentEntry?.status === HabitEntryStatus.MISSED 
-                                ? 'text-on-secondary' 
-                                : !currentEntry ? 'text-secondary' : 'text-outline'
+                                ? 'text-on-error' 
+                                : !currentEntry ? 'text-error' : 'text-outline'
                         }`}>
                             {currentEntry?.status === HabitEntryStatus.MISSED ? 'Missed' : 'Miss'}
                         </Text>
@@ -124,8 +124,8 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
                 <TouchableOpacity
                     className={`flex-1 rounded-lg py-3 mx-1 ${
                         currentEntry?.status === HabitEntryStatus.EXCUSED 
-                            ? 'bg-warning' 
-                            : !currentEntry ? 'bg-transparent border border-warning' : 'bg-transparent border border-outline'
+                            ? 'bg-secondary' 
+                            : !currentEntry ? 'bg-transparent border border-secondary' : 'bg-transparent border border-outline'
                     }`}
                     onPress={() => handleMarkHabit(HabitEntryStatus.EXCUSED)}
                 >
@@ -134,14 +134,14 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
                             name={currentEntry?.status === HabitEntryStatus.EXCUSED ? "remove-circle" : "remove-circle-outline"}
                             size={16}
                             color={currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                ? getColor('on-warning')
-                                : !currentEntry ? getColor('warning') : getColor('outline')
+                                ? getColor('on-secondary')
+                                : !currentEntry ? getColor('secondary') : getColor('outline')
                             }
                         />
                         <Text className={`text-sm font-medium ml-1 ${
                             currentEntry?.status === HabitEntryStatus.EXCUSED 
-                                ? 'text-on-warning' 
-                                : !currentEntry ? 'text-warning' : 'text-outline'
+                                ? 'text-on-secondary' 
+                                : !currentEntry ? 'text-secondary' : 'text-outline'
                         }`}>
                             {currentEntry?.status === HabitEntryStatus.EXCUSED ? 'Excused' : 'Excuse'}
                         </Text>
