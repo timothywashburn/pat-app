@@ -3,14 +3,15 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
-import { SettingsList } from '@/src/features/settings/components/SettingsList';
-import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { UserModuleData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { GeneralSection } from '@/src/features/settings/sections/GeneralSection';
+import { AgendaSection } from '@/src/features/settings/sections/AgendaSection';
+import { PeopleSection } from '@/src/features/settings/sections/PeopleSection';
 
 interface SettingsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Settings'>;
@@ -22,29 +23,18 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     route
 }) => {
     const { errorToast, successToast } = useToast();
-    const { signOut, authData } = useAuthStore();
+    const { signOut } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const { data, updateUserData } = useUserDataStore();
 
-    // Local state for tracking changes
-    const [localItemCategories, setLocalItemCategories] = useState(data.config.agenda.itemCategories);
-    const [localItemTypes, setLocalItemTypes] = useState(data.config.agenda.itemTypes);
-    const [localPropertyKeys, setLocalPropertyKeys] = useState(data.config.people.propertyKeys);
-    const [localModules, setLocalModules] = useState(data.config.modules);
-
-    // Reset local state when entering/exiting edit mode
-    useEffect(() => {
-        if (editMode) {
-            // Initialize with current values when entering edit mode
-            setLocalItemCategories([...data.config.agenda.itemCategories]);
-            setLocalItemTypes([...data.config.agenda.itemTypes]);
-            setLocalPropertyKeys([...data.config.people.propertyKeys]);
-            setLocalModules([...data.config.modules]);
-        }
-    }, [editMode, data]);
+    const [sectionData, setSectionData] = useState({
+        modules: data.config.modules,
+        itemCategories: data.config.agenda.itemCategories,
+        itemTypes: data.config.agenda.itemTypes,
+        propertyKeys: data.config.people.propertyKeys
+    });
 
     const handleSaveChanges = async () => {
         setIsSaving(true);
@@ -52,13 +42,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             await updateUserData({
                 config: {
                     agenda: {
-                        itemCategories: localItemCategories,
-                        itemTypes: localItemTypes
+                        itemCategories: sectionData.itemCategories,
+                        itemTypes: sectionData.itemTypes
                     },
                     people: {
-                        propertyKeys: localPropertyKeys
+                        propertyKeys: sectionData.propertyKeys
                     },
-                    modules: localModules
+                    modules: sectionData.modules
                 }
             });
             successToast("Settings saved successfully");
@@ -71,8 +61,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         }
     };
 
-    const updateLocalModules = (updatedModules: UserModuleData[]) => {
-        setLocalModules(updatedModules);
+    const handleGeneralDataChange = (data: { modules: UserModuleData[] }) => {
+        setSectionData(prev => ({ ...prev, modules: data.modules }));
+    };
+
+    const handleAgendaDataChange = (data: { itemCategories: string[], itemTypes: string[] }) => {
+        setSectionData(prev => ({ ...prev, itemCategories: data.itemCategories, itemTypes: data.itemTypes }));
+    };
+
+    const handlePeopleDataChange = (data: { propertyKeys: string[] }) => {
+        setSectionData(prev => ({ ...prev, propertyKeys: data.propertyKeys }));
     };
 
     const handleCategoryNotificationPress = (category: string) => {
@@ -114,54 +112,26 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
             <ScrollView className="flex-1">
                 <View className="p-4">
-                    <ModuleManagement
+                    <GeneralSection
                         editMode={editMode}
-                        modules={editMode ? localModules : data.config.modules}
-                        onUpdateModules={updateLocalModules}
+                        onSignOut={() => signOut()}
+                        onDataChange={handleGeneralDataChange}
                     />
 
-                    <View className="h-px bg-surface my-4" />
+                    <View className="h-px bg-surface my-6" />
 
-                    <SettingsList
-                        title="Item Categories"
-                        items={editMode ? localItemCategories : data.config.agenda.itemCategories}
-                        onUpdateItems={(updatedItems) => setLocalItemCategories(updatedItems)}
+                    <AgendaSection
                         editMode={editMode}
-                        showNotificationButtons={true}
-                        onNotificationPress={handleCategoryNotificationPress}
+                        onCategoryNotificationPress={handleCategoryNotificationPress}
+                        onDataChange={handleAgendaDataChange}
                     />
 
-                    <View className="h-px bg-surface my-4" />
+                    <View className="h-px bg-surface my-6" />
 
-                    <SettingsList
-                        title="Item Types"
-                        items={editMode ? localItemTypes : data.config.agenda.itemTypes}
-                        onUpdateItems={(updatedItems) => setLocalItemTypes(updatedItems)}
+                    <PeopleSection
                         editMode={editMode}
+                        onDataChange={handlePeopleDataChange}
                     />
-
-                    <View className="h-px bg-surface my-4" />
-
-                    <SettingsList
-                        title="Property Keys"
-                        items={editMode ? localPropertyKeys : data.config.people.propertyKeys}
-                        onUpdateItems={(updatedItems) => setLocalPropertyKeys(updatedItems)}
-                        editMode={editMode}
-                    />
-
-                    {authData && (
-                        <View className="bg-surface w-full p-4 rounded-lg mt-5 mb-5">
-                            <Text className="text-on-surface text-base font-bold mb-2.5">User Info</Text>
-                            <Text className="text-on-surface">Email: {authData.email}</Text>
-                        </View>
-                    )}
-
-                    <Text
-                        className="text-on-error text-base font-bold text-center py-3"
-                        onPress={() => signOut()}
-                    >
-                        Sign Out
-                    </Text>
                 </View>
             </ScrollView>
 
