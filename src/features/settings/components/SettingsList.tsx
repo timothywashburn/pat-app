@@ -51,7 +51,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({
                                 onPress={() => onNotificationPress?.(item)}
                                 className="p-1 mr-2"
                             >
-                                <Ionicons name="notifications" size={20} color={getColor("primary")} />
+                                <Ionicons name="notifications" size={20} color={getColor("secondary")} />
                             </TouchableOpacity>
                         )}
 

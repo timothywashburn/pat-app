@@ -12,6 +12,8 @@ import { MainStackParamList } from '@/src/navigation/MainStack';
 import { GeneralSection } from '@/src/features/settings/sections/GeneralSection';
 import { AgendaSection } from '@/src/features/settings/sections/AgendaSection';
 import { PeopleSection } from '@/src/features/settings/sections/PeopleSection';
+import { HabitsSection } from '@/src/features/settings/sections/HabitsSection';
+import { InboxSection } from '@/src/features/settings/sections/InboxSection';
 
 interface SettingsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Settings'>;
@@ -73,15 +75,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         setSectionData(prev => ({ ...prev, propertyKeys: data.propertyKeys }));
     };
 
-    const handleCategoryNotificationPress = (category: string) => {
-        navigation.navigate('NotificationInfo', {
-            targetEntityType: NotificationEntityType.AGENDA_ITEM,
-            targetId: `agenda_item_${category}`,
-            targetLevel: NotificationTemplateLevel.PARENT,
-            entityName: `${category} Category`
-        });
-    };
-
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <MainViewHeader
@@ -122,7 +115,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                     <AgendaSection
                         editMode={editMode}
-                        onCategoryNotificationPress={handleCategoryNotificationPress}
                         onDataChange={handleAgendaDataChange}
                     />
 
@@ -131,6 +123,18 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     <PeopleSection
                         editMode={editMode}
                         onDataChange={handlePeopleDataChange}
+                    />
+
+                    <View className="h-px bg-surface my-6" />
+
+                    <HabitsSection
+                        editMode={editMode}
+                    />
+
+                    <View className="h-px bg-surface my-6" />
+
+                    <InboxSection
+                        editMode={editMode}
                     />
                 </View>
             </ScrollView>

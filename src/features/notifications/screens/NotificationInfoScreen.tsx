@@ -99,7 +99,7 @@ export const NotificationInfoScreen: React.FC<NotificationConfigScreenProps> = (
     return (
         <View className="flex-1 bg-background">
             <NotificationViewHeader
-                title={`Notifications - ${entityName}`}
+                title={`Notifications (${isParent ? 'Parent' : 'Entity'}) - ${entityName}`}
                 onBack={() => navigation.goBack()}
                 showAddButton={isParent || notifications.syncState != NotificationTemplateSyncState.SYNCED}
                 onAdd={() => navigation.navigate('NotificationForm', {

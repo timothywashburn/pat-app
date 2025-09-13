@@ -167,13 +167,6 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
                 showAddButton={false}
-                showNotificationsButton={true}
-                onNotificationsTapped={() => navigation.navigate('NotificationInfo', {
-                    targetEntityType: NotificationEntityType.INBOX_PANEL,
-                    targetId: "inbox_panel",
-                    targetLevel: NotificationTemplateLevel.PARENT,
-                    entityName: "Inbox"
-                })}
             />
 
             <View className="flex-row p-4 py-2 items-center">

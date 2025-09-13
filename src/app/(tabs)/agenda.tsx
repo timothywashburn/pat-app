@@ -44,15 +44,6 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
         navigation.navigate('AgendaItemDetail', { itemId: item._id });
     };
 
-    const handleNotificationsPress = () => {
-        navigation.navigate('NotificationInfo', {
-            targetEntityType: NotificationEntityType.AGENDA_PANEL,
-            targetId: "agenda_panel",
-            targetLevel: NotificationTemplateLevel.ENTITY,
-            entityName: "Agenda Panel"
-        });
-    };
-
     const filteredItems = items
         .filter(item => item.completed === showCompleted)
         .sort((a, b) => {
@@ -68,8 +59,6 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
             <MainViewHeader
                 moduleType={ModuleType.AGENDA}
                 title="Agenda"
-                showNotificationsButton
-                onNotificationsTapped={handleNotificationsPress}
                 showAddButton
                 onAddTapped={handleAddItem}
                 showFilterButton
