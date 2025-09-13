@@ -102,7 +102,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                         </Text>
                     </View>
                 ) : (
-                    activeTemplates.slice(0, 3).map(template => (
+                    activeTemplates.slice(0, 5).map(template => (
                         <View key={template._id} className="flex-row items-center py-1">
                             <Ionicons
                                 name={getStatusIcon()}
@@ -111,16 +111,16 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                                 className="mr-1.5"
                             />
                             <Text className="text-on-surface-variant flex-1 text-sm" numberOfLines={1}>
-                                {template.targetLevel} - {template.schedulerData.type}
+                                {template.variantData.type}
                             </Text>
                             <Text className="text-success text-xs">Active</Text>
                         </View>
                     ))
                 )}
 
-                {totalCount > 3 && (
+                {totalCount > 5 && (
                     <Text className="text-on-surface-variant italic text-sm">
-                        +{totalCount - 3} more...
+                        +{totalCount - 5} more...
                     </Text>
                 )}
             </View>

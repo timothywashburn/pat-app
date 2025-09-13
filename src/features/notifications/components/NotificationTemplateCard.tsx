@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { NotificationTemplateData, NotificationSchedulerType } from '@timothyw/pat-common';
+import { NotificationTemplateData } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,10 +29,6 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
         );
     };
 
-    const getVariantText = () => {
-        return `${template.schedulerData.type} : ${template.variantData.type}`;
-    };
-
     return (
         <View className={`bg-surface rounded-xl p-4 my-1.5 border ${
             template.active ? 'border-primary' : ''
@@ -40,7 +36,7 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
             <View className="flex-row justify-between items-center mb-2">
                 <View className="flex-row items-center flex-1">
                     <Text className="text-on-surface text-base font-semibold">
-                        {template.targetLevel}:{template.targetEntityType}
+                        {template.variantData.type}
                     </Text>
                     {readOnly && (
                         <View className="flex-row items-center ml-2 px-2 py-0.5 rounded">
@@ -65,10 +61,6 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
 
             <Text className="text-on-surface-variant text-sm mb-3">
                 Target: {template.targetId}
-            </Text>
-
-            <Text className="text-primary text-xs py-1 rounded-md self-start overflow-hidden">
-                {getVariantText()}
             </Text>
 
             <View className="flex-row justify-end items-center mt-3">
