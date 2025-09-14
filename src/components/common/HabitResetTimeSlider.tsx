@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/context/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
 
 interface HabitResetTimeSliderProps {
     value: string; // HH:MM format
@@ -18,8 +19,8 @@ interface HabitResetTimeSliderProps {
 const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onValueChange }) => {
     const { getColor } = useTheme();
     const screenWidth = Dimensions.get('window').width;
-    const sliderWidth = screenWidth - 80; // Account for container padding and margins
-    const thumbSize = 20; // Smaller thumb size
+    const sliderWidth = screenWidth - 80;
+    const thumbSize = 20;
     const trackHeight = 2;
 
     const translateX = useSharedValue(0);
@@ -28,7 +29,6 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
 
     const [currentDisplayTime, setCurrentDisplayTime] = React.useState(value);
 
-    // Convert total minutes to display string
     const minutesToDisplayString = (totalMinutes: number): string => {
         const day = Math.floor(totalMinutes / (24 * 60));
         const remainingMinutes = totalMinutes % (24 * 60);
@@ -39,30 +39,23 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         return day > 0 ? `${day}d + ${timeStr}` : timeStr;
     };
 
-    // Convert time string to slider position (0-1)
     const timeToPosition = (timeStr: string): number => {
         const [hours, minutes] = timeStr.split(':').map(Number);
         const totalMinutes = hours * 60 + minutes;
-        // Map 0-2879 (48 hours - 1 minute) to 0-1 position for 2-day range
-        return totalMinutes / (48 * 60 - 5); // -5 to exclude the very last 5-minute interval
+        return totalMinutes / (48 * 60 - 5);
     };
 
-    // Convert slider position to total minutes with 5-minute snapping
     const positionToMinutes = (position: number): number => {
         'worklet';
-        // Map position (0-1) to minutes in 48-hour range (minus last interval)
         const totalMinutes = Math.round(position * (48 * 60 - 5));
-        // Snap to 5-minute intervals
         return Math.round(totalMinutes / 5) * 5;
     };
 
-    // Convert total minutes to slider position
     const minutesToPosition = (totalMinutes: number): number => {
         'worklet';
         return totalMinutes / (48 * 60 - 5);
     };
 
-    // Initialize position from current value
     React.useEffect(() => {
         const initialPosition = timeToPosition(value);
         translateX.value = initialPosition * (sliderWidth - thumbSize);
@@ -75,6 +68,17 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         setCurrentDisplayTime(displayString);
     };
 
+    const adjustTime = (increment: boolean) => {
+        const currentPosition = translateX.value / (sliderWidth - thumbSize);
+        const currentMinutes = positionToMinutes(currentPosition);
+        const newMinutes = Math.max(0, Math.min(48 * 60 - 5, currentMinutes + (increment ? 5 : -5)));
+        const newPosition = minutesToPosition(newMinutes);
+        const newX = newPosition * (sliderWidth - thumbSize);
+
+        translateX.value = withSpring(newX, { damping: 15, stiffness: 150 });
+        updateDisplayTime(newX);
+    };
+
     const panGesture = Gesture.Pan()
         .onStart(() => {
             startX.value = translateX.value;
@@ -84,12 +88,10 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
             const newX = startX.value + event.translationX;
             const clampedX = Math.max(0, Math.min(sliderWidth - thumbSize, newX));
             translateX.value = clampedX;
-            console.log('Dragging to position:', clampedX);
             runOnJS(updateDisplayTime)(clampedX);
         })
         .onEnd(() => {
             isDragging.value = false;
-            // Snap to nearest 5-minute interval
             const currentPosition = translateX.value / (sliderWidth - thumbSize);
             const snappedMinutes = positionToMinutes(currentPosition);
             const snappedPosition = minutesToPosition(snappedMinutes);
@@ -114,16 +116,29 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
                 Choose when your habit resets. Drag the slider to select a time.
             </Text>
 
-            {/* Real-time display */}
             <View className="mb-4 bg-surface-variant rounded-lg p-3">
-                <Text className="text-on-surface-variant text-sm text-center">
-                    Selected Time: <Text className="font-medium text-on-surface">{currentDisplayTime}</Text>
-                </Text>
+                <View className="flex-row justify-center items-center">
+                    <TouchableOpacity
+                        onPress={() => adjustTime(false)}
+                        className="bg-primary rounded-full p-2 mr-4"
+                    >
+                        <Ionicons name="chevron-back" size={20} color="white" />
+                    </TouchableOpacity>
+
+                    <Text className="text-on-surface-variant text-sm text-center">
+                        Selected Time: <Text className="font-medium text-on-surface">{currentDisplayTime}</Text>
+                    </Text>
+
+                    <TouchableOpacity
+                        onPress={() => adjustTime(true)}
+                        className="bg-primary rounded-full p-2 ml-4"
+                    >
+                        <Ionicons name="chevron-forward" size={20} color="white" />
+                    </TouchableOpacity>
+                </View>
             </View>
 
-            {/* Slider container */}
             <View className="relative mb-4" style={{ height: 40 }}>
-                {/* Track */}
                 <View
                     className="bg-outline absolute"
                     style={{
@@ -134,7 +149,6 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
                     }}
                 />
 
-                {/* Hour markers every 12 hours for 2-day span */}
                 {[0, 0.25, 0.5, 0.75, 1].map((position, index) => (
                     <View
                         key={index}
@@ -149,7 +163,6 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
                     />
                 ))}
 
-                {/* Draggable thumb */}
                 <GestureDetector gesture={panGesture}>
                     <Animated.View
                         className="bg-primary absolute shadow-sm"
@@ -166,7 +179,6 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
                 </GestureDetector>
             </View>
 
-            {/* Time labels for 2-day range */}
             <View className="flex-row justify-between px-1">
                 <Text className="text-on-surface-variant text-xs">
                     Day 1
