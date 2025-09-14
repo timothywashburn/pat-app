@@ -19,7 +19,6 @@ const TimeRemainingIndicator: React.FC<TimeRemainingIndicatorProps> = ({
 
     const updateTimeRemaining = () => {
         setTimeRemaining(getTimeRemainingUntilRollover(startOffsetMinutes, endOffsetMinutes));
-        console.log(getTimeRemainingUntilRollover(startOffsetMinutes, endOffsetMinutes))
     };
 
     const startTimer = () => {

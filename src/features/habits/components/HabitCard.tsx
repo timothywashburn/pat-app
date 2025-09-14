@@ -5,7 +5,6 @@ import { getActiveHabitDate } from '@/src/features/habits/models';
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
 import { useTheme } from '@/src/context/ThemeContext';
-import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import { Habit } from "@timothyw/pat-common";
 
 interface HabitCardProps {
@@ -17,13 +16,7 @@ interface HabitCardProps {
 
 const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHabitUpdated }) => {
     const { getColor } = useTheme();
-    const habitStore = useHabitsStore();
-
     const activeDate = getActiveHabitDate(habit);
-
-    const formatCompletionRate = (rate: number): string => {
-        return rate.toFixed(1);
-    };
 
     const getCompletionsInfo = (): string => {
         const { completedDays, totalDays, excusedDays } = habit.stats;
@@ -33,7 +26,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
 
     return (
         <TouchableOpacity
-            className={`bg-surface rounded-lg p-4 mb-5 border border-surface-variant`}
+            className={`bg-surface rounded-lg p-4 mb-5`}
             onPress={() => onPress(habit)}
             activeOpacity={0.7}
         >
@@ -72,9 +65,6 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
             <View className="flex-row justify-between items-center mb-3">
                 <View>
                     <Text className="text-on-surface-variant text-xs">
-                        Rollover: {habit.rolloverTime}
-                    </Text>
-                    <Text className="text-on-surface-variant text-xs">
                         Frequency: {habit.frequency}
                     </Text>
                 </View>
@@ -86,13 +76,12 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                 </View>
             </View>
 
-            <TimeRemainingIndicator
-                habit={habit}
-            />
-
             {activeDate && (
                 <>
-                    <View className="mt-3 pt-3 border-t border-surface-variant">
+                    <TimeRemainingIndicator
+                        habit={habit}
+                    />
+                    <View className="mt-3 pt-3">
                         <HabitActionButtons
                             habit={habit}
                             targetDate={activeDate}

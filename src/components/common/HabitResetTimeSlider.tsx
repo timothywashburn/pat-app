@@ -18,9 +18,10 @@ interface HabitResetTimeSliderProps {
     endOffsetMinutes: number;
     onStartOffsetChange?: (offset: number) => void;
     onEndOffsetChange?: (offset: number) => void;
+    readOnly?: boolean;
 }
 
-const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffsetMinutes, endOffsetMinutes, onStartOffsetChange, onEndOffsetChange }) => {
+const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffsetMinutes, endOffsetMinutes, onStartOffsetChange, onEndOffsetChange, readOnly = false }) => {
     // TODO: definitely need to figure out a less cursed way of doing this
     const screenWidth = Dimensions.get('window').width;
     const sliderWidth = screenWidth - 80;
@@ -295,54 +296,64 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
     return (
         <View className="mb-4">
             <Text className="text-on-surface text-base font-medium mb-2">
-                Habit Reset Time (MOCKUP)
+                Habit Reset Time
             </Text>
-            <Text className="text-on-surface-variant text-sm mb-2">
-                Choose when your habit resets. Drag the slider to select a time.
-            </Text>
+            {!readOnly && (
+                <Text className="text-on-surface-variant text-sm mb-2">
+                    Choose when your habit resets. Drag the slider to select a time.
+                </Text>
+            )}
 
             <View className="mb-4 bg-surface-variant rounded-lg p-3">
                 <View className="mb-3">
                     <View className="flex-row justify-center items-center">
-                        <TouchableOpacity
-                            onPress={() => adjustTime(true, false)}
-                            className="bg-primary rounded-full p-2 mr-4"
-                        >
-                            <Ionicons name="chevron-back" size={20} color="white" />
-                        </TouchableOpacity>
+                        {!readOnly && (
+                            <TouchableOpacity
+                                onPress={() => adjustTime(true, false)}
+                                className="bg-primary rounded-full p-2 mr-4"
+                            >
+                                <Ionicons name="chevron-back" size={20} color="white" />
+                            </TouchableOpacity>
+                        )}
 
                         <Text className="text-on-surface-variant text-sm text-center">
                             Start Time: <Text className="font-medium text-on-surface">{currentStartDisplayTime}</Text>
                         </Text>
 
-                        <TouchableOpacity
-                            onPress={() => adjustTime(true, true)}
-                            className="bg-primary rounded-full p-2 ml-4"
-                        >
-                            <Ionicons name="chevron-forward" size={20} color="white" />
-                        </TouchableOpacity>
+                        {!readOnly && (
+                            <TouchableOpacity
+                                onPress={() => adjustTime(true, true)}
+                                className="bg-primary rounded-full p-2 ml-4"
+                            >
+                                <Ionicons name="chevron-forward" size={20} color="white" />
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
 
                 <View>
                     <View className="flex-row justify-center items-center">
-                        <TouchableOpacity
-                            onPress={() => adjustTime(false, false)}
-                            className="bg-primary rounded-full p-2 mr-4"
-                        >
-                            <Ionicons name="chevron-back" size={20} color="white" />
-                        </TouchableOpacity>
+                        {!readOnly && (
+                            <TouchableOpacity
+                                onPress={() => adjustTime(false, false)}
+                                className="bg-primary rounded-full p-2 mr-4"
+                            >
+                                <Ionicons name="chevron-back" size={20} color="white" />
+                            </TouchableOpacity>
+                        )}
 
                         <Text className="text-on-surface-variant text-sm text-center">
                             End Time: <Text className="font-medium text-on-surface">{currentEndDisplayTime}</Text>
                         </Text>
 
-                        <TouchableOpacity
-                            onPress={() => adjustTime(false, true)}
-                            className="bg-primary rounded-full p-2 ml-4"
-                        >
-                            <Ionicons name="chevron-forward" size={20} color="white" />
-                        </TouchableOpacity>
+                        {!readOnly && (
+                            <TouchableOpacity
+                                onPress={() => adjustTime(false, true)}
+                                className="bg-primary rounded-full p-2 ml-4"
+                            >
+                                <Ionicons name="chevron-forward" size={20} color="white" />
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </View>
@@ -384,35 +395,66 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
                     ]}
                 />
 
-                <GestureDetector gesture={startPanGesture}>
-                    <Animated.View
-                        className="bg-primary absolute shadow-sm"
-                        style={[
-                            {
-                                width: thumbSize,
-                                height: thumbSize,
-                                borderRadius: thumbSize / 2,
-                                top: 20 - thumbSize / 2,
-                            },
-                            startThumbStyle
-                        ]}
-                    />
-                </GestureDetector>
+                {readOnly ? (
+                    <>
+                        <Animated.View
+                            className="bg-primary absolute shadow-sm"
+                            style={[
+                                {
+                                    width: thumbSize,
+                                    height: thumbSize,
+                                    borderRadius: thumbSize / 2,
+                                    top: 20 - thumbSize / 2,
+                                },
+                                startThumbStyle
+                            ]}
+                        />
+                        <Animated.View
+                            className="bg-primary absolute shadow-sm"
+                            style={[
+                                {
+                                    width: thumbSize,
+                                    height: thumbSize,
+                                    borderRadius: thumbSize / 2,
+                                    top: 20 - thumbSize / 2,
+                                },
+                                endThumbStyle
+                            ]}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <GestureDetector gesture={startPanGesture}>
+                            <Animated.View
+                                className="bg-primary absolute shadow-sm"
+                                style={[
+                                    {
+                                        width: thumbSize,
+                                        height: thumbSize,
+                                        borderRadius: thumbSize / 2,
+                                        top: 20 - thumbSize / 2,
+                                    },
+                                    startThumbStyle
+                                ]}
+                            />
+                        </GestureDetector>
 
-                <GestureDetector gesture={endPanGesture}>
-                    <Animated.View
-                        className="bg-primary absolute shadow-sm"
-                        style={[
-                            {
-                                width: thumbSize,
-                                height: thumbSize,
-                                borderRadius: thumbSize / 2,
-                                top: 20 - thumbSize / 2,
-                            },
-                            endThumbStyle
-                        ]}
-                    />
-                </GestureDetector>
+                        <GestureDetector gesture={endPanGesture}>
+                            <Animated.View
+                                className="bg-primary absolute shadow-sm"
+                                style={[
+                                    {
+                                        width: thumbSize,
+                                        height: thumbSize,
+                                        borderRadius: thumbSize / 2,
+                                        top: 20 - thumbSize / 2,
+                                    },
+                                    endThumbStyle
+                                ]}
+                            />
+                        </GestureDetector>
+                    </>
+                )}
             </View>
 
             <View className="flex-row justify-between px-1">

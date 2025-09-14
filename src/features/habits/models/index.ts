@@ -1,4 +1,4 @@
-import { DateOnlyString, Habit, HabitEntryStatus, HabitStats } from "@timothyw/pat-common";
+import { DateOnlyString, Habit } from "@timothyw/pat-common";
 
 export const getTodayDate = (): Date => {
     const today = new Date();
@@ -44,37 +44,6 @@ export const isYesterday = (date: Date): boolean => {
            date.getDate() === yesterday.getDate();
 };
 
-// Date utilities for rollover time
-export const shouldRolloverToNextDay = (rolloverTime: string): boolean => {
-    const now = new Date();
-    const [hours, minutes] = rolloverTime.split(':').map(Number);
-
-    const rolloverDate = new Date();
-    rolloverDate.setHours(hours, minutes, 0, 0);
-
-    return now >= rolloverDate;
-};
-
-export const sh = (rolloverTime: string): boolean => {
-    const now = new Date();
-    const [hours, minutes] = rolloverTime.split(':').map(Number);
-
-    const rolloverDate = new Date();
-    rolloverDate.setHours(hours, minutes, 0, 0);
-
-    return now >= rolloverDate;
-};
-
-// export const getActiveHabitDate = (habit: Habit): Date => {
-//     const shouldRollover = shouldRolloverToNextDay(habit.rolloverTime);
-//
-//     if (shouldRollover) {
-//         return new Date();
-//     } else {
-//         return getYesterdayDate();
-//     }
-// };
-
 export const getActiveHabitDate = (habit: Habit): DateOnlyString | null => {
     const now = new Date();
     let date = getYesterdayDate();
@@ -82,15 +51,31 @@ export const getActiveHabitDate = (habit: Habit): DateOnlyString | null => {
     for (let i = 0; i < 2; i++) {
         const habitStart = new Date(date.getTime() + habit.startOffsetMinutes * 60 * 1000);
         const habitEnd = new Date(date.getTime() + habit.endOffsetMinutes * 60 * 1000);
-        if (now >= habitStart && now <= habitEnd) return toDateOnlyString(date);
+        if (now.getTime() >= habitStart.getTime() && now.getTime() <= habitEnd.getTime()) return toDateOnlyString(date);
         date.setDate(date.getDate() + 1);
     }
 
     return null;
 };
 
+export const getPreviouslyActiveHabitDate = (habit: Habit): DateOnlyString => {
+    const now = new Date();
+    const start = new Date(getTodayDate());
+    start.setDate(start.getDate() - 2);
+
+    let mostRecentDate = new Date(start.getTime() + habit.startOffsetMinutes * 60 * 1000);
+    while (true) {
+        const nextDate = new Date(mostRecentDate.getTime() + 24 * 60 * 60 * 1000);
+        if (nextDate.getTime() >= now.getTime()) break;
+        mostRecentDate.setDate(mostRecentDate.getDate() + 1);
+    }
+
+    return toDateOnlyString(mostRecentDate);
+}
+
 export const getPreviousHabitDate = (habit: Habit): DateOnlyString => {
     const activeDate = getActiveHabitDate(habit);
+    if (!activeDate) return getPreviouslyActiveHabitDate(habit);
     const previousDate = new Date(activeDate + 'T00:00:00');
     previousDate.setDate(previousDate.getDate() - 1);
     return toDateOnlyString(previousDate);

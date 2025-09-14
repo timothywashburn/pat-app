@@ -38,7 +38,6 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
     const [description, setDescription] = useState(currentHabit?.description || '');
     const [notes, setNotes] = useState(currentHabit?.notes || '');
     const [frequency, setFrequency] = useState(currentHabit?.frequency || HabitFrequency.DAILY);
-    const [rolloverTime, setRolloverTime] = useState(currentHabit?.rolloverTime || '00:00');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -51,13 +50,6 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
             return;
         }
 
-        // Validate rollover time format (HH:MM)
-        const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!timeRegex.test(rolloverTime)) {
-            setErrorMessage('Rollover time must be in HH:MM format (24-hour)');
-            return;
-        }
-
         setIsLoading(true);
         setErrorMessage(null);
 
@@ -67,7 +59,6 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                 description: description.trim() || null,
                 notes: notes.trim() || null,
                 frequency,
-                rolloverTime,
                 startOffsetMinutes,
                 endOffsetMinutes,
             };
@@ -80,13 +71,6 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                     description: habitData.description || undefined,
                     notes: habitData.notes || undefined
                 });
-            }
-
-            if (!currentIsEditMode) {
-                setName('');
-                setDescription('');
-                setFrequency(HabitFrequency.DAILY);
-                setRolloverTime('00:00');
             }
 
             if (currentIsEditMode) {
@@ -184,51 +168,6 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                         selectedValue={frequency}
                         onSelectionChange={(value) => setFrequency(value as any)}
                     />
-
-                    <View className="mb-4">
-                        <Text className="text-on-surface text-base font-medium mb-2">
-                            Day Rollover Time
-                        </Text>
-                        <Text className="text-on-surface-variant text-sm mb-3">
-                            When should your habit day reset? This affects when you can mark habits as completed.
-                        </Text>
-
-                        {/* Quick select buttons */}
-                        <View className="flex-row flex-wrap mb-3">
-                            {commonRolloverTimes.map((time) => (
-                                <TouchableOpacity
-                                    key={time.value}
-                                    className={`mr-2 mb-2 px-3 py-2 rounded-lg border ${
-                                        rolloverTime === time.value
-                                            ? 'bg-primary border-primary'
-                                            : 'bg-surface border-outline'
-                                    }`}
-                                    onPress={() => setRolloverTime(time.value)}
-                                >
-                                    <Text className={`text-sm ${
-                                        rolloverTime === time.value
-                                            ? 'text-on-primary font-medium'
-                                            : 'text-on-surface'
-                                    }`}>
-                                        {time.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        {/* Custom time input */}
-                        <Text className="text-on-surface-variant text-sm mb-2">
-                            Or enter custom time (24-hour format):
-                        </Text>
-                        <TextInput
-                            className="bg-surface border border-outline rounded-lg p-3 text-on-surface text-base"
-                            placeholder="HH:MM (e.g., 06:30)"
-                            placeholderTextColor={getColor('on-surface-variant')}
-                            value={rolloverTime}
-                            onChangeText={setRolloverTime}
-                            maxLength={5}
-                        />
-                    </View>
 
                     {/* MOCKUP: Habit Reset Time Slider */}
                     <HabitResetTimeSlider

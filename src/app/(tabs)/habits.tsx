@@ -6,7 +6,7 @@ import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCard from '@/src/features/habits/components/HabitCard';
-import { getActiveHabitDate, toDateOnlyString } from '@/src/features/habits/models';
+import { getActiveHabitDate } from '@/src/features/habits/models';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 
@@ -19,10 +19,8 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
     navigation,
     route
 }) => {
-    const { habits, isInitialized, loadHabits, getHabitById } = useHabitsStore();
+    const { habits, isInitialized, loadHabits } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
-
-    console.log('date: ' + (habits[0] ? getActiveHabitDate(habits[0]) : 'No habits'));
 
     useEffect(() => {
         if (!isInitialized) {

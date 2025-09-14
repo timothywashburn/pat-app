@@ -17,21 +17,6 @@ interface DevPanelProps {
     route: RouteProp<MainStackParamList, 'Dev'>;
 }
 
-const HabitSliderTestSection: React.FC = () => {
-    const [startTime, setStartTime] = useState(360); // 06:00 in minutes
-    const [endTime, setEndTime] = useState(1080); // 18:00 in minutes
-    return (
-        <View className="bg-surface rounded-lg p-4 mb-6">
-            <HabitResetTimeSlider
-                startOffsetMinutes={startTime}
-                endOffsetMinutes={endTime}
-                onStartOffsetChange={setStartTime}
-                onEndOffsetChange={setEndTime}
-            />
-        </View>
-    );
-};
-
 export const DevPanel: React.FC<DevPanelProps> = ({
     navigation,
     route
@@ -54,8 +39,6 @@ export const DevPanel: React.FC<DevPanelProps> = ({
                     <Text className="text-on-background text-2xl font-bold mb-5">Dev Panel</Text>
                     <Text className="text-on-background-variant">For various development things</Text>
                 </View>
-
-                <HabitSliderTestSection />
 
                 <LogViewerSection
                     onOpenPanel={() => setLogViewerPanelVisible(true)}

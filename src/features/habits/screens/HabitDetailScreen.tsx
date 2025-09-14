@@ -16,6 +16,7 @@ import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
 import { NotificationsSection } from "@/src/features/notifications/components/NotificationsSection";
 import { NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
+import HabitResetTimeSlider from "@/src/components/common/HabitResetTimeSlider";
 
 interface HabitDetailViewProps {
     navigation: StackNavigationProp<MainStackParamList, 'HabitDetail'>;
@@ -26,25 +27,26 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
     navigation,
     route,
 }) => {
-    const { getColor } = useTheme();
     const { habits } = useHabitsStore();
-    const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
 
     const currentHabit = habits.find(habit => habit._id === route.params.habitId);
-    
+
     if (!currentHabit) {
         return null;
     }
-    
-    // Handle edit request
-    const handleEditRequest = () => {
-        navigation.navigate('HabitForm', { habitId: currentHabit._id, isEditing: true });
-    };
 
     const currentDate = getActiveHabitDate(currentHabit);
     const previousDate = getPreviousHabitDate(currentHabit);
+
+    const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>(
+        currentDate === null ? 'previous' : 'current'
+    );
     
     const handleTimeframeChange = (timeframe: 'current' | 'previous') => {
+        // Don't allow switching to current if currentDate is null
+        if (timeframe === 'current' && currentDate === null) {
+            return;
+        }
         setSelectedTimeframe(timeframe);
     };
 
@@ -74,9 +76,6 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                             <Text className="text-on-surface-variant text-xs">
                                 Frequency: {currentHabit.frequency}
                             </Text>
-                            <Text className="text-on-surface-variant text-xs">
-                                Rollover: {currentHabit.rolloverTime}
-                            </Text>
                         </View>
 
                         <View className="mb-4">
@@ -95,12 +94,13 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                             <TouchableOpacity
                                 className={`flex-1 py-2 px-3 rounded-md ${
                                     selectedTimeframe === 'current' ? 'bg-primary' : 'bg-transparent'
-                                }`}
+                                } ${currentDate === null ? 'opacity-50' : ''}`}
                                 onPress={() => handleTimeframeChange('current')}
+                                disabled={currentDate === null}
                             >
                                 <Text className={`text-center text-sm font-medium ${
                                     selectedTimeframe === 'current' ? 'text-on-primary' : 'text-on-surface-variant'
-                                }`}>
+                                } ${currentDate === null ? 'text-on-surface-variant' : ''}`}>
                                     Current
                                 </Text>
                             </TouchableOpacity>
@@ -124,7 +124,6 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                             <Text className="text-on-surface text-lg font-semibold mb-3">
                                 {selectedTimeframe === 'current' ? 'Current Timeframe' : 'Previous Timeframe'}
                             </Text>
-                            {/*TODO: FIX*/}
                             <HabitActionButtons
                                 habit={currentHabit}
                                 targetDate={selectedTimeframe === 'current' ? currentDate! : previousDate!}
@@ -141,6 +140,16 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                 <HabitCalendarGrid
                     habit={currentHabit}
                     viewMode="weeks" // Default to last 52 weeks
+                />
+            )
+        },
+        // Reset Time Section
+        {
+            content: (
+                <HabitResetTimeSlider
+                    startOffsetMinutes={currentHabit.startOffsetMinutes}
+                    endOffsetMinutes={currentHabit.endOffsetMinutes}
+                    readOnly={true}
                 />
             )
         },
@@ -206,7 +215,10 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
             navigation={navigation}
             route={route}
             title={currentHabit.name}
-            onEditRequest={handleEditRequest}
+            onEditRequest={() => navigation.navigate('HabitForm', {
+                habitId: currentHabit._id,
+                isEditing: true
+            })}
             sections={sections}
         />
     );
