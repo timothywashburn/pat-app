@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Text,
     TouchableOpacity,
@@ -29,19 +29,13 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
 }) => {
     const { habits } = useHabitsStore();
 
-    const currentHabit = habits.find(habit => habit._id === route.params.habitId);
+    const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
 
-    if (!currentHabit) {
-        return null;
-    }
+    const currentHabit = habits.find(habit => habit._id === route.params.habitId)!;
 
     const currentDate = getActiveHabitDate(currentHabit);
     const previousDate = getPreviousHabitDate(currentHabit);
 
-    const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>(
-        currentDate === null ? 'previous' : 'current'
-    );
-    
     const handleTimeframeChange = (timeframe: 'current' | 'previous') => {
         // Don't allow switching to current if currentDate is null
         if (timeframe === 'current' && currentDate === null) {

@@ -1,6 +1,14 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { ItemId, ListId, PersonId, NotificationEntityType, NotificationTemplateLevel, NotificationTemplateData } from '@timothyw/pat-common';
+import {
+    ItemId,
+    ListId,
+    PersonId,
+    NotificationEntityType,
+    NotificationTemplateLevel,
+    NotificationTemplateData,
+    HabitId, ListItemId, ThoughtId
+} from '@timothyw/pat-common';
 import AgendaPanel from '@/src/app/(tabs)/agenda';
 import InboxPanel from '@/src/app/(tabs)/inbox';
 import ListsPanel from '@/src/app/(tabs)/lists';
@@ -33,35 +41,35 @@ export type MainStackParamList = {
         itemId?: ItemId;
         isEditing?: boolean;
         initialName?: string;
-        thoughtId?: string;
+        thoughtId?: ThoughtId;
     };
 
     Inbox: {
         thoughtProcessed?: boolean;
-        thoughtId?: string;
+        thoughtId?: ThoughtId;
     } | undefined;
 
     Lists: undefined;
     ListDetail: {
         listId: ListId;
         thoughtProcessed?: boolean;
-        thoughtId?: string;
+        thoughtId?: ThoughtId;
     };
     ListForm: {
         listId?: ListId;
         isEditing?: boolean;
     };
     ListItemDetail: {
-        listItemId: string;
+        listItemId: ListItemId;
         listId: ListId;
     };
     ListItemForm: {
-        listItemId?: string;
+        listItemId?: ListItemId;
         listId?: ListId;
         isEditing?: boolean;
         allowListChange?: boolean;
         initialName?: string;
-        thoughtId?: string;
+        thoughtId?: ThoughtId;
     };
 
     People: undefined;
@@ -75,10 +83,10 @@ export type MainStackParamList = {
 
     Habits: undefined;
     HabitDetail: {
-        habitId: string;
+        habitId: HabitId;
     };
     HabitForm: {
-        habitId?: string;
+        habitId?: HabitId;
         isEditing?: boolean;
     };
 
