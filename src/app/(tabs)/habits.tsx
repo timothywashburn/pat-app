@@ -6,7 +6,7 @@ import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCard from '@/src/features/habits/components/HabitCard';
-import { getActiveHabitDate } from '@/src/features/habits/models';
+import { getActiveHabitDate, getTimeRemainingUntilRollover } from '@/src/features/habits/models';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 
@@ -50,14 +50,32 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
     };
 
     const getFilteredHabits = (): Habit[] => {
+        let filteredHabits: Habit[];
+
         if (!showUnmarkedOnly) {
-            return habits;
+            filteredHabits = habits;
+        } else {
+            filteredHabits = habits.filter(habit => {
+                const activeDate = getActiveHabitDate(habit);
+                const currentEntry = habit.entries.find(entry => entry.date === activeDate);
+                return currentEntry === undefined;
+            });
         }
-        
-        return habits.filter(habit => {
-            const activeDate = getActiveHabitDate(habit);
-            const currentEntry = habit.entries.find(entry => entry.date === activeDate);
-            return currentEntry === undefined;
+
+        return filteredHabits.sort((a, b) => {
+            const activeA = getActiveHabitDate(a);
+            const activeB = getActiveHabitDate(b);
+
+            if (activeA && !activeB) return -1;
+            if (!activeA && activeB) return 1;
+
+            if (activeA && activeB) {
+                const timeA = getTimeRemainingUntilRollover(a.startOffsetMinutes, a.endOffsetMinutes);
+                const timeB = getTimeRemainingUntilRollover(b.startOffsetMinutes, b.endOffsetMinutes);
+                return timeA.totalMinutes - timeB.totalMinutes;
+            }
+
+            return 0;
         });
     };
 
