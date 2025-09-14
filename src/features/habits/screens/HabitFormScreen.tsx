@@ -12,6 +12,7 @@ import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
+import HabitResetTimeSlider from '@/src/components/common/HabitResetTimeSlider';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import { Habit, HabitFrequency } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -187,22 +188,22 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                         <Text className="text-on-surface-variant text-sm mb-3">
                             When should your habit day reset? This affects when you can mark habits as completed.
                         </Text>
-                        
+
                         {/* Quick select buttons */}
                         <View className="flex-row flex-wrap mb-3">
                             {commonRolloverTimes.map((time) => (
                                 <TouchableOpacity
                                     key={time.value}
                                     className={`mr-2 mb-2 px-3 py-2 rounded-lg border ${
-                                        rolloverTime === time.value 
-                                            ? 'bg-primary border-primary' 
+                                        rolloverTime === time.value
+                                            ? 'bg-primary border-primary'
                                             : 'bg-surface border-outline'
                                     }`}
                                     onPress={() => setRolloverTime(time.value)}
                                 >
                                     <Text className={`text-sm ${
-                                        rolloverTime === time.value 
-                                            ? 'text-on-primary font-medium' 
+                                        rolloverTime === time.value
+                                            ? 'text-on-primary font-medium'
                                             : 'text-on-surface'
                                     }`}>
                                         {time.label}
@@ -224,6 +225,12 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                             maxLength={5}
                         />
                     </View>
+
+                    {/* MOCKUP: Habit Reset Time Slider */}
+                    <HabitResetTimeSlider
+                        value={rolloverTime}
+                        onValueChange={() => {}} // No-op for mockup
+                    />
                 </FormSection>
 
         </BaseFormView>

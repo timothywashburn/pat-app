@@ -10,11 +10,24 @@ import DevicesSection from "@/src/features/dev/components/DevicesSection";
 import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
 import { ModuleType } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import HabitResetTimeSlider from "@/src/components/common/HabitResetTimeSlider";
 
 interface DevPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Dev'>;
     route: RouteProp<MainStackParamList, 'Dev'>;
 }
+
+const HabitSliderTestSection: React.FC = () => {
+    const [sliderTime, setSliderTime] = useState('12:00');
+    return (
+        <View className="bg-surface rounded-lg p-4 mb-6">
+            <HabitResetTimeSlider
+                value={sliderTime}
+                onValueChange={setSliderTime}
+            />
+        </View>
+    );
+};
 
 export const DevPanel: React.FC<DevPanelProps> = ({
     navigation,
@@ -38,6 +51,8 @@ export const DevPanel: React.FC<DevPanelProps> = ({
                     <Text className="text-on-background text-2xl font-bold mb-5">Dev Panel</Text>
                     <Text className="text-on-background-variant">For various development things</Text>
                 </View>
+
+                <HabitSliderTestSection />
 
                 <LogViewerSection
                     onOpenPanel={() => setLogViewerPanelVisible(true)}
