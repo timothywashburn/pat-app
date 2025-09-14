@@ -23,10 +23,10 @@ const HabitSliderTestSection: React.FC = () => {
     return (
         <View className="bg-surface rounded-lg p-4 mb-6">
             <HabitResetTimeSlider
-                startValue={startTime}
-                endValue={endTime}
-                onStartValueChange={setStartTime}
-                onEndValueChange={setEndTime}
+                startOffsetMinutes={startTime}
+                endOffsetMinutes={endTime}
+                onStartOffsetChange={setStartTime}
+                onEndOffsetChange={setEndTime}
             />
         </View>
     );

@@ -42,8 +42,8 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const [habitResetStartTime, setHabitResetStartTime] = useState(0);
-    const [habitResetEndTime, setHabitResetEndTime] = useState(720);
+    const [startOffsetMinutes, setStartOffsetMinutes] = useState(0);
+    const [endOffsetMinutes, setEndOffsetMinutes] = useState(60 * 24);
 
     const handleSaveHabit = async () => {
         if (!name.trim()) {
@@ -230,10 +230,10 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
 
                     {/* MOCKUP: Habit Reset Time Slider */}
                     <HabitResetTimeSlider
-                        startValue={habitResetStartTime}
-                        endValue={habitResetEndTime}
-                        onStartValueChange={setHabitResetStartTime}
-                        onEndValueChange={setHabitResetEndTime}
+                        startOffsetMinutes={startOffsetMinutes}
+                        endOffsetMinutes={endOffsetMinutes}
+                        onStartOffsetChange={setStartOffsetMinutes}
+                        onEndOffsetChange={setEndOffsetMinutes}
                     />
                 </FormSection>
 

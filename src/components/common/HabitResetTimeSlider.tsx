@@ -10,16 +10,17 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 
 const MINUTE_INCREMENT = 30;
-const MIN_DISTANCE_MINUTES = MINUTE_INCREMENT;
+const MIN_DISTANCE_MINUTES = 60 * 4;
 
 interface HabitResetTimeSliderProps {
-    startValue: number;
-    endValue: number;
-    onStartValueChange?: (value: number) => void;
-    onEndValueChange?: (value: number) => void;
+    startOffsetMinutes: number;
+    endOffsetMinutes: number;
+    onStartOffsetChange?: (offset: number) => void;
+    onEndOffsetChange?: (offset: number) => void;
 }
 
-const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue, endValue, onStartValueChange, onEndValueChange }) => {
+const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffsetMinutes, endOffsetMinutes, onStartOffsetChange, onEndOffsetChange }) => {
+    // TODO: definitely need to figure out a less cursed way of doing this
     const screenWidth = Dimensions.get('window').width;
     const sliderWidth = screenWidth - 80;
     const thumbSize = 20;
@@ -37,14 +38,14 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue,
         const day = Math.floor(totalMinutes / (24 * 60));
         const remainingMinutes = totalMinutes % (24 * 60);
         const hours = Math.floor(remainingMinutes / 60);
-        const mins = remainingMinutes % 60;
+        const minutes = remainingMinutes % 60;
 
-        const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         return day > 0 ? `${day}d + ${timeStr}` : timeStr;
     };
 
-    const [currentStartDisplayTime, setCurrentStartDisplayTime] = React.useState(minutesToDisplayString(startValue));
-    const [currentEndDisplayTime, setCurrentEndDisplayTime] = React.useState(minutesToDisplayString(endValue));
+    const [currentStartDisplayTime, setCurrentStartDisplayTime] = React.useState(minutesToDisplayString(startOffsetMinutes));
+    const [currentEndDisplayTime, setCurrentEndDisplayTime] = React.useState(minutesToDisplayString(endOffsetMinutes));
 
     const minutesToPosition = (totalMinutes: number): number => {
         'worklet';
@@ -69,11 +70,11 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue,
     };
 
     React.useEffect(() => {
-        const initialStartPosition = minutesToPosition(startValue);
-        const initialEndPosition = minutesToPosition(endValue);
+        const initialStartPosition = minutesToPosition(startOffsetMinutes);
+        const initialEndPosition = minutesToPosition(endOffsetMinutes);
         startTranslateX.value = initialStartPosition * (sliderWidth - thumbSize);
         endTranslateX.value = initialEndPosition * (sliderWidth - thumbSize);
-    }, [startValue, endValue, sliderWidth, thumbSize]);
+    }, [startOffsetMinutes, endOffsetMinutes, sliderWidth, thumbSize]);
 
     const positionToMinutesRaw = (position: number): number => {
         const totalMinutes = Math.round(position * (48 * 60 - MINUTE_INCREMENT));
@@ -87,10 +88,10 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue,
 
         if (isStart) {
             setCurrentStartDisplayTime(displayString);
-            onStartValueChange?.(totalMinutes);
+            onStartOffsetChange?.(totalMinutes);
         } else {
             setCurrentEndDisplayTime(displayString);
-            onEndValueChange?.(totalMinutes);
+            onEndOffsetChange?.(totalMinutes);
         }
     };
 
@@ -207,6 +208,17 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue,
         };
     });
 
+    const durationBarStyle = useAnimatedStyle(() => {
+        const startPos = startTranslateX.value;
+        const endPos = endTranslateX.value;
+        const width = endPos - startPos;
+
+        return {
+            left: startPos,
+            width: width,
+        };
+    });
+
     return (
         <View className="mb-4">
             <Text className="text-on-surface text-base font-medium mb-2">
@@ -287,6 +299,18 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue,
                     />
                 ))}
 
+                <Animated.View
+                    className="bg-secondary absolute"
+                    style={[
+                        {
+                            height: trackHeight + 2,
+                            top: 20 - (trackHeight + 2) / 2,
+                            borderRadius: (trackHeight + 2) / 2,
+                        },
+                        durationBarStyle
+                    ]}
+                />
+
                 <GestureDetector gesture={startPanGesture}>
                     <Animated.View
                         className="bg-primary absolute shadow-sm"
@@ -304,7 +328,7 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue,
 
                 <GestureDetector gesture={endPanGesture}>
                     <Animated.View
-                        className="bg-secondary absolute shadow-sm"
+                        className="bg-primary absolute shadow-sm"
                         style={[
                             {
                                 width: thumbSize,
@@ -332,7 +356,12 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startValue,
                     12:00
                 </Text>
                 <Text className="text-on-surface-variant text-xs text-right">
-                    23:55
+                    {(() => {
+                        const maxMinutes = 24 * 60 - MINUTE_INCREMENT;
+                        const hours = Math.floor(maxMinutes / 60);
+                        const minutes = maxMinutes % 60;
+                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                    })()}
                 </Text>
             </View>
         </View>
