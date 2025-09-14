@@ -80,15 +80,6 @@ export const habitDueVariant: NotificationVariantInformation = {
                         {formatTimeDisplay(schedulerData.offsetMinutes)}
                     </Text>
                 </View>
-
-                <View className="bg-primary-container/20 p-3 rounded-md">
-                    <View className="flex-row items-start">
-                        <Ionicons name="information-circle" size={16} color={getColor('primary')} className="mt-0.5 mr-2" />
-                        <Text className="text-on-primary-container text-xs flex-1">
-                            Get notified before the habit's deadline if it hasn't been completed yet.
-                        </Text>
-                    </View>
-                </View>
             </View>
         );
     }

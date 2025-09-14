@@ -26,13 +26,10 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
     };
 
     const updateTime = (time: string) => {
-        // Validate time format (HH:mm)
-        if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
-            onSchedulerDataChange({
-                ...schedulerData,
-                time
-            });
-        }
+        onSchedulerDataChange({
+            ...schedulerData,
+            time
+        });
     };
 
     const toggleDay = (dayIndex: number) => {
@@ -99,16 +96,6 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
                 <Text className="text-primary text-sm font-medium ml-2">
                     {schedulerData.days?.length || 0} day{(schedulerData.days?.length || 0) !== 1 ? 's' : ''} at {formatTimeDisplay(schedulerData.time)}
                 </Text>
-            </View>
-
-            <View className="bg-primary-container/20 p-3 rounded-md">
-                <View className="flex-row items-start">
-                    <Ionicons name="information-circle" size={16} color={getColor('primary')} className="mt-0.5 mr-2" />
-                    <Text className="text-on-primary-container text-xs flex-1">
-                        Timed reminders will notify you on selected days at the specified time, 
-                        regardless of habit completion status.
-                    </Text>
-                </View>
             </View>
         </View>
     );
