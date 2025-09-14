@@ -45,8 +45,19 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         return totalMinutes / (48 * 60 - 5);
     };
 
+    const snapPositions = [0, 0.25, 0.5, 0.75, 1];
+    const snapThreshold = 0.03;
+
     const positionToMinutes = (position: number): number => {
         'worklet';
+
+        for (const snapPos of snapPositions) {
+            if (Math.abs(position - snapPos) < snapThreshold) {
+                const snapMinutes = Math.round(snapPos * (48 * 60 - 5));
+                return Math.round(snapMinutes / 5) * 5;
+            }
+        }
+
         const totalMinutes = Math.round(position * (48 * 60 - 5));
         return Math.round(totalMinutes / 5) * 5;
     };
@@ -61,6 +72,11 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         translateX.value = initialPosition * (sliderWidth - thumbSize);
     }, [value, sliderWidth, thumbSize]);
 
+    const positionToMinutesRaw = (position: number): number => {
+        const totalMinutes = Math.round(position * (48 * 60 - 5));
+        return Math.round(totalMinutes / 5) * 5;
+    };
+
     const updateDisplayTime = (x: number) => {
         const position = x / (sliderWidth - thumbSize);
         const totalMinutes = positionToMinutes(position);
@@ -68,15 +84,22 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         setCurrentDisplayTime(displayString);
     };
 
+    const updateDisplayTimeRaw = (x: number) => {
+        const position = x / (sliderWidth - thumbSize);
+        const totalMinutes = positionToMinutesRaw(position);
+        const displayString = minutesToDisplayString(totalMinutes);
+        setCurrentDisplayTime(displayString);
+    };
+
     const adjustTime = (increment: boolean) => {
         const currentPosition = translateX.value / (sliderWidth - thumbSize);
-        const currentMinutes = positionToMinutes(currentPosition);
+        const currentMinutes = positionToMinutesRaw(currentPosition);
         const newMinutes = Math.max(0, Math.min(48 * 60 - 5, currentMinutes + (increment ? 5 : -5)));
-        const newPosition = minutesToPosition(newMinutes);
+        const newPosition = newMinutes / (48 * 60 - 5);
         const newX = newPosition * (sliderWidth - thumbSize);
 
         translateX.value = withSpring(newX, { damping: 15, stiffness: 150 });
-        updateDisplayTime(newX);
+        updateDisplayTimeRaw(newX);
     };
 
     const panGesture = Gesture.Pan()
@@ -87,13 +110,37 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         .onUpdate((event) => {
             const newX = startX.value + event.translationX;
             const clampedX = Math.max(0, Math.min(sliderWidth - thumbSize, newX));
-            translateX.value = clampedX;
-            runOnJS(updateDisplayTime)(clampedX);
+
+            const currentPosition = clampedX / (sliderWidth - thumbSize);
+            let shouldSnap = false;
+
+            for (const snapPos of snapPositions) {
+                if (Math.abs(currentPosition - snapPos) < snapThreshold) {
+                    translateX.value = snapPos * (sliderWidth - thumbSize);
+                    shouldSnap = true;
+                    break;
+                }
+            }
+
+            if (!shouldSnap) {
+                translateX.value = clampedX;
+            }
+
+            runOnJS(updateDisplayTime)(translateX.value);
         })
         .onEnd(() => {
             isDragging.value = false;
             const currentPosition = translateX.value / (sliderWidth - thumbSize);
-            const snappedMinutes = positionToMinutes(currentPosition);
+
+            let finalPosition = currentPosition;
+            for (const snapPos of snapPositions) {
+                if (Math.abs(currentPosition - snapPos) < snapThreshold) {
+                    finalPosition = snapPos;
+                    break;
+                }
+            }
+
+            const snappedMinutes = positionToMinutes(finalPosition);
             const snappedPosition = minutesToPosition(snappedMinutes);
             const snappedX = snappedPosition * (sliderWidth - thumbSize);
 
