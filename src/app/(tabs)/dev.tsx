@@ -18,7 +18,7 @@ interface DevPanelProps {
 }
 
 const HabitSliderTestSection: React.FC = () => {
-    const [sliderTime, setSliderTime] = useState('12:00');
+    const [sliderTime, setSliderTime] = useState(720); // 12:00 in minutes
     return (
         <View className="bg-surface rounded-lg p-4 mb-6">
             <HabitResetTimeSlider

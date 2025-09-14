@@ -7,17 +7,16 @@ import Animated, {
     withSpring,
     runOnJS,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
+const MINUTE_INCREMENT = 30;
+
 interface HabitResetTimeSliderProps {
-    value: string; // HH:MM format
-    onValueChange: (value: string) => void;
+    value: number;
+    onValueChange?: (value: number) => void;
 }
 
 const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onValueChange }) => {
-    const { getColor } = useTheme();
     const screenWidth = Dimensions.get('window').width;
     const sliderWidth = screenWidth - 80;
     const thumbSize = 20;
@@ -26,8 +25,6 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
     const translateX = useSharedValue(0);
     const startX = useSharedValue(0);
     const isDragging = useSharedValue(false);
-
-    const [currentDisplayTime, setCurrentDisplayTime] = React.useState(value);
 
     const minutesToDisplayString = (totalMinutes: number): string => {
         const day = Math.floor(totalMinutes / (24 * 60));
@@ -39,10 +36,11 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         return day > 0 ? `${day}d + ${timeStr}` : timeStr;
     };
 
-    const timeToPosition = (timeStr: string): number => {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        const totalMinutes = hours * 60 + minutes;
-        return totalMinutes / (48 * 60 - 5);
+    const [currentDisplayTime, setCurrentDisplayTime] = React.useState(minutesToDisplayString(value));
+
+    const minutesToPosition = (totalMinutes: number): number => {
+        'worklet';
+        return totalMinutes / (48 * 60 - MINUTE_INCREMENT);
     };
 
     const snapPositions = [0, 0.25, 0.5, 0.75, 1];
@@ -53,28 +51,23 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
 
         for (const snapPos of snapPositions) {
             if (Math.abs(position - snapPos) < snapThreshold) {
-                const snapMinutes = Math.round(snapPos * (48 * 60 - 5));
-                return Math.round(snapMinutes / 5) * 5;
+                const snapMinutes = Math.round(snapPos * (48 * 60 - MINUTE_INCREMENT));
+                return Math.round(snapMinutes / MINUTE_INCREMENT) * MINUTE_INCREMENT;
             }
         }
 
-        const totalMinutes = Math.round(position * (48 * 60 - 5));
-        return Math.round(totalMinutes / 5) * 5;
-    };
-
-    const minutesToPosition = (totalMinutes: number): number => {
-        'worklet';
-        return totalMinutes / (48 * 60 - 5);
+        const totalMinutes = Math.round(position * (48 * 60 - MINUTE_INCREMENT));
+        return Math.round(totalMinutes / MINUTE_INCREMENT) * MINUTE_INCREMENT;
     };
 
     React.useEffect(() => {
-        const initialPosition = timeToPosition(value);
+        const initialPosition = minutesToPosition(value);
         translateX.value = initialPosition * (sliderWidth - thumbSize);
     }, [value, sliderWidth, thumbSize]);
 
     const positionToMinutesRaw = (position: number): number => {
-        const totalMinutes = Math.round(position * (48 * 60 - 5));
-        return Math.round(totalMinutes / 5) * 5;
+        const totalMinutes = Math.round(position * (48 * 60 - MINUTE_INCREMENT));
+        return Math.round(totalMinutes / MINUTE_INCREMENT) * MINUTE_INCREMENT;
     };
 
     const updateDisplayTime = (x: number) => {
@@ -82,6 +75,7 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         const totalMinutes = positionToMinutes(position);
         const displayString = minutesToDisplayString(totalMinutes);
         setCurrentDisplayTime(displayString);
+        onValueChange?.(totalMinutes);
     };
 
     const updateDisplayTimeRaw = (x: number) => {
@@ -89,13 +83,14 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
         const totalMinutes = positionToMinutesRaw(position);
         const displayString = minutesToDisplayString(totalMinutes);
         setCurrentDisplayTime(displayString);
+        onValueChange?.(totalMinutes);
     };
 
     const adjustTime = (increment: boolean) => {
         const currentPosition = translateX.value / (sliderWidth - thumbSize);
         const currentMinutes = positionToMinutesRaw(currentPosition);
-        const newMinutes = Math.max(0, Math.min(48 * 60 - 5, currentMinutes + (increment ? 5 : -5)));
-        const newPosition = newMinutes / (48 * 60 - 5);
+        const newMinutes = Math.max(0, Math.min(48 * 60 - MINUTE_INCREMENT, currentMinutes + (increment ? MINUTE_INCREMENT : -MINUTE_INCREMENT)));
+        const newPosition = newMinutes / (48 * 60 - MINUTE_INCREMENT);
         const newX = newPosition * (sliderWidth - thumbSize);
 
         translateX.value = withSpring(newX, { damping: 15, stiffness: 150 });
@@ -196,7 +191,7 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ value, onVa
                     }}
                 />
 
-                {[0, 0.25, 0.5, 0.75, 1].map((position, index) => (
+                {snapPositions.map((position, index) => (
                     <View
                         key={index}
                         className="bg-primary absolute"
