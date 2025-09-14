@@ -1,9 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import {
-    getActiveHabitDate, toDateOnlyString
-} from '@/src/features/habits/models';
+import { getActiveHabitDate } from '@/src/features/habits/models';
 import HabitActionButtons from './HabitActionButtons';
 import TimeRemainingIndicator from './TimeRemainingIndicator';
 import { useTheme } from '@/src/context/ThemeContext';
@@ -20,6 +18,8 @@ interface HabitCardProps {
 const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHabitUpdated }) => {
     const { getColor } = useTheme();
     const habitStore = useHabitsStore();
+
+    const activeDate = getActiveHabitDate(habit);
 
     const formatCompletionRate = (rate: number): string => {
         return rate.toFixed(1);
@@ -86,18 +86,23 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, onPress, onEditPress, onHa
                 </View>
             </View>
 
-            <TimeRemainingIndicator rolloverTime={habit.rolloverTime} />
+            <TimeRemainingIndicator
+                habit={habit}
+            />
 
-            {/* Quick mark buttons */}
-            <View className="mt-3 pt-3 border-t border-surface-variant">
-                <HabitActionButtons
-                    habit={habit}
-                    targetDate={getActiveHabitDate(habit)}
-                    onHabitUpdated={onHabitUpdated}
-                    showDateInfo={true}
-                />
-            </View>
-            
+            {activeDate && (
+                <>
+                    <View className="mt-3 pt-3 border-t border-surface-variant">
+                        <HabitActionButtons
+                            habit={habit}
+                            targetDate={activeDate}
+                            onHabitUpdated={onHabitUpdated}
+                            showDateInfo={true}
+                        />
+                    </View>
+                </>
+            )}
+
         </TouchableOpacity>
     );
 };

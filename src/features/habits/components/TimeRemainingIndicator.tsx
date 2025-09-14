@@ -1,18 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
-import { formatTimeRemaining } from '@/src/features/habits/models';
+import { formatTimeRemaining, getTimeRemainingUntilRollover, TimeRemaining } from '@/src/features/habits/models';
 import { useTheme } from '@/src/context/ThemeContext';
-import { useCountdown } from '@/src/features/habits/hooks/useCountdown';
+import { useAppFocus } from '@/src/hooks/useAppFocus';
+import { Habit } from "@timothyw/pat-common";
 
 interface TimeRemainingIndicatorProps {
-    rolloverTime: string;
+    habit: Habit;
 }
 
-const TimeRemainingIndicator: React.FC<TimeRemainingIndicatorProps> = ({ 
-    rolloverTime,
+const TimeRemainingIndicator: React.FC<TimeRemainingIndicatorProps> = ({
+    habit
 }) => {
+    const { startOffsetMinutes, endOffsetMinutes } = habit;
     const { getColor } = useTheme();
-    const timeRemaining = useCountdown(rolloverTime);
+    const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(() => getTimeRemainingUntilRollover(startOffsetMinutes, endOffsetMinutes));
+    const intervalRef = useRef<number | null>(null);
+
+    const updateTimeRemaining = () => {
+        setTimeRemaining(getTimeRemainingUntilRollover(startOffsetMinutes, endOffsetMinutes));
+        console.log(getTimeRemainingUntilRollover(startOffsetMinutes, endOffsetMinutes))
+    };
+
+    const startTimer = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+
+        intervalRef.current = setInterval(() => {
+            updateTimeRemaining();
+        }, 1_000);
+    };
+
+    const stopTimer = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    };
+
+    useEffect(() => {
+        startTimer();
+
+        return () => {
+            stopTimer();
+        };
+    }, [startOffsetMinutes, endOffsetMinutes]);
+
+    useAppFocus(() => {
+        updateTimeRemaining();
+        startTimer();
+    });
 
     const interpolateColor = (color1: string, color2: string, factor: number): string => {
         const hex1 = color1.replace('#', '');

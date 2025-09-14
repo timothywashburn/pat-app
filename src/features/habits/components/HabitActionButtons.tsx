@@ -3,13 +3,13 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
-import { Habit, HabitEntryStatus } from "@timothyw/pat-common";
+import { DateOnlyString, Habit, HabitEntryStatus } from "@timothyw/pat-common";
 import { isToday, isYesterday, toDateOnlyString } from '@/src/features/habits/models';
 import { useToast } from "@/src/components/toast/ToastContext";
 
 interface HabitActionButtonsProps {
     habit: Habit;
-    targetDate: Date;
+    targetDate: DateOnlyString;
     onHabitUpdated?: () => void;
     showDateInfo?: boolean;
 }
@@ -24,10 +24,10 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
     const { getColor } = useTheme();
     const { markHabitEntry, deleteHabitEntry } = useHabitsStore();
 
-    const targetDateOnlyString = toDateOnlyString(targetDate);
-    const currentEntry = habit.entries.find(entry => entry.date === targetDateOnlyString);
+    const currentEntry = habit.entries.find(entry => entry.date === targetDate);
 
-    const getDateInfo = (date: Date) => {
+    const getDateInfo = (dateString: DateOnlyString) => {
+        const date = new Date(dateString + 'T00:00:00'); // Ensure it's treated as local date
         const dateStr = date.toLocaleDateString('en-US', {
             month: 'numeric', 
             day: 'numeric' 
@@ -52,9 +52,9 @@ const HabitActionButtons: React.FC<HabitActionButtonsProps> = ({
     const handleMarkHabit = async (status: HabitEntryStatus) => {
         try {
             if (currentEntry?.status === status) {
-                await deleteHabitEntry(habit._id, targetDateOnlyString);
+                await deleteHabitEntry(habit._id, targetDate);
             } else {
-                await markHabitEntry(habit._id, targetDateOnlyString, status);
+                await markHabitEntry(habit._id, targetDate, status);
             }
             onHabitUpdated?.();
         } catch (error) {

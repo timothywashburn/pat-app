@@ -64,14 +64,7 @@ export const useHabitsStore = create<HabitsState & HabitsActions>((set, get) => 
         }
     },
 
-    createHabit: async (params: CreateHabitRequest): Promise<Habit> => {
-        const body: CreateHabitRequest = {
-            name: params.name,
-            description: params.description,
-            frequency: HabitFrequency.DAILY,
-            rolloverTime: params.rolloverTime || '00:00'
-        };
-
+    createHabit: async (body: CreateHabitRequest): Promise<Habit> => {
         const response = await performAuthenticatedRequest<CreateHabitRequest, CreateHabitResponse>({
             endpoint: '/api/habits',
             method: HTTPMethod.POST,

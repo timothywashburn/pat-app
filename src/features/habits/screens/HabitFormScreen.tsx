@@ -42,8 +42,8 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const [startOffsetMinutes, setStartOffsetMinutes] = useState(0);
-    const [endOffsetMinutes, setEndOffsetMinutes] = useState(60 * 24);
+    const [startOffsetMinutes, setStartOffsetMinutes] = useState(currentHabit?.startOffsetMinutes || 0);
+    const [endOffsetMinutes, setEndOffsetMinutes] = useState(currentHabit?.endOffsetMinutes || 60 * 24);
 
     const handleSaveHabit = async () => {
         if (!name.trim()) {
@@ -68,6 +68,8 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                 notes: notes.trim() || null,
                 frequency,
                 rolloverTime,
+                startOffsetMinutes,
+                endOffsetMinutes,
             };
 
             if (currentIsEditMode && currentHabit) {

@@ -86,7 +86,7 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                         </View>
                     </View>
 
-                    <TimeRemainingIndicator rolloverTime={currentHabit.rolloverTime} />
+                    <TimeRemainingIndicator habit={currentHabit} />
 
                     {/* Timeframe Toggle and Buttons */}
                     <View className="mt-4">
@@ -124,9 +124,10 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                             <Text className="text-on-surface text-lg font-semibold mb-3">
                                 {selectedTimeframe === 'current' ? 'Current Timeframe' : 'Previous Timeframe'}
                             </Text>
+                            {/*TODO: FIX*/}
                             <HabitActionButtons
                                 habit={currentHabit}
-                                targetDate={selectedTimeframe === 'current' ? currentDate : previousDate}
+                                targetDate={selectedTimeframe === 'current' ? currentDate! : previousDate!}
                                 showDateInfo={true}
                             />
                         </View>

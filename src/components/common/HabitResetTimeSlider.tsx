@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 const MINUTE_INCREMENT = 30;
 const MIN_DISTANCE_MINUTES = 60 * 4;
+const MAX_DURATION_MINUTES = 24 * 60;
 
 interface HabitResetTimeSliderProps {
     startOffsetMinutes: number;
@@ -106,10 +107,39 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
 
         let newMinutes = currentMinutes + (increment ? MINUTE_INCREMENT : -MINUTE_INCREMENT);
 
+        // Check if the new position would exceed max duration and push the other tack
+        const duration = Math.abs(newMinutes - otherMinutes);
+        if (duration > MAX_DURATION_MINUTES) {
+            if (isStart) {
+                // If start is moving and would exceed max duration, move end tack
+                const newEndMinutes = newMinutes + MAX_DURATION_MINUTES;
+                if (newEndMinutes <= 48 * 60 - MINUTE_INCREMENT) {
+                    // Move end tack to maintain max duration
+                    const newEndPosition = newEndMinutes / (48 * 60 - MINUTE_INCREMENT);
+                    const newEndX = newEndPosition * (sliderWidth - thumbSize);
+                    endTranslateX.value = newEndX;
+                    runOnJS(updateDisplayTime)(newEndX, false, true);
+                }
+            } else {
+                // If end is moving and would exceed max duration, move start tack
+                const newStartMinutes = newMinutes - MAX_DURATION_MINUTES;
+                if (newStartMinutes >= 0) {
+                    // Move start tack to maintain max duration
+                    const newStartPosition = newStartMinutes / (48 * 60 - MINUTE_INCREMENT);
+                    const newStartX = newStartPosition * (sliderWidth - thumbSize);
+                    startTranslateX.value = newStartX;
+                    runOnJS(updateDisplayTime)(newStartX, true, true);
+                }
+            }
+        }
+
+        // Apply normal constraints (min distance and bounds)
         if (isStart) {
-            newMinutes = Math.max(0, Math.min(otherMinutes - MIN_DISTANCE_MINUTES, newMinutes));
+            const maxFromMinDistance = otherMinutes - MIN_DISTANCE_MINUTES;
+            newMinutes = Math.max(0, Math.min(maxFromMinDistance, newMinutes));
         } else {
-            newMinutes = Math.max(otherMinutes + MIN_DISTANCE_MINUTES, Math.min(48 * 60 - MINUTE_INCREMENT, newMinutes));
+            const minFromMinDistance = otherMinutes + MIN_DISTANCE_MINUTES;
+            newMinutes = Math.max(minFromMinDistance, Math.min(48 * 60 - MINUTE_INCREMENT, newMinutes));
         }
 
         const newPosition = newMinutes / (48 * 60 - MINUTE_INCREMENT);
@@ -122,12 +152,27 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
     const constrainPosition = (position: number, isStart: boolean, otherPosition: number): number => {
         'worklet';
 
+        const otherPos = otherPosition / (sliderWidth - thumbSize);
+        const minDistancePos = MIN_DISTANCE_MINUTES / (48 * 60 - MINUTE_INCREMENT);
+
         if (isStart) {
-            const maxPos = (otherPosition / (sliderWidth - thumbSize)) - (MIN_DISTANCE_MINUTES / (48 * 60 - MINUTE_INCREMENT));
-            return Math.max(0, Math.min(maxPos, position));
+            // Start tack constraints:
+            // 1. Cannot be less than 0
+            // 2. Cannot be closer than MIN_DISTANCE_MINUTES to end tack
+            const maxFromMinDistance = otherPos - minDistancePos;
+            const maxPos = Math.min(maxFromMinDistance, 1); // Can't exceed slider bounds
+            const minPos = 0; // Can't be negative
+
+            return Math.max(minPos, Math.min(maxPos, position));
         } else {
-            const minPos = (otherPosition / (sliderWidth - thumbSize)) + (MIN_DISTANCE_MINUTES / (48 * 60 - MINUTE_INCREMENT));
-            return Math.max(minPos, Math.min(1, position));
+            // End tack constraints:
+            // 1. Cannot be greater than 1
+            // 2. Cannot be closer than MIN_DISTANCE_MINUTES to start tack
+            const minFromMinDistance = otherPos + minDistancePos;
+            const minPos = Math.max(minFromMinDistance, 0); // Can't be negative
+            const maxPos = 1; // Can't exceed slider bounds
+
+            return Math.max(minPos, Math.min(maxPos, position));
         }
     };
 
@@ -146,29 +191,57 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
             .onUpdate((event) => {
                 const newX = startX.value + event.translationX;
                 const position = newX / (sliderWidth - thumbSize);
+
+                // Apply normal constraints first to get the actual position of current tack
                 const constrainedPosition = constrainPosition(position, isStart, otherTranslateX.value);
                 const constrainedX = constrainedPosition * (sliderWidth - thumbSize);
 
+                // Check for snapping
+                let finalPosition = constrainedPosition;
                 let shouldSnap = false;
                 for (const snapPos of snapPositions) {
                     if (Math.abs(constrainedPosition - snapPos) < snapThreshold) {
-                        const snapX = snapPos * (sliderWidth - thumbSize);
-                        const snapPosition = snapX / (sliderWidth - thumbSize);
-                        const finalConstrainedPosition = constrainPosition(snapPosition, isStart, otherTranslateX.value);
-
-                        if (Math.abs(finalConstrainedPosition - snapPosition) < 0.001) {
-                            translateX.value = snapX;
+                        const snapPosition = constrainPosition(snapPos, isStart, otherTranslateX.value);
+                        if (Math.abs(snapPosition - snapPos) < 0.001) {
+                            finalPosition = snapPos;
                             shouldSnap = true;
                             break;
                         }
                     }
                 }
 
-                if (!shouldSnap) {
-                    translateX.value = constrainedX;
+                const finalX = finalPosition * (sliderWidth - thumbSize);
+                translateX.value = finalX;
+
+                // Now check max duration constraint using the ACTUAL final position
+                const finalMinutes = Math.round(finalPosition * (48 * 60 - MINUTE_INCREMENT));
+                const otherPos = otherTranslateX.value / (sliderWidth - thumbSize);
+                const otherMinutes = Math.round(otherPos * (48 * 60 - MINUTE_INCREMENT));
+                const duration = Math.abs(finalMinutes - otherMinutes);
+
+                if (duration > MAX_DURATION_MINUTES) {
+                    if (isStart) {
+                        // Start tack moved, adjust end tack to maintain exactly 24h
+                        const targetEndMinutes = finalMinutes + MAX_DURATION_MINUTES;
+                        if (targetEndMinutes <= 48 * 60 - MINUTE_INCREMENT) {
+                            const newEndPosition = targetEndMinutes / (48 * 60 - MINUTE_INCREMENT);
+                            const newEndX = newEndPosition * (sliderWidth - thumbSize);
+                            otherTranslateX.value = newEndX;
+                            runOnJS(updateDisplayTime)(newEndX, !isStart);
+                        }
+                    } else {
+                        // End tack moved, adjust start tack to maintain exactly 24h
+                        const targetStartMinutes = finalMinutes - MAX_DURATION_MINUTES;
+                        if (targetStartMinutes >= 0) {
+                            const newStartPosition = targetStartMinutes / (48 * 60 - MINUTE_INCREMENT);
+                            const newStartX = newStartPosition * (sliderWidth - thumbSize);
+                            otherTranslateX.value = newStartX;
+                            runOnJS(updateDisplayTime)(newStartX, !isStart);
+                        }
+                    }
                 }
 
-                runOnJS(updateDisplayTime)(translateX.value, isStart);
+                runOnJS(updateDisplayTime)(finalX, isStart);
             })
             .onEnd(() => {
                 isDragging.value = false;

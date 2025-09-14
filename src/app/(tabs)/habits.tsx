@@ -22,6 +22,8 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
     const { habits, isInitialized, loadHabits, getHabitById } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
 
+    console.log('date: ' + (habits[0] ? getActiveHabitDate(habits[0]) : 'No habits'));
+
     useEffect(() => {
         if (!isInitialized) {
             loadHabits();
@@ -56,8 +58,7 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
         
         return habits.filter(habit => {
             const activeDate = getActiveHabitDate(habit);
-            const targetDateString = toDateOnlyString(activeDate);
-            const currentEntry = habit.entries.find(entry => entry.date === targetDateString);
+            const currentEntry = habit.entries.find(entry => entry.date === activeDate);
             return currentEntry === undefined;
         });
     };

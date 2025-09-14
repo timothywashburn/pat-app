@@ -1,49 +1,5 @@
 import { DateOnlyString, Habit, HabitEntryStatus, HabitStats } from "@timothyw/pat-common";
 
-export const parseDate = (dateString: string): Date => {
-    return new Date(dateString + 'T00:00:00');
-};
-
-export const calculateHabitStats = (habit: Habit): HabitStats => {
-    const completedDays = habit.entries.filter(entry => entry.status === HabitEntryStatus.COMPLETED).length;
-    const excusedDays = habit.entries.filter(entry => entry.status === HabitEntryStatus.EXCUSED).length;
-    const totalDays = getDaysBetweenInclusive(fromDateOnlyString(habit.firstDay), getTodayDate());
-    const missedDays = totalDays - completedDays - excusedDays;
-    const completionRate = completedDays / (totalDays - excusedDays) * 100;
-
-    return {
-        totalDays,
-        completedDays,
-        excusedDays,
-        missedDays,
-        completionRate,
-    };
-};
-
-export const getDateRange = (startDate: Date, endDate: Date): Date[] => {
-    const dates: Date[] = [];
-    const currentDate = new Date(startDate);
-    currentDate.setHours(0, 0, 0, 0);
-    
-    while (currentDate <= endDate) {
-        dates.push(new Date(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return dates;
-};
-
-export const getDaysBetweenInclusive = (startDate: Date, endDate: Date): number => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-
-    const diffMs = Math.abs(end.getTime() - start.getTime());
-    return Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-}
-
 export const getTodayDate = (): Date => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -92,28 +48,52 @@ export const isYesterday = (date: Date): boolean => {
 export const shouldRolloverToNextDay = (rolloverTime: string): boolean => {
     const now = new Date();
     const [hours, minutes] = rolloverTime.split(':').map(Number);
-    
+
     const rolloverDate = new Date();
     rolloverDate.setHours(hours, minutes, 0, 0);
-    
+
     return now >= rolloverDate;
 };
 
-export const getActiveHabitDate = (habit: Habit): Date => {
-    const shouldRollover = shouldRolloverToNextDay(habit.rolloverTime);
-    
-    if (shouldRollover) {
-        return new Date();
-    } else {
-        return getYesterdayDate();
-    }
+export const sh = (rolloverTime: string): boolean => {
+    const now = new Date();
+    const [hours, minutes] = rolloverTime.split(':').map(Number);
+
+    const rolloverDate = new Date();
+    rolloverDate.setHours(hours, minutes, 0, 0);
+
+    return now >= rolloverDate;
 };
 
-export const getPreviousHabitDate = (habit: Habit): Date => {
+// export const getActiveHabitDate = (habit: Habit): Date => {
+//     const shouldRollover = shouldRolloverToNextDay(habit.rolloverTime);
+//
+//     if (shouldRollover) {
+//         return new Date();
+//     } else {
+//         return getYesterdayDate();
+//     }
+// };
+
+export const getActiveHabitDate = (habit: Habit): DateOnlyString | null => {
+    const now = new Date();
+    let date = getYesterdayDate();
+
+    for (let i = 0; i < 2; i++) {
+        const habitStart = new Date(date.getTime() + habit.startOffsetMinutes * 60 * 1000);
+        const habitEnd = new Date(date.getTime() + habit.endOffsetMinutes * 60 * 1000);
+        if (now >= habitStart && now <= habitEnd) return toDateOnlyString(date);
+        date.setDate(date.getDate() + 1);
+    }
+
+    return null;
+};
+
+export const getPreviousHabitDate = (habit: Habit): DateOnlyString => {
     const activeDate = getActiveHabitDate(habit);
-    const previousDate = new Date(activeDate);
+    const previousDate = new Date(activeDate + 'T00:00:00');
     previousDate.setDate(previousDate.getDate() - 1);
-    return previousDate;
+    return toDateOnlyString(previousDate);
 };
 
 // Time remaining utilities
@@ -125,40 +105,70 @@ export interface TimeRemaining {
     isOverdue: boolean;
 }
 
-export const getTimeRemainingUntilRollover = (rolloverTime: string): TimeRemaining => {
+export const getTimeRemainingUntilRollover = (startOffsetMinutes: number, endOffsetMinutes: number): TimeRemaining => {
     const now = new Date();
-    const [rolloverHours, rolloverMinutes] = rolloverTime.split(':').map(Number);
-    
-    // Create rollover time for today
-    const todayRollover = new Date();
-    todayRollover.setHours(rolloverHours, rolloverMinutes, 0, 0);
-    
-    // Create rollover time for tomorrow (in case we're past today's rollover)
-    const tomorrowRollover = new Date(todayRollover);
-    tomorrowRollover.setDate(tomorrowRollover.getDate() + 1);
-    
-    // Determine which rollover time to use
-    const targetRollover = now > todayRollover ? tomorrowRollover : todayRollover;
-    
-    // Calculate time difference
-    const diffMs = targetRollover.getTime() - now.getTime();
-    const totalMinutes = Math.floor(diffMs / (1000 * 60));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    
-    // Calculate percentage of day passed (24 hours = 100%)
-    const minutesSinceLastRollover = now > todayRollover 
-        ? Math.floor((now.getTime() - todayRollover.getTime()) / (1000 * 60))
-        : Math.floor((now.getTime() - (todayRollover.getTime() - 24 * 60 * 60 * 1000)) / (1000 * 60));
-    
-    const percentage = Math.min(100, Math.max(0, (minutesSinceLastRollover / (24 * 60)) * 100));
-    
+    let date = getYesterdayDate();
+
+    // Find the current active habit period
+    for (let i = 0; i < 2; i++) {
+        const habitStart = new Date(date.getTime() + startOffsetMinutes * 60 * 1000);
+        const habitEnd = new Date(date.getTime() + endOffsetMinutes * 60 * 1000);
+
+        if (now >= habitStart && now <= habitEnd) {
+            // We're in the active period, calculate time until end
+            const diffMs = habitEnd.getTime() - now.getTime();
+            const totalMinutes = Math.floor(diffMs / (1000 * 60));
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+
+            // Calculate percentage of period passed
+            const periodDurationMs = habitEnd.getTime() - habitStart.getTime();
+            const elapsedMs = now.getTime() - habitStart.getTime();
+            const percentage = Math.min(100, Math.max(0, (elapsedMs / periodDurationMs) * 100));
+
+            return {
+                hours: Math.max(0, hours),
+                minutes: Math.max(0, minutes),
+                totalMinutes: Math.max(0, totalMinutes),
+                percentage,
+                isOverdue: totalMinutes < 0
+            };
+        }
+
+        date.setDate(date.getDate() + 1);
+    }
+
+    // Not in an active period - find the next one
+    date = getYesterdayDate();
+    for (let i = 0; i < 3; i++) {
+        const habitStart = new Date(date.getTime() + startOffsetMinutes * 60 * 1000);
+
+        if (now < habitStart) {
+            // Found the next period
+            const diffMs = habitStart.getTime() - now.getTime();
+            const totalMinutes = Math.floor(diffMs / (1000 * 60));
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+
+            return {
+                hours: Math.max(0, hours),
+                minutes: Math.max(0, minutes),
+                totalMinutes: Math.max(0, totalMinutes),
+                percentage: 0, // Not in active period
+                isOverdue: false
+            };
+        }
+
+        date.setDate(date.getDate() + 1);
+    }
+
+    // Fallback - shouldn't reach here
     return {
-        hours: Math.max(0, hours),
-        minutes: Math.max(0, minutes),
-        totalMinutes: Math.max(0, totalMinutes),
-        percentage,
-        isOverdue: totalMinutes < 0
+        hours: 0,
+        minutes: 0,
+        totalMinutes: 0,
+        percentage: 100,
+        isOverdue: true
     };
 };
 
