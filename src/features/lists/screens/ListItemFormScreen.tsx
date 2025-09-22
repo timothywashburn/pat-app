@@ -90,7 +90,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
                         thoughtId: thoughtId 
                     });
                 } else {
-                    navigation.navigate('ListDetail', { listId: selectedListId });
+                    navigation.navigate('Lists');
                 }
             }
         } catch (error) {
