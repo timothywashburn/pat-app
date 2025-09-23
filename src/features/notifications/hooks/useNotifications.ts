@@ -84,11 +84,12 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
         });
     }, [asyncOp, performAuthenticated]);
 
-    const loadEntitySyncState = useCallback(async (targetEntityType: NotificationEntityType, targetId: string): Promise<void> => {
+    const loadEntitySyncState = useCallback(async (entityType: NotificationEntityType, entityId: string): Promise<void> => {
         try {
+            // TODO: figure out how to make these type safe
             const params = new URLSearchParams();
-            params.append('targetEntityType', targetEntityType);
-            params.append('targetId', targetId);
+            params.append('entityType', entityType);
+            params.append('entityId', entityId);
 
             const response = await performAuthenticated<undefined, GetEntitySyncResponse>({
                 endpoint: `/api/notifications/entity-sync?${params.toString()}`,
@@ -102,20 +103,20 @@ export function useNotifications(targetEntityType: NotificationEntityType, targe
         }
     }, [performAuthenticated]);
 
-    const updateEntitySync = useCallback(async (targetEntityType: NotificationEntityType, targetId: string, synced: boolean): Promise<void> => {
+    const updateEntitySync = useCallback(async (entityType: NotificationEntityType, entityId: string, synced: boolean): Promise<void> => {
         return asyncOp.execute(async () => {
             const response = await performAuthenticated<SetEntitySyncRequest, SetEntitySyncResponse>({
                 endpoint: '/api/notifications/entity-sync',
                 method: HTTPMethod.PUT,
                 body: {
-                    targetEntityType,
-                    targetId,
+                    entityType,
+                    entityId,
                     synced
                 },
             });
             setSyncState(response.synced ? NotificationTemplateSyncState.SYNCED : NotificationTemplateSyncState.DESYNCED);
             await loadTemplates();
-            await loadEntitySyncState(targetEntityType, targetId);
+            await loadEntitySyncState(entityType, entityId);
         });
     }, [asyncOp, performAuthenticated, setTemplates]);
 
