@@ -28,6 +28,9 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
 
     const { setCompleted, items } = useAgendaStore();
     const currentItem = items.find(item => item._id === route.params.itemId)!;
+
+    // TODO: added because deleting an item caused crash because this page I guess is still mounted?
+    if (!currentItem) return null;
     
     const handleEditRequest = () => {
         if (currentItem) {
