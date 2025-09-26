@@ -63,7 +63,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
 
                     <View className="w-[20%] px-2">
                         {item.type ? (
-                            <Text className="text-unknown text-xs font-medium" numberOfLines={1}>
+                            <Text className="text-secondary text-xs font-medium" numberOfLines={1}>
                                 {item.type}
                             </Text>
                         ) : (
