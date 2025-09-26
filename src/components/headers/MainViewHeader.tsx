@@ -15,6 +15,7 @@ interface CustomHeaderProps {
     showFilterButton?: boolean;
     isFilterActive?: boolean;
     onFilterTapped?: () => void;
+    customFilter?: () => React.ReactNode;
     trailing?: () => React.ReactNode;
     isModuleView?: boolean;
 }
@@ -27,6 +28,7 @@ const MainViewHeader: React.FC<CustomHeaderProps> = ({
     showFilterButton = false,
     isFilterActive = false,
     onFilterTapped,
+    customFilter,
     trailing,
 }) => {
     const { getColor } = useTheme();
@@ -59,7 +61,11 @@ const MainViewHeader: React.FC<CustomHeaderProps> = ({
                     <Text className="text-on-surface text-lg font-bold flex-2 text-center">{title}</Text>
 
                     <View className="flex-1 flex-row justify-end items-center">
-                        {showFilterButton && (
+                        {customFilter ? (
+                            <View className="ml-4">
+                                {customFilter()}
+                            </View>
+                        ) : showFilterButton ? (
                             <TouchableOpacity onPress={onFilterTapped} className="ml-4 p-1">
                                 <Ionicons
                                     name="filter"
@@ -67,7 +73,7 @@ const MainViewHeader: React.FC<CustomHeaderProps> = ({
                                     color={isFilterActive ? getColor("primary") : getColor("on-surface")}
                                 />
                             </TouchableOpacity>
-                        )}
+                        ) : null}
 
                         {showAddButton && (
                             <TouchableOpacity onPress={onAddTapped} className="ml-4 p-1">

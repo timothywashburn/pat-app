@@ -11,6 +11,8 @@ import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import { AgendaItemData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
+import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/components/AgendaFilterDropdown";
 
 interface AgendaPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Agenda'>;
@@ -24,8 +26,9 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
     const { items, isInitialized, loadItems } = useAgendaStore();
+    const { data } = useUserDataStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
-    const [showCompleted, setShowCompleted] = useState(false);
+    const [selectedFilter, setSelectedFilter] = useState<FilterType>('incomplete');
 
     const isTableView = width >= 768;
 
@@ -45,7 +48,16 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     };
 
     const filteredItems = items
-        .filter(item => item.completed === showCompleted)
+        .filter(item => {
+            switch (selectedFilter) {
+                case 'incomplete':
+                    return !item.completed;
+                case 'complete':
+                    return item.completed;
+                default:
+                    return !item.completed && item.category === selectedFilter;
+            }
+        })
         .sort((a, b) => {
             if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
             if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
@@ -61,9 +73,13 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
                 title="Agenda"
                 showAddButton
                 onAddTapped={handleAddItem}
-                showFilterButton
-                isFilterActive={showCompleted}
-                onFilterTapped={() => setShowCompleted(!showCompleted)}
+                customFilter={() => (
+                    <AgendaFilterDropdown
+                        selectedFilter={selectedFilter}
+                        categories={data.config.agenda.itemCategories}
+                        onFilterChange={setSelectedFilter}
+                    />
+                )}
             />
 
             {!isInitialized && items.length === 0 ? (
@@ -78,7 +94,9 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
                         color={getColor("primary")}
                     />
                     <Text className="text-base text-on-background-variant mb-5">
-                        {showCompleted ? 'No completed items' : 'No pending items'}
+                        {selectedFilter === 'complete' ? 'No completed items' :
+                         selectedFilter === 'incomplete' ? 'No incomplete items' :
+                         `No incomplete items in ${selectedFilter}`}
                     </Text>
                     <TouchableOpacity
                         className="bg-primary px-5 py-2.5 rounded-lg"
