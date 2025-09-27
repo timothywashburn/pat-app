@@ -40,20 +40,17 @@ const AppContent: React.FC = () => {
     const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
 
     const pathname = usePathname();
-    const segments = useSegments();
+    // const segments = useSegments();
 
     const navigationStore = useNavigationStore();
 
     useEffect(() => {
-        console.log("Current pathname:", pathname);
-        console.log("Current segments:", segments);
-
         if (pathname.toLowerCase().includes("form")) {
             navigationStore.setEnabled(false);
         } else {
             navigationStore.setEnabled(true);
         }
-    }, [pathname, segments]);
+    }, [pathname]);
 
     // Listen for actual URL changes and prevent detail screen URLs
     useEffect(() => {
@@ -62,12 +59,11 @@ const AppContent: React.FC = () => {
         const handleUrlChange = () => {
             const pathname = window.location.pathname;
             const search = window.location.search;
-            console.log('url change detected:', pathname, search);
 
             // remove everything after and including the first capital letter
             const newPathname = pathname.replace(/\/[A-Z][^\/]*/g, '');
             if (newPathname !== pathname || search) {
-                console.log('overriding url change, reverting to', newPathname);
+                console.log(`overriding url change, changing ${pathname + search} to ${newPathname}`);
                 window.history.replaceState(null, '', newPathname);
             }
         };
