@@ -2,11 +2,23 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
-import { 
-    NotificationVariantType, 
-    NotificationSchedulerType 
+import {
+    NotificationVariantType,
+    NotificationSchedulerType
 } from '@timothyw/pat-common';
 import { NotificationVariantInformation, SchedulerFormProps } from "@/src/features/notifications/variants/index";
+
+// Helper functions to convert between time strings and offsetMinutes
+const timeStringToOffsetMinutes = (timeString: string): number => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+};
+
+const offsetMinutesToTimeString = (offsetMinutes: number): string => {
+    const hours = Math.floor(offsetMinutes / 60);
+    const minutes = offsetMinutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
 
 const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
     schedulerData,
@@ -26,9 +38,10 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
     };
 
     const updateTime = (time: string) => {
+        const offsetMinutes = timeStringToOffsetMinutes(time);
         onSchedulerDataChange({
             ...schedulerData,
-            time
+            offsetMinutes
         });
     };
 
@@ -82,7 +95,7 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
             <View className="mb-4">
                 <Text className="text-on-surface text-sm font-medium mb-1.5">Time</Text>
                 <TextInput
-                    value={schedulerData.time}
+                    value={offsetMinutesToTimeString(schedulerData.offsetMinutes)}
                     onChangeText={updateTime}
                     placeholder="09:00"
                     className="bg-surface border border-divider rounded-md px-3 py-2 text-sm"
@@ -94,7 +107,7 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
             <View className="flex-row items-center mb-4">
                 <Ionicons name="time" size={16} color={getColor('primary')} />
                 <Text className="text-primary text-sm font-medium ml-2">
-                    {schedulerData.days?.length || 0} day{(schedulerData.days?.length || 0) !== 1 ? 's' : ''} at {formatTimeDisplay(schedulerData.time)}
+                    {schedulerData.days?.length || 0} day{(schedulerData.days?.length || 0) !== 1 ? 's' : ''} at {formatTimeDisplay(offsetMinutesToTimeString(schedulerData.offsetMinutes))}
                 </Text>
             </View>
         </View>
@@ -109,7 +122,7 @@ export const habitTimedReminderVariant: NotificationVariantInformation = {
     defaultSchedulerData: {
         type: NotificationSchedulerType.DAY_TIME,
         days: [1, 2, 3, 4, 5], // Monday through Friday by default
-        time: '09:00'
+        offsetMinutes: 540 // 09:00 AM (9 * 60 = 540 minutes)
     },
     defaultVariantData: {
         type: NotificationVariantType.HABIT_TIMED_REMINDER,
