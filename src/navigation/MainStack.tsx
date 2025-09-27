@@ -14,12 +14,10 @@ import InboxPanel from '@/src/app/(tabs)/inbox';
 import ListsPanel from '@/src/app/(tabs)/lists';
 import PeoplePanel from '@/src/app/(tabs)/people';
 import HabitsPanel from '@/src/app/(tabs)/habits';
-import AgendaItemDetailScreen from '@/src/features/agenda/screens/AgendaItemDetailScreen';
 import ListDetailScreen from '@/src/features/lists/screens/ListDetailScreen';
 import ListItemDetailScreen from '@/src/features/lists/screens/ListItemDetailScreen';
 import PersonDetailScreen from '@/src/features/people/screens/PersonDetailScreen';
 import HabitDetailScreen from '@/src/features/habits/screens/HabitDetailScreen';
-import AgendaItemFormScreen from '@/src/features/agenda/screens/AgendaItemFormScreen';
 import ListFormScreen from '@/src/features/lists/screens/ListFormScreen';
 import ListItemFormScreen from '@/src/features/lists/screens/ListItemFormScreen';
 import PersonFormScreen from '@/src/features/people/screens/PersonFormScreen';
@@ -124,8 +122,8 @@ export default function MainStack({ initialRouteName }: MainStackProps) {
             }}
         >
             <Stack.Screen name="Agenda" component={AgendaPanel} />
-            <Stack.Screen name="AgendaItemDetail" component={AgendaItemDetailScreen} />
-            <Stack.Screen name="AgendaItemForm" component={AgendaItemFormScreen} />
+            {/*<Stack.Screen name="AgendaItemDetail" component={AgendaItemDetailScreen} />*/}
+            {/*<Stack.Screen name="AgendaItemForm" component={AgendaItemFormScreen} />*/}
 
             <Stack.Screen name="Inbox" component={InboxPanel} />
 

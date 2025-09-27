@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
 import FormViewHeader from '../headers/FormViewHeader';
+import { useRouter } from "expo-router";
 
 interface NavigationProps {
     navigation?: any;
@@ -54,6 +55,8 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     const { getColor } = useTheme();
     const { confirmAlert } = useAlert();
 
+    const router = useRouter();
+
     // Handle dismiss
     const handleDismiss = () => {
         navigation.goBack();
@@ -61,7 +64,8 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
 
     // Handle cancel
     const handleCancel = () => {
-        navigation.goBack();
+        // navigation.goBack();
+        router.back();
     };
 
     const handleDelete = () => {

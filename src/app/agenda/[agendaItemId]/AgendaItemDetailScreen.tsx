@@ -12,6 +12,7 @@ import { NotificationsSection } from '@/src/features/notifications/components/No
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { UnknownOutputParams, useLocalSearchParams, useRouter } from "expo-router";
 
 interface AgendaItemDetailViewProps {
     navigation: StackNavigationProp<MainStackParamList, 'AgendaItemDetail'>;
@@ -26,15 +27,30 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
+    const params = useLocalSearchParams<'/agenda/[agendaItemId]/AgendaItemDetailScreen'>();
+    const router = useRouter();
+
     const { setCompleted, items } = useAgendaStore();
-    const currentItem = items.find(item => item._id === route.params.itemId)!;
+    const currentItem = items.find(item => item._id === params.agendaItemId)!;
+
+    console.log('Current item:', currentItem);
+    console.log('Current item:', params);
+    console.log('Current item:', params.test);
+    console.log('Current item:', items);
 
     // TODO: added because deleting an item caused crash because this page I guess is still mounted?
     if (!currentItem) return null;
-    
+
     const handleEditRequest = () => {
         if (currentItem) {
-            navigation.navigate('AgendaItemForm', { itemId: currentItem._id, isEditing: true });
+            // navigation.navigate('AgendaItemForm', { itemId: currentItem._id, isEditing: true });
+            router.navigate({
+                pathname: '/agenda/[agendaItemId]/AgendaItemFormScreen',
+                params: {
+                    agendaItemId: currentItem._id,
+                    isEditing: 'true'
+                }
+            });
         }
     };
 

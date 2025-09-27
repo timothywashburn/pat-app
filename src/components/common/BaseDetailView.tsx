@@ -3,6 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import DetailViewHeader from '../headers/DetailViewHeader';
+import { useRouter } from "expo-router";
 
 interface ActionButton {
     label: string;
@@ -54,9 +55,12 @@ const BaseDetailView: React.FC<BaseDetailViewProps> = ({
 }) => {
     const { getColor } = useTheme();
 
+    const router = useRouter();
+
     // Handle dismiss
     const handleDismiss = () => {
-        navigation.goBack();
+        // navigation.goBack();
+        router.back();
     };
 
     const getButtonStyle = (variant: ActionButton['variant'] = 'primary', isDestructive?: boolean) => {

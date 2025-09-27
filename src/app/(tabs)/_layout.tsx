@@ -70,7 +70,8 @@ export default function TabsLayout() {
     }
 
     return (
-        <SafeAreaView className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}>
+        <>
+        {/*<SafeAreaView className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}>*/}
             {isWeb && <WebHeader modules={data?.config.modules} />}
             <Tab.Navigator
                 key={navigationKey} // TODO: temporary patch
@@ -122,6 +123,7 @@ export default function TabsLayout() {
                     );
                 })}
             </Tab.Navigator>
-        </SafeAreaView>
+        {/*</SafeAreaView>*/}
+        </>
     );
 }

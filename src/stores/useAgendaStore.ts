@@ -26,6 +26,7 @@ interface AgendaActions {
     setCompleted: (id: string, completed: boolean) => Promise<void>;
 }
 
+// TODO: need a get items so load items can be called automatically if the items haven't been loaded yet (probably sane for all entities)
 export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => ({
     items: [],
     isInitialized: false,
@@ -33,6 +34,11 @@ export const useAgendaStore = create<AgendaState & AgendaActions>((set, get) => 
 
     loadItems: async (): Promise<AgendaItemData[]> => {
         set({ isLoading: true });
+
+        console.log("hi")
+        console.log("hi")
+        console.log("hi")
+        console.log("hi")
 
         try {
             const response = await performAuthenticatedRequest<undefined, GetAgendaItemsResponse>({

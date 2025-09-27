@@ -15,12 +15,14 @@ import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import FormTextArea from '@/src/components/common/FormTextArea';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import WebDateTimePicker from '../components/WebDateTimePicker';
+import WebDateTimePicker from "@/src/features/agenda/components/WebDateTimePicker";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
-import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest } from "@timothyw/pat-common";
+import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest, ThoughtId } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { UnknownOutputParams, useLocalSearchParams } from "expo-router";
+import { AgendaItemFormParams } from "@/app/agenda/[agendaItemId]/types";
 
 interface AgendaItemFormViewProps {
     navigation: StackNavigationProp<MainStackParamList, 'AgendaItemForm'>;
@@ -33,12 +35,14 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 }) => {
     const { getColor } = useTheme();
 
-    const items = useAgendaStore(state => state.items);
-    const currentItem = route.params.itemId ? items.find(item => item._id === route.params.itemId) : undefined;
+    const params = useLocalSearchParams<AgendaItemFormParams>();
 
-    const currentIsEditMode = route.params.isEditing || false;
-    const currentInitialName = route.params.initialName || '';
-    const thoughtId = route.params.thoughtId;
+    const items = useAgendaStore(state => state.items);
+    const currentItem = params.agendaItemId ? items.find(item => item._id === params.agendaItemId) : undefined;
+
+    const currentIsEditMode = params.isEditing === 'true' || false;
+    const currentInitialName = params.initialName as string || '';
+    const thoughtId = params.thoughtId as ThoughtId;
 
     const getTonight = () => {
         const today = new Date();

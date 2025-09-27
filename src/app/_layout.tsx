@@ -1,6 +1,6 @@
 import "@/global.css"
 
-import { Slot, usePathname, useRouter, useSegments } from 'expo-router';
+import { Slot, usePathname, useRouter, useSegments, useNavigationContainerRef, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
@@ -41,11 +41,23 @@ const AppContent: React.FC = () => {
     const router = useRouter();
     const pathname = usePathname();
     const segments = useSegments();
+    const navigationRef = useNavigationContainerRef();
 
     useEffect(() => {
+        console.log();
+        console.log("===================");
         console.log("Current pathname:", pathname);
         console.log("Current segments:", segments);
-    }, [pathname, segments]);
+        if (navigationRef.current) {
+            const navState = navigationRef.current.getState();
+            console.log("Navigation state:", navState);
+            console.log("Navigation routes history:", navState.routes);
+            console.log("Current route index:", navState.index);
+            console.log("Can go back:", navigationRef.current.canGoBack());
+        }
+        console.log("===================");
+        console.log();
+    }, [pathname, segments, navigationRef]);
 
     useEffect(() => {
         Logger.debug('startup', 'deciding whether to initialize auth', {
@@ -231,22 +243,25 @@ const AppContent: React.FC = () => {
     }
 
     return (
-        <ModuleProvider>
-            <ToastProvider>
-                <AlertProvider>
-                    <ThemeProvider value={theme}>
-                        <AppNavigator onLayout={hidesplash}>
-                            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                            {/*<Stack screenOptions={{ header: () => null }}>*/}
-                            {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
-                            {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
-                            {/*</Stack>*/}
-                            <Slot />
-                        </AppNavigator>
-                    </ThemeProvider>
-                </AlertProvider>
-            </ToastProvider>
-        </ModuleProvider>
+        <SafeAreaView className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}>
+            <ModuleProvider>
+                <ToastProvider>
+                    <AlertProvider>
+                        <ThemeProvider value={theme}>
+                            <AppNavigator onLayout={hidesplash}>
+                                <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                                {/*<Stack screenOptions={{ header: () => null }}>*/}
+                                {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
+                                {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
+                                {/*</Stack>*/}
+                                <Stack screenOptions={{ header: () => null }}/>
+                                {/*<Slot />*/}
+                            </AppNavigator>
+                        </ThemeProvider>
+                    </AlertProvider>
+                </ToastProvider>
+            </ModuleProvider>
+        </SafeAreaView>
     );
 };
 

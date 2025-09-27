@@ -13,6 +13,7 @@ import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/components/AgendaFilterDropdown";
+import { useRouter } from "expo-router";
 
 interface AgendaPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Agenda'>;
@@ -30,6 +31,8 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('incomplete');
 
+    const router = useRouter();
+
     const isTableView = width >= 768;
 
     // Load items when component mounts
@@ -40,11 +43,17 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     }, [isInitialized, loadItems]);
 
     const handleAddItem = () => {
-        navigation.navigate('AgendaItemForm', {});
+        // navigation.navigate('AgendaItemForm', {});
     };
 
     const handleItemSelect = (item: AgendaItemData) => {
-        navigation.navigate('AgendaItemDetail', { itemId: item._id });
+        // navigation.navigate('AgendaItemDetail', { itemId: item._id });
+        router.navigate({
+            pathname: '/agenda/[agendaItemId]/AgendaItemDetailScreen',
+            params: {
+                agendaItemId: item._id
+            }
+        })
     };
 
     const filteredItems = items
