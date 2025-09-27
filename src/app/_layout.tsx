@@ -1,6 +1,6 @@
 import "@/global.css"
 
-import { Slot, usePathname, useRouter, useSegments } from 'expo-router';
+import { Slot, useLocalSearchParams, usePathname, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
@@ -8,7 +8,7 @@ import { VersionResponse } from "@timothyw/pat-common";
 import { Platform } from 'react-native';
 import SocketService from '@/src/services/SocketService';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
-import { ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider, useNavigation, useRoute } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/context/ThemeContext";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import { AlertProvider } from "@/src/components/alert";
@@ -22,6 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ModuleProvider } from "@/src/components/ModuleContext";
 import * as Application from 'expo-application';
+import { useNavigationStore } from "@/src/stores/useNavigationStore";
 
 const DEV_BOOT = false;
 
@@ -38,14 +39,62 @@ const AppContent: React.FC = () => {
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
     const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
 
-    const router = useRouter();
     const pathname = usePathname();
     const segments = useSegments();
+
+    const navigationStore = useNavigationStore();
 
     useEffect(() => {
         console.log("Current pathname:", pathname);
         console.log("Current segments:", segments);
+
+        if (pathname.toLowerCase().includes("form")) {
+            navigationStore.setEnabled(false);
+        } else {
+            navigationStore.setEnabled(true);
+        }
     }, [pathname, segments]);
+
+    // Listen for actual URL changes and prevent detail screen URLs
+    useEffect(() => {
+        if (Platform.OS !== 'web') return;
+
+        const handleUrlChange = () => {
+            const pathname = window.location.pathname;
+            const search = window.location.search;
+            console.log('url change detected:', pathname, search);
+
+            // remove everything after and including the first capital letter
+            const newPathname = pathname.replace(/\/[A-Z][^\/]*/g, '');
+            if (newPathname !== pathname || search) {
+                console.log('overriding url change, reverting to', newPathname);
+                window.history.replaceState(null, '', newPathname);
+            }
+        };
+
+        // Listen for popstate events (back/forward)
+        window.addEventListener('popstate', handleUrlChange);
+
+        // Listen for pushState/replaceState calls
+        const originalPushState = window.history.pushState;
+        const originalReplaceState = window.history.replaceState;
+
+        window.history.pushState = function(...args) {
+            originalPushState.apply(this, args);
+            setTimeout(handleUrlChange, 0);
+        };
+
+        window.history.replaceState = function(...args) {
+            originalReplaceState.apply(this, args);
+            setTimeout(handleUrlChange, 0);
+        };
+
+        return () => {
+            window.removeEventListener('popstate', handleUrlChange);
+            window.history.pushState = originalPushState;
+            window.history.replaceState = originalReplaceState;
+        };
+    }, []);
 
     useEffect(() => {
         Logger.debug('startup', 'deciding whether to initialize auth', {
@@ -95,7 +144,8 @@ const AppContent: React.FC = () => {
 
         if (authStoreStatus !== AuthStoreStatus.NOT_INITIALIZED) {
             Logger.debug('startup', 'initializing deep links');
-            DeepLinkHandler.initialize();
+            // TODO: re enable and fix
+            // DeepLinkHandler.initialize();
             Logger.debug('startup', 'deep links initialized successfully');
         }
     }, [authStoreStatus]);

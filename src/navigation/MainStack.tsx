@@ -9,11 +9,11 @@ import {
     NotificationTemplateData,
     HabitId, ListItemId, ThoughtId
 } from '@timothyw/pat-common';
-import AgendaPanel from '@/src/app/(tabs)/agenda';
-import InboxPanel from '@/src/app/(tabs)/inbox';
-import ListsPanel from '@/src/app/(tabs)/lists';
-import PeoplePanel from '@/src/app/(tabs)/people';
-import HabitsPanel from '@/src/app/(tabs)/habits';
+import AgendaPanel from "@/src/features/agenda/screens/AgendaScreen";
+import InboxPanel from '@/src/features/inbox/screens/InboxScreens';
+import ListsPanel from '@/src/features/lists/screens/ListsScreen';
+import PeoplePanel from '@/src/features/people/screens/PeopleScreen';
+import HabitsPanel from '@/src/features/habits/screens/HabitsScreen';
 import AgendaItemDetailScreen from '@/src/features/agenda/screens/AgendaItemDetailScreen';
 import ListDetailScreen from '@/src/features/lists/screens/ListDetailScreen';
 import ListItemDetailScreen from '@/src/features/lists/screens/ListItemDetailScreen';
@@ -24,8 +24,8 @@ import ListFormScreen from '@/src/features/lists/screens/ListFormScreen';
 import ListItemFormScreen from '@/src/features/lists/screens/ListItemFormScreen';
 import PersonFormScreen from '@/src/features/people/screens/PersonFormScreen';
 import HabitFormScreen from '@/src/features/habits/screens/HabitFormScreen';
-import SettingsPanel from '@/src/app/(tabs)/settings';
-import DevPanel from '@/src/app/(tabs)/dev';
+import SettingsPanel from '@/src/features/settings/screens/SettingsScreen';
+import DevPanel from '@/src/features/dev/screens/DevScreen';
 import NotificationInfoScreen from '@/src/features/notifications/screens/NotificationInfoScreen';
 import NotificationFormScreen from '@/src/features/notifications/screens/NotificationFormScreen';
 

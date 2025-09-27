@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -8,11 +8,20 @@ import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
-import { AgendaItemData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
+import {
+    AgendaItemData,
+    ItemId,
+    ModuleType,
+    NotificationEntityType,
+    NotificationTemplateLevel
+} from "@timothyw/pat-common";
 import { TableHeader } from "@/src/features/agenda/components/TableHeader";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/components/AgendaFilterDropdown";
+import { useNavigationStore } from "@/src/stores/useNavigationStore";
+import { useLocalSearchParams } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 
 interface AgendaPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Agenda'>;
@@ -23,6 +32,15 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     navigation,
     route
 }) => {
+    const params = useLocalSearchParams();
+
+    if (params.itemId) {
+        console.log('Navigating to item detail for ID:', params.itemId);
+        navigation.navigate('AgendaItemDetail', {
+            itemId: params.itemId as ItemId
+        });
+    }
+
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
     const { items, isInitialized, loadItems } = useAgendaStore();
