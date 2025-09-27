@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { AuthError } from '@/src/features/auth/models/auth';
-import { HTTPMethod, ApiResponseBody } from '@/src/hooks/useNetworkRequest';
 import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 import SecureStorage from '../services/SecureStorage';
@@ -18,6 +17,7 @@ import { Logger } from "@/src/features/dev/components/Logger";
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
 import Constants from "expo-constants";
+import { ApiResponseBody, HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
 
 // NetworkError class for auth store
 export class NetworkError extends Error {

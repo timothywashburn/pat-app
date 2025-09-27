@@ -1,6 +1,6 @@
 import "@/global.css"
 
-import { Stack } from 'expo-router';
+import { Slot, usePathname, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
@@ -37,6 +37,15 @@ const AppContent: React.FC = () => {
     const { userDataStoreStatus, loadUserData } = useUserDataStore();
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
     const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
+
+    const router = useRouter();
+    const pathname = usePathname();
+    const segments = useSegments();
+
+    useEffect(() => {
+        console.log("Current pathname:", pathname);
+        console.log("Current segments:", segments);
+    }, [pathname, segments]);
 
     useEffect(() => {
         Logger.debug('startup', 'deciding whether to initialize auth', {
@@ -228,10 +237,11 @@ const AppContent: React.FC = () => {
                     <ThemeProvider value={theme}>
                         <AppNavigator onLayout={hidesplash}>
                             <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                            <Stack screenOptions={{ header: () => null }}>
-                                <Stack.Screen name="(auth)" />
-                                <Stack.Screen name="(tabs)" />
-                            </Stack>
+                            {/*<Stack screenOptions={{ header: () => null }}>*/}
+                            {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
+                            {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
+                            {/*</Stack>*/}
+                            <Slot />
                         </AppNavigator>
                     </ThemeProvider>
                 </AlertProvider>

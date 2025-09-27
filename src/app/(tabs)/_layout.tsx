@@ -57,16 +57,14 @@ export default function TabsLayout() {
 
     if (activeHiddenModule) {
         const moduleConfig = moduleInfo[activeHiddenModule.type];
-        
         if (!moduleConfig) return null;
-        
-        const ModuleComponent = moduleConfig.getComponent;
+        const Component = moduleConfig.Component;
 
         return (
             <SafeAreaView
                 className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}
             >
-                <ModuleComponent />
+                <Component />
             </SafeAreaView>
         );
     }
@@ -107,8 +105,8 @@ export default function TabsLayout() {
                     
                     if (!moduleConfig) return null;
                     
-                    const { getComponent: Component, icon, title } = moduleConfig;
-                    
+                    const { Component, icon, title } = moduleConfig;
+
                     return (
                         <Tab.Screen
                             key={moduleType}

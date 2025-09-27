@@ -9,7 +9,7 @@ const VerifySuccess: React.FC = () => {
     return (
         <SafeAreaView className="bg-background flex-1">
             <View className="flex-1 items-center justify-center p-4">
-                <View className="bg-surface rounded-lg shadow p-8 w-full max-w-md items-center">
+                <View className="bg-surface rounded-lg p-8 w-full max-w-md items-center">
                     <Text className="text-on-surface text-2xl font-bold mb-4 text-center">
                         App
                     </Text>

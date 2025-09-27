@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import {
     CreatePersonRequest,
     CreatePersonResponse,
@@ -22,6 +21,7 @@ import {
 } from '@timothyw/pat-common';
 import { performAuthenticatedRequest } from '@/src/utils/networkUtils';
 import { toastManager } from '@/src/utils/toastUtils';
+import { HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
 
 interface PeopleState {
     people: Person[];

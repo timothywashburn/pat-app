@@ -59,7 +59,7 @@ const WebDateTimePicker: React.FC<WebDateTimePickerProps> = ({
     };
 
     return (
-        <View className={`bg-surface rounded-lg shadow-lg ${useHorizontalLayout ? 'w-auto' : 'w-80'} max-w-full`}>
+        <View className={`bg-surface rounded-lg ${useHorizontalLayout ? 'w-auto' : 'w-80'} max-w-full`}>
             {/* Header */}
             <View className="bg-primary-container p-4 rounded-t-lg">
                 <Text className="text-on-primary-container text-center text-lg font-medium">

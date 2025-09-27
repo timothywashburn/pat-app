@@ -94,7 +94,7 @@ export const Alert: React.FC<AlertProps> = ({ alert, onDismiss }) => {
                 <TouchableOpacity 
                     activeOpacity={1}
                     onPress={(e) => e.stopPropagation()}
-                    className="bg-surface rounded-xl p-5 min-w-[280px] max-w-[400px] shadow-lg"
+                    className="bg-surface rounded-xl p-5 min-w-[280px] max-w-[400px]"
                 >
                     <Text className="text-lg font-semibold text-on-surface text-center mb-2">
                         {alert.title}

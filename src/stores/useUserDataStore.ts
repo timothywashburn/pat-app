@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { HTTPMethod, ApiResponseBody } from '@/src/hooks/useNetworkRequest';
 import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/src/stores/useAuthStore';
@@ -11,6 +10,7 @@ import {
     UserData, UserId
 } from "@timothyw/pat-common";
 import { Logger } from "@/src/features/dev/components/Logger";
+import { ApiResponseBody, HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
 
 const performAuthenticatedRequest = async <TReq, TRes>(config: {
     endpoint: string;

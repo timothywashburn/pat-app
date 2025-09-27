@@ -35,7 +35,7 @@ const VerifySuccess: React.FC = () => {
     return (
         <SafeAreaView className="bg-background flex-1">
             <View className="flex-1 items-center justify-center p-4">
-                <View className="bg-surface rounded-lg shadow p-8 w-full max-w-md items-center">
+                <View className="bg-surface rounded-lg p-8 w-full max-w-md items-center">
                     <View className="mb-6">
                         <View className="rounded-full bg-success-container p-3">
                             <Ionicons

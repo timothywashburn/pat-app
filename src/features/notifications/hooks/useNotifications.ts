@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { HTTPMethod, useNetworkRequest } from '@/src/hooks/useNetworkRequest';
+import { useNetworkRequest } from '@/src/hooks/useNetworkRequest';
 import { useAsyncOperation } from '@/src/hooks/useAsyncOperation';
 import {
     CreateNotificationTemplateRequest,
@@ -17,6 +17,7 @@ import {
     UpdateNotificationTemplateRequest,
     UpdateNotificationTemplateResponse,
 } from '@timothyw/pat-common';
+import { HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
 
 export function useNotifications(targetEntityType: NotificationEntityType, targetId: string, targetLevel: NotificationTemplateLevel) {
     const [ syncState, setSyncState ] = useState<NotificationTemplateSyncState | null>(null);

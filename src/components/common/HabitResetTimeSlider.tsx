@@ -398,7 +398,7 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
                 {readOnly ? (
                     <>
                         <Animated.View
-                            className="bg-primary absolute shadow-sm"
+                            className="bg-primary absolute"
                             style={[
                                 {
                                     width: thumbSize,
@@ -410,7 +410,7 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
                             ]}
                         />
                         <Animated.View
-                            className="bg-primary absolute shadow-sm"
+                            className="bg-primary absolute"
                             style={[
                                 {
                                     width: thumbSize,
@@ -426,7 +426,7 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
                     <>
                         <GestureDetector gesture={startPanGesture}>
                             <Animated.View
-                                className="bg-primary absolute shadow-sm"
+                                className="bg-primary absolute"
                                 style={[
                                     {
                                         width: thumbSize,
@@ -441,7 +441,7 @@ const HabitResetTimeSlider: React.FC<HabitResetTimeSliderProps> = ({ startOffset
 
                         <GestureDetector gesture={endPanGesture}>
                             <Animated.View
-                                className="bg-primary absolute shadow-sm"
+                                className="bg-primary absolute"
                                 style={[
                                     {
                                         width: thumbSize,

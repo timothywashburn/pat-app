@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { HTTPMethod } from '@/src/hooks/useNetworkRequest';
 import {
     CompleteListItemRequest,
     CompleteListItemResponse,
@@ -22,6 +21,7 @@ import {
 import { ListWithItems } from "@/src/features/lists/models";
 import { performAuthenticatedRequest } from '@/src/utils/networkUtils';
 import { toastManager } from '@/src/utils/toastUtils';
+import { HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
 
 interface ListsState {
     lists: ListData[];
