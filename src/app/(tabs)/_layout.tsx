@@ -95,8 +95,7 @@ export default function TabsLayout() {
                     tabBarInactiveTintColor: getColor("on-surface"),
                     tabBarStyle: {
                         backgroundColor: getColor("surface"),
-                        // todo: TEMP turn first flex back to none
-                        display: isWeb ? 'flex' : 'flex',
+                        display: isWeb ? 'none' : 'flex',
                         // height: 60
                     },
                     tabBarIndicatorStyle: {
