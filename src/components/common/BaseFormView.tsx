@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
 import FormViewHeader from '../headers/FormViewHeader';
+import KeyboardAvoidingWrapper from './KeyboardAvoidingWrapper';
 
 interface NavigationProps {
     navigation?: any;
@@ -77,44 +78,46 @@ const BaseFormView: React.FC<BaseFormViewProps> = ({
     };
 
     return (
-        <View className="bg-background flex-1">
-            <FormViewHeader
-                title={title}
-                onCancel={handleCancel}
-                onSave={onSave}
-                isEditMode={isEditMode}
-                isSaveDisabled={isSaveDisabled}
-                isLoading={isLoading}
-                saveText={saveText}
-            />
+        <KeyboardAvoidingWrapper>
+            <View className="bg-background flex-1">
+                <FormViewHeader
+                    title={title}
+                    onCancel={handleCancel}
+                    onSave={onSave}
+                    isEditMode={isEditMode}
+                    isSaveDisabled={isSaveDisabled}
+                    isLoading={isLoading}
+                    saveText={saveText}
+                />
 
-            {errorMessage && (
-                <View className="p-4">
-                    <Text className="text-error text-center">{errorMessage}</Text>
-                </View>
-            )}
-
-            <ScrollView className="flex-1 p-4">
-                {children}
-
-                {isEditMode && existingItem && onDelete && (
-                    <View className="mt-5">
-                        <TouchableOpacity
-                            className="bg-error flex-row items-center justify-center rounded-lg p-3"
-                            onPress={handleDelete}
-                            disabled={isLoading}
-                        >
-                            <Text className="text-on-error text-base font-semibold mr-2">
-                                {deleteButtonText}
-                            </Text>
-                            <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
-                        </TouchableOpacity>
+                {errorMessage && (
+                    <View className="p-4">
+                        <Text className="text-error text-center">{errorMessage}</Text>
                     </View>
                 )}
 
-                <View className="h-10" />
-            </ScrollView>
-        </View>
+                <ScrollView className="flex-1 p-4">
+                    {children}
+
+                    {isEditMode && existingItem && onDelete && (
+                        <View className="mt-5">
+                            <TouchableOpacity
+                                className="bg-error flex-row items-center justify-center rounded-lg p-3"
+                                onPress={handleDelete}
+                                disabled={isLoading}
+                            >
+                                <Text className="text-on-error text-base font-semibold mr-2">
+                                    {deleteButtonText}
+                                </Text>
+                                <Ionicons name="trash-outline" size={20} color={getColor("on-error")} />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    <View className="h-10" />
+                </ScrollView>
+            </View>
+        </KeyboardAvoidingWrapper>
     );
 };
 

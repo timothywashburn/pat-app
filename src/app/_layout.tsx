@@ -1,14 +1,12 @@
 import "@/global.css"
 
-import { Slot, useLocalSearchParams, usePathname, useRouter, useSegments } from 'expo-router';
+import { Slot, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
-import { VersionResponse } from "@timothyw/pat-common";
 import { Platform } from 'react-native';
 import SocketService from '@/src/services/SocketService';
-import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
-import { ThemeProvider, useNavigation, useRoute } from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/context/ThemeContext";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import { AlertProvider } from "@/src/components/alert";
