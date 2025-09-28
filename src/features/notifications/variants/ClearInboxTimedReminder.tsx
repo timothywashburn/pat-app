@@ -10,8 +10,7 @@ import {
 import { NotificationVariantInformation, SchedulerFormProps, DisplayComponentProps } from "@/src/features/notifications/variants/index";
 import { timeStringToOffsetMinutes, offsetMinutesToTimeString, formatTimeDisplay, formatOffsetMinutesToDisplay, formatDays } from '@/src/utils/timeUtils';
 
-
-const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
+const ClearInboxTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
     schedulerData,
     onSchedulerDataChange
 }) => {
@@ -20,7 +19,7 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
     if (schedulerData.type !== NotificationSchedulerType.DAY_TIME) return null;
 
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+
     const updateDays = (days: number[]) => {
         onSchedulerDataChange({
             ...schedulerData,
@@ -46,7 +45,6 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
         }
     };
 
-
     return (
         <View className="space-y-4">
             <View className="mb-4">
@@ -59,8 +57,8 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
                                 key={index}
                                 onPress={() => toggleDay(index)}
                                 className={`px-3 py-2 rounded-md border ${
-                                    isSelected 
-                                        ? 'bg-primary/20 border-primary' 
+                                    isSelected
+                                        ? 'bg-primary/20 border-primary'
                                         : 'bg-surface border-divider'
                                 }`}
                             >
@@ -82,7 +80,7 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
                     onOffsetChange={updateTime}
                 />
             </View>
-            
+
             <View className="flex-row items-center mb-4">
                 <Ionicons name="time" size={16} color={getColor('primary')} />
                 <Text className="text-primary text-sm font-medium ml-2">
@@ -93,18 +91,18 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
     );
 };
 
-export const habitTimedReminderVariant: NotificationVariantInformation = {
-    type: NotificationVariantType.HABIT_TIMED_REMINDER,
-    displayName: 'Timed Reminder',
-    description: 'Get reminded at specific times on selected days',
-    icon: 'alarm',
+export const clearInboxTimedReminderVariant: NotificationVariantInformation = {
+    type: NotificationVariantType.CLEAR_INBOX_TIMED_REMINDER,
+    displayName: 'Clear Inbox Reminder',
+    description: 'Get reminded to clear your inbox at specific times on selected days',
+    icon: 'mail',
     defaultSchedulerData: {
         type: NotificationSchedulerType.DAY_TIME,
         days: [1, 2, 3, 4, 5], // Monday through Friday by default
         offsetMinutes: 540 // 09:00 AM (9 * 60 = 540 minutes)
     },
     defaultVariantData: {
-        type: NotificationVariantType.HABIT_TIMED_REMINDER,
+        type: NotificationVariantType.CLEAR_INBOX_TIMED_REMINDER,
     },
     displayComponent: ({ schedulerData, variantData }) => {
         const getTimeDisplay = () => {
@@ -123,7 +121,7 @@ export const habitTimedReminderVariant: NotificationVariantInformation = {
 
         return (
             <View>
-                <Text className="text-on-surface font-medium text-sm mb-1">Timed Reminder</Text>
+                <Text className="text-on-surface font-medium text-sm mb-1">Clear Inbox Reminder</Text>
                 <Text className="text-on-surface-variant text-xs mb-0.5">
                     Days: {getDaysDisplay()}
                 </Text>
@@ -133,5 +131,5 @@ export const habitTimedReminderVariant: NotificationVariantInformation = {
             </View>
         );
     },
-    dataForm: HabitTimedReminderDataForm
+    dataForm: ClearInboxTimedReminderDataForm
 };

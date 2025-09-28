@@ -6,6 +6,7 @@ import {
 import { agendaItemDueVariant } from './AgendaItemDue';
 import { habitDueVariant } from './HabitDue';
 import { habitTimedReminderVariant } from './HabitTimedReminder';
+import { clearInboxTimedReminderVariant } from './ClearInboxTimedReminder';
 import { z } from "zod";
 import { Ionicons } from "@expo/vector-icons";
 import React from 'react';
@@ -35,6 +36,7 @@ export const VARIANT_REGISTRY = {
     [NotificationVariantType.AGENDA_ITEM_DUE]: agendaItemDueVariant,
     [NotificationVariantType.HABIT_TIMED_REMINDER]: habitTimedReminderVariant,
     [NotificationVariantType.HABIT_DUE]: habitDueVariant,
+    [NotificationVariantType.CLEAR_INBOX_TIMED_REMINDER]: clearInboxTimedReminderVariant,
 };
 
 export function getVariantDefinition(variantType: NotificationVariantType): NotificationVariantInformation | undefined {
@@ -61,3 +63,4 @@ export function getDefaultDataForVariant(variantType: NotificationVariantType) {
 export * from './AgendaItemDue';
 export * from './HabitDue';
 export * from './HabitTimedReminder';
+export * from './ClearInboxTimedReminder';
