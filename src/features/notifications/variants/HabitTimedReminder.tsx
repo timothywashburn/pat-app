@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
+import TimeSlider from '@/src/components/common/TimeSlider';
 import {
     NotificationVariantType,
     NotificationSchedulerType
@@ -37,8 +38,7 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
         });
     };
 
-    const updateTime = (time: string) => {
-        const offsetMinutes = timeStringToOffsetMinutes(time);
+    const updateTime = (offsetMinutes: number) => {
         onSchedulerDataChange({
             ...schedulerData,
             offsetMinutes
@@ -94,13 +94,9 @@ const HabitTimedReminderDataForm: React.FC<SchedulerFormProps> = ({
 
             <View className="mb-4">
                 <Text className="text-on-surface text-sm font-medium mb-1.5">Time</Text>
-                <TextInput
-                    value={offsetMinutesToTimeString(schedulerData.offsetMinutes)}
-                    onChangeText={updateTime}
-                    placeholder="09:00"
-                    className="bg-surface border border-divider rounded-md px-3 py-2 text-sm"
-                    style={{ color: getColor('on-surface') }}
-                    maxLength={5}
+                <TimeSlider
+                    offsetMinutes={schedulerData.offsetMinutes}
+                    onOffsetChange={updateTime}
                 />
             </View>
             
