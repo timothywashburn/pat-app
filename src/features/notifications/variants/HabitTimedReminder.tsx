@@ -7,7 +7,7 @@ import {
     NotificationVariantType,
     NotificationSchedulerType
 } from '@timothyw/pat-common';
-import { NotificationVariantInformation, SchedulerFormProps } from "@/src/features/notifications/variants/index";
+import { NotificationVariantInformation, SchedulerFormProps, DisplayComponentProps } from "@/src/features/notifications/variants/index";
 
 // Helper functions to convert between time strings and offsetMinutes
 const timeStringToOffsetMinutes = (timeString: string): number => {
@@ -122,6 +122,47 @@ export const habitTimedReminderVariant: NotificationVariantInformation = {
     },
     defaultVariantData: {
         type: NotificationVariantType.HABIT_TIMED_REMINDER,
+    },
+    displayComponent: ({ schedulerData, variantData }) => {
+        const formatTime = (offsetMinutes: number): string => {
+            const hours = Math.floor(offsetMinutes / 60);
+            const minutes = offsetMinutes % 60;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHour = hours % 12 || 12;
+            return `${displayHour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        };
+
+        const formatDays = (days: number[]): string => {
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            if (!days || days.length === 0) return 'No days selected';
+            return days.map(d => dayNames[d]).join(', ');
+        };
+
+        const getTimeDisplay = () => {
+            if (schedulerData.type === NotificationSchedulerType.DAY_TIME) {
+                return formatTime(schedulerData.offsetMinutes);
+            }
+            return 'N/A';
+        };
+
+        const getDaysDisplay = () => {
+            if (schedulerData.type === NotificationSchedulerType.DAY_TIME) {
+                return formatDays(schedulerData.days);
+            }
+            return 'N/A';
+        };
+
+        return (
+            <View>
+                <Text className="text-on-surface font-medium text-sm mb-1">Timed Reminder</Text>
+                <Text className="text-on-surface-variant text-xs mb-0.5">
+                    Days: {getDaysDisplay()}
+                </Text>
+                <Text className="text-on-surface-variant text-xs">
+                    Time: {getTimeDisplay()}
+                </Text>
+            </View>
+        );
     },
     dataForm: HabitTimedReminderDataForm
 };

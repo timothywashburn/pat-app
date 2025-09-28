@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
-import { 
-    NotificationVariantType, 
-    NotificationSchedulerType 
+import {
+    NotificationVariantType,
+    NotificationSchedulerType
 } from '@timothyw/pat-common';
-import { NotificationVariantInformation } from "@/src/features/notifications/variants/index";
+import { NotificationVariantInformation, DisplayComponentProps } from "@/src/features/notifications/variants/index";
 
 export const agendaItemDueVariant: NotificationVariantInformation = {
     type: NotificationVariantType.AGENDA_ITEM_DUE,
@@ -19,6 +19,24 @@ export const agendaItemDueVariant: NotificationVariantInformation = {
     },
     defaultVariantData: {
         type: NotificationVariantType.AGENDA_ITEM_DUE,
+    },
+    displayComponent: ({ schedulerData, variantData }) => {
+        const getMinutesDisplay = () => {
+            if (schedulerData.type === NotificationSchedulerType.RELATIVE_DATE) {
+                const minutes = Math.abs(schedulerData.offsetMinutes);
+                return `${minutes} minutes`;
+            }
+            return 'N/A';
+        };
+
+        return (
+            <View>
+                <Text className="text-on-surface font-medium text-sm mb-1">Upcoming Deadline</Text>
+                <Text className="text-on-surface-variant text-xs">
+                    Minutes Before: {getMinutesDisplay()}
+                </Text>
+            </View>
+        );
     },
     dataForm: ({
         schedulerData,

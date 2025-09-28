@@ -11,8 +11,13 @@ import { Ionicons } from "@expo/vector-icons";
 import React from 'react';
 
 export interface SchedulerFormProps {
-    schedulerData: z.infer<typeof notificationSchedulerDataSchema>;
+    schedulerData: z.infer<typeof notificationSchedulerDataSchema>; // TODO: these infers can probably be converted to just one and moved to common
     onSchedulerDataChange: (data: z.infer<typeof notificationSchedulerDataSchema>) => void;
+}
+
+export interface DisplayComponentProps {
+    schedulerData: z.infer<typeof notificationSchedulerDataSchema>;
+    variantData: any;
 }
 
 export interface NotificationVariantInformation {
@@ -23,6 +28,7 @@ export interface NotificationVariantInformation {
     defaultSchedulerData: z.infer<typeof notificationSchedulerDataSchema>;
     defaultVariantData: any;
     dataForm?: React.ComponentType<SchedulerFormProps>;
+    displayComponent?: React.ComponentType<DisplayComponentProps>;
 }
 
 export const VARIANT_REGISTRY = {

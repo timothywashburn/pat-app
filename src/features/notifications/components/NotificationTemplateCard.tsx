@@ -4,6 +4,7 @@ import { NotificationTemplateData } from '@timothyw/pat-common';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAlert } from '@/src/components/alert';
 import { Ionicons } from '@expo/vector-icons';
+import { getVariantDefinition } from '@/src/features/notifications/variants';
 
 interface NotificationTemplateCardProps {
     template: NotificationTemplateData;
@@ -29,15 +30,35 @@ export const NotificationTemplateCard: React.FC<NotificationTemplateCardProps> =
         );
     };
 
+    const renderTemplateDisplay = () => {
+        const variantDefinition = getVariantDefinition(template.variantData.type);
+
+        if (variantDefinition?.displayComponent) {
+            const DisplayComponent = variantDefinition.displayComponent;
+            return (
+                <DisplayComponent
+                    schedulerData={template.schedulerData}
+                    variantData={template.variantData}
+                />
+            );
+        }
+
+        return (
+            <View className="flex-row items-center">
+                <Text className="text-on-surface text-base font-semibold">
+                    {template.variantData.type}
+                </Text>
+            </View>
+        );
+    };
+
     return (
         <View className={`bg-surface rounded-xl p-4 my-1.5 border ${
             template.active ? 'border-primary' : ''
         } ${readOnly ? 'opacity-75 border-l-4 border-l-success/40' : ''}`}>
             <View className="flex-row justify-between items-center mb-2">
                 <View className="flex-row items-center flex-1">
-                    <Text className="text-on-surface text-base font-semibold">
-                        {template.variantData.type}
-                    </Text>
+                    {renderTemplateDisplay()}
                     {readOnly && (
                         <View className="flex-row items-center ml-2 px-2 py-0.5 rounded">
                             <Ionicons name="lock-closed" size={10} color={getColor('success')} />
