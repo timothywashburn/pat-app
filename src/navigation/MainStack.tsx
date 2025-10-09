@@ -10,7 +10,7 @@ import {
     HabitId, ListItemId, ThoughtId
 } from '@timothyw/pat-common';
 import AgendaPanel from "@/src/features/agenda/screens/AgendaScreen";
-import InboxPanel from '@/src/features/inbox/screens/InboxScreens';
+import InboxPanel from '@/src/features/inbox/screens/InboxScreen';
 import ListsPanel from '@/src/features/lists/screens/ListsScreen';
 import PeoplePanel from '@/src/features/people/screens/PeopleScreen';
 import HabitsPanel from '@/src/features/habits/screens/HabitsScreen';

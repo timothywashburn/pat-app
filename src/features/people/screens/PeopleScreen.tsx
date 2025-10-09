@@ -55,7 +55,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({
                 onAddTapped={handleAddPerson}
             />
 
-            {isInitialized && people.length === 0 ? (
+            {!isInitialized && people.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
                     <ActivityIndicator size="large" color={getColor("primary")} />
                 </View>
