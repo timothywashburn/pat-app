@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { ActivityIndicator, Animated, FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { NavigationRoute, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -18,6 +18,7 @@ import { useNavStateLogger } from '@/src/hooks/useNavStateLogger';
 import ListItemDetailScreen from './ListItemDetailScreen';
 import ListItemFormScreen from './ListItemFormScreen';
 import { CustomNavigation } from '@/src/navigation/CustomNavigation';
+import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 
 interface ListsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Lists'>;
@@ -35,6 +36,7 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     const { isRefreshing, refreshControl } = useRefreshControl(loadAll, 'Failed to refresh lists');
     const { width } = useWindowDimensions();
     const isWideScreen = width >= 768;
+    const { setHeaderControls } = useHeaderControls();
 
     useNavStateLogger(navigation, 'lists');
 
@@ -65,10 +67,25 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
         }, [isRefreshing])
     );
 
-
     const handleAddList = () => {
         navigation.navigate('ListForm', {});
     };
+
+    useFocusEffect(
+        useCallback(() => {
+            setHeaderControls({
+                showAddButton: true,
+                onAddTapped: handleAddList,
+                showFilterButton: true,
+                isFilterActive: showCompleted,
+                onFilterTapped: () => setShowCompleted(!showCompleted),
+            });
+
+            return () => {
+                setHeaderControls({});
+            };
+        }, [showCompleted])
+    );
 
     const handleListSelect = (list: ListWithItems) => {
         navigation.navigate('ListDetail', {
@@ -214,11 +231,6 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
             <MainViewHeader
                 moduleType={ModuleType.LISTS}
                 title="Lists"
-                showAddButton
-                onAddTapped={handleAddList}
-                showFilterButton
-                isFilterActive={showCompleted}
-                onFilterTapped={() => setShowCompleted(!showCompleted)}
             />
 
             {isWideScreen ? (

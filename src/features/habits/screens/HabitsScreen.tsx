@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
+import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
@@ -10,6 +11,7 @@ import { getActiveHabitDate, getTimeRemainingUntilRollover } from '@/src/feature
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
+import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 
 interface HabitsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Habits'>;
@@ -22,6 +24,7 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
 }) => {
     const { habits, isInitialized, loadHabits } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
+    const { setHeaderControls } = useHeaderControls();
 
     useNavStateLogger(navigation, 'habits');
 
@@ -35,6 +38,24 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
     const handleAddHabit = () => {
         navigation.navigate('HabitForm', {});
     };
+
+    // Set header controls for WebHeader on web
+    useFocusEffect(
+        useCallback(() => {
+            setHeaderControls({
+                showAddButton: true,
+                onAddTapped: handleAddHabit,
+                showFilterButton: true,
+                isFilterActive: showUnmarkedOnly,
+                onFilterTapped: () => setShowUnmarkedOnly(!showUnmarkedOnly),
+            });
+
+            // Clear header controls when screen loses focus
+            return () => {
+                setHeaderControls({});
+            };
+        }, [showUnmarkedOnly])
+    );
 
     const handleEditHabit = (habit: Habit) => {
         navigation.navigate('HabitForm', { habitId: habit._id, isEditing: true });
@@ -89,11 +110,6 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
             <MainViewHeader
                 moduleType={ModuleType.HABITS}
                 title="Habits"
-                showAddButton
-                onAddTapped={handleAddHabit}
-                showFilterButton
-                isFilterActive={showUnmarkedOnly}
-                onFilterTapped={() => setShowUnmarkedOnly(!showUnmarkedOnly)}
             />
 
             <ScrollView 

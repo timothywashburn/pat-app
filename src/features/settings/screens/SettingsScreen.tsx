@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
+import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
@@ -15,6 +16,7 @@ import { PeopleSection } from '@/src/features/settings/sections/PeopleSection';
 import { HabitsSection } from '@/src/features/settings/sections/HabitsSection';
 import { InboxSection } from '@/src/features/settings/sections/InboxSection';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
+import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 
 interface SettingsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Settings'>;
@@ -29,6 +31,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     const { signOut } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const { setHeaderControls } = useHeaderControls();
 
     const { data, updateUserData } = useUserDataStore();
 
@@ -78,13 +81,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         setSectionData(prev => ({ ...prev, propertyKeys: data.propertyKeys }));
     };
 
-    return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <MainViewHeader
-                moduleType={ModuleType.SETTINGS}
-                title="Settings"
-                showAddButton={false}
-                trailing={() => (
+    useFocusEffect(
+        useCallback(() => {
+            setHeaderControls({
+                trailing: () => (
                     <View className="flex-row">
                         {editMode && (
                             <TouchableOpacity
@@ -103,7 +103,21 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             </Text>
                         </TouchableOpacity>
                     </View>
-                )}
+                ),
+            });
+
+            return () => {
+                setHeaderControls({});
+            };
+        }, [editMode, isSaving, handleSaveChanges])
+    );
+
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <MainViewHeader
+                moduleType={ModuleType.SETTINGS}
+                title="Settings"
+                hideOnWeb
             />
 
             <ScrollView className="flex-1">

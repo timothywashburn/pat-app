@@ -21,8 +21,9 @@ import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/components/AgendaFilterDropdown";
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { useLocalSearchParams } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
+import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 
 interface AgendaPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Agenda'>;
@@ -48,6 +49,7 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     const { data } = useUserDataStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('incomplete');
+    const { setHeaderControls } = useHeaderControls();
 
     useNavStateLogger(navigation, 'agenda');
 
@@ -63,6 +65,28 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     const handleAddItem = () => {
         navigation.navigate('AgendaItemForm', {});
     };
+
+    // Set header controls for WebHeader on web
+    useFocusEffect(
+        useCallback(() => {
+            setHeaderControls({
+                showAddButton: true,
+                onAddTapped: handleAddItem,
+                customFilter: () => (
+                    <AgendaFilterDropdown
+                        selectedFilter={selectedFilter}
+                        categories={data.config.agenda.itemCategories}
+                        onFilterChange={setSelectedFilter}
+                    />
+                ),
+            });
+
+            // Clear header controls when screen loses focus
+            return () => {
+                setHeaderControls({});
+            };
+        }, [selectedFilter, data.config.agenda.itemCategories])
+    );
 
     const handleItemSelect = (item: AgendaItemData) => {
         navigation.navigate('AgendaItemDetail', { itemId: item._id });
@@ -92,15 +116,7 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
             <MainViewHeader
                 moduleType={ModuleType.AGENDA}
                 title="Agenda"
-                showAddButton
-                onAddTapped={handleAddItem}
-                customFilter={() => (
-                    <AgendaFilterDropdown
-                        selectedFilter={selectedFilter}
-                        categories={data.config.agenda.itemCategories}
-                        onFilterChange={setSelectedFilter}
-                    />
-                )}
+                hideOnWeb
             />
 
             {!isInitialized && items.length === 0 ? (

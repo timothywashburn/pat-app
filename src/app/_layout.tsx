@@ -21,6 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ModuleProvider } from "@/src/components/ModuleContext";
 import * as Application from 'expo-application';
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
+import { HeaderControlsProvider } from '@/src/context/HeaderControlsContext';
 
 const DEV_BOOT = false;
 
@@ -276,20 +277,22 @@ const AppContent: React.FC = () => {
 
     return (
         <ModuleProvider>
-            <ToastProvider>
-                <AlertProvider>
-                    <ThemeProvider value={theme}>
-                        <AppNavigator onLayout={hidesplash}>
-                            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                            {/*<Stack screenOptions={{ header: () => null }}>*/}
-                            {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
-                            {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
-                            {/*</Stack>*/}
-                            <Slot />
-                        </AppNavigator>
-                    </ThemeProvider>
-                </AlertProvider>
-            </ToastProvider>
+            <HeaderControlsProvider>
+                <ToastProvider>
+                    <AlertProvider>
+                        <ThemeProvider value={theme}>
+                            <AppNavigator onLayout={hidesplash}>
+                                <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                                {/*<Stack screenOptions={{ header: () => null }}>*/}
+                                {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
+                                {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
+                                {/*</Stack>*/}
+                                <Slot />
+                            </AppNavigator>
+                        </ThemeProvider>
+                    </AlertProvider>
+                </ToastProvider>
+            </HeaderControlsProvider>
         </ModuleProvider>
     );
 };

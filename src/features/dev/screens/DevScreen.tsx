@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
+import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
@@ -11,6 +12,7 @@ import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
 import { ModuleType } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import HabitResetTimeSlider from "@/src/components/common/HabitResetTimeSlider";
+import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 
 interface DevPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Dev'>;
@@ -22,16 +24,30 @@ export const DevPanel: React.FC<DevPanelProps> = ({
     route
 }) => {
     const [logViewerPanelVisible, setLogViewerPanelVisible] = useState(false);
+    const { setHeaderControls } = useHeaderControls();
+
+    const handleAddTapped = () => {
+        console.log('dev tapped');
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            setHeaderControls({
+                showAddButton: true,
+                onAddTapped: handleAddTapped,
+            });
+
+            return () => {
+                setHeaderControls({});
+            };
+        }, [])
+    );
 
     return (
         <>
             <MainViewHeader
                 moduleType={ModuleType.DEV}
                 title="Dev"
-                showAddButton
-                onAddTapped={() => {
-                    console.log('dev tapped')
-                }}
             />
 
             <ScrollView className="flex-1 p-5">

@@ -1,40 +1,30 @@
 import React, { useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import HamburgerMenu from '../HamburgerMenu';
 import { useModuleContext } from "@/src/components/ModuleContext";
 import { ModuleType } from "@timothyw/pat-common";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
+import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 
 interface CustomHeaderProps {
     moduleType: ModuleType;
     title: string;
-    showAddButton?: boolean;
-    onAddTapped?: () => void;
-    showFilterButton?: boolean;
-    isFilterActive?: boolean;
-    onFilterTapped?: () => void;
-    customFilter?: () => React.ReactNode;
-    trailing?: () => React.ReactNode;
-    isModuleView?: boolean;
+    hideOnWeb?: boolean;
 }
 
 const MainViewHeader: React.FC<CustomHeaderProps> = ({
     moduleType,
     title,
-    showAddButton = false,
-    onAddTapped,
-    showFilterButton = false,
-    isFilterActive = false,
-    onFilterTapped,
-    customFilter,
-    trailing,
 }) => {
     const { getColor } = useTheme();
     const [menuVisible, setMenuVisible] = useState(false);
     const { hideActiveModule } = useModuleContext();
     const { isModuleVisible } = useUserDataStore();
+    const { headerControls } = useHeaderControls();
+
+    if (Platform.OS === 'web') return null;
 
     return (
         <>
@@ -61,27 +51,27 @@ const MainViewHeader: React.FC<CustomHeaderProps> = ({
                     <Text className="text-on-surface text-lg font-bold flex-2 text-center">{title}</Text>
 
                     <View className="flex-1 flex-row justify-end items-center">
-                        {customFilter ? (
+                        {headerControls.customFilter ? (
                             <View className="ml-4">
-                                {customFilter()}
+                                {headerControls.customFilter()}
                             </View>
-                        ) : showFilterButton ? (
-                            <TouchableOpacity onPress={onFilterTapped} className="ml-4 p-1">
+                        ) : headerControls.showFilterButton ? (
+                            <TouchableOpacity onPress={headerControls.onFilterTapped} className="ml-4 p-1">
                                 <Ionicons
                                     name="filter"
                                     size={24}
-                                    color={isFilterActive ? getColor("primary") : getColor("on-surface")}
+                                    color={headerControls.isFilterActive ? getColor("primary") : getColor("on-surface")}
                                 />
                             </TouchableOpacity>
                         ) : null}
 
-                        {showAddButton && (
-                            <TouchableOpacity onPress={onAddTapped} className="ml-4 p-1">
+                        {headerControls.showAddButton && (
+                            <TouchableOpacity onPress={headerControls.onAddTapped} className="ml-4 p-1">
                                 <Ionicons name="add" size={24} color={getColor("on-surface")} />
                             </TouchableOpacity>
                         )}
 
-                        {trailing && trailing()}
+                        {headerControls.trailing && headerControls.trailing()}
                     </View>
                 </View>
             </View>

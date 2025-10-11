@@ -108,8 +108,6 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
         }
     };
 
-
-
     const toggleThoughtExpansion = (thought: ThoughtData) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
@@ -169,7 +167,6 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
             <MainViewHeader
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
-                showAddButton={false}
             />
 
             <View className="flex-row p-4 py-2 items-center">
