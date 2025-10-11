@@ -1,6 +1,7 @@
 import React from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTheme } from '@/src/context/ThemeContext';
+import TextBox from './TextBox';
 
 interface FormFieldProps {
     label: string;
@@ -22,31 +23,25 @@ const FormField: React.FC<FormFieldProps> = ({
     value,
     onChangeText,
     placeholder,
-    required = false,
+    required,
     error,
-    disabled = false,
-    autoFocus = false,
+    disabled,
+    autoFocus,
     maxLength,
-    secureTextEntry = false,
-    keyboardType = 'default',
-    autoCapitalize = 'sentences'
+    secureTextEntry,
+    keyboardType,
+    autoCapitalize
 }) => {
-    const { getColor } = useTheme();
-
     return (
         <View className="mb-4">
             <Text className="text-on-surface text-base font-medium mb-2">
                 {label}{required && ' *'}
             </Text>
-            <TextInput
-                className={`bg-surface border rounded-lg p-3 text-on-surface text-base ${
-                    error ? 'border-error' : 'border-outline'
-                } ${disabled ? 'opacity-50' : ''}`}
+            <TextBox
                 placeholder={placeholder}
-                placeholderTextColor={getColor('on-surface-variant')}
                 value={value}
                 onChangeText={onChangeText}
-                editable={!disabled}
+                disabled={disabled}
                 autoFocus={autoFocus}
                 maxLength={maxLength}
                 secureTextEntry={secureTextEntry}

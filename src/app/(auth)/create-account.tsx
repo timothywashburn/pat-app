@@ -5,6 +5,7 @@ import { useTheme } from '@/src/context/ThemeContext';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
+import TextBox from '@/src/components/common/TextBox';
 
 export default function CreateAccountScreen() {
     const { getColor } = useTheme();
@@ -47,10 +48,8 @@ export default function CreateAccountScreen() {
                 <Text className="text-on-background-variant text-base mb-8 text-center">Create an account to get started.</Text>
 
                 <View className="mb-4">
-                    <TextInput
-                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                    <TextBox
                         placeholder="Full Name"
-                        placeholderTextColor={getColor("on-surface-variant")}
                         value={name}
                         onChangeText={setName}
                         returnKeyType="go"
