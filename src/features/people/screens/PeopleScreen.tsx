@@ -11,6 +11,7 @@ import PersonFormScreen from "@/src/features/people/screens/PersonFormScreen";
 import { ModuleType, Person } from "@timothyw/pat-common";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 
 interface PeoplePanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'People'>;
@@ -24,6 +25,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({
     const { getColor } = useTheme();
     const { people, isInitialized, loadPeople } = usePeopleStore();
     const { refreshControl } = useRefreshControl(loadPeople, 'Failed to refresh people');
+
+    useNavStateLogger(navigation, 'people');
 
     useEffect(() => {
         if (!isInitialized) {

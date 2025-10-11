@@ -71,11 +71,7 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                 });
             }
 
-            if (currentIsEditMode) {
-                navigation.goBack();
-            } else {
-                navigation.navigate('Habits');
-            }
+            navigation.popTo('Habits');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save habit');
         } finally {
@@ -91,7 +87,7 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
 
         try {
             await deleteHabit(currentHabit._id);
-            navigation.navigate('Habits');
+            navigation.popTo('Habits');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete habit');
             setIsLoading(false);

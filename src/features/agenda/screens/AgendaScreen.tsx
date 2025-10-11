@@ -22,6 +22,7 @@ import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/componen
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { useLocalSearchParams } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
+import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 
 interface AgendaPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Agenda'>;
@@ -47,6 +48,8 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     const { data } = useUserDataStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('incomplete');
+
+    useNavStateLogger(navigation, 'agenda');
 
     const isTableView = width >= 768;
 

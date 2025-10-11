@@ -52,11 +52,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
                 setName('');
             }
 
-            if (currentIsEditMode) {
-                navigation.goBack();
-            } else {
-                navigation.navigate('Lists');
-            }
+            navigation.popTo('Lists');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list');
         } finally {

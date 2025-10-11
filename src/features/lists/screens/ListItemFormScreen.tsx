@@ -79,18 +79,13 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
                 setNotes('');
             }
 
-            if (currentIsEditMode) {
-                navigation.goBack();
+            if (thoughtId) {
+                navigation.popTo('Inbox', {
+                    thoughtProcessed: true,
+                    thoughtId: thoughtId
+                });
             } else {
-                // If this was created from a thought (inbox), navigate back to inbox with success info
-                if (thoughtId) {
-                    navigation.navigate('Inbox', {
-                        thoughtProcessed: true, 
-                        thoughtId: thoughtId 
-                    });
-                } else {
-                    navigation.navigate('Lists');
-                }
+                navigation.popTo('Lists');
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list item');

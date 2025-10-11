@@ -14,6 +14,7 @@ import { AgendaSection } from '@/src/features/settings/sections/AgendaSection';
 import { PeopleSection } from '@/src/features/settings/sections/PeopleSection';
 import { HabitsSection } from '@/src/features/settings/sections/HabitsSection';
 import { InboxSection } from '@/src/features/settings/sections/InboxSection';
+import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 
 interface SettingsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Settings'>;
@@ -30,6 +31,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     const [isSaving, setIsSaving] = useState(false);
 
     const { data, updateUserData } = useUserDataStore();
+
+    useNavStateLogger(navigation, 'settings');
 
     const [sectionData, setSectionData] = useState({
         modules: data.config.modules,

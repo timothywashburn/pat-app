@@ -115,12 +115,7 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
                 setNewNote('');
             }
 
-            // Handle save completion
-            if (currentIsEditMode) {
-                navigation.goBack();
-            } else {
-                navigation.navigate('People');
-            }
+            navigation.popTo('People');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save person');
         } finally {
@@ -136,8 +131,7 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
 
         try {
             await deletePerson(currentPerson._id);
-            // Handle delete completion
-            navigation.navigate('People');
+            navigation.popTo('People');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete person');
             setIsLoading(false);

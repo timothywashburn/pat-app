@@ -9,6 +9,7 @@ import HabitCard from '@/src/features/habits/components/HabitCard';
 import { getActiveHabitDate, getTimeRemainingUntilRollover } from '@/src/features/habits/models';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 
 interface HabitsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Habits'>;
@@ -21,6 +22,8 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
 }) => {
     const { habits, isInitialized, loadHabits } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
+
+    useNavStateLogger(navigation, 'habits');
 
     useEffect(() => {
         if (!isInitialized) {

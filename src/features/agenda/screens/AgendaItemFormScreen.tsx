@@ -105,18 +105,13 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
                 setType(undefined);
             }
 
-            if (currentIsEditMode) {
-                navigation.goBack();
+            if (thoughtId) {
+                navigation.popTo('Inbox', {
+                    thoughtProcessed: true,
+                    thoughtId: thoughtId
+                });
             } else {
-                // If this was created from a thought (inbox), navigate back to inbox with success info
-                if (thoughtId) {
-                    navigation.navigate('Inbox', {
-                        thoughtProcessed: true, 
-                        thoughtId: thoughtId 
-                    });
-                } else {
-                    navigation.navigate('Agenda');
-                }
+                navigation.popTo('Agenda');
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save item');
@@ -133,7 +128,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
         try {
             await deleteItem(currentItem._id);
-            navigation.navigate('Agenda');
+            navigation.popTo('Agenda');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
             setIsLoading(false);

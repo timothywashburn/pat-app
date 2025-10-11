@@ -14,6 +14,7 @@ import { useToast } from "@/src/components/toast/ToastContext";
 import { ListWithItems } from "@/src/features/lists/models";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { useNavStateLogger } from '@/src/hooks/useNavStateLogger';
 
 interface ListsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Lists'>;
@@ -29,6 +30,8 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     const { getListsWithItems, isInitialized, loadAll } = useListsStore();
     const lists = getListsWithItems();
     const { isRefreshing, refreshControl } = useRefreshControl(loadAll, 'Failed to refresh lists');
+
+    useNavStateLogger(navigation, 'lists');
 
     useEffect(() => {
         if (!isInitialized) {

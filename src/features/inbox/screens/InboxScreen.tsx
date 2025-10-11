@@ -20,6 +20,7 @@ import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 
 interface AgendaItemDetailViewProps {
     navigation: StackNavigationProp<MainStackParamList, 'Inbox'>;
@@ -34,6 +35,8 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
     const { errorToast } = useToast();
     const { thoughts, isInitialized, loadThoughts, createThought, updateThought, deleteThought } = useThoughtsStore();
     const { refreshControl } = useRefreshControl(loadThoughts, 'Failed to refresh thoughts');
+
+    useNavStateLogger(navigation, 'inbox');
 
     useEffect(() => {
         if (!isInitialized) {
