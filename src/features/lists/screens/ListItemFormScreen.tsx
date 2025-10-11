@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
-import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import { useListsStore } from '@/src/stores/useListsStore';
@@ -142,13 +141,13 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
                         maxLength={200}
                     />
 
-                    <FormTextArea
+                    <FormField
                         label="Notes"
                         value={notes}
                         onChangeText={setNotes}
                         placeholder="Add notes (optional)"
                         maxLength={1000}
-                        numberOfLines={4}
+                        multiline
                     />
 
                     {allowListChange ? (

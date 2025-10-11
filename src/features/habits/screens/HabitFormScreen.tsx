@@ -9,7 +9,6 @@ import {
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
-import FormTextArea from '@/src/components/common/FormTextArea';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import HabitResetTimeSlider from '@/src/components/common/HabitResetTimeSlider';
@@ -144,22 +143,22 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                         maxLength={100}
                     />
 
-                    <FormTextArea
+                    <FormField
                         label="Description"
                         value={description}
                         onChangeText={setDescription}
                         placeholder="Add details about your habit (optional)"
                         maxLength={300}
-                        numberOfLines={3}
+                        multiline
                     />
 
-                    <FormTextArea
+                    <FormField
                         label="Notes"
                         value={notes}
                         onChangeText={setNotes}
                         placeholder="Add other notes about your habit (optional)"
                         maxLength={300}
-                        numberOfLines={3}
+                        multiline
                     />
 
                     <SelectionList

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { useTheme } from '@/src/context/ThemeContext';
 import TextBox from './TextBox';
 
 interface FormFieldProps {
@@ -11,11 +10,12 @@ interface FormFieldProps {
     required?: boolean;
     error?: string;
     disabled?: boolean;
-    autoFocus?: boolean;
     maxLength?: number;
+    autoFocus?: boolean;
     secureTextEntry?: boolean;
     keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
     autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+    multiline?: boolean;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -30,14 +30,13 @@ const FormField: React.FC<FormFieldProps> = ({
     maxLength,
     secureTextEntry,
     keyboardType,
-    autoCapitalize
+    autoCapitalize,
+    multiline,
 }) => {
     return (
         <View className="mb-4">
-            <Text className="text-on-surface text-base font-medium mb-2">
-                {label}{required && ' *'}
-            </Text>
             <TextBox
+                label={`${label}${required ? ' *' : ''}`}
                 placeholder={placeholder}
                 value={value}
                 onChangeText={onChangeText}
@@ -47,6 +46,8 @@ const FormField: React.FC<FormFieldProps> = ({
                 secureTextEntry={secureTextEntry}
                 keyboardType={keyboardType}
                 autoCapitalize={autoCapitalize}
+                multiline={multiline}
+                error={error}
             />
             {error && (
                 <Text className="text-error text-sm mt-1">{error}</Text>

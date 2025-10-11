@@ -12,7 +12,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
-import FormTextArea from '@/src/components/common/FormTextArea';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import WebDateTimePicker from '../components/WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
@@ -374,11 +373,12 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
                     </ScrollView>
                 </View>
 
-                <FormTextArea
+                <FormField
                     label="Notes"
                     value={notes}
                     onChangeText={setNotes}
                     placeholder="Add notes..."
+                    multiline
                 />
 
         </BaseFormView>
