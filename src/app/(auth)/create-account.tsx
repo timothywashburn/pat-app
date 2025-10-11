@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
-import TextBox from '@/src/components/common/TextBox';
+import CustomTextInput from '@/src/components/common/CustomTextInput';
 
 export default function CreateAccountScreen() {
     const { getColor } = useTheme();
@@ -48,7 +48,7 @@ export default function CreateAccountScreen() {
                 <Text className="text-on-background-variant text-base mb-8 text-center">Create an account to get started.</Text>
 
                 <View className="mb-4">
-                    <TextBox
+                    <CustomTextInput
                         placeholder="Full Name"
                         value={name}
                         onChangeText={setName}
@@ -58,10 +58,8 @@ export default function CreateAccountScreen() {
                 </View>
 
                 <View className="mb-4">
-                    <TextInput
-                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                    <CustomTextInput
                         placeholder="Email"
-                        placeholderTextColor={getColor("on-surface-variant")}
                         value={email}
                         onChangeText={setEmail}
                         autoCapitalize="none"
@@ -72,10 +70,8 @@ export default function CreateAccountScreen() {
                 </View>
 
                 <View className="mb-4">
-                    <TextInput
-                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                    <CustomTextInput
                         placeholder="Password"
-                        placeholderTextColor={getColor("on-surface-variant")}
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
@@ -85,10 +81,8 @@ export default function CreateAccountScreen() {
                 </View>
 
                 <View className="mb-4">
-                    <TextInput
-                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                    <CustomTextInput
                         placeholder="Confirm Password"
-                        placeholderTextColor={getColor("on-surface-variant")}
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         secureTextEntry

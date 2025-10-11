@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
@@ -9,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
+import CustomTextInput from '@/src/components/common/CustomTextInput';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import { PersonNoteData, PersonNoteId, PersonPropertyData } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -243,23 +243,19 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
                         <View className="flex-1 flex-row">
                             <View className="flex-1 mr-2">
                                 <Text className="text-on-background text-xs mb-1">Key</Text>
-                                <TextInput
-                                    className="bg-surface text-on-surface border border-outline rounded-lg p-2"
+                                <CustomTextInput
                                     value={newPropertyKey}
                                     onChangeText={setNewPropertyKey}
                                     placeholder="Property Key"
-                                    placeholderTextColor={getColor("on-surface-variant")}
                                 />
                             </View>
 
                             <View className="flex-1">
                                 <Text className="text-on-background text-xs mb-1">Value</Text>
-                                <TextInput
-                                    className="bg-surface text-on-surface border border-outline rounded-lg p-2"
+                                <CustomTextInput
                                     value={newPropertyValue}
                                     onChangeText={setNewPropertyValue}
                                     placeholder="Property Value"
-                                    placeholderTextColor={getColor("on-surface-variant")}
                                 />
                             </View>
                         </View>
@@ -281,13 +277,11 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
                         <View key={property.key} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
                             <View className="flex-row items-center">
                                 <View className="flex-1">
-                                    <Text className="text-on-surface-variant text-xs">{property.key}</Text>
-                                    <TextInput
-                                        className="text-on-surface text-base"
+                                    <Text className="text-on-surface-variant text-xs mb-1">{property.key}</Text>
+                                    <CustomTextInput
                                         value={property.value}
                                         onChangeText={(newValue) => updatePropertyValue(property.key, newValue)}
                                         placeholder="Property Value"
-                                        placeholderTextColor={getColor("on-surface-variant")}
                                     />
                                 </View>
                                 <TouchableOpacity
@@ -307,14 +301,14 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
                     <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
 
                     <View className="flex-row items-center mb-3">
-                        <TextInput
-                            className="bg-surface text-on-surface flex-1 border border-outline rounded-lg p-2 min-h-[60px]"
-                            value={newNote}
-                            onChangeText={setNewNote}
-                            placeholder="Add a note..."
-                            placeholderTextColor={getColor("on-surface-variant")}
-                            multiline
-                        />
+                        <View className="flex-1">
+                            <CustomTextInput
+                                value={newNote}
+                                onChangeText={setNewNote}
+                                placeholder="Add a note..."
+                                multiline
+                            />
+                        </View>
 
                         <TouchableOpacity
                             onPress={addNote}
@@ -334,12 +328,10 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
                         <View key={note._id} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
                             <View className="flex-row items-center">
                                 <View className="flex-1">
-                                    <TextInput
-                                        className="text-on-surface text-base mb-1"
+                                    <CustomTextInput
                                         value={note.content}
                                         onChangeText={(newContent) => updateNoteContent(note._id!, newContent)}
                                         placeholder="Note content"
-                                        placeholderTextColor={getColor("on-surface-variant")}
                                         multiline
                                     />
                                     <Text className="text-on-surface-variant text-xs">
@@ -362,12 +354,10 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
                         <View key={note.tempId} className="bg-surface border border-outline mb-2 p-2.5 rounded-lg">
                             <View className="flex-row items-center">
                                 <View className="flex-1">
-                                    <TextInput
-                                        className="text-on-surface text-base mb-1"
+                                    <CustomTextInput
                                         value={note.content}
                                         onChangeText={(newContent) => updateNoteContent(note.tempId, newContent)}
                                         placeholder="Note content"
-                                        placeholderTextColor={getColor("on-surface-variant")}
                                         multiline
                                     />
                                     <Text className="text-on-surface-variant text-xs">

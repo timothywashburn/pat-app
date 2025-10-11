@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TextInput } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
+import CustomTextInput from '@/src/components/common/CustomTextInput';
 import {
     NotificationVariantType,
     NotificationSchedulerType
@@ -82,13 +83,11 @@ export const agendaItemDueVariant: NotificationVariantInformation = {
             <View className="space-y-4">
                 <View className="mb-4">
                     <Text className="text-on-surface text-sm font-medium mb-1.5">Minutes Before Deadline</Text>
-                    <TextInput
+                    <CustomTextInput
                         value={Math.abs(schedulerData.offsetMinutes).toString()}
                         onChangeText={handleTextInput}
                         keyboardType="numeric"
                         placeholder="60"
-                        className="border border-outline rounded-md px-3 py-2 text-sm"
-                        style={{ color: getColor('on-surface') }}
                         maxLength={4}
                     />
                 </View>

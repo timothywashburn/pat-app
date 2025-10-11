@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
+import CustomTextInput from '@/src/components/common/CustomTextInput';
 
 export default function SignInScreen() {
     const { getColor } = useTheme();
@@ -39,10 +40,8 @@ export default function SignInScreen() {
                 <Text className="text-on-background-variant text-base mb-8 text-center">Your personal planner and tracker.</Text>
 
                 <View className="mb-4">
-                    <TextInput
-                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                    <CustomTextInput
                         placeholder="Email"
-                        placeholderTextColor={getColor("on-surface-variant")}
                         value={email}
                         onChangeText={setEmail}
                         autoCapitalize="none"
@@ -53,10 +52,8 @@ export default function SignInScreen() {
                 </View>
 
                 <View className="mb-4">
-                    <TextInput
-                        className="bg-surface text-on-surface h-[50px] border border-outline rounded-lg px-3 text-base"
+                    <CustomTextInput
                         placeholder="Password"
-                        placeholderTextColor={getColor("on-surface-variant")}
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry

@@ -4,7 +4,6 @@ import {
     FlatList, LayoutAnimation,
     RefreshControl,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
@@ -13,6 +12,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
+import CustomTextInput from '@/src/components/common/CustomTextInput';
 import { useThoughtsStore } from '@/src/stores/useThoughtsStore';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { useListsStore } from '@/src/stores/useListsStore';
@@ -170,14 +170,14 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
             />
 
             <View className="flex-row p-4 py-2 items-center">
-                <TextInput
-                    className="bg-surface text-on-surface flex-1 border border-outline rounded-lg p-2.5 mr-2"
-                    placeholder="Add a thought..."
-                    placeholderTextColor={getColor("on-surface-variant")}
-                    value={newThought}
-                    onChangeText={setNewThought}
-                    onSubmitEditing={handleAddThought}
-                />
+                <View className="flex-1 mr-2">
+                    <CustomTextInput
+                        placeholder="Add a thought..."
+                        value={newThought}
+                        onChangeText={setNewThought}
+                        onSubmitEditing={handleAddThought}
+                    />
+                </View>
                 <TouchableOpacity
                     className={`bg-primary rounded-lg p-2.5 items-center justify-center ${newThought.trim() === '' ? 'opacity-40' : ''}`}
                     onPress={handleAddThought}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TextInput, TextInputProps, Text } from 'react-native';
 import { useTheme } from '@/src/context/ThemeContext';
 
-interface TextBoxProps extends Omit<TextInputProps, 'placeholderTextColor'> {
+interface ATextBoxProps extends Omit<TextInputProps, 'placeholderTextColor'> {
     label?: string;
     placeholder?: string;
     value: string;
@@ -17,7 +17,7 @@ interface TextBoxProps extends Omit<TextInputProps, 'placeholderTextColor'> {
     className?: string;
 }
 
-const TextBox: React.FC<TextBoxProps> = ({
+const CustomTextInput: React.FC<ATextBoxProps> = ({
     label,
     placeholder,
     value,
@@ -34,7 +34,7 @@ const TextBox: React.FC<TextBoxProps> = ({
 }) => {
     const { getColor } = useTheme();
 
-    const baseClassName = `bg-surface text-on-surface border rounded-lg p-3 text-left ${
+    const baseClassName = `bg-surface text-on-surface border rounded-lg px-3 py-4 text-left ${
         error ? 'border-error' : 'border-outline'
     } ${disabled ? 'opacity-50' : ''}`;
 
@@ -66,4 +66,4 @@ const TextBox: React.FC<TextBoxProps> = ({
     );
 };
 
-export default TextBox;
+export default CustomTextInput;

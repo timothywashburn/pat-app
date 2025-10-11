@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
+import CustomTextInput from '@/src/components/common/CustomTextInput';
 
 interface SettingsListProps {
     title: string;
@@ -69,13 +70,13 @@ export const SettingsList: React.FC<SettingsListProps> = ({
 
             {editMode && (
                 <View className="flex-row items-center mt-2">
-                    <TextInput
-                        className="bg-surface text-on-surface flex-1 h-10 border border-outline rounded-lg px-3 mr-2"
-                        placeholder={`New ${title.slice(0, -1)}`}
-                        placeholderTextColor={getColor("on-surface-variant")}
-                        value={newItem}
-                        onChangeText={setNewItem}
-                    />
+                    <View className="flex-1 mr-2">
+                        <CustomTextInput
+                            placeholder={`New ${title.slice(0, -1)}`}
+                            value={newItem}
+                            onChangeText={setNewItem}
+                        />
+                    </View>
                     <TouchableOpacity
                         onPress={handleAddItem}
                         disabled={newItem.trim() === ''}

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Text, TextInput, View, TouchableOpacity } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { ThoughtData } from "@timothyw/pat-common";
+import CustomTextInput from '@/src/components/common/CustomTextInput';
 
 interface ThoughtViewProps {
     thought: ThoughtData;
@@ -38,13 +39,11 @@ const ThoughtView: React.FC<ThoughtViewProps> = ({
         >
             <View className="p-4">
                 {isEditing ? (
-                    <TextInput
-                        className="text-base text-on-surface"
+                    <CustomTextInput
                         value={editedContent}
                         onChangeText={onChangeEditContent}
                         autoFocus
                         multiline
-                        style={{ padding: 0 }}
                     />
                 ) : (
                     <Text className="text-on-surface text-base">{thought.content}</Text>

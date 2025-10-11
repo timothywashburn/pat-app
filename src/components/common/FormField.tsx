@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import TextBox from './TextBox';
+import CustomTextInput from './CustomTextInput';
 
 interface FormFieldProps {
     label: string;
@@ -35,7 +35,7 @@ const FormField: React.FC<FormFieldProps> = ({
 }) => {
     return (
         <View className="mb-4">
-            <TextBox
+            <CustomTextInput
                 label={`${label}${required ? ' *' : ''}`}
                 placeholder={placeholder}
                 value={value}
