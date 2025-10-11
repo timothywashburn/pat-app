@@ -379,8 +379,6 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
                     value={notes}
                     onChangeText={setNotes}
                     placeholder="Add notes..."
-                    numberOfLines={4}
-                    minHeight={100}
                 />
 
         </BaseFormView>

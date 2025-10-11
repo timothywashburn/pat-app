@@ -1,6 +1,6 @@
 import React from 'react';
-import { Text, TextInput, View } from 'react-native';
-import { useTheme } from '@/src/context/ThemeContext';
+import { Text, View } from 'react-native';
+import TextBox from './TextBox';
 
 interface FormTextAreaProps {
     label: string;
@@ -11,8 +11,6 @@ interface FormTextAreaProps {
     error?: string;
     disabled?: boolean;
     maxLength?: number;
-    numberOfLines?: number;
-    minHeight?: number;
 }
 
 const FormTextArea: React.FC<FormTextAreaProps> = ({
@@ -20,34 +18,22 @@ const FormTextArea: React.FC<FormTextAreaProps> = ({
     value,
     onChangeText,
     placeholder,
-    required = false,
+    required,
     error,
-    disabled = false,
+    disabled,
     maxLength,
-    numberOfLines = 4,
-    minHeight = 100
 }) => {
-    const { getColor } = useTheme();
-
     return (
         <View className="mb-4">
-            <Text className="text-on-surface text-base font-medium mb-2">
-                {label}{required && ' *'}
-            </Text>
-            <TextInput
-                className={`bg-surface border rounded-lg p-3 text-on-surface text-base ${
-                    error ? 'border-error' : 'border-outline'
-                } ${disabled ? 'opacity-50' : ''}`}
-                style={{ minHeight }}
+            <TextBox
+                label={`${label}${required ? '*' : ''}`}
                 placeholder={placeholder}
-                placeholderTextColor={getColor('on-surface-variant')}
                 value={value}
                 onChangeText={onChangeText}
-                editable={!disabled}
-                multiline
-                numberOfLines={numberOfLines}
-                textAlignVertical="top"
+                disabled={disabled}
                 maxLength={maxLength}
+                multiline
+                error={error}
             />
             {error && (
                 <Text className="text-error text-sm mt-1">{error}</Text>
