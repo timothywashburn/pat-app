@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useEffect, useState, useRef } from 'react';
+import { ActivityIndicator, Animated, FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { NavigationRoute, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/src/context/ThemeContext';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
-import { ListId, ListItemData, ModuleType } from "@timothyw/pat-common";
+import { ListId, ListItemData, ListItemId, ModuleType } from "@timothyw/pat-common";
 import { useListsStore } from '@/src/stores/useListsStore';
 import ListCard from '@/src/features/lists/components/ListCard';
 import { useToast } from "@/src/components/toast/ToastContext";
@@ -15,6 +15,9 @@ import { ListWithItems } from "@/src/features/lists/models";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useNavStateLogger } from '@/src/hooks/useNavStateLogger';
+import ListItemDetailScreen from './ListItemDetailScreen';
+import ListItemFormScreen from './ListItemFormScreen';
+import { CustomNavigation } from '@/src/navigation/CustomNavigation';
 
 interface ListsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Lists'>;
@@ -30,6 +33,8 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     const { getListsWithItems, isInitialized, loadAll } = useListsStore();
     const lists = getListsWithItems();
     const { isRefreshing, refreshControl } = useRefreshControl(loadAll, 'Failed to refresh lists');
+    const { width } = useWindowDimensions();
+    const isWideScreen = width >= 768;
 
     useNavStateLogger(navigation, 'lists');
 
@@ -39,6 +44,15 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
         }
     }, [isInitialized, loadAll]);
     const [showCompleted, setShowCompleted] = useState(false);
+
+    // Split-view state: stores screen name and params to render
+    type SplitViewState = {
+        screen: keyof MainStackParamList;
+        params: any;
+    } | null;
+
+    const [splitViewState, setSplitViewState] = useState<SplitViewState>(null);
+    const detailPanelAnimation = useRef(new Animated.Value(0)).current;
 
     useFocusEffect(
         React.useCallback(() => {
@@ -63,9 +77,39 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     };
 
     const handleListItemSelect = (listItem: ListItemData) => {
-        navigation.navigate('ListItemDetail', {
-            listItemId: listItem._id,
-            listId: listItem.listId
+        if (isWideScreen) {
+            // On wide screens, show in split view with animation
+            setSplitViewState({
+                screen: 'ListItemDetail',
+                params: {
+                    listItemId: listItem._id,
+                    listId: listItem.listId
+                }
+            });
+
+            // Animate detail panel sliding in
+            Animated.spring(detailPanelAnimation, {
+                toValue: 1,
+                useNativeDriver: true,
+                tension: 65,
+                friction: 10
+            }).start();
+        } else {
+            // On narrow screens, use navigation
+            navigation.navigate('ListItemDetail', {
+                listItemId: listItem._id,
+                listId: listItem.listId
+            });
+        }
+    };
+
+    const closeSplitView = () => {
+        Animated.timing(detailPanelAnimation, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true
+        }).start(() => {
+            setSplitViewState(null);
         });
     };
 
@@ -75,18 +119,55 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
         });
     };
 
-    return (
-        <>
-            <MainViewHeader
-                moduleType={ModuleType.LISTS}
-                title="Lists"
-                showAddButton
-                onAddTapped={handleAddList}
-                showFilterButton
-                isFilterActive={showCompleted}
-                onFilterTapped={() => setShowCompleted(!showCompleted)}
-            />
+    const detailPanelTranslateX = detailPanelAnimation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [width, 0]
+    });
 
+    // Custom navigation for split-view mode
+    const customNavigation: CustomNavigation = {
+        navigate: (screen, params) => {
+            // In wide screen mode, just update the split view state
+            setSplitViewState({ screen, params });
+        },
+        goBack: () => {
+            closeSplitView();
+        },
+        popTo: (screen, params) => {
+            if (screen === 'Lists') {
+                closeSplitView();
+            } else {
+                // If popTo is for a different screen, render it in split view
+                setSplitViewState({ screen, params });
+            }
+        }
+    };
+
+    // Dynamically render the appropriate screen component based on screen name
+    const renderSplitViewScreen = (screen: keyof MainStackParamList, params: any) => {
+        switch (screen) {
+            case 'ListItemDetail':
+                return (
+                    <ListItemDetailScreen
+                        customParams={params}
+                        customNavigation={customNavigation}
+                    />
+                );
+            case 'ListItemForm':
+                return (
+                    <ListItemFormScreen
+                        customParams={params}
+                        customNavigation={customNavigation}
+                    />
+                );
+            // Add more screens here as needed
+            default:
+                return null;
+        }
+    };
+
+    const renderListContent = () => (
+        <>
             {!isInitialized && lists.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-5">
                     <ActivityIndicator size="large" color={getColor("primary")} />
@@ -124,6 +205,53 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
                     contentContainerStyle={{ padding: 16 }}
                     refreshControl={refreshControl}
                 />
+            )}
+        </>
+    );
+
+    return (
+        <>
+            <MainViewHeader
+                moduleType={ModuleType.LISTS}
+                title="Lists"
+                showAddButton
+                onAddTapped={handleAddList}
+                showFilterButton
+                isFilterActive={showCompleted}
+                onFilterTapped={() => setShowCompleted(!showCompleted)}
+            />
+
+            {isWideScreen ? (
+                <View style={{ flex: 1, flexDirection: 'row' }}>
+                    {/* Main list panel - centered when no selection */}
+                    <View style={{
+                        flex: splitViewState ? 0.5 : 1,
+                        alignItems: splitViewState ? 'flex-start' : 'center'
+                    }}>
+                        <View style={{
+                            width: splitViewState ? '100%' : Math.min(600, width * 0.6),
+                            flex: 1
+                        }}>
+                            {renderListContent()}
+                        </View>
+                    </View>
+
+                    {/* Detail/Form panel - slides in from right */}
+                    {splitViewState && (
+                        <Animated.View
+                            style={{
+                                flex: 0.5,
+                                transform: [{ translateX: detailPanelTranslateX }],
+                                borderLeftWidth: 1,
+                                borderLeftColor: getColor('outline')
+                            }}
+                        >
+                            {renderSplitViewScreen(splitViewState.screen, splitViewState.params)}
+                        </Animated.View>
+                    )}
+                </View>
+            ) : (
+                renderListContent()
             )}
         </>
     );

@@ -12,28 +12,35 @@ import { ListId, UpdateListItemRequest } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { CustomNavigation } from '@/src/navigation/CustomNavigation';
 
 interface ListItemFormViewProps {
-    navigation: StackNavigationProp<MainStackParamList, 'ListItemForm'>;
-    route: RouteProp<MainStackParamList, 'ListItemForm'>;
+    navigation?: StackNavigationProp<MainStackParamList, 'ListItemForm'>;
+    route?: RouteProp<MainStackParamList, 'ListItemForm'>;
+    customParams?: MainStackParamList['ListItemForm'];
+    customNavigation?: CustomNavigation;
 }
 
 const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
     navigation,
     route,
+    customParams,
+    customNavigation,
 }) => {
+    const params = route?.params || customParams!;
+    const nav = customNavigation || navigation!;
     const { createListItem, updateListItem, deleteListItem, getListsWithItems, listItems } = useListsStore();
     const listsWithItems = getListsWithItems();
-    const currentListItem = route.params.listItemId ? listItems.find(item => item._id === route.params.listItemId) : undefined;
-    const currentIsEditMode = route.params.isEditing || false;
-    const allowListChange = route.params.allowListChange || false;
-    const thoughtId = route.params.thoughtId;
-    const initialName = route.params.initialName || '';
+    const currentListItem = params.listItemId ? listItems.find(item => item._id === params.listItemId) : undefined;
+    const currentIsEditMode = params.isEditing || false;
+    const allowListChange = params.allowListChange || false;
+    const thoughtId = params.thoughtId;
+    const initialName = params.initialName || '';
 
     const [name, setName] = useState(currentListItem?.name || initialName);
     const [notes, setNotes] = useState(currentListItem?.notes || '');
     const [selectedListId, setSelectedListId] = useState<ListId>(() => {
-        if (route.params.listId) return route.params.listId;
+        if (params.listId) return params.listId;
         if (currentListItem?.listId) return currentListItem.listId;
         return listsWithItems[0]?._id!;
     });
@@ -80,12 +87,12 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
             }
 
             if (thoughtId) {
-                navigation.popTo('Inbox', {
+                nav.popTo('Inbox', {
                     thoughtProcessed: true,
                     thoughtId: thoughtId
                 });
             } else {
-                navigation.popTo('Lists');
+                nav.popTo('Lists');
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list item');
@@ -102,7 +109,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
 
         try {
             await deleteListItem(currentListItem._id);
-            navigation.navigate('ListDetail', { listId: selectedListId });
+            nav.navigate('ListDetail', { listId: selectedListId });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
             setIsLoading(false);
@@ -111,7 +118,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
 
     return (
         <BaseFormView
-            navigation={navigation}
+            navigation={nav}
             route={route}
             title={currentIsEditMode ? 'Edit List Item' : 'New List Item'}
             isEditMode={currentIsEditMode}
