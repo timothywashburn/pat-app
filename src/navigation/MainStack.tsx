@@ -28,6 +28,7 @@ import SettingsPanel from '@/src/features/settings/screens/SettingsScreen';
 import DevPanel from '@/src/features/dev/screens/DevScreen';
 import NotificationInfoScreen from '@/src/features/notifications/screens/NotificationInfoScreen';
 import NotificationFormScreen from '@/src/features/notifications/screens/NotificationFormScreen';
+import { SplitScreenConfig } from '@/src/components/layout/SplitViewLayout';
 
 export type MainStackParamList = {
     Agenda: {
@@ -108,6 +109,13 @@ export type MainStackParamList = {
         template?: NotificationTemplateData;
     };
 };
+
+export const splitScreenConfigs = {
+    Lists: {
+        ListItemDetail: ListItemDetailScreen,
+        ListItemForm: ListItemFormScreen,
+    },
+} as const satisfies Partial<Record<keyof MainStackParamList, SplitScreenConfig>>;
 
 const Stack = createStackNavigator<MainStackParamList>();
 

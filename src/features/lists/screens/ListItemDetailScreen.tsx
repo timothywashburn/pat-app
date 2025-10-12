@@ -12,8 +12,7 @@ import { useAlert } from '@/src/components/alert';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
-import type { Route } from "@react-navigation/routers";
-import { CustomNavigation } from '@/src/navigation/CustomNavigation';
+import { CustomNavigation } from "@/src/hooks/useSplitView";
 
 interface ListItemDetailViewProps {
     navigation?: StackNavigationProp<MainStackParamList, 'ListItemDetail'>;
@@ -28,8 +27,9 @@ const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({
     customParams,
     customNavigation,
 }) => {
-    const params = route?.params || customParams!;
     const nav = customNavigation || navigation!;
+    const params = route?.params || customParams!;
+
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);

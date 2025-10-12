@@ -12,7 +12,7 @@ import { ListId, UpdateListItemRequest } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
-import { CustomNavigation } from '@/src/navigation/CustomNavigation';
+import { CustomNavigation } from "@/src/hooks/useSplitView";
 
 interface ListItemFormViewProps {
     navigation?: StackNavigationProp<MainStackParamList, 'ListItemForm'>;
@@ -27,8 +27,9 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
     customParams,
     customNavigation,
 }) => {
-    const params = route?.params || customParams!;
     const nav = customNavigation || navigation!;
+    const params = route?.params || customParams!;
+
     const { createListItem, updateListItem, deleteListItem, getListsWithItems, listItems } = useListsStore();
     const listsWithItems = getListsWithItems();
     const currentListItem = params.listItemId ? listItems.find(item => item._id === params.listItemId) : undefined;
