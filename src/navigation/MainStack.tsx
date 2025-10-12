@@ -112,6 +112,8 @@ export type MainStackParamList = {
 
 export const splitScreenConfigs = {
     Lists: {
+        ListDetail: ListDetailScreen,
+        ListForm: ListFormScreen,
         ListItemDetail: ListItemDetailScreen,
         ListItemForm: ListItemFormScreen,
     },

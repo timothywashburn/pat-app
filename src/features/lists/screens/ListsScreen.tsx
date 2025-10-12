@@ -56,7 +56,11 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     );
 
     const handleAddList = () => {
-        navigation.navigate('ListForm', {});
+        if (splitView.isWideScreen) {
+            splitView.openSplitView('ListForm', {});
+        } else {
+            navigation.navigate('ListForm', {});
+        }
     };
 
     useFocusEffect(
@@ -76,9 +80,15 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     );
 
     const handleListSelect = (list: ListWithItems) => {
-        navigation.navigate('ListDetail', {
-            listId: list._id
-        });
+        if (splitView.isWideScreen) {
+            splitView.openSplitView('ListDetail', {
+                listId: list._id
+            });
+        } else {
+            navigation.navigate('ListDetail', {
+                listId: list._id
+            });
+        }
     };
 
     const handleListItemSelect = (listItem: ListItemData) => {
@@ -98,9 +108,15 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     };
 
     const handleAddItemToList = (listId: ListId) => {
-        navigation.navigate('ListItemForm', {
-            listId
-        });
+        if (splitView.isWideScreen) {
+            splitView.openSplitView('ListItemForm', {
+                listId
+            });
+        } else {
+            navigation.navigate('ListItemForm', {
+                listId
+            });
+        }
     };
 
     return (

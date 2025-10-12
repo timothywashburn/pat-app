@@ -16,16 +16,23 @@ import { sortListItems } from "@/src/features/lists/models";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { CustomNavigation } from '@/src/hooks/useSplitView';
 
 interface ListDetailViewProps {
-    navigation: StackNavigationProp<MainStackParamList, 'ListDetail'>;
-    route: RouteProp<MainStackParamList, 'ListDetail'>;
+    navigation?: StackNavigationProp<MainStackParamList, 'ListDetail'>;
+    route?: RouteProp<MainStackParamList, 'ListDetail'>;
+    customParams?: MainStackParamList['ListDetail'];
+    customNavigation?: CustomNavigation;
 }
 
 const ListDetailScreen: React.FC<ListDetailViewProps> = ({
     navigation,
     route,
+    customParams,
+    customNavigation,
 }) => {
+    const nav = customNavigation || navigation!;
+    const params = route?.params || customParams!;
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -36,17 +43,17 @@ const ListDetailScreen: React.FC<ListDetailViewProps> = ({
     const { confirmAlert } = useAlert();
 
     const listsWithItems = getListsWithItems();
-    const currentList = listsWithItems.find(list => list._id === route.params.listId);
-    
+    const currentList = listsWithItems.find(list => list._id === params.listId);
+
     const handleEditRequest = () => {
         if (currentList) {
-            navigation.navigate('ListForm', { listId: currentList._id, isEditing: true });
+            nav.navigate('ListForm', { listId: currentList._id, isEditing: true });
         }
     };
 
     const handleListItemPress = (listItem: ListItemData) => {
         if (currentList) {
-            navigation.navigate('ListItemDetail', { listItemId: listItem._id, listId: currentList._id });
+            nav.navigate('ListItemDetail', { listItemId: listItem._id, listId: currentList._id });
         }
     };
 
@@ -69,7 +76,7 @@ const ListDetailScreen: React.FC<ListDetailViewProps> = ({
 
                 try {
                     await deleteList(currentList._id);
-                    navigation.popTo('Lists');
+                    nav.popTo('Lists');
                 } catch (error) {
                     setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
                 } finally {
@@ -262,7 +269,7 @@ const ListDetailScreen: React.FC<ListDetailViewProps> = ({
 
     return (
         <BaseDetailView
-            navigation={navigation}
+            navigation={nav}
             route={route}
             title={currentList.type === ListType.NOTES ? "Note List" : "Task List"}
             onEditRequest={handleEditRequest}
