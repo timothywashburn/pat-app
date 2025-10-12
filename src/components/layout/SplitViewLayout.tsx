@@ -17,16 +17,18 @@ export interface SplitViewLayoutProps {
     mainContent: ReactNode;
     splitScreenConfig: SplitScreenConfig;
     splitView: UseSplitView;
-    maxCenteredWidth?: number;
     centeredWidthPercentage?: number;
+    mainContentFlex?: number;
+    detailPanelFlex?: number;
 }
 
 export const SplitViewLayout: React.FC<SplitViewLayoutProps> = ({
     mainContent,
     splitScreenConfig,
     splitView,
-    maxCenteredWidth = 600,
-    centeredWidthPercentage = 0.6,
+    centeredWidthPercentage = 100,
+    mainContentFlex = 1,
+    detailPanelFlex = 1,
 }) => {
     const { width } = useWindowDimensions();
 
@@ -57,14 +59,14 @@ export const SplitViewLayout: React.FC<SplitViewLayoutProps> = ({
         <View className="flex-1 flex-row">
             <View
                 className={splitViewState ? 'items-start' : 'flex-1 items-center'}
-                style={{ flex: splitViewState ? 1 : undefined }}
+                style={{ flex: splitViewState ? mainContentFlex : undefined }}
             >
                 <View
                     className="flex-1"
                     style={{
                         width: splitViewState
                             ? '100%'
-                            : Math.min(maxCenteredWidth, width * centeredWidthPercentage)
+                            : width * centeredWidthPercentage / 100
                     }}
                 >
                     {mainContent}
@@ -73,8 +75,8 @@ export const SplitViewLayout: React.FC<SplitViewLayoutProps> = ({
 
             {splitViewState && (
                 <Animated.View
-                    className="flex-1 border-l border-divider"
-                    style={animatedStyle}
+                    className="border-l border-divider"
+                    style={[animatedStyle, { flex: detailPanelFlex }]}
                 >
                     {renderSplitViewScreen()}
                 </Animated.View>

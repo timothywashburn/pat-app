@@ -12,29 +12,36 @@ import { NotificationsSection } from '@/src/features/notifications/components/No
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { CustomNavigation } from '@/src/hooks/useSplitView';
 
 interface AgendaItemDetailViewProps {
-    navigation: StackNavigationProp<MainStackParamList, 'AgendaItemDetail'>;
-    route: RouteProp<MainStackParamList, 'AgendaItemDetail'>;
+    navigation?: StackNavigationProp<MainStackParamList, 'AgendaItemDetail'>;
+    route?: RouteProp<MainStackParamList, 'AgendaItemDetail'>;
+    customParams?: MainStackParamList['AgendaItemDetail'];
+    customNavigation?: CustomNavigation;
 }
 
 const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
     navigation,
     route,
+    customParams,
+    customNavigation,
 }) => {
+    const nav = customNavigation || navigation!;
+    const params = route?.params || customParams!;
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
     const { setCompleted, items } = useAgendaStore();
-    const currentItem = items.find(item => item._id === route.params.itemId)!;
+    const currentItem = items.find(item => item._id === params.itemId)!;
 
     // TODO: added because deleting an item caused crash because this page I guess is still mounted?
     if (!currentItem) return null;
     
     const handleEditRequest = () => {
         if (currentItem) {
-            navigation.navigate('AgendaItemForm', { itemId: currentItem._id, isEditing: true });
+            nav.navigate('AgendaItemForm', { itemId: currentItem._id, isEditing: true });
         }
     };
 
@@ -44,7 +51,7 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
 
         try {
             await setCompleted(currentItem._id, !currentItem.completed);
-            if (!currentItem.completed) navigation.goBack();
+            if (!currentItem.completed) nav.goBack();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update currentItem');
         } finally {
@@ -141,7 +148,7 @@ const AgendaItemDetailScreen: React.FC<AgendaItemDetailViewProps> = ({
     return (
         <>
             <BaseDetailView
-                navigation={navigation}
+                navigation={nav}
                 route={route}
                 title="Details"
                 onEditRequest={handleEditRequest}

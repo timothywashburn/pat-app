@@ -111,6 +111,10 @@ export type MainStackParamList = {
 };
 
 export const splitScreenConfigs = {
+    Agenda: {
+        AgendaItemDetail: AgendaItemDetailScreen,
+        AgendaItemForm: AgendaItemFormScreen,
+    },
     Lists: {
         ListDetail: ListDetailScreen,
         ListForm: ListFormScreen,

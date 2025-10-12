@@ -129,6 +129,7 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
             <SplitViewLayout
                 splitView={splitView}
                 splitScreenConfig={splitScreenConfigs.Lists}
+                centeredWidthPercentage={70}
                 mainContent={(
                     <>
                         {!isInitialized && lists.length === 0 ? (
