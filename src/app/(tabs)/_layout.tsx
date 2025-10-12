@@ -111,7 +111,7 @@ export default function TabsLayout() {
                         marginRight: 0,
                     },
                     tabBarPressColor: 'transparent',
-                    swipeEnabled: navigationStore.enabled,
+                    swipeEnabled: navigationStore.enabled && !isWeb,
                 }}
             >
                 {data.config.modules.map((module) => {

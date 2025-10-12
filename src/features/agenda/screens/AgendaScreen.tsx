@@ -6,8 +6,10 @@ import { RouteProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
-import { MainStackParamList } from '@/src/navigation/MainStack';
+import { MainStackParamList, splitScreenConfigs } from '@/src/navigation/MainStack';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
+import { useSplitView } from '@/src/hooks/useSplitView';
+import { SplitViewLayout } from '@/src/components/layout/SplitViewLayout';
 import {
     AgendaItemData,
     ItemId,
@@ -21,8 +23,9 @@ import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/components/AgendaFilterDropdown";
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { useLocalSearchParams } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
+import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 
 interface AgendaPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Agenda'>;
@@ -48,12 +51,13 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     const { data } = useUserDataStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('incomplete');
+    const { setHeaderControls } = useHeaderControls();
+    const splitView = useSplitView('Agenda');
 
     useNavStateLogger(navigation, 'agenda');
 
     const isTableView = width >= 768;
 
-    // Load items when component mounts
     useEffect(() => {
         if (!isInitialized) {
             loadItems();
@@ -61,11 +65,39 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     }, [isInitialized, loadItems]);
 
     const handleAddItem = () => {
-        navigation.navigate('AgendaItemForm', {});
+        if (splitView.isWideScreen) {
+            splitView.openSplitView('AgendaItemForm', {});
+        } else {
+            navigation.navigate('AgendaItemForm', {});
+        }
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            setHeaderControls({
+                showAddButton: true,
+                onAddTapped: handleAddItem,
+                customFilter: () => (
+                    <AgendaFilterDropdown
+                        selectedFilter={selectedFilter}
+                        categories={data.config.agenda.itemCategories}
+                        onFilterChange={setSelectedFilter}
+                    />
+                ),
+            });
+
+            return () => {
+                setHeaderControls({});
+            };
+        }, [selectedFilter, data.config.agenda.itemCategories])
+    );
+
     const handleItemSelect = (item: AgendaItemData) => {
-        navigation.navigate('AgendaItemDetail', { itemId: item._id });
+        if (splitView.isWideScreen) {
+            splitView.openSplitView('AgendaItemDetail', { itemId: item._id });
+        } else {
+            navigation.navigate('AgendaItemDetail', { itemId: item._id });
+        }
     };
 
     const filteredItems = items
@@ -92,78 +124,86 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
             <MainViewHeader
                 moduleType={ModuleType.AGENDA}
                 title="Agenda"
-                showAddButton
-                onAddTapped={handleAddItem}
-                customFilter={() => (
-                    <AgendaFilterDropdown
-                        selectedFilter={selectedFilter}
-                        categories={data.config.agenda.itemCategories}
-                        onFilterChange={setSelectedFilter}
-                    />
-                )}
+                hideOnWeb
             />
 
-            {!isInitialized && items.length === 0 ? (
-                <View className="flex-1 justify-center items-center p-5">
-                    <ActivityIndicator size="large" color={getColor("primary")} />
-                </View>
-            ) : filteredItems.length === 0 ? (
-                <View className="flex-1 justify-center items-center p-5">
-                    <Ionicons
-                        name="checkmark-circle"
-                        size={48}
-                        color={getColor("primary")}
-                    />
-                    <Text className="text-base text-on-background-variant mb-5">
-                        {selectedFilter === 'complete' ? 'No completed items' :
-                         selectedFilter === 'incomplete' ? 'No incomplete items' :
-                         `No incomplete items in ${selectedFilter}`}
-                    </Text>
-                    <TouchableOpacity
-                        className="bg-primary px-5 py-2.5 rounded-lg"
-                        onPress={handleAddItem}
-                    >
-                        <Text className="text-on-primary text-base font-semibold">Add Item</Text>
-                    </TouchableOpacity>
-                </View>
-            ) : (
-                isTableView ? (
-                    <FlatList
-                        data={[{ key: 'content' }]}
-                        renderItem={() => (
-                            <View className="p-6">
-                                <View className="bg-surface rounded-xl overflow-hidden">
-                                    <TableHeader />
-                                    {filteredItems.map((item) => (
+            <SplitViewLayout
+                splitView={splitView}
+                splitScreenConfig={splitScreenConfigs.Agenda}
+                mainContentFlex={3}
+                detailPanelFlex={1}
+                mainContent={(
+                    <>
+                        {!isInitialized && items.length === 0 ? (
+                            <View className="flex-1 justify-center items-center p-5">
+                                <ActivityIndicator size="large" color={getColor("primary")} />
+                            </View>
+                        ) : filteredItems.length === 0 ? (
+                            <View className="flex-1 justify-center items-center p-5">
+                                <Ionicons
+                                    name="checkmark-circle"
+                                    size={48}
+                                    color={getColor("primary")}
+                                />
+                                <Text className="text-base text-on-background-variant mb-5">
+                                    {selectedFilter === 'complete' ? 'No completed items' :
+                                        selectedFilter === 'incomplete' ? 'No incomplete items' :
+                                            `No incomplete items in ${selectedFilter}`}
+                                </Text>
+                                <TouchableOpacity
+                                    className="bg-primary px-5 py-2.5 rounded-lg"
+                                    onPress={handleAddItem}
+                                >
+                                    <Text className="text-on-primary text-base font-semibold">Add Item</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            isTableView ? (
+                                <FlatList
+                                    data={[{ key: 'content' }]}
+                                    renderItem={() => (
+                                        <View className="p-6">
+                                            <View className="bg-surface rounded-xl overflow-hidden">
+                                                <TableHeader />
+                                                <View className="border-b-2 border-background" />
+                                                {filteredItems.map((item, index) => (
+                                                    <>
+                                                        <AgendaItemCard
+                                                            key={item._id}
+                                                            item={item}
+                                                            onPress={handleItemSelect}
+                                                            isTableView={true}
+                                                        />
+                                                        {index < filteredItems.length - 1 && (
+                                                            <View className="border-b-[1.5px] border-background" />
+                                                        )}
+                                                    </>
+                                                ))}
+                                            </View>
+                                        </View>
+                                    )}
+                                    keyExtractor={item => item.key}
+                                    refreshControl={refreshControl}
+                                />
+                            ) : (
+                                <FlatList
+                                    data={filteredItems}
+                                    renderItem={({ item }) => (
                                         <AgendaItemCard
-                                            key={item._id}
                                             item={item}
                                             onPress={handleItemSelect}
-                                            isTableView={true}
+                                            isTableView={false}
                                         />
-                                    ))}
-                                </View>
-                            </View>
+                                    )}
+                                    keyExtractor={item => item._id}
+                                    refreshControl={refreshControl}
+                                    contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
+                                />
+                            )
                         )}
-                        keyExtractor={item => item.key}
-                        refreshControl={refreshControl}
-                    />
-                ) : (
-                    <FlatList
-                        data={filteredItems}
-                        renderItem={({ item }) => (
-                            <AgendaItemCard
-                                item={item}
-                                onPress={handleItemSelect}
-                                isTableView={false}
-                            />
-                        )}
-                        keyExtractor={item => item._id}
-                        refreshControl={refreshControl}
-                        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12 }}
-                    />
-                )
-            )}
+                    </>
+                )}
+            />
         </>
     );
 }

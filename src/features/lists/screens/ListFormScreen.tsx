@@ -8,26 +8,32 @@ import { ListType } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { CustomNavigation } from '@/src/hooks/useSplitView';
 
 interface ListFormViewProps {
-    navigation: StackNavigationProp<MainStackParamList, 'ListForm'>;
-    route: RouteProp<MainStackParamList, 'ListForm'>;
+    navigation?: StackNavigationProp<MainStackParamList, 'ListForm'>;
+    route?: RouteProp<MainStackParamList, 'ListForm'>;
+    customParams?: MainStackParamList['ListForm'];
+    customNavigation?: CustomNavigation;
 }
 
 const ListFormScreen: React.FC<ListFormViewProps> = ({
     navigation,
     route,
+    customParams,
+    customNavigation,
 }) => {
+    const nav = customNavigation || navigation!;
+    const params = route?.params || customParams!;
     const { createList, updateList, deleteList, getListsWithItems } = useListsStore();
     const listsWithItems = getListsWithItems();
-    const currentList = route.params.listId ? listsWithItems.find(list => list._id === route.params.listId) : undefined;
-    const currentIsEditMode = route.params.isEditing || false;
+    const currentList = params?.listId ? listsWithItems.find(list => list._id === params.listId) : undefined;
+    const currentIsEditMode = params?.isEditing || false;
 
     const [name, setName] = useState(currentList?.name || '');
     const [type, setType] = useState<ListType>(currentList?.type || ListType.TASKS);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
 
     const handleSaveList = async () => {
         if (!name.trim()) {
@@ -52,7 +58,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
                 setName('');
             }
 
-            navigation.popTo('Lists');
+            nav.popTo('Lists');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list');
         } finally {
@@ -68,17 +74,16 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
 
         try {
             await deleteList(currentList._id);
-            navigation.navigate('Lists');
+            nav.navigate('Lists');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
             setIsLoading(false);
         }
     };
 
-
     return (
         <BaseFormView
-            navigation={navigation}
+            navigation={nav}
             route={route}
             title={currentIsEditMode ? 'Edit List' : 'New List'}
             isEditMode={currentIsEditMode}
@@ -92,29 +97,28 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
             deleteConfirmTitle="Delete List"
             deleteConfirmMessage="Are you sure you want to delete this list? This will also delete all tasks in it. This action cannot be undone."
         >
-                <FormSection title="List Details">
-                    <FormField
-                        label="List Name"
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Enter list name"
-                        required
-                        autoFocus={!currentIsEditMode}
-                        maxLength={100}
-                    />
-                    
-                    <SelectionList
-                        label="List Type"
-                        selectedValue={type}
-                        onSelectionChange={(value) => setType(value as ListType)}
-                        options={[
-                            { label: 'Task List', value: ListType.TASKS, description: 'Items can be marked as complete' },
-                            { label: 'Note List', value: ListType.NOTES, description: 'Items are notes and cannot be completed' }
-                        ]}
-                        required
-                    />
-                </FormSection>
+            <FormSection title="List Details">
+                <FormField
+                    label="List Name"
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Enter list name"
+                    required
+                    autoFocus={!currentIsEditMode}
+                    maxLength={100}
+                />
 
+                <SelectionList
+                    label="List Type"
+                    selectedValue={type}
+                    onSelectionChange={(value) => setType(value as ListType)}
+                    options={[
+                        { label: 'Task List', value: ListType.TASKS, description: 'Items can be marked as complete' },
+                        { label: 'Note List', value: ListType.NOTES, description: 'Items are notes and cannot be completed' }
+                    ]}
+                    required
+                />
+            </FormSection>
         </BaseFormView>
     );
 };

@@ -12,33 +12,39 @@ import { useAlert } from '@/src/components/alert';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { CustomNavigation } from "@/src/hooks/useSplitView";
 
 interface ListItemDetailViewProps {
-    navigation: StackNavigationProp<MainStackParamList, 'ListItemDetail'>;
-    route: RouteProp<MainStackParamList, 'ListItemDetail'>;
+    navigation?: StackNavigationProp<MainStackParamList, 'ListItemDetail'>;
+    route?: RouteProp<MainStackParamList, 'ListItemDetail'>;
+    customParams?: MainStackParamList['ListItemDetail'];
+    customNavigation?: CustomNavigation;
 }
 
 const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({
     navigation,
     route,
+    customParams,
+    customNavigation,
 }) => {
+    const nav = customNavigation || navigation!;
+    const params = route?.params || customParams!;
+
     const { getColor } = useTheme();
     const [isLoading, setIsLoading] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     
     const { setListItemCompleted, deleteListItem, getListsWithItems, listItems } = useListsStore();
     const listsWithItems = getListsWithItems();
-    const currentListItem = listItems.find(item => item._id === route.params.listItemId);
-    const currentList = listsWithItems.find(list => list._id === route.params.listId);
+    const currentListItem = listItems.find(item => item._id === params.listItemId)!;
+    const currentList = listsWithItems.find(list => list._id === params.listId)!;
     
     const handleEditRequest = () => {
-        if (currentListItem && currentList) {
-            navigation.navigate('ListItemForm', {
-                listItemId: currentListItem._id,
-                listId: currentList._id,
-                isEditing: true,
-            });
-        }
+        nav.navigate('ListItemForm', {
+            listItemId: currentListItem._id,
+            listId: currentList._id,
+            isEditing: true,
+        });
     };
     
     const isNoteList = currentList?.type === ListType.NOTES;
@@ -54,7 +60,7 @@ const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({
 
         try {
             await setListItemCompleted(currentListItem._id, !currentListItem.completed);
-            navigation.goBack();
+            nav.goBack();
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to update list item');
         } finally {
@@ -72,7 +78,7 @@ const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({
 
                 try {
                     await deleteListItem(currentListItem._id);
-                    navigation.goBack();
+                    nav.goBack();
                 } catch (error) {
                     setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
                 } finally {
@@ -107,7 +113,7 @@ const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({
 
     return (
         <BaseDetailView
-            navigation={navigation}
+            navigation={nav}
             route={route}
             title={isNoteList ? "Note Details" : "Task Details"}
             onEditRequest={handleEditRequest}
@@ -115,33 +121,32 @@ const ListItemDetailScreen: React.FC<ListItemDetailViewProps> = ({
             actions={actions}
         >
             <Text className="text-on-surface text-xl font-bold mb-4">{currentListItem.name}</Text>
-
-                    <View className="mb-4">
-                        <View className="flex-row items-center mb-2">
-                            <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
-                            <Text className="text-on-surface-variant text-base ml-2">
-                                Created {new Date(currentListItem.createdAt).toLocaleDateString()}
-                            </Text>
-                        </View>
-
-                        {currentListItem.updatedAt.getTime() !== currentListItem.createdAt.getTime() && (
-                            <View className="flex-row items-center mb-2">
-                                <Ionicons name="time-outline" size={20} color={getColor("on-surface-variant")} />
-                                <Text className="text-on-surface-variant text-base ml-2">
-                                    Updated {new Date(currentListItem.updatedAt).toLocaleDateString()}
-                                </Text>
-                            </View>
-                        )}
+                <View className="mb-4">
+                    <View className="flex-row items-center mb-2">
+                        <Ionicons name="calendar-outline" size={20} color={getColor("on-surface-variant")} />
+                        <Text className="text-on-surface-variant text-base ml-2">
+                            Created {new Date(currentListItem.createdAt).toLocaleDateString()}
+                        </Text>
                     </View>
 
-                    {currentListItem.notes && (
-                        <View className="mb-4">
-                            <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
-                            <View className="bg-surface border border-outline rounded-lg p-3">
-                                <Text className="text-on-surface text-base">{currentListItem.notes}</Text>
-                            </View>
+                    {currentListItem.updatedAt.getTime() !== currentListItem.createdAt.getTime() && (
+                        <View className="flex-row items-center mb-2">
+                            <Ionicons name="time-outline" size={20} color={getColor("on-surface-variant")} />
+                            <Text className="text-on-surface-variant text-base ml-2">
+                                Updated {new Date(currentListItem.updatedAt).toLocaleDateString()}
+                            </Text>
                         </View>
                     )}
+                </View>
+
+                {currentListItem.notes && (
+                    <View className="mb-4">
+                        <Text className="text-on-background text-base font-medium mb-2">Notes</Text>
+                        <View className="bg-surface border border-outline rounded-lg p-3">
+                            <Text className="text-on-surface text-base">{currentListItem.notes}</Text>
+                        </View>
+                    </View>
+                )}
 
             {!isNoteList && (
                 <View className="flex-row items-center">

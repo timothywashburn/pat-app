@@ -19,24 +19,31 @@ import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest } from
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import { CustomNavigation } from '@/src/hooks/useSplitView';
 
 interface AgendaItemFormViewProps {
-    navigation: StackNavigationProp<MainStackParamList, 'AgendaItemForm'>;
-    route: RouteProp<MainStackParamList, 'AgendaItemForm'>;
+    navigation?: StackNavigationProp<MainStackParamList, 'AgendaItemForm'>;
+    route?: RouteProp<MainStackParamList, 'AgendaItemForm'>;
+    customParams?: MainStackParamList['AgendaItemForm'];
+    customNavigation?: CustomNavigation;
 }
 
 const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
     navigation,
     route,
+    customParams,
+    customNavigation,
 }) => {
+    const nav = customNavigation || navigation!;
+    const params = route?.params || customParams!;
     const { getColor } = useTheme();
 
     const items = useAgendaStore(state => state.items);
-    const currentItem = route.params.itemId ? items.find(item => item._id === route.params.itemId) : undefined;
+    const currentItem = params?.itemId ? items.find(item => item._id === params.itemId) : undefined;
 
-    const currentIsEditMode = route.params.isEditing || false;
-    const currentInitialName = route.params.initialName || '';
-    const thoughtId = route.params.thoughtId;
+    const currentIsEditMode = params?.isEditing || false;
+    const currentInitialName = params?.initialName || '';
+    const thoughtId = params?.thoughtId;
 
     const getTonight = () => {
         const today = new Date();
@@ -106,12 +113,12 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
             }
 
             if (thoughtId) {
-                navigation.popTo('Inbox', {
+                nav.popTo('Inbox', {
                     thoughtProcessed: true,
                     thoughtId: thoughtId
                 });
             } else {
-                navigation.popTo('Agenda');
+                nav.popTo('Agenda');
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save item');
@@ -128,7 +135,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
         try {
             await deleteItem(currentItem._id);
-            navigation.popTo('Agenda');
+            nav.popTo('Agenda');
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
             setIsLoading(false);
@@ -178,7 +185,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
     return (
         <BaseFormView
-            navigation={navigation}
+            navigation={nav}
             route={route}
             title={currentIsEditMode ? 'Edit Item' : 'New Item'}
             isEditMode={currentIsEditMode}
