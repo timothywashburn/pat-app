@@ -34,13 +34,17 @@ export function useSplitView<T extends keyof MainStackParamList>(rootName: T): U
     const isWideScreen = width >= minWidth;
 
     const [splitViewState, setSplitViewState] = useState<SplitViewState | null>(null);
+    const [splitViewHistory, setSplitViewHistory] = useState<SplitViewState[]>([]);
     const detailPanelTranslateX = useSharedValue(width);
 
     const openSplitView = <T extends keyof MainStackParamList>(
         screen: T,
         params: MainStackParamList[T]
     ) => {
-        setSplitViewState({ screen, params } as SplitViewState);
+        const newState = { screen, params } as SplitViewState;
+        setSplitViewState(newState);
+        // Clear history when opening fresh from main view
+        setSplitViewHistory([]);
 
         detailPanelTranslateX.value = withSpring(0, {
             damping: 20,
@@ -55,21 +59,39 @@ export function useSplitView<T extends keyof MainStackParamList>(rootName: T): U
 
         setTimeout(() => {
             setSplitViewState(null);
+            setSplitViewHistory([]);
         }, 250);
     };
 
     const customNavigation: CustomNavigation = {
         navigate: (screen, params) => {
-            setSplitViewState({ screen, params } as SplitViewState);
+            const newState = { screen, params } as SplitViewState;
+            if (splitViewState) setSplitViewHistory(prev => [...prev, splitViewState]);
+            setSplitViewState(newState);
         },
         goBack: () => {
-            closeSplitView();
+            if (splitViewHistory.length > 0) {
+                const previousState = splitViewHistory[splitViewHistory.length - 1];
+                setSplitViewHistory(prev => prev.slice(0, -1));
+                setSplitViewState(previousState);
+            } else {
+                closeSplitView();
+            }
         },
         popTo: (screen, params) => {
             if (screen.toString() == rootName.toString()) {
                 closeSplitView();
             } else {
-                setSplitViewState({ screen, params } as SplitViewState);
+                const historyIndex = splitViewHistory.findIndex(state => state.screen === screen);
+
+                if (historyIndex >= 0) {
+                    const targetState = splitViewHistory[historyIndex];
+                    setSplitViewHistory(prev => prev.slice(0, historyIndex));
+                    setSplitViewState(targetState);
+                } else {
+                    setSplitViewHistory([]);
+                    setSplitViewState({ screen, params } as SplitViewState);
+                }
             }
         }
     };
