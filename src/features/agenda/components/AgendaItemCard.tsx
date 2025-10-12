@@ -16,7 +16,7 @@ const AgendaItemCard: React.FC<AgendaItemCardProps> = ({ item, onPress, isTableV
     if (isTableView) {
         return (
             <TouchableOpacity
-                className={`bg-surface border-b border-divider-variant border-l-4 ${
+                className={`bg-surface border-l-4 ${
                     item.urgent ? 'border-l-on-error' : 'border-l-transparent'
                 }`}
                 onPress={() => onPress(item)}

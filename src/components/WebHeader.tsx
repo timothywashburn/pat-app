@@ -18,11 +18,6 @@ export default function WebHeader({ modules }: WebHeaderProps) {
     const { headerControls } = useHeaderControls();
     const [menuVisible, setMenuVisible] = useState(false);
 
-    const hasHeaderControls = headerControls.showAddButton ||
-                              headerControls.showFilterButton ||
-                              headerControls.customFilter ||
-                              headerControls.trailing;
-
     return (
         <>
             <View className="bg-surface h-16 border-b border-on-surface-variant" style={{ position: 'relative' }}>

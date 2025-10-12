@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { ActivityIndicator, Animated, FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { NavigationRoute, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
@@ -54,7 +55,7 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     } | null;
 
     const [splitViewState, setSplitViewState] = useState<SplitViewState>(null);
-    const detailPanelAnimation = useRef(new Animated.Value(0)).current;
+    const detailPanelTranslateX = useSharedValue(width);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -105,12 +106,10 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
             });
 
             // Animate detail panel sliding in
-            Animated.spring(detailPanelAnimation, {
-                toValue: 1,
-                useNativeDriver: true,
-                tension: 65,
-                friction: 10
-            }).start();
+            detailPanelTranslateX.value = withSpring(0, {
+                damping: 20,
+                stiffness: 90
+            });
         } else {
             // On narrow screens, use navigation
             navigation.navigate('ListItemDetail', {
@@ -121,13 +120,13 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
     };
 
     const closeSplitView = () => {
-        Animated.timing(detailPanelAnimation, {
-            toValue: 0,
-            duration: 250,
-            useNativeDriver: true
-        }).start(() => {
-            setSplitViewState(null);
+        detailPanelTranslateX.value = withTiming(width, {
+            duration: 250
         });
+        // Delay state update to allow animation to complete
+        setTimeout(() => {
+            setSplitViewState(null);
+        }, 250);
     };
 
     const handleAddItemToList = (listId: ListId) => {
@@ -136,10 +135,10 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
         });
     };
 
-    const detailPanelTranslateX = detailPanelAnimation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [width, 0]
-    });
+    // Animated style for detail panel
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: detailPanelTranslateX.value }]
+    }));
 
     // Custom navigation for split-view mode
     const customNavigation: CustomNavigation = {
@@ -234,16 +233,18 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
             />
 
             {isWideScreen ? (
-                <View style={{ flex: 1, flexDirection: 'row' }}>
+                <View className="flex-1 flex-row">
                     {/* Main list panel - centered when no selection */}
-                    <View style={{
-                        flex: splitViewState ? 0.5 : 1,
-                        alignItems: splitViewState ? 'flex-start' : 'center'
-                    }}>
-                        <View style={{
-                            width: splitViewState ? '100%' : Math.min(600, width * 0.6),
-                            flex: 1
-                        }}>
+                    <View
+                        className={splitViewState ? 'items-start' : 'flex-1 items-center'}
+                        style={{ flex: splitViewState ? 1 : undefined }}
+                    >
+                        <View
+                            className="flex-1"
+                            style={{
+                                width: splitViewState ? '100%' : Math.min(600, width * 0.6)
+                            }}
+                        >
                             {renderListContent()}
                         </View>
                     </View>
@@ -251,12 +252,8 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
                     {/* Detail/Form panel - slides in from right */}
                     {splitViewState && (
                         <Animated.View
-                            style={{
-                                flex: 0.5,
-                                transform: [{ translateX: detailPanelTranslateX }],
-                                borderLeftWidth: 1,
-                                borderLeftColor: getColor('outline')
-                            }}
+                            className="flex-1 border-l border-divider"
+                            style={animatedStyle}
                         >
                             {renderSplitViewScreen(splitViewState.screen, splitViewState.params)}
                         </Animated.View>

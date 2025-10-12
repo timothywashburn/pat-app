@@ -150,13 +150,19 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
                             <View className="p-6">
                                 <View className="bg-surface rounded-xl overflow-hidden">
                                     <TableHeader />
-                                    {filteredItems.map((item) => (
-                                        <AgendaItemCard
-                                            key={item._id}
-                                            item={item}
-                                            onPress={handleItemSelect}
-                                            isTableView={true}
-                                        />
+                                    <View className="border-b-2 border-background" />
+                                    {filteredItems.map((item, index) => (
+                                        <>
+                                            <AgendaItemCard
+                                                key={item._id}
+                                                item={item}
+                                                onPress={handleItemSelect}
+                                                isTableView={true}
+                                            />
+                                            {index < filteredItems.length - 1 && (
+                                                <View className="border-b-[1.5px] border-background" />
+                                            )}
+                                        </>
                                     ))}
                                 </View>
                             </View>

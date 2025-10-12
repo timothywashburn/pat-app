@@ -57,8 +57,8 @@
     "on-surface-variant": "#9AA1B0",
     "outline": "#656e81",
     "outline-variant": "#383d48",
-    "divider": "#000000",
-    "divider-variant": "#16181d",
+    "divider": "#9AA1B0",
+    "divider-variant": "#ffff00",
     "unknown": "#ff00ff"
   }
 }
