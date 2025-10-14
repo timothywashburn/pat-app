@@ -15,6 +15,7 @@ import FormField from '@/src/components/common/FormField';
 import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import WebDateTimePicker from '../components/WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
+import { useModal } from '@/src/context/ModalContext';
 import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
@@ -37,6 +38,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
     const nav = customNavigation || navigation!;
     const params = route?.params || customParams!;
     const { getColor } = useTheme();
+    const { showModal, hideModal } = useModal();
 
     const items = useAgendaStore(state => state.items);
     const currentItem = params?.itemId ? items.find(item => item._id === params.itemId) : undefined;
@@ -177,10 +179,21 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
     const handleWebDateChange = (selectedDate: Date) => {
         setDate(selectedDate);
+        hideModal();
     };
 
     const showDateTimePickerModal = () => {
-        setShowDatePicker(true);
+        if (Platform.OS === 'web') {
+            showModal(
+                <WebDateTimePicker
+                    date={date}
+                    onDateChange={handleWebDateChange}
+                    onDismiss={hideModal}
+                />
+            );
+        } else {
+            setShowDatePicker(true);
+        }
     };
 
     return (
@@ -200,23 +213,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
             deleteConfirmTitle="Delete Item"
             deleteConfirmMessage="Are you sure you want to delete this item? This action cannot be undone."
         >
-            {Platform.OS === 'web' && showDatePicker && (
-                <View className="absolute inset-0 z-10 bg-black bg-opacity-50 flex items-center justify-center">
-                    <TouchableOpacity
-                        className="absolute inset-0"
-                        onPress={() => setShowDatePicker(false)}
-                        activeOpacity={1}
-                    />
-                    <View className="z-20">
-                        <WebDateTimePicker
-                            date={date}
-                            onDateChange={handleWebDateChange}
-                            onDismiss={() => setShowDatePicker(false)}
-                        />
-                    </View>
-                </View>
-            )}
-                <FormField
+            <FormField
                     label="Name"
                     value={name}
                     onChangeText={setName}

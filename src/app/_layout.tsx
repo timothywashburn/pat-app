@@ -22,6 +22,7 @@ import { ModuleProvider } from "@/src/components/ModuleContext";
 import * as Application from 'expo-application';
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { HeaderControlsProvider } from '@/src/context/HeaderControlsContext';
+import { ModalProvider } from '@/src/context/ModalContext';
 
 const DEV_BOOT = false;
 
@@ -278,20 +279,22 @@ const AppContent: React.FC = () => {
     return (
         <ModuleProvider>
             <HeaderControlsProvider>
-                <ToastProvider>
-                    <AlertProvider>
-                        <ThemeProvider value={theme}>
-                            <AppNavigator onLayout={hidesplash}>
-                                <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                                {/*<Stack screenOptions={{ header: () => null }}>*/}
-                                {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
-                                {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
-                                {/*</Stack>*/}
-                                <Slot />
-                            </AppNavigator>
-                        </ThemeProvider>
-                    </AlertProvider>
-                </ToastProvider>
+                <ModalProvider>
+                    <ToastProvider>
+                        <AlertProvider>
+                            <ThemeProvider value={theme}>
+                                <AppNavigator onLayout={hidesplash}>
+                                    <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                                    {/*<Stack screenOptions={{ header: () => null }}>*/}
+                                    {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
+                                    {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
+                                    {/*</Stack>*/}
+                                    <Slot />
+                                </AppNavigator>
+                            </ThemeProvider>
+                        </AlertProvider>
+                    </ToastProvider>
+                </ModalProvider>
             </HeaderControlsProvider>
         </ModuleProvider>
     );
