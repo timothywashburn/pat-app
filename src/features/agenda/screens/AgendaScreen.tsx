@@ -130,8 +130,8 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
             <SplitViewLayout
                 splitView={splitView}
                 splitScreenConfig={splitScreenConfigs.Agenda}
-                mainContentFlex={3}
-                detailPanelFlex={1}
+                mainPanelFlex={3}
+                secondaryPanelFlex={1}
                 mainContent={(
                     <>
                         {!isInitialized && items.length === 0 ? (
