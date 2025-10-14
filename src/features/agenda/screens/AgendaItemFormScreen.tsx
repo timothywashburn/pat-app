@@ -54,7 +54,9 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
     };
 
     const [name, setName] = useState(currentItem?.name || currentInitialName);
-    const [date, setDate] = useState<Date | undefined>(currentItem?.dueDate);
+    const [date, setDate] = useState<Date | undefined>(
+        currentItem?.dueDate || (!currentIsEditMode ? getTonight() : undefined)
+    );
     const [notes, setNotes] = useState(currentItem?.notes || '');
     const [urgent, setUrgent] = useState(currentItem?.urgent || false);
     const [category, setCategory] = useState<string | undefined>(currentItem?.category);
@@ -155,16 +157,11 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
             return;
         }
 
-        const currentDate = selectedDate || date || getTonight();
+        if (!selectedDate) return;
 
         if (Platform.OS === 'android') {
             if (showDatePicker) {
-                if (date) {
-                    const hours = date.getHours();
-                    const minutes = date.getMinutes();
-                    currentDate.setHours(hours, minutes, 0, 0);
-                }
-
+                if (date) selectedDate.setHours(date.getHours(), date.getMinutes(), 0, 0);
                 setShowDatePicker(false);
                 setShowTimePicker(true);
             } else if (showTimePicker) {
@@ -174,7 +171,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
             setShowDatePicker(false);
         }
 
-        setDate(currentDate);
+        setDate(selectedDate);
     };
 
     const handleWebDateChange = (selectedDate: Date) => {
