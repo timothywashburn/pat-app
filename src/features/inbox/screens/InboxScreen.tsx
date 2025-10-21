@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    FlatList, LayoutAnimation,
+    FlatList, KeyboardAvoidingView, LayoutAnimation,
     RefreshControl,
     Text,
     TouchableOpacity,
@@ -21,6 +21,7 @@ import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLe
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
+import KeyboardAvoidingWrapper from "@/src/components/common/KeyboardAvoidingWrapper";
 
 interface AgendaItemDetailViewProps {
     navigation: StackNavigationProp<MainStackParamList, 'Inbox'>;
@@ -163,7 +164,7 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
     };
 
     return (
-        <>
+        <KeyboardAvoidingWrapper>
             <MainViewHeader
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
@@ -231,7 +232,7 @@ export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
                 />
             )}
 
-        </>
+        </KeyboardAvoidingWrapper>
     );
 }
 
