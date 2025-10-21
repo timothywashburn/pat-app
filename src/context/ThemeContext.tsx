@@ -25,6 +25,7 @@ type ThemeColors = {
     "on-error": string;
     "error-container": string;
     "on-error-container": string;
+    "error-on-bg": string;
     "background": string;
     "on-background": string;
     "on-background-variant": string;
