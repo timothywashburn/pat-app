@@ -10,6 +10,7 @@ import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { UserModuleData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { LocalSection } from '@/src/features/settings/sections/LocalSection';
 import { GeneralSection } from '@/src/features/settings/sections/GeneralSection';
 import { AgendaSection } from '@/src/features/settings/sections/AgendaSection';
 import { PeopleSection } from '@/src/features/settings/sections/PeopleSection';
@@ -44,7 +45,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         propertyKeys: data.config.people.propertyKeys
     });
 
-    const handleSaveChanges = async () => {
+    const handleSaveChanges = useCallback(async () => {
         setIsSaving(true);
         try {
             await updateUserData({
@@ -67,7 +68,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [sectionData, updateUserData, successToast, errorToast]);
 
     const handleGeneralDataChange = (data: { modules: UserModuleData[] }) => {
         setSectionData(prev => ({ ...prev, modules: data.modules }));
@@ -127,6 +128,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         onSignOut={() => signOut()}
                         onDataChange={handleGeneralDataChange}
                     />
+
+                    <View className="h-px bg-surface my-6" />
+
+                    <LocalSection />
 
                     <View className="h-px bg-surface my-6" />
 

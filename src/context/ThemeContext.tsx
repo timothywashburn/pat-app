@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { DarkTheme, DefaultTheme, Theme } from "@react-navigation/native";
 import { Appearance, Platform } from "react-native";
 import themeData from '@/colors.json';
+import LocalStorage from '@/src/services/LocalStorage';
 
 export const lightColors = themeData.light;
 export const darkColors = themeData.dark;
@@ -43,12 +44,14 @@ interface CustomTheme extends Theme {
 }
 
 type ThemeMode = 'light' | 'dark';
+type ThemePreference = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
     theme: CustomTheme;
     colorScheme: ThemeMode;
+    themePreference: ThemePreference;
     getColor: (colorName: keyof ThemeColors) => string;
-    setTheme: (theme: ThemeMode) => void;
+    setThemePreference: (preference: ThemePreference) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
@@ -79,44 +82,86 @@ export const CustomThemeProvider: React.FC<CustomThemeProviderProps> = ({ childr
         return (systemScheme as ThemeMode) || 'light';
     });
 
-    const [themeOverride, setThemeOverride] = useState<ThemeMode | undefined>();
+    const [themePreference, setThemePreferenceState] = useState<ThemePreference>('system');
+    const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
-        const subscription = Appearance.addChangeListener(({ colorScheme: newScheme }) => {
-            if (!themeOverride && newScheme) {
-                setColorScheme(newScheme as ThemeMode);
+        const loadThemePreference = async () => {
+            const savedPreference = await LocalStorage.shared.getThemePreference();
+            setThemePreferenceState(savedPreference);
+
+            if (savedPreference !== 'system') {
+                setColorScheme(savedPreference as ThemeMode);
+
+                if (Platform.OS === 'web') {
+                    if (typeof document !== 'undefined') {
+                        document.documentElement.classList.toggle('dark-mode', savedPreference === 'dark');
+                        document.documentElement.classList.toggle('light-mode', savedPreference === 'light');
+                    }
+                } else {
+                    Appearance.setColorScheme(savedPreference as ThemeMode);
+                }
             }
+
+            setIsInitialized(true);
+        };
+
+        loadThemePreference();
+    }, []);
+
+    useEffect(() => {
+        if (!isInitialized) return;
+
+        const subscription = Appearance.addChangeListener(({ colorScheme: newScheme }) => {
+            if (themePreference === 'system' && newScheme) setColorScheme(newScheme as ThemeMode);
         });
 
         return () => subscription?.remove();
-    }, [themeOverride]);
+    }, [themePreference, isInitialized]);
 
-    const currentScheme = themeOverride || colorScheme;
+    const currentScheme = themePreference === 'system' ? colorScheme : (themePreference as ThemeMode);
     const theme = currentScheme === 'dark' ? darkTheme : lightTheme;
 
     const getColor = (colorName: keyof ThemeColors): string => {
         return theme.colors[colorName];
     };
 
-    const setTheme = (newTheme: ThemeMode) => {
-        setThemeOverride(newTheme);
-        setColorScheme(newTheme);
+    const setThemePreference = async (preference: ThemePreference) => {
+        setThemePreferenceState(preference);
+        await LocalStorage.shared.setThemePreference(preference);
 
-        if (Platform.OS === 'web') {
-            if (typeof document !== 'undefined') {
-                document.documentElement.classList.toggle('dark-mode', newTheme === 'dark');
-                document.documentElement.classList.toggle('light-mode', newTheme === 'light');
+        if (preference === 'system') {
+            const systemScheme = Appearance.getColorScheme() as ThemeMode || 'light';
+            setColorScheme(systemScheme);
+
+            if (Platform.OS === 'web') {
+                if (typeof document !== 'undefined') {
+                    document.documentElement.classList.toggle('dark-mode', systemScheme === 'dark');
+                    document.documentElement.classList.toggle('light-mode', systemScheme === 'light');
+                }
+            } else {
+                Appearance.setColorScheme(null);
             }
         } else {
-            Appearance.setColorScheme(newTheme);
+            setColorScheme(preference as ThemeMode);
+
+            if (Platform.OS === 'web') {
+                if (typeof document !== 'undefined') {
+                    document.documentElement.classList.toggle('dark-mode', preference === 'dark');
+                    document.documentElement.classList.toggle('light-mode', preference === 'light');
+                }
+            } else {
+                Appearance.setColorScheme(preference as ThemeMode);
+            }
         }
     };
 
     const value: ThemeContextType = {
         theme,
         colorScheme: currentScheme,
+        themePreference,
         getColor,
-        setTheme,
+        setThemePreference,
     };
 
     return (
