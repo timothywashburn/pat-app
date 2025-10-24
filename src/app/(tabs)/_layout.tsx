@@ -18,6 +18,7 @@ import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { useLocalSearchParams } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { FocusAwareWrapper } from '@/src/components/FocusAwareWrapper';
 
 export type ModuleProps = {
     isModuleView: boolean;
@@ -140,7 +141,12 @@ export default function TabsLayout() {
                                 ),
                             }}
                         >
-                            {() => <MainStack initialRouteName={moduleConfig.initialRouteName} />}
+                            {/*TODO: try also putting keyboard aware thing here*/}
+                            {() => (
+                                <FocusAwareWrapper>
+                                    <MainStack initialRouteName={moduleConfig.initialRouteName} />
+                                </FocusAwareWrapper>
+                            )}
                         </Tab.Screen>
                     );
                 })}
