@@ -51,7 +51,7 @@ export const GeneralSection: React.FC<GeneralSectionProps> = ({
             )}
 
             <Text
-                className="text-on-error text-base font-bold text-center py-3"
+                className="text-error-on-bg text-base font-bold text-center py-3"
                 onPress={onSignOut}
             >
                 Sign Out
