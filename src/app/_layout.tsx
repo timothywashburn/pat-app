@@ -23,6 +23,7 @@ import * as Application from 'expo-application';
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { HeaderControlsProvider } from '@/src/context/HeaderControlsContext';
 import { ModalProvider } from '@/src/context/ModalContext';
+import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 
 const DEV_BOOT = false;
 
@@ -140,8 +141,7 @@ const AppContent: React.FC = () => {
 
         if (authStoreStatus !== AuthStoreStatus.NOT_INITIALIZED) {
             Logger.debug('startup', 'initializing deep links');
-            // TODO: re enable and fix
-            // DeepLinkHandler.initialize();
+            DeepLinkHandler.initialize();
             Logger.debug('startup', 'deep links initialized successfully');
         }
     }, [authStoreStatus]);
