@@ -30,7 +30,29 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#F5F7FA"
       },
-      "package": "dev.timothyw.patapp"
+      "package": "dev.timothyw.patapp",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "pat.timothyw.dev",
+              "pathPrefix": "/"
+            },
+            {
+              "scheme": "https",
+              "host": "dev-timothyw-patapp.ngrok.io",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": [
+              "BROWSABLE",
+              "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
