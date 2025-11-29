@@ -9,6 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "appleTeamId": "2MSZNNJ354",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.dev.timothyw.patapp"
+        ]
+      },
       "icon": {
         "light": "./assets/images/icon.png",
         "dark": "./assets/images/icon.png",
@@ -60,6 +66,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "@bacons/apple-targets",
       "expo-router",
       "expo-secure-store",
       [
