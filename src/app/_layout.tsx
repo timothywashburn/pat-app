@@ -25,6 +25,9 @@ import { HeaderControlsProvider } from '@/src/context/HeaderControlsContext';
 import { ModalProvider } from '@/src/context/ModalContext';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { useAppFocus } from "@/src/hooks/useAppFocus";
+import { processWidgetActionQueue } from "@/src/utils/widgetSync";
+import { useHabitsStore } from "@/src/stores/useHabitsStore";
+import { HabitEntryStatus } from "@timothyw/pat-common";
 
 const DEV_BOOT = false;
 
@@ -46,6 +49,8 @@ const AppContent: React.FC = () => {
 
     const navigationStore = useNavigationStore();
 
+    const { markHabitEntry, syncToWidget } = useHabitsStore();
+
     useAppFocus(useCallback(() => {
         if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL ||
             authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
@@ -53,8 +58,24 @@ const AppContent: React.FC = () => {
             refreshAuth().catch((error) => {
                 Logger.error('auth', 'failed to refresh token on app refocus', error);
             });
+
+            // Process widget action queue
+            processWidgetActionQueue().then(async (action) => {
+                if (action) {
+                    Logger.debug('unclassified', 'processing widget action', action);
+                    try {
+                        await markHabitEntry(action.habitId, action.date as any, HabitEntryStatus.COMPLETED);
+                        await syncToWidget();
+                        Logger.debug('unclassified', 'widget action processed successfully');
+                    } catch (error) {
+                        Logger.error('unclassified', 'failed to process widget action', error);
+                    }
+                }
+            }).catch((error) => {
+                Logger.error('unclassified', 'failed to read widget action queue', error);
+            });
         }
-    }, [authStoreStatus, refreshAuth]));
+    }, [authStoreStatus, refreshAuth, markHabitEntry, syncToWidget]));
 
     useEffect(() => {
         if (pathname.toLowerCase().includes("form")) {

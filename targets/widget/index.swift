@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct exportWidgets: WidgetBundle {
     var body: some Widget {
+        HabitsWidget()
         ExampleWidget()
         ExampleWidgetControl()
         ExampleWidgetLiveActivity()

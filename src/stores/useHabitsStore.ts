@@ -17,6 +17,7 @@ import {
 import { performAuthenticatedRequest } from '@/src/utils/networkUtils';
 import { toastManager } from '@/src/utils/toastUtils';
 import { HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
+import { syncHabitsToWidget } from '@/src/utils/widgetSync';
 
 interface HabitsState {
     habits: Habit[];
@@ -33,6 +34,7 @@ interface HabitsActions {
     deleteHabitEntry: (habitId: string, date: DateOnlyString) => Promise<void>;
     getHabitById: (id: string) => Habit | undefined;
     getHabitEntryByDate: (habitId: string, date: DateOnlyString) => HabitEntryData | undefined;
+    syncToWidget: () => Promise<void>;
 }
 
 export const useHabitsStore = create<HabitsState & HabitsActions>((set, get) => ({
@@ -57,6 +59,10 @@ export const useHabitsStore = create<HabitsState & HabitsActions>((set, get) => 
 
             const habits = response.habits.map(habit => Serializer.deserialize<Habit>(habit));
             set({ habits, isInitialized: true, isLoading: false });
+
+            // Sync to widget
+            syncHabitsToWidget(habits).catch(err => console.error('Failed to sync to widget:', err));
+
             return habits;
         } catch (error) {
             set({ isLoading: false });
@@ -157,5 +163,10 @@ export const useHabitsStore = create<HabitsState & HabitsActions>((set, get) => 
         const habit = get().getHabitById(habitId);
         if (!habit) return undefined;
         return habit.entries.find(e => e.date === date);
+    },
+
+    syncToWidget: async (): Promise<void> => {
+        const { habits } = get();
+        await syncHabitsToWidget(habits);
     },
 }));
