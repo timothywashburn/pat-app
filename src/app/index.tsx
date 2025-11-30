@@ -19,6 +19,7 @@ export default function Index() {
             console.log('[Live Activity] Starting Live Activity with emoji: 🎉');
             try {
                 console.log(AppleLiveActivityModule.hello());
+                AppleLiveActivityModule.startLiveActivity("🎉");
                 console.log('[Live Activity] ✅ Live Activity start command sent!');
             } catch (error: any) {
                 console.error('[Live Activity] ❌ Failed to start Live Activity:', error);
