@@ -1,16 +1,36 @@
 import { Redirect } from 'expo-router';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
-import { ExtensionStorage } from "@bacons/apple-targets";
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import AppleLiveActivityModule from "@/modules/apple-live-activity";
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
-const widgetStorage = new ExtensionStorage('group.dev.timothyw.patapp')
+// Only import native modules if NOT running in Expo Go
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+let ExtensionStorage: any = null;
+let AppleLiveActivityModule: any = null;
+let widgetStorage: any = null;
+
+if (!isExpoGo && Platform.OS === 'ios') {
+    ExtensionStorage = require("@bacons/apple-targets").ExtensionStorage;
+    AppleLiveActivityModule = require("@/modules/apple-live-activity").default;
+    widgetStorage = new ExtensionStorage('group.dev.timothyw.patapp');
+}
 
 export default function Index() {
     const { getFirstModule } = useUserDataStore();
 
     useEffect(() => {
+        if (isExpoGo) {
+            console.log('[Native Modules] Running in Expo Go - native modules disabled');
+            return;
+        }
+
+        if (!widgetStorage || !AppleLiveActivityModule) {
+            console.log('[Native Modules] Native modules not available');
+            return;
+        }
+
         widgetStorage.set('test', 'Hello World!');
         ExtensionStorage.reloadWidget();
 

@@ -2,16 +2,16 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct WidgetAttributes: ActivityAttributes {
+struct ExampleWidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var emoji: String
     }
     var name: String
 }
 
-struct WidgetLiveActivity: Widget {
+struct ExampleWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: WidgetAttributes.self) { context in
+        ActivityConfiguration(for: ExampleWidgetAttributes.self) { context in
             // Lock screen/banner UI goes here
             VStack {
                 Text("Hello \(context.state.emoji)")
@@ -46,25 +46,25 @@ struct WidgetLiveActivity: Widget {
     }
 }
 
-extension WidgetAttributes {
-    fileprivate static var preview: WidgetAttributes {
-        WidgetAttributes(name: "World")
+extension ExampleWidgetAttributes {
+    fileprivate static var preview: ExampleWidgetAttributes {
+        ExampleWidgetAttributes(name: "World")
     }
 }
 
-extension WidgetAttributes.ContentState {
-    fileprivate static var smiley: WidgetAttributes.ContentState {
-        WidgetAttributes.ContentState(emoji: "😀")
+extension ExampleWidgetAttributes.ContentState {
+    fileprivate static var smiley: ExampleWidgetAttributes.ContentState {
+        ExampleWidgetAttributes.ContentState(emoji: "😀")
      }
-     
-     fileprivate static var starEyes: WidgetAttributes.ContentState {
-         WidgetAttributes.ContentState(emoji: "🤩")
+
+     fileprivate static var starEyes: ExampleWidgetAttributes.ContentState {
+         ExampleWidgetAttributes.ContentState(emoji: "🤩")
      }
 }
 
-#Preview("Notification", as: .content, using: WidgetAttributes.preview) {
-   WidgetLiveActivity()
+#Preview("Notification", as: .content, using: ExampleWidgetAttributes.preview) {
+   ExampleWidgetLiveActivity()
 } contentStates: {
-    WidgetAttributes.ContentState.smiley
-    WidgetAttributes.ContentState.starEyes
+    ExampleWidgetAttributes.ContentState.smiley
+    ExampleWidgetAttributes.ContentState.starEyes
 }

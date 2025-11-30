@@ -34,9 +34,9 @@ struct SimpleEntry: TimelineEntry {
     let configuration: ConfigurationAppIntent
 }
 
-struct widgetEntryView : View {
+struct ExampleWidgetEntryView : View {
     var entry: Provider.Entry
-    
+
     let defaults = UserDefaults(suiteName: "group.dev.timothyw.patapp")
 
     var body: some View {
@@ -50,12 +50,12 @@ struct widgetEntryView : View {
     }
 }
 
-struct widget: Widget {
-    let kind: String = "widget"
-    
+struct ExampleWidget: Widget {
+    let kind: String = "ExampleWidget"
+
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
-            widgetEntryView(entry: entry)
+            ExampleWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
     }
@@ -76,7 +76,7 @@ extension ConfigurationAppIntent {
 }
 
 #Preview(as: .systemSmall) {
-    widget()
+    ExampleWidget()
 } timeline: {
     SimpleEntry(date: .now, configuration: .smiley)
     SimpleEntry(date: .now, configuration: .starEyes)

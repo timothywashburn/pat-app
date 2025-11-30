@@ -2,8 +2,8 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-struct widgetControl: ControlWidget {
-    static let kind: String = "com.developer.example.widget"
+struct ExampleWidgetControl: ControlWidget {
+    static let kind: String = "com.developer.example.widget.control"
 
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(
@@ -18,12 +18,12 @@ struct widgetControl: ControlWidget {
                 Label(isRunning ? "On" : "Off", systemImage: "timer")
             }
         }
-        .displayName("Timer")
-        .description("A an example control that runs a timer.")
+        .displayName("Example Timer")
+        .description("An example control that runs a timer.")
     }
 }
 
-extension widgetControl {
+extension ExampleWidgetControl {
     struct Value {
         var isRunning: Bool
         var name: String
@@ -31,12 +31,12 @@ extension widgetControl {
 
     struct Provider: AppIntentControlValueProvider {
         func previewValue(configuration: TimerConfiguration) -> Value {
-            widgetControl.Value(isRunning: false, name: configuration.timerName)
+            ExampleWidgetControl.Value(isRunning: false, name: configuration.timerName)
         }
 
         func currentValue(configuration: TimerConfiguration) async throws -> Value {
             let isRunning = true // Check if the timer is running
-            return widgetControl.Value(isRunning: isRunning, name: configuration.timerName)
+            return ExampleWidgetControl.Value(isRunning: isRunning, name: configuration.timerName)
         }
     }
 }
