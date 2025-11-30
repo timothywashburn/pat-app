@@ -24,6 +24,7 @@ import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { HeaderControlsProvider } from '@/src/context/HeaderControlsContext';
 import { ModalProvider } from '@/src/context/ModalContext';
 import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
+import { useAppFocus } from "@/src/hooks/useAppFocus";
 
 const DEV_BOOT = false;
 
@@ -35,7 +36,7 @@ SplashScreen.setOptions({
 
 const AppContent: React.FC = () => {
     const { theme, colorScheme, getColor } = useTheme();
-    const { authStoreStatus, initializeAuth, versionInfo } = useAuthStore();
+    const { authStoreStatus, initializeAuth, refreshAuth, versionInfo } = useAuthStore();
     const { userDataStoreStatus, loadUserData } = useUserDataStore();
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
     const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
@@ -44,6 +45,16 @@ const AppContent: React.FC = () => {
     // const segments = useSegments();
 
     const navigationStore = useNavigationStore();
+
+    useAppFocus(useCallback(() => {
+        if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL ||
+            authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
+            Logger.debug('auth', 'app refocused, refreshing token');
+            refreshAuth().catch((error) => {
+                Logger.error('auth', 'failed to refresh token on app refocus', error);
+            });
+        }
+    }, [authStoreStatus, refreshAuth]));
 
     useEffect(() => {
         if (pathname.toLowerCase().includes("form")) {
