@@ -7,6 +7,7 @@ import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCard from '@/src/features/habits/components/HabitCard';
+import HabitRowCondensed from '@/src/features/habits/components/HabitRowCondensed';
 import { getActiveHabitDate, getTimeRemainingUntilRollover } from '@/src/features/habits/models';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
@@ -33,28 +34,26 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
             loadHabits();
         }
     }, [isInitialized, loadHabits]);
-    const [showUnmarkedOnly, setShowUnmarkedOnly] = useState(false);
+    const [showExpandedView, setShowExpandedView] = useState(false);
 
     const handleAddHabit = () => {
         navigation.navigate('HabitForm', {});
     };
 
-    // Set header controls for WebHeader on web
     useFocusEffect(
         useCallback(() => {
             setHeaderControls({
                 showAddButton: true,
                 onAddTapped: handleAddHabit,
                 showFilterButton: true,
-                isFilterActive: showUnmarkedOnly,
-                onFilterTapped: () => setShowUnmarkedOnly(!showUnmarkedOnly),
+                isFilterActive: showExpandedView,
+                onFilterTapped: () => setShowExpandedView(!showExpandedView),
             });
 
-            // Clear header controls when screen loses focus
             return () => {
                 setHeaderControls({});
             };
-        }, [showUnmarkedOnly])
+        }, [showExpandedView])
     );
 
     const handleEditHabit = (habit: Habit) => {
@@ -73,37 +72,19 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
         }
     };
 
-    const getFilteredHabits = (): Habit[] => {
-        let filteredHabits: Habit[];
-
-        if (!showUnmarkedOnly) {
-            filteredHabits = habits;
-        } else {
-            filteredHabits = habits.filter(habit => {
-                const activeDate = getActiveHabitDate(habit);
-                const currentEntry = habit.entries.find(entry => entry.date === activeDate);
-                return currentEntry === undefined;
-            });
-        }
-
-        return filteredHabits.sort((a, b) => {
+    const getSortedHabits = (): Habit[] => {
+        return habits.sort((a, b) => {
             const activeA = getActiveHabitDate(a);
             const activeB = getActiveHabitDate(b);
 
             if (activeA && !activeB) return -1;
             if (!activeA && activeB) return 1;
 
-            if (activeA && activeB) {
-                const timeA = getTimeRemainingUntilRollover(a.startOffsetMinutes, a.endOffsetMinutes);
-                const timeB = getTimeRemainingUntilRollover(b.startOffsetMinutes, b.endOffsetMinutes);
-                return timeA.totalMinutes - timeB.totalMinutes;
-            }
-
-            return 0;
+            return a.sortOrder - b.sortOrder;
         });
     };
 
-    const filteredHabits = getFilteredHabits();
+    const sortedHabits = getSortedHabits();
 
     return (
         <>
@@ -112,7 +93,7 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
                 title="Habits"
             />
 
-            <ScrollView 
+            <ScrollView
                 className="flex-1 p-5"
                 refreshControl={refreshControl}
             >
@@ -127,28 +108,28 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
                             Start building better habits by adding your first one!
                         </Text>
                     </View>
-                ) : filteredHabits.length === 0 ? (
-                    <View className="flex-1 items-center justify-center">
-                        <Text className="text-on-background text-xl font-bold mb-3">No Unmarked Habits</Text>
-                        <Text className="text-on-background-variant text-center">
-                            All habits have been marked for today!
-                        </Text>
-                    </View>
                 ) : (
                     <View>
-                        <Text className="text-on-background text-2xl font-bold mb-5">
-                            {showUnmarkedOnly ? 'Unmarked Habits' : 'Your Habits'}
-                        </Text>
-                        
-                        {filteredHabits.map((habit, index) => (
-                            <HabitCard
-                                key={habit._id}
-                                habit={habit}
-                                onPress={handleHabitPress}
-                                onEditPress={handleEditHabit}
-                                onHabitUpdated={handleHabitUpdated}
-                            />
-                        ))}
+                        {showExpandedView ? (
+                            sortedHabits.map((habit) => (
+                                <HabitCard
+                                    key={habit._id}
+                                    habit={habit}
+                                    onPress={handleHabitPress}
+                                    onEditPress={handleEditHabit}
+                                    onHabitUpdated={handleHabitUpdated}
+                                />
+                            ))
+                        ) : (
+                            sortedHabits.map((habit) => (
+                                <HabitRowCondensed
+                                    key={habit._id}
+                                    habit={habit}
+                                    onPress={handleHabitPress}
+                                    onHabitUpdated={handleHabitUpdated}
+                                />
+                            ))
+                        )}
                     </View>
                 )}
             </ScrollView>

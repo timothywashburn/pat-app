@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     Text,
-    TouchableOpacity,
     View,
 } from 'react-native';
 import { useTheme } from '@/src/context/ThemeContext';
@@ -29,20 +28,10 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
 }) => {
     const { habits } = useHabitsStore();
 
-    const [selectedTimeframe, setSelectedTimeframe] = useState<'current' | 'previous'>('current');
-
     const currentHabit = habits.find(habit => habit._id === route.params.habitId)!;
 
     const currentDate = getActiveHabitDate(currentHabit);
     const previousDate = getPreviousHabitDate(currentHabit);
-
-    const handleTimeframeChange = (timeframe: 'current' | 'previous') => {
-        // Don't allow switching to current if currentDate is null
-        if (timeframe === 'current' && currentDate === null) {
-            return;
-        }
-        setSelectedTimeframe(timeframe);
-    };
 
     const sections = [
         // Habit Info Section
@@ -80,51 +69,6 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                     </View>
 
                     <TimeRemainingIndicator habit={currentHabit} />
-
-                    {/* Timeframe Toggle and Buttons */}
-                    <View className="mt-4">
-                        {/* Simple Toggle */}
-                        <View className="flex-row bg-surface-variant rounded-lg p-1 mb-4">
-                            <TouchableOpacity
-                                className={`flex-1 py-2 px-3 rounded-md ${
-                                    selectedTimeframe === 'current' ? 'bg-primary' : 'bg-transparent'
-                                } ${currentDate === null ? 'opacity-50' : ''}`}
-                                onPress={() => handleTimeframeChange('current')}
-                                disabled={currentDate === null}
-                            >
-                                <Text className={`text-center text-sm font-medium ${
-                                    selectedTimeframe === 'current' ? 'text-on-primary' : 'text-on-surface-variant'
-                                } ${currentDate === null ? 'text-on-surface-variant' : ''}`}>
-                                    Current
-                                </Text>
-                            </TouchableOpacity>
-                            
-                            <TouchableOpacity
-                                className={`flex-1 py-2 px-3 rounded-md ${
-                                    selectedTimeframe === 'previous' ? 'bg-primary' : 'bg-transparent'
-                                }`}
-                                onPress={() => handleTimeframeChange('previous')}
-                            >
-                                <Text className={`text-center text-sm font-medium ${
-                                    selectedTimeframe === 'previous' ? 'text-on-primary' : 'text-on-surface-variant'
-                                }`}>
-                                    Previous
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                        
-                        {/* Action Buttons for Selected Timeframe */}
-                        <View>
-                            <Text className="text-on-surface text-lg font-semibold mb-3">
-                                {selectedTimeframe === 'current' ? 'Current Timeframe' : 'Previous Timeframe'}
-                            </Text>
-                            <HabitActionButtons
-                                habit={currentHabit}
-                                targetDate={selectedTimeframe === 'current' ? currentDate! : previousDate!}
-                                showDateInfo={true}
-                            />
-                        </View>
-                    </View>
                 </>
             )
         },
@@ -135,6 +79,38 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
                     habit={currentHabit}
                     viewMode="weeks" // Default to last 52 weeks
                 />
+            )
+        },
+        // Action Buttons Section
+        {
+            content: (
+                <>
+                    <Text className="text-on-surface text-medium font-semibold mb-4">
+                        Completion Status
+                    </Text>
+
+                    {/* Today's Actions */}
+                    {currentDate && (
+                        <View className="mb-4">
+                            <HabitActionButtons
+                                habit={currentHabit}
+                                targetDate={currentDate}
+                                showDateInfo={true}
+                            />
+                        </View>
+                    )}
+
+                    {/* Yesterday's Actions */}
+                    {previousDate && (
+                        <View>
+                            <HabitActionButtons
+                                habit={currentHabit}
+                                targetDate={previousDate}
+                                showDateInfo={true}
+                            />
+                        </View>
+                    )}
+                </>
             )
         },
         // Reset Time Section
@@ -162,7 +138,7 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
         {
             content: (
                 <>
-                    <Text className="text-on-surface text-lg font-semibold mb-3">
+                    <Text className="text-on-surface text-medium font-semibold mb-3">
                         Details
                     </Text>
                     
