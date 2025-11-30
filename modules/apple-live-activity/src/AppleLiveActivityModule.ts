@@ -1,12 +1,9 @@
 import { NativeModule, requireNativeModule } from 'expo';
 
-import { AppleLiveActivityModuleEvents } from './AppleLiveActivity.types';
-
-declare class AppleLiveActivityModule extends NativeModule<AppleLiveActivityModuleEvents> {
-  PI: number;
-  hello(): string;
-  setValueAsync(value: string): Promise<void>;
+declare class AppleLiveActivityModule extends NativeModule {
   startLiveActivity(emoji: string): void;
+  updateLiveActivity(emoji: string): void;
+  stopAllLiveActivities(): void;
 }
 
 // This call loads the native module object from the JSI.

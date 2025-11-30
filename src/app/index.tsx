@@ -18,9 +18,8 @@ export default function Index() {
         if (Platform.OS === 'ios') {
             console.log('[Live Activity] Starting Live Activity with emoji: 🎉');
             try {
-                console.log(AppleLiveActivityModule.hello());
                 AppleLiveActivityModule.startLiveActivity("🎉");
-                console.log('[Live Activity] ✅ Live Activity start command sent!');
+                console.log('[Live Activity] ✅ Live Activity started!');
             } catch (error: any) {
                 console.error('[Live Activity] ❌ Failed to start Live Activity:', error);
                 console.error('[Live Activity] Error details:', error.message);
