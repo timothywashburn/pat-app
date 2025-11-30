@@ -6,6 +6,8 @@
     "start": "expo start --dev-client",
     "dev": "npm install @timothyw/pat-common && APP_VARIANT=development npx expo start -c --go",
     "dev:tunnel": "npm install @timothyw/pat-common && APP_VARIANT=development npx expo start -c --tunnel --go",
+    "build:widgetandrun": "npx expo prebuild -p ios --clean && npx expo run:ios --device",
+    "build:widgetonly": "npx expo prebuild -p ios --template ./node_modules/@bacons/apple-targets/prebuild-blank.tgz --clean",
     "build:ios": "scripts/build-ios.sh",
     "build:ios:preview": "scripts/build-ios-preview.sh",
     "build:ios:dev": "scripts/build-ios-dev.sh",

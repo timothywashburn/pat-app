@@ -102,9 +102,7 @@
       }
     },
     "owner": "timothywashburn",
-    "runtimeVersion": {
-      "policy": "fingerprint"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/567a8eb7-3de0-44ff-b899-e0f7b83d5118",
       "checkAutomatically": "NEVER"

@@ -3,11 +3,12 @@ module.exports = config => ({
   type: "widget",
   icon: 'https://github.com/expo.png',
   entitlements: {
-    'com.apple.security.application-groups': [
-        config.ios.entitlements['com.apple.security.application-groups']
-    ]
+    'com.apple.security.application-groups': config.ios.entitlements['com.apple.security.application-groups']
   },
   colors: {
-    accent: '#FF0000',
+    $accent: {
+      color: "red",
+      darkColor: "orange"
+    }
   }
 });

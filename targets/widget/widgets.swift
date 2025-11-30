@@ -36,21 +36,23 @@ struct SimpleEntry: TimelineEntry {
 
 struct widgetEntryView : View {
     var entry: Provider.Entry
+    
+    let defaults = UserDefaults(suiteName: "group.dev.timothyw.patapp")
 
     var body: some View {
         VStack {
             Text("Time:")
             Text(entry.date, style: .time)
 
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
+            Text("Text:")
+            Text(defaults?.string(forKey: "test") ?? "None")
         }
     }
 }
 
 struct widget: Widget {
     let kind: String = "widget"
-
+    
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             widgetEntryView(entry: entry)
