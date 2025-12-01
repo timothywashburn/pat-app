@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DevPanelSection from './DevPanelSection';
 import { DraggableList } from '@/src/components/common/DraggableList';
+import { useTheme } from '@/src/context/ThemeContext';
 
 interface DemoItem {
     id: string;
@@ -50,10 +51,10 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
     },
 ];
 
-const ITEM_HEIGHT = 80;
-
 const DraggableListSection = () => {
+    const { getColor } = useTheme();
     const [items, setItems] = useState<DemoItem[]>(INITIAL_DEMO_ITEMS);
+    const [reorderable, setReorderable] = useState(true);
 
     const handleReorder = (newData: DemoItem[]) => {
         setItems(newData);
@@ -62,10 +63,49 @@ const DraggableListSection = () => {
 
     return (
         <DevPanelSection title="Draggable List Demo" bgClassName="bg-background">
+            <View className="mb-4">
+                <TouchableOpacity
+                    onPress={() => setReorderable(!reorderable)}
+                    className="flex-row items-center justify-between bg-surface rounded-lg px-4 py-3"
+                >
+                    <View className="flex-row items-center">
+                        <Ionicons
+                            name={reorderable ? "lock-open" : "lock-closed"}
+                            size={20}
+                            color={getColor("on-surface-variant")}
+                            className="mr-3"
+                        />
+                        <Text className="text-on-surface text-base font-medium">
+                            Reorder Mode
+                        </Text>
+                    </View>
+                    <View
+                        className="px-3 py-1 rounded-full"
+                        style={{
+                            backgroundColor: reorderable
+                                ? getColor("primary-container")
+                                : getColor("surface-variant"),
+                        }}
+                    >
+                        <Text
+                            className="text-xs font-semibold"
+                            style={{
+                                color: reorderable
+                                    ? getColor("on-primary-container")
+                                    : getColor("on-surface-variant"),
+                            }}
+                        >
+                            {reorderable ? 'ON' : 'OFF'}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
+
             <DraggableList
                 data={items}
                 onReorder={handleReorder}
                 keyExtractor={(item) => item.id}
+                reorderable={reorderable}
                 renderItem={({ item, index }) => {
                     return (
                         <>
@@ -95,7 +135,6 @@ const DraggableListSection = () => {
                         </>
                     )
                 }}
-                itemHeight={ITEM_HEIGHT}
             />
         </DevPanelSection>
     );
