@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DevPanelSection from './DevPanelSection';
 import { DraggableList } from '@/src/components/common/DraggableList';
@@ -51,14 +51,30 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
     },
 ];
 
-const DraggableListSection = () => {
+interface DraggableListSectionProps {
+    scrollViewRef?: React.RefObject<ScrollView>;
+    scrollYRef?: React.MutableRefObject<number>;
+}
+
+const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewRef, scrollYRef }) => {
     const { getColor } = useTheme();
     const [items, setItems] = useState<DemoItem[]>(INITIAL_DEMO_ITEMS);
-    const [reorderable, setReorderable] = useState(true);
+    const [savedItems, setSavedItems] = useState<DemoItem[]>(INITIAL_DEMO_ITEMS);
+    const [reorderable, setReorderable] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const handleReorder = (newData: DemoItem[]) => {
         setItems(newData);
-        console.log('Items reordered:', newData.map(item => item.name));
+    };
+
+    const handleSave = () => {
+        setSavedItems(items);
+        console.log('Items saved:', items.map(item => item.name));
+    };
+
+    const handleCancel = () => {
+        setItems(savedItems);
+        console.log('Changes cancelled, restored to:', savedItems.map(item => item.name));
     };
 
     return (
@@ -66,7 +82,9 @@ const DraggableListSection = () => {
             <View className="mb-4">
                 <TouchableOpacity
                     onPress={() => setReorderable(!reorderable)}
+                    disabled={isEditMode}
                     className="flex-row items-center justify-between bg-surface rounded-lg px-4 py-3"
+                    style={{ opacity: isEditMode ? 0.5 : 1 }}
                 >
                     <View className="flex-row items-center">
                         <Ionicons
@@ -76,7 +94,7 @@ const DraggableListSection = () => {
                             className="mr-3"
                         />
                         <Text className="text-on-surface text-base font-medium">
-                            Reorder Mode
+                            Always Reorderable
                         </Text>
                     </View>
                     <View
@@ -84,7 +102,7 @@ const DraggableListSection = () => {
                         style={{
                             backgroundColor: reorderable
                                 ? getColor("primary-container")
-                                : getColor("surface-variant"),
+                                : getColor("surface")
                         }}
                     >
                         <Text
@@ -106,6 +124,11 @@ const DraggableListSection = () => {
                 onReorder={handleReorder}
                 keyExtractor={(item) => item.id}
                 reorderable={reorderable}
+                onEditModeChange={setIsEditMode}
+                onSaveChanges={handleSave}
+                onCancelChanges={handleCancel}
+                scrollViewRef={scrollViewRef}
+                scrollYRef={scrollYRef}
                 renderItem={({ item, index }) => {
                     return (
                         <>

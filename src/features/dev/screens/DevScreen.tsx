@@ -28,6 +28,8 @@ export const DevPanel: React.FC<DevPanelProps> = ({
 }) => {
     const [logViewerPanelVisible, setLogViewerPanelVisible] = useState(false);
     const { setHeaderControls } = useHeaderControls();
+    const scrollViewRef = React.useRef<ScrollView>(null);
+    const scrollYRef = React.useRef(0);
 
     const handleAddTapped = () => {
         console.log('dev tapped');
@@ -53,7 +55,14 @@ export const DevPanel: React.FC<DevPanelProps> = ({
                 title="Dev"
             />
 
-            <ScrollView className="flex-1 p-5">
+            <ScrollView
+                ref={scrollViewRef}
+                className="flex-1 p-5"
+                onScroll={(event) => {
+                    scrollYRef.current = event.nativeEvent.contentOffset.y;
+                }}
+                scrollEventThrottle={16}
+            >
                 <View className="items-center mb-10">
                     <Text className="text-on-background text-2xl font-bold mb-5">Dev Panel</Text>
                     <Text className="text-on-background-variant">For various development things</Text>
@@ -62,7 +71,7 @@ export const DevPanel: React.FC<DevPanelProps> = ({
                 <LogViewerSection
                     setPanelVisible={setLogViewerPanelVisible}
                 />
-                <DraggableListSection />
+                <DraggableListSection scrollViewRef={scrollViewRef} scrollYRef={scrollYRef} />
                 <PushNotificationSection />
                 <DevicesSection />
                 <DeepLinkSection />

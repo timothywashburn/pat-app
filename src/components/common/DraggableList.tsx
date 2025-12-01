@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, useAnimatedReaction } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/src/context/ThemeContext";
@@ -12,6 +12,11 @@ interface DraggableListProps<T> {
     renderItem: (data: {item: T, index: number}) => React.ReactNode;
     onReorder: (newData: T[]) => void;
     reorderable?: boolean;
+    onEditModeChange?: (isEditing: boolean) => void;
+    onSaveChanges?: () => void;
+    onCancelChanges?: () => void;
+    scrollViewRef?: React.RefObject<ScrollView>;
+    scrollYRef?: React.MutableRefObject<number>;
 }
 
 const springConfig = {
@@ -25,8 +30,18 @@ export function DraggableList<T>({
     renderItem,
     keyExtractor,
     reorderable = true,
+    onEditModeChange,
+    onSaveChanges,
+    onCancelChanges,
+    scrollViewRef,
+    scrollYRef: externalScrollYRef,
 }: DraggableListProps<T>) {
     const { getColor } = useTheme();
+    const [isEditMode, setIsEditMode] = useState(false);
+    const containerRef = useRef<View>(null);
+    const internalScrollYRef = useRef(0);
+    const scrollYRef = externalScrollYRef || internalScrollYRef;
+    const baseScrollY = useSharedValue(0);
 
     const [itemHeights, setItemHeights] = useState<Record<string, number>>({});
     const positions = useSharedValue<Record<string, number>>({});
@@ -37,12 +52,76 @@ export function DraggableList<T>({
     const dragStartPosition = useSharedValue<number>(0);
     const currentIndex = useSharedValue<number>(-1);
     const isDragging = useSharedValue<boolean>(false);
-    const reorderableProgress = useSharedValue(reorderable ? 1 : 0);
+    const isInternallyReorderable = reorderable || isEditMode;
+    const reorderableProgress = useSharedValue(isInternallyReorderable ? 1 : 0);
+    const editModeHeaderHeight = useSharedValue(isEditMode ? 1 : 0);
+    const flashingKey = useSharedValue<string>('');
 
     // Animate reorderable state changes
     useEffect(() => {
-        reorderableProgress.value = withSpring(reorderable ? 1 : 0, springConfig);
-    }, [reorderable]);
+        reorderableProgress.value = withSpring(isInternallyReorderable ? 1 : 0, springConfig);
+    }, [isInternallyReorderable]);
+
+    // Helper function to update scroll (must be on JS thread)
+    const updateScroll = (scroll: number) => {
+        scrollViewRef?.current?.scrollTo({
+            y: scroll,
+            animated: false,
+        });
+    };
+
+    // Sync scroll position with animation progress
+    useAnimatedReaction(
+        () => editModeHeaderHeight.value,
+        (progress) => {
+            const HEADER_HEIGHT = 72;
+            const targetScroll = baseScrollY.value + (HEADER_HEIGHT * progress);
+            runOnJS(updateScroll)(targetScroll);
+        }
+    );
+
+    // Animate edit mode header
+    useEffect(() => {
+        if (isEditMode) {
+            // Store the base scroll position when entering edit mode
+            baseScrollY.value = scrollYRef.current;
+            editModeHeaderHeight.value = withSpring(1, springConfig);
+        } else {
+            // When exiting, baseScrollY should be current scroll minus the header offset
+            const HEADER_HEIGHT = 72;
+            baseScrollY.value = scrollYRef.current - HEADER_HEIGHT;
+            editModeHeaderHeight.value = withSpring(0, springConfig);
+        }
+    }, [isEditMode]);
+
+    // Notify parent of edit mode changes
+    useEffect(() => {
+        onEditModeChange?.(isEditMode);
+    }, [isEditMode]);
+
+    const enterEditMode = (itemKey: string) => {
+        if (!reorderable && !isEditMode) {
+            setIsEditMode(true);
+            triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
+
+            // Clear flash after edit mode enters
+            setTimeout(() => {
+                flashingKey.value = '';
+            }, 600);
+        }
+    };
+
+    const handleSave = () => {
+        setIsEditMode(false);
+        onSaveChanges?.();
+        triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
+    };
+
+    const handleCancel = () => {
+        setIsEditMode(false);
+        onCancelChanges?.();
+        triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
+    };
 
     useEffect(() => {
         const allKeys = data.map(item => keyExtractor(item));
@@ -149,9 +228,18 @@ export function DraggableList<T>({
 
         const animatedStyle = useAnimatedStyle(() => {
             const isActive = activeKey.value === itemKey;
+            const isFlashing = flashingKey.value === itemKey && !isActive;
             const targetY = isActive
                 ? activeItemY.value
                 : (positions.value[itemKey] ?? 0);
+
+            // Priority: active drag (0.8) > flashing (0.6) > normal (1.0)
+            let targetOpacity = 1.0;
+            if (isActive) {
+                targetOpacity = 0.8;
+            } else if (isFlashing) {
+                targetOpacity = 0.6;
+            }
 
             return {
                 position: 'absolute',
@@ -162,7 +250,7 @@ export function DraggableList<T>({
                     { translateY: isActive ? targetY : withSpring(targetY, springConfig) },
                     { scale: withSpring(isActive ? 1.06 : 1, springConfig) },
                 ],
-                opacity: withSpring(isActive ? 0.8 : 1, springConfig),
+                opacity: withSpring(targetOpacity, isActive ? springConfig : { damping: 15, stiffness: 300 }),
                 zIndex: isActive ? 999 : index,
                 elevation: isActive ? 8 : 0,
             };
@@ -177,9 +265,29 @@ export function DraggableList<T>({
             };
         });
 
+        const longPressGesture = Gesture.LongPress()
+            .enabled(!reorderable && !isEditMode)
+            .minDuration(500)
+            .onBegin(() => {
+                flashingKey.value = itemKey;
+            })
+            .onStart(() => {
+                runOnJS(enterEditMode)(itemKey);
+            })
+            .onFinalize(() => {
+                // Clear flash if gesture is cancelled
+                if (!isEditMode) {
+                    flashingKey.value = '';
+                }
+            });
+
         const panGesture = Gesture.Pan()
-            .enabled(reorderable)
+            .enabled(isInternallyReorderable)
             .activateAfterLongPress(150)
+            .onBegin(() => {
+                // Immediate visual feedback on touch
+                flashingKey.value = itemKey;
+            })
             .onStart(() => {
                 isDragging.value = true;
                 activeKey.value = itemKey;
@@ -195,6 +303,9 @@ export function DraggableList<T>({
                 // runOnJS(logDebug)('Starting Y', positions.value[itemKey]);
                 // runOnJS(logDebug)('All positions', positions.value);
                 // runOnJS(logDebug)('Initial order', [...order.value]);
+
+                // Clear the flash since active state will take over
+                flashingKey.value = '';
 
                 runOnJS(triggerHaptic)(Haptics.ImpactFeedbackStyle.Medium);
             })
@@ -239,10 +350,18 @@ export function DraggableList<T>({
                 activeKey.value = '';
 
                 runOnJS(triggerHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
+            })
+            .onFinalize(() => {
+                // Clear flash if drag gesture is cancelled before starting
+                if (!isDragging.value) {
+                    flashingKey.value = '';
+                }
             });
 
+        const combinedGesture = Gesture.Simultaneous(longPressGesture, panGesture);
+
         return (
-            <GestureDetector gesture={panGesture}>
+            <GestureDetector gesture={combinedGesture}>
                 <Animated.View style={animatedStyle} onLayout={handleLayout}>
                     <View className="flex-1 flex-row items-center bg-surface rounded-lg px-4 py-2 mx-1 my-1.5">
                         <Animated.View style={dragHandleStyle}>
@@ -264,18 +383,78 @@ export function DraggableList<T>({
     // Calculate total height from all measured heights
     const totalHeight = Object.values(itemHeights).reduce((sum, h) => sum + h, 0);
 
+    const editModeHeaderStyle = useAnimatedStyle(() => {
+        const headerHeight = 60;
+        return {
+            height: editModeHeaderHeight.value * headerHeight,
+            opacity: editModeHeaderHeight.value,
+            marginBottom: editModeHeaderHeight.value * 12,
+            overflow: 'hidden',
+        };
+    });
+
+    const listContainerStyle = useAnimatedStyle(() => {
+        return {
+            transform: [
+                { translateY: editModeHeaderHeight.value * 72 }
+            ],
+        };
+    });
+
+    const containerStyle = useAnimatedStyle(() => {
+        const HEADER_HEIGHT = 72;
+        return {
+            height: totalHeight + (editModeHeaderHeight.value * HEADER_HEIGHT),
+        };
+    });
+
     return (
-        <View
-            className="relative overflow-visible"
-            style={{ height: totalHeight || undefined }}
-        >
-            {data.map((item, index) => (
-                <DraggableItem
-                    key={keyExtractor(item)}
-                    item={item}
-                    index={index}
-                />
-            ))}
-        </View>
+        <Animated.View ref={containerRef} style={containerStyle} className="relative">
+            <Animated.View style={editModeHeaderStyle} className="absolute top-0 left-0 right-0 z-50">
+                <View className="flex-row items-center justify-between bg-primary-container rounded-lg px-4 py-3 mx-1">
+                    <View className="flex-row items-center flex-1">
+                        <Ionicons
+                            name="create-outline"
+                            size={20}
+                            color={getColor("on-primary-container")}
+                        />
+                        <Text className="text-on-primary-container text-base font-medium ml-3">
+                            Editing Mode
+                        </Text>
+                    </View>
+                    <View className="flex-row gap-2">
+                        <TouchableOpacity
+                            onPress={handleCancel}
+                            className="bg-surface-variant rounded-lg px-4 py-2"
+                        >
+                            <Text className="text-on-surface-variant text-sm font-semibold">
+                                Cancel
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={handleSave}
+                            className="bg-primary rounded-lg px-4 py-2"
+                        >
+                            <Text className="text-on-primary text-sm font-semibold">
+                                Save
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Animated.View>
+
+            <Animated.View
+                style={[listContainerStyle, { height: totalHeight || undefined }]}
+                className="relative overflow-visible"
+            >
+                {data.map((item, index) => (
+                    <DraggableItem
+                        key={keyExtractor(item)}
+                        item={item}
+                        index={index}
+                    />
+                ))}
+            </Animated.View>
+        </Animated.View>
     );
 }
