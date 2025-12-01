@@ -9,10 +9,13 @@ import PushNotificationSection from "@/src/features/dev/components/PushNotificat
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
 import DevicesSection from "@/src/features/dev/components/DevicesSection";
 import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
+import DraggableListSection from "@/src/features/dev/components/DraggableListSection";
 import { ModuleType } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import HabitResetTimeSlider from "@/src/components/common/HabitResetTimeSlider";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
+import DetailViewHeader from "@/src/components/headers/DetailViewHeader";
+import LogViewer from "@/src/features/dev/components/LogViewer";
 
 interface DevPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Dev'>;
@@ -57,8 +60,9 @@ export const DevPanel: React.FC<DevPanelProps> = ({
                 </View>
 
                 <LogViewerSection
-                    onOpenPanel={() => setLogViewerPanelVisible(true)}
+                    setPanelVisible={setLogViewerPanelVisible}
                 />
+                <DraggableListSection />
                 <PushNotificationSection />
                 <DevicesSection />
                 <DeepLinkSection />
@@ -66,10 +70,17 @@ export const DevPanel: React.FC<DevPanelProps> = ({
                 <View className="h-10" />
             </ScrollView>
 
-            <LogViewerSection
-                panelVisible={logViewerPanelVisible}
-                onClosePanel={() => setLogViewerPanelVisible(false)}
-            />
+            {logViewerPanelVisible &&
+                <View className="bg-background absolute inset-0 z-50">
+                    <DetailViewHeader
+                        title="Application Logs"
+                        onBack={() => setLogViewerPanelVisible(false)}
+                        onEdit={() => {}}
+                        showEdit={false}
+                    />
+                    <LogViewer maxHeight={undefined} fullScreen={true} />
+                </View>
+            }
         </>
     );
 }
