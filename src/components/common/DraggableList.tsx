@@ -3,15 +3,15 @@ import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/src/context/ThemeContext";
 
 interface DraggableListProps<T> {
     data: T[];
-    onReorder: (newData: T[]) => void;
-    renderItem: (item: T, index: number, isDragging: boolean) => React.ReactNode;
-    keyExtractor: (item: T, index: number) => string;
+    keyExtractor: (item: T) => string;
+    renderItem: (data: {item: T, index: number}) => React.ReactNode;
     itemHeight: number;
-    dragActiveScale?: number;
-    dragActiveElevation?: number;
+    onReorder: (newData: T[]) => void;
 }
 
 const springConfig = {
@@ -25,25 +25,23 @@ export function DraggableList<T>({
     renderItem,
     keyExtractor,
     itemHeight,
-    dragActiveScale = 1.05,
-    dragActiveElevation = 8,
 }: DraggableListProps<T>) {
-    // Track positions by key instead of index
+    const { getColor } = useTheme();
+
     const positions = useSharedValue<Record<string, number>>({});
-    const order = useSharedValue<string[]>([]); // Array of keys in visual order
+    const order = useSharedValue<string[]>([]);
     const activeKey = useSharedValue<string>('');
     const activeItemY = useSharedValue<number>(0);
     const dragStartPosition = useSharedValue<number>(0);
     const currentIndex = useSharedValue<number>(-1);
     const isDragging = useSharedValue<boolean>(false);
 
-    // Update positions when data changes
     useEffect(() => {
         const newPositions: Record<string, number> = {};
         const newOrder: string[] = [];
 
         data.forEach((item, index) => {
-            const key = keyExtractor(item, index);
+            const key = keyExtractor(item);
             newPositions[key] = index * itemHeight;
             newOrder.push(key);
         });
@@ -79,11 +77,9 @@ export function DraggableList<T>({
 
         const newOrder = [...order.value];
 
-        // Remove key from old position and insert at new position
         const [movedKey] = newOrder.splice(fromIndex, 1);
         newOrder.splice(toIndex, 0, movedKey);
 
-        // Update positions: each key gets positioned based on its index in the new order
         const newPositions: Record<string, number> = {};
         newOrder.forEach((key, orderIndex) => {
             newPositions[key] = orderIndex * itemHeight;
@@ -96,10 +92,9 @@ export function DraggableList<T>({
     };
 
     const finalizeReorder = () => {
-        // Convert order of keys back to order of data items
         const keyToItem = new Map<string, T>();
-        data.forEach((item, index) => {
-            const key = keyExtractor(item, index);
+        data.forEach(item => {
+            const key = keyExtractor(item);
             keyToItem.set(key, item);
         });
 
@@ -108,7 +103,7 @@ export function DraggableList<T>({
     };
 
     const DraggableItem = ({ item, index }: { item: T; index: number }) => {
-        const itemKey = keyExtractor(item, index);
+        const itemKey = keyExtractor(item);
 
         const animatedStyle = useAnimatedStyle(() => {
             const isActive = activeKey.value === itemKey;
@@ -124,10 +119,10 @@ export function DraggableList<T>({
                 height: itemHeight,
                 transform: [
                     { translateY: isActive ? targetY : withSpring(targetY, springConfig) },
-                    { scale: withSpring(isActive ? dragActiveScale : 1, springConfig) },
+                    { scale: withSpring(isActive ? 1.05 : 1, springConfig) },
                 ],
                 zIndex: isActive ? 999 : index,
-                elevation: isActive ? dragActiveElevation : 0,
+                elevation: isActive ? 8 : 0,
             };
         });
 
@@ -141,13 +136,13 @@ export function DraggableList<T>({
                 dragStartPosition.value = positions.value[itemKey];
                 activeItemY.value = positions.value[itemKey];
 
-                runOnJS(logDebug)('=== DRAG START ===');
-                runOnJS(logDebug)('Item key', itemKey);
-                runOnJS(logDebug)('Item data index', index);
-                runOnJS(logDebug)('Item position in order', currentIndex.value);
-                runOnJS(logDebug)('Starting Y', positions.value[itemKey]);
-                runOnJS(logDebug)('All positions', positions.value);
-                runOnJS(logDebug)('Initial order', [...order.value]);
+                // runOnJS(logDebug)('=== DRAG START ===');
+                // runOnJS(logDebug)('Item key', itemKey);
+                // runOnJS(logDebug)('Item data index', index);
+                // runOnJS(logDebug)('Item position in order', currentIndex.value);
+                // runOnJS(logDebug)('Starting Y', positions.value[itemKey]);
+                // runOnJS(logDebug)('All positions', positions.value);
+                // runOnJS(logDebug)('Initial order', [...order.value]);
 
                 runOnJS(triggerHaptic)(Haptics.ImpactFeedbackStyle.Medium);
             })
@@ -159,22 +154,19 @@ export function DraggableList<T>({
                 const targetIndex = getItemIndexAtY(activeItemY.value);
                 const fromIndex = currentIndex.value;
 
-                if (targetIndex !== fromIndex) {
-                    runOnJS(logDebug)('--- REORDER ATTEMPT ---');
-                    runOnJS(logDebug)('Moving from index', fromIndex);
-                    runOnJS(logDebug)('To index', targetIndex);
-                    runOnJS(logDebug)('Order BEFORE', [...order.value]);
+                // runOnJS(logDebug)('--- REORDER ATTEMPT ---');
+                // runOnJS(logDebug)('Moving from index', fromIndex);
+                // runOnJS(logDebug)('To index', targetIndex);
+                // runOnJS(logDebug)('Order BEFORE', [...order.value]);
 
-                    const didReorder = reorderItems(fromIndex, targetIndex);
+                const didReorder = reorderItems(fromIndex, targetIndex);
 
-                    if (didReorder) {
-                        // Update currentIndex to track where the item is now
-                        currentIndex.value = targetIndex;
+                if (didReorder) {
+                    currentIndex.value = targetIndex;
 
-                        runOnJS(logDebug)('Order AFTER', [...order.value]);
-                        runOnJS(logDebug)('Updated currentIndex to', targetIndex);
-                        runOnJS(triggerHaptic)(Haptics.ImpactFeedbackStyle.Light);
-                    }
+                    // runOnJS(logDebug)('Order AFTER', [...order.value]);
+                    // runOnJS(logDebug)('Updated currentIndex to', targetIndex);
+                    // runOnJS(triggerHaptic)(Haptics.ImpactFeedbackStyle.Light);
                 }
             })
             .onEnd(() => {
@@ -185,10 +177,8 @@ export function DraggableList<T>({
                 runOnJS(logDebug)('Current position in order', currentIndex.value);
                 runOnJS(logDebug)('Final order', [...order.value]);
 
-                // Snap to final position based on current position in order, not data index
                 const finalY = currentIndex.value * itemHeight;
                 activeItemY.value = withSpring(finalY, springConfig, () => {
-                    // Only finalize after animation completes
                     runOnJS(finalizeReorder)();
                 });
 
@@ -201,21 +191,30 @@ export function DraggableList<T>({
         return (
             <GestureDetector gesture={panGesture}>
                 <Animated.View style={animatedStyle}>
-                    {renderItem(item, index, activeKey.value === itemKey)}
+                    <View className="flex-1 flex-row items-center bg-background rounded-lg px-4 mx-1 my-1.5">
+                        <Ionicons
+                            name="reorder-three"
+                            size={24}
+                            color={getColor("on-surface-variant")}
+                            className="mr-3"
+                        />
+                        {renderItem({ item, index })}
+                    </View>
                 </Animated.View>
             </GestureDetector>
         );
     };
 
-    if (data.length === 0) {
-        return null;
-    }
+    if (data.length === 0) return null;
 
     return (
-        <View style={{ overflow: 'visible', height: data.length * itemHeight, position: 'relative' }}>
+        <View
+            className="relative overflow-visible"
+            style={{ height: data.length * itemHeight }}
+        >
             {data.map((item, index) => (
                 <DraggableItem
-                    key={keyExtractor(item, index)}
+                    key={keyExtractor(item)}
                     item={item}
                     index={index}
                 />
