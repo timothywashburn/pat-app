@@ -79,46 +79,6 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
 
     return (
         <DevPanelSection title="Draggable List Demo" bgClassName="bg-background">
-            <View className="mb-4">
-                <TouchableOpacity
-                    onPress={() => setReorderable(!reorderable)}
-                    disabled={isEditMode}
-                    className="flex-row items-center justify-between bg-surface rounded-lg px-4 py-3"
-                    style={{ opacity: isEditMode ? 0.5 : 1 }}
-                >
-                    <View className="flex-row items-center">
-                        <Ionicons
-                            name={reorderable ? "lock-open" : "lock-closed"}
-                            size={20}
-                            color={getColor("on-surface-variant")}
-                            className="mr-3"
-                        />
-                        <Text className="text-on-surface text-base font-medium">
-                            Always Reorderable
-                        </Text>
-                    </View>
-                    <View
-                        className="px-3 py-1 rounded-full"
-                        style={{
-                            backgroundColor: reorderable
-                                ? getColor("primary-container")
-                                : getColor("surface")
-                        }}
-                    >
-                        <Text
-                            className="text-xs font-semibold"
-                            style={{
-                                color: reorderable
-                                    ? getColor("on-primary-container")
-                                    : getColor("on-surface-variant"),
-                            }}
-                        >
-                            {reorderable ? 'ON' : 'OFF'}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-
             <DraggableList
                 data={items}
                 onReorder={handleReorder}

@@ -5,6 +5,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, useAni
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/src/context/ThemeContext";
+import { useNavigationStore } from "@/src/stores/useNavigationStore";
 
 interface DraggableListProps<T> {
     data: T[];
@@ -37,6 +38,7 @@ export function DraggableList<T>({
     scrollYRef: externalScrollYRef,
 }: DraggableListProps<T>) {
     const { getColor } = useTheme();
+    const { setEnabled: setNavigationEnabled } = useNavigationStore();
     const [isEditMode, setIsEditMode] = useState(false);
     const containerRef = useRef<View>(null);
     const internalScrollYRef = useRef(0);
@@ -52,6 +54,7 @@ export function DraggableList<T>({
     const dragStartPosition = useSharedValue<number>(0);
     const currentIndex = useSharedValue<number>(-1);
     const isDragging = useSharedValue<boolean>(false);
+    const isAnimationBlockingGesture = useSharedValue<boolean>(false);
     const isInternallyReorderable = reorderable || isEditMode;
     const reorderableProgress = useSharedValue(isInternallyReorderable ? 1 : 0);
     const editModeHeaderHeight = useSharedValue(isEditMode ? 1 : 0);
@@ -70,10 +73,15 @@ export function DraggableList<T>({
         });
     };
 
-    // Sync scroll position with animation progress
+    // Track if we're actively transitioning edit mode
+    const isTransitioningEditMode = useSharedValue(false);
+
+    // Sync scroll position with animation progress (only during edit mode transitions)
     useAnimatedReaction(
         () => editModeHeaderHeight.value,
         (progress) => {
+            if (!isTransitioningEditMode.value) return;
+
             const HEADER_HEIGHT = 72;
             const targetScroll = baseScrollY.value + (HEADER_HEIGHT * progress);
             runOnJS(updateScroll)(targetScroll);
@@ -85,18 +93,26 @@ export function DraggableList<T>({
         if (isEditMode) {
             // Store the base scroll position when entering edit mode
             baseScrollY.value = scrollYRef.current;
-            editModeHeaderHeight.value = withSpring(1, springConfig);
+            isTransitioningEditMode.value = true;
+            editModeHeaderHeight.value = withSpring(1, springConfig, () => {
+                isTransitioningEditMode.value = false;
+            });
         } else {
             // When exiting, baseScrollY should be current scroll minus the header offset
             const HEADER_HEIGHT = 72;
             baseScrollY.value = scrollYRef.current - HEADER_HEIGHT;
-            editModeHeaderHeight.value = withSpring(0, springConfig);
+            isTransitioningEditMode.value = true;
+            editModeHeaderHeight.value = withSpring(0, springConfig, () => {
+                isTransitioningEditMode.value = false;
+            });
         }
     }, [isEditMode]);
 
-    // Notify parent of edit mode changes
+    // Notify parent of edit mode changes and control navigation
     useEffect(() => {
         onEditModeChange?.(isEditMode);
+        // Disable module navigation when in edit mode
+        setNavigationEnabled(!isEditMode);
     }, [isEditMode]);
 
     const enterEditMode = (itemKey: string) => {
@@ -226,6 +242,26 @@ export function DraggableList<T>({
             });
         };
 
+        const resetDragState = () => {
+            'worklet';
+            isAnimationBlockingGesture.value = true;
+
+            const currentOrderIndex = order.value.indexOf(itemKey);
+            if (currentOrderIndex >= 0) {
+                const targetKey = order.value[currentOrderIndex];
+                const targetY = positions.value[targetKey];
+                activeItemY.value = withSpring(targetY, springConfig, () => {
+                    isAnimationBlockingGesture.value = false;
+                });
+            } else {
+                isAnimationBlockingGesture.value = false;
+            }
+
+            isDragging.value = false;
+            activeKey.value = '';
+            flashingKey.value = '';
+        };
+
         const animatedStyle = useAnimatedStyle(() => {
             const isActive = activeKey.value === itemKey;
             const isFlashing = flashingKey.value === itemKey && !isActive;
@@ -268,27 +304,38 @@ export function DraggableList<T>({
         const longPressGesture = Gesture.LongPress()
             .enabled(!reorderable && !isEditMode)
             .minDuration(500)
-            .onBegin(() => {
+            .onBegin(() => { // when the finger touches down
+                if (isAnimationBlockingGesture.value) return;
+
                 flashingKey.value = itemKey;
             })
-            .onStart(() => {
+            .onStart(() => { // when the gesture is recognized (after minDuration)
+                if (isAnimationBlockingGesture.value) return;
+
                 runOnJS(enterEditMode)(itemKey);
             })
-            .onFinalize(() => {
-                // Clear flash if gesture is cancelled
-                if (!isEditMode) {
+            .onTouchesUp(() => {
+                if (!isEditMode) { // if the finger is lifted early
                     flashingKey.value = '';
                 }
+            })
+            .onTouchesCancelled(() => { // if canceled; happens if scrolling starts
+                if (!isEditMode) flashingKey.value = '';
+            })
+            .onFinalize(() => { // no idea
+                if (!isEditMode) flashingKey.value = '';
             });
 
         const panGesture = Gesture.Pan()
             .enabled(isInternallyReorderable)
             .activateAfterLongPress(150)
             .onBegin(() => {
-                // Immediate visual feedback on touch
+                if (isAnimationBlockingGesture.value) return;
                 flashingKey.value = itemKey;
             })
             .onStart(() => {
+                if (isAnimationBlockingGesture.value) return;
+
                 isDragging.value = true;
                 activeKey.value = itemKey;
                 // Find current position in order array
@@ -335,15 +382,18 @@ export function DraggableList<T>({
             .onEnd(() => {
                 if (!isDragging.value || activeKey.value !== itemKey) return;
 
-                runOnJS(logDebug)('=== DRAG END ===');
-                runOnJS(logDebug)('Data index', index);
-                runOnJS(logDebug)('Current position in order', currentIndex.value);
-                runOnJS(logDebug)('Final order', [...order.value]);
+                // runOnJS(logDebug)('=== DRAG END ===');
+                // runOnJS(logDebug)('Data index', index);
+                // runOnJS(logDebug)('Current position in order', currentIndex.value);
+                // runOnJS(logDebug)('Final order', [...order.value]);
+
+                isAnimationBlockingGesture.value = true;
 
                 const finalKey = order.value[currentIndex.value];
                 const finalY = positions.value[finalKey];
                 activeItemY.value = withSpring(finalY, springConfig, () => {
                     runOnJS(finalizeReorder)();
+                    isAnimationBlockingGesture.value = false;
                 });
 
                 isDragging.value = false;
@@ -351,9 +401,25 @@ export function DraggableList<T>({
 
                 runOnJS(triggerHaptic)(Haptics.ImpactFeedbackStyle.Heavy);
             })
-            .onFinalize(() => {
-                // Clear flash if drag gesture is cancelled before starting
+            .onTouchesUp(() => {
+                // Clean up flash if we didn't start dragging
                 if (!isDragging.value) {
+                    flashingKey.value = '';
+                }
+            })
+            .onTouchesCancelled(() => {
+                if (isDragging.value && activeKey.value === itemKey) {
+                    resetDragState();
+                    runOnJS(logDebug)('Drag gesture cancelled - resetting state');
+                } else {
+                    flashingKey.value = '';
+                }
+            })
+            .onFinalize(() => {
+                if (activeKey.value === itemKey && isDragging.value) {
+                    resetDragState();
+                    runOnJS(logDebug)('Gesture finalized with active drag - force reset');
+                } else if (!isDragging.value) {
                     flashingKey.value = '';
                 }
             });
@@ -410,7 +476,7 @@ export function DraggableList<T>({
 
     return (
         <Animated.View ref={containerRef} style={containerStyle} className="relative">
-            <Animated.View style={editModeHeaderStyle} className="absolute top-0 left-0 right-0 z-50">
+            <Animated.View style={editModeHeaderStyle} className="absolute top-0 left-0 right-0">
                 <View className="flex-row items-center justify-between bg-primary-container rounded-lg px-4 py-3 mx-1">
                     <View className="flex-row items-center flex-1">
                         <Ionicons
