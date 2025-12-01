@@ -16,14 +16,14 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
     {
         id: '1',
         name: 'Task Management',
-        color: 'bg-red-500',
+        color: '#FF6B6B',
         icon: 'checkmark-circle',
         description: 'Organize your daily tasks',
     },
     {
         id: '2',
         name: 'Calendar Events',
-        color: 'orange-600',
+        color: '#4ECDC4',
         icon: 'calendar',
         description: 'Schedule and track events',
     },
@@ -44,7 +44,7 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
     {
         id: '5',
         name: 'Projects',
-        color: '',
+        color: '#A8E6CF',
         icon: 'folder',
         description: 'Manage long-term projects',
     },
@@ -61,11 +61,7 @@ const DraggableListSection = () => {
     };
 
     return (
-        <DevPanelSection title="Draggable List Demo">
-            <Text className="text-on-surface-variant text-sm mb-4">
-                Long press and drag to reorder items. Notice the haptic feedback!
-            </Text>
-
+        <DevPanelSection title="Draggable List Demo" bgClassName="bg-background">
             <DraggableList
                 data={items}
                 onReorder={handleReorder}

@@ -119,8 +119,9 @@ export function DraggableList<T>({
                 height: itemHeight,
                 transform: [
                     { translateY: isActive ? targetY : withSpring(targetY, springConfig) },
-                    { scale: withSpring(isActive ? 1.05 : 1, springConfig) },
+                    { scale: withSpring(isActive ? 1.06 : 1, springConfig) },
                 ],
+                opacity: withSpring(isActive ? 0.8 : 1, springConfig),
                 zIndex: isActive ? 999 : index,
                 elevation: isActive ? 8 : 0,
             };
@@ -191,7 +192,7 @@ export function DraggableList<T>({
         return (
             <GestureDetector gesture={panGesture}>
                 <Animated.View style={animatedStyle}>
-                    <View className="flex-1 flex-row items-center bg-background rounded-lg px-4 mx-1 my-1.5">
+                    <View className="flex-1 flex-row items-center bg-surface rounded-lg px-4 mx-1 my-1.5">
                         <Ionicons
                             name="reorder-three"
                             size={24}
