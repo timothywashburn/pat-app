@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DevPanelSection from './DevPanelSection';
@@ -8,51 +8,51 @@ import { useTheme } from '@/src/context/ThemeContext';
 interface DemoItem {
     id: string;
     name: string;
-    color: string;
     icon: keyof typeof Ionicons.glyphMap;
     description: string;
+    section: number;
 }
 
 const INITIAL_DEMO_ITEMS: DemoItem[] = [
     {
         id: '1',
         name: 'Task Management',
-        color: '#FF6B6B',
         icon: 'checkmark-circle',
         description: 'Organize your daily tasks',
+        section: 0,
     },
     {
         id: '2',
         name: 'Calendar Events',
-        color: '#4ECDC4',
         icon: 'calendar',
         description: 'Schedule and track events',
+        section: 0,
     },
     {
         id: '3',
         name: 'Notes',
-        color: '#FFE66D',
         icon: 'document-text',
         description: 'Quick notes and ideas',
+        section: 0,
     },
     {
         id: '4',
         name: 'Reminders',
-        color: '#95E1D3',
         icon: 'notifications',
-        description: 'Never forget important things',
+        description: 'Never forget things',
+        section: 1,
     },
     {
         id: '5',
         name: 'Projects',
-        color: '#A8E6CF',
         icon: 'folder',
         description: 'Manage long-term projects',
+        section: 1,
     },
 ];
 
 interface DraggableListSectionProps {
-    scrollViewRef?: React.RefObject<ScrollView>;
+    scrollViewRef?: React.RefObject<ScrollView | null>;
     scrollYRef?: React.MutableRefObject<number>;
 }
 
@@ -62,6 +62,11 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
     const [savedItems, setSavedItems] = useState<DemoItem[]>(INITIAL_DEMO_ITEMS);
     const [reorderable, setReorderable] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
+
+    console.log('DraggableListSection render');
+    useEffect(() => {
+        console.log('Items updated:', items.map(item => item.name));
+    }, [items]);
 
     const handleReorder = (newData: DemoItem[]) => {
         setItems(newData);
@@ -77,13 +82,24 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
         console.log('Changes cancelled, restored to:', savedItems.map(item => item.name));
     };
 
+    const handleToggleSection = (itemId: string) => {
+        setItems(prevItems => {
+            return prevItems.map(item => {
+                if (item.id === itemId) {
+                    return { ...item, section: item.section === 0 ? 1 : 0 };
+                }
+                return item;
+            });
+        });
+    };
+
     return (
         <DevPanelSection title="Draggable List Demo" bgClassName="bg-background">
             <DraggableList
+                reorderable={reorderable}
                 data={items}
                 onReorder={handleReorder}
                 keyExtractor={(item) => item.id}
-                reorderable={reorderable}
                 onEditModeChange={setIsEditMode}
                 onSaveChanges={handleSave}
                 onCancelChanges={handleCancel}
@@ -95,7 +111,7 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
                             <View
                                 className="rounded-full items-center justify-center w-10 h-10 mr-3"
                                 style={{
-                                    backgroundColor: item.color,
+                                    backgroundColor: item.section === 0 ? '#FF6B6B' : '#95E1D3',
                                 }}
                             >
                                 <Ionicons name={item.icon} size={24} color="white" />
@@ -109,6 +125,17 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
                                     {item.description}
                                 </Text>
                             </View>
+
+                            <TouchableOpacity
+                                onPress={() => handleToggleSection(item.id)}
+                                className="bg-secondary rounded-full w-8 h-8 items-center justify-center ml-2"
+                            >
+                                <Ionicons
+                                    name={item.section === 0 ? 'arrow-down' : 'arrow-up'}
+                                    size={16}
+                                    color={getColor('on-secondary')}
+                                />
+                            </TouchableOpacity>
 
                             <View className="bg-primary rounded-full w-6 h-6 items-center justify-center ml-2">
                                 <Text className="text-on-primary text-xs font-bold">

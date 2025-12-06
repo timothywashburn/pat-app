@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/src/context/ThemeContext";
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 
-interface DraggableListProps<T> {
+interface DraggableListProps<T extends { section?: number }> {
     data: T[];
     keyExtractor: (item: T) => string;
     renderItem: (data: {item: T, index: number}) => React.ReactNode;
@@ -16,16 +16,17 @@ interface DraggableListProps<T> {
     onEditModeChange?: (isEditing: boolean) => void;
     onSaveChanges?: () => void;
     onCancelChanges?: () => void;
-    scrollViewRef?: React.RefObject<ScrollView>;
+    scrollViewRef?: React.RefObject<ScrollView | null>;
     scrollYRef?: React.MutableRefObject<number>;
 }
 
+// TODO: cancel button can be pressed during animation (reduce stiffness to make this obvious)
 const springConfig = {
     damping: 20,
     stiffness: 200,
 };
 
-export function DraggableList<T>({
+export function DraggableList<T extends { section?: number }>({
     data,
     onReorder,
     renderItem,
@@ -49,6 +50,7 @@ export function DraggableList<T>({
     const positions = useSharedValue<Record<string, number>>({});
     const heights = useSharedValue<Record<string, number>>({});
     const order = useSharedValue<string[]>([]);
+    const sections = useSharedValue<Record<string, number | undefined>>({});
     const activeKey = useSharedValue<string>('');
     const activeItemY = useSharedValue<number>(0);
     const dragStartPosition = useSharedValue<number>(0);
@@ -145,20 +147,51 @@ export function DraggableList<T>({
 
         if (!allMeasured) return;
 
+        // Check if any items have sections defined
+        const hasSections = data.some(item => item.section !== undefined);
+
+        // Sections are primary - always group by section first, preserving data order within sections
+        let orderedData = [...data];
+
+        if (hasSections) {
+            // Group items by section number, preserving original data order within each section
+            const sectionGroups: Record<number, T[]> = {};
+
+            data.forEach(item => {
+                const section = item.section ?? 0; // Default to section 0 if undefined
+                if (!sectionGroups[section]) {
+                    sectionGroups[section] = [];
+                }
+                sectionGroups[section].push(item);
+            });
+
+            // Sort sections by number and flatten back into single array
+            const sortedSectionNumbers = Object.keys(sectionGroups)
+                .map(Number)
+                .sort((a, b) => a - b);
+
+            orderedData = sortedSectionNumbers.flatMap(section => sectionGroups[section]);
+        }
+
         const newPositions: Record<string, number> = {};
         const newOrder: string[] = [];
+        const newSections: Record<string, number | undefined> = {};
         let cumulativeY = 0;
 
-        data.forEach((item) => {
+        orderedData.forEach((item, index) => {
             const key = keyExtractor(item);
+            const section = item.section;
+
             newPositions[key] = cumulativeY;
             newOrder.push(key);
+            newSections[key] = section;
             cumulativeY += itemHeights[key] || 0;
         });
 
         positions.value = newPositions;
         heights.value = itemHeights;
         order.value = newOrder;
+        sections.value = newSections;
     }, [data, itemHeights]);
 
     const triggerHaptic = async (style: Haptics.ImpactFeedbackStyle) => {
@@ -177,24 +210,55 @@ export function DraggableList<T>({
         }
     };
 
-    const getItemIndexAtY = (y: number) => {
+    const getItemIndexAtY = (y: number, draggedItemKey: string) => {
         'worklet';
         const orderKeys = order.value;
-        let cumulativeY = 0;
+        const draggedSection = sections.value[draggedItemKey];
 
+        // If no section defined for dragged item, use default behavior
+        if (draggedSection === undefined) {
+            let cumulativeY = 0;
+            for (let i = 0; i < orderKeys.length; i++) {
+                const key = orderKeys[i];
+                const height = heights.value[key] || 0;
+                const midpoint = cumulativeY + height / 2;
+
+                if (y < midpoint) {
+                    return i;
+                }
+                cumulativeY += height;
+            }
+            return Math.max(0, orderKeys.length - 1);
+        }
+
+        // Find section bounds based on current order
+        let sectionStart = -1;
+        let sectionEnd = -1;
+        for (let i = 0; i < orderKeys.length; i++) {
+            if (sections.value[orderKeys[i]] === draggedSection) {
+                if (sectionStart === -1) sectionStart = i;
+                sectionEnd = i;
+            }
+        }
+
+        let cumulativeY = 0;
         for (let i = 0; i < orderKeys.length; i++) {
             const key = orderKeys[i];
             const height = heights.value[key] || 0;
             const midpoint = cumulativeY + height / 2;
 
             if (y < midpoint) {
+                // Clamp to section bounds
+                if (sectionStart !== -1 && i < sectionStart) return sectionStart;
+                if (sectionEnd !== -1 && i > sectionEnd) return sectionEnd;
                 return i;
             }
 
             cumulativeY += height;
         }
 
-        return Math.max(0, orderKeys.length - 1);
+        // If we're past all items, return the end of our section
+        return sectionEnd >= 0 ? sectionEnd : Math.max(0, orderKeys.length - 1);
     };
 
     const reorderItems = (fromIndex: number, toIndex: number) => {
@@ -361,7 +425,7 @@ export function DraggableList<T>({
 
                 activeItemY.value = dragStartPosition.value + event.translationY;
 
-                const targetIndex = getItemIndexAtY(activeItemY.value);
+                const targetIndex = getItemIndexAtY(activeItemY.value, itemKey);
                 const fromIndex = currentIndex.value;
 
                 // runOnJS(logDebug)('--- REORDER ATTEMPT ---');
