@@ -143,7 +143,8 @@ class SocketService {
         }
 
         const { type, userId } = message;
-        console.log(`socket handling message type: ${type}`);
+        // TODO: figure out what I want to do with this
+        // console.log(`socket handling message type: ${type}`);
 
         switch (type) {
             case SocketMessageType.CLIENT_HEARTBEAT_ACK:
@@ -175,7 +176,8 @@ class SocketService {
             data: { timestamp: Date.now() }
         };
 
-        console.log(`socket sending heartbeat: ${JSON.stringify(heartbeat)}`);
+        // TODO: figure out what I want to do with this
+        // console.log(`socket sending heartbeat: ${JSON.stringify(heartbeat)}`);
         this.emit(SocketMessageType.SERVER_HEARTBEAT, heartbeat);
     }
 

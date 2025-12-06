@@ -13,11 +13,12 @@ function AppNavigator({ children, onLayout }: { children: React.ReactNode, onLay
     const { getFirstModule } = useUserDataStore();
 
     useEffect(() => {
-        Logger.debug('unclassified', 'navigation state changed', {
-            authStoreStatus,
-            segments,
-            pathname,
-        });
+        // TODO: figure out what I want to do with this
+        // Logger.debug('unclassified', 'navigation state changed', {
+        //     authStoreStatus,
+        //     segments,
+        //     pathname,
+        // });
 
         const isInAuthGroup = segments[0] === '(auth)';
         const isInPublicGroup = segments[0] === '(public)';
