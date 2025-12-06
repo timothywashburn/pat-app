@@ -63,7 +63,6 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
     const [reorderable, setReorderable] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
 
-    console.log('DraggableListSection render');
     useEffect(() => {
         console.log('Items updated:', items.map(item => item.name));
     }, [items]);
@@ -107,7 +106,7 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
                 scrollYRef={scrollYRef}
                 renderItem={({ item, index }) => {
                     return (
-                        <>
+                        <View className="flex-row items-center bg-surface rounded-lg px-4 py-3">
                             <View
                                 className="rounded-full items-center justify-center w-10 h-10 mr-3"
                                 style={{
@@ -142,7 +141,7 @@ const DraggableListSection: React.FC<DraggableListSectionProps> = ({ scrollViewR
                                     {index + 1}
                                 </Text>
                             </View>
-                        </>
+                        </View>
                     )
                 }}
             />

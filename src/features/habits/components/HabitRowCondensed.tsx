@@ -82,7 +82,7 @@ const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, o
     const dateInfo = activeDate ? getDateInfo(activeDate) : null;
 
     return (
-        <View className="mb-3">
+        <>
             <View className="flex-row items-center justify-between">
                 {/* Left side: Habit name and date */}
                 <TouchableOpacity
@@ -216,7 +216,7 @@ const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, o
                     <TimeRemainingIndicator habit={habit} />
                 </View>
             )}
-        </View>
+        </>
     );
 };
 

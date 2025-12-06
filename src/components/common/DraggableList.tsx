@@ -493,22 +493,22 @@ export function DraggableList<T extends { section?: number }>({
         return (
             <GestureDetector gesture={combinedGesture}>
                 <Animated.View style={animatedStyle} onLayout={handleLayout}>
-                    <View className="flex-1 flex-row items-center bg-surface rounded-lg px-4 py-2 mx-1 my-1.5">
-                        <Animated.View style={dragHandleStyle}>
-                            <Ionicons
-                                name="reorder-three"
-                                size={24}
-                                color={getColor("on-surface-variant")}
-                            />
-                        </Animated.View>
-                        {renderItem({ item, index })}
+                    <View className="flex-row items-center mb-3">
+                        {/*<Animated.View style={dragHandleStyle}>*/}
+                        {/*    <Ionicons*/}
+                        {/*        name="reorder-three"*/}
+                        {/*        size={24}*/}
+                        {/*        color={getColor("on-surface-variant")}*/}
+                        {/*    />*/}
+                        {/*</Animated.View>*/}
+                        <View className="flex-1">
+                            {renderItem({ item, index })}
+                        </View>
                     </View>
                 </Animated.View>
             </GestureDetector>
         );
     };
-
-    if (data.length === 0) return null;
 
     // Calculate total height from all measured heights
     const totalHeight = Object.values(itemHeights).reduce((sum, h) => sum + h, 0);
@@ -537,6 +537,8 @@ export function DraggableList<T extends { section?: number }>({
             height: totalHeight + (editModeHeaderHeight.value * HEADER_HEIGHT),
         };
     });
+
+    if (data.length === 0) return null;
 
     return (
         <Animated.View ref={containerRef} style={containerStyle} className="relative">

@@ -13,6 +13,7 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
+import { DraggableList } from '@/src/components/common/DraggableList';
 
 interface HabitsPanelProps {
     navigation: StackNavigationProp<MainStackParamList, 'Habits'>;
@@ -23,18 +24,35 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
     navigation,
     route
 }) => {
-    const { habits, isInitialized, loadHabits } = useHabitsStore();
+    const { habits, isInitialized, loadHabits, updateHabit } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
     const { setHeaderControls } = useHeaderControls();
+    const [localHabits, setLocalHabits] = useState<Habit[]>([]);
 
     useNavStateLogger(navigation, 'habits');
+
+    const [showExpandedView, setShowExpandedView] = useState(false);
 
     useEffect(() => {
         if (!isInitialized) {
             loadHabits();
         }
     }, [isInitialized, loadHabits]);
-    const [showExpandedView, setShowExpandedView] = useState(false);
+
+    // Sync local habits with store
+    useEffect(() => {
+        // const sorted = [...habits].sort((a, b) => {
+        //     const activeA = getActiveHabitDate(a);
+        //     const activeB = getActiveHabitDate(b);
+        //
+        //     if (activeA && !activeB) return -1;
+        //     if (!activeA && activeB) return 1;
+        //
+        //     return a.sortOrder - b.sortOrder;
+        // });
+        const sorted = [...habits].sort((a, b) => a.sortOrder - b.sortOrder);
+        setLocalHabits(sorted);
+    }, [habits]);
 
     const handleAddHabit = () => {
         navigation.navigate('HabitForm', {});
@@ -72,19 +90,27 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
         }
     };
 
-    const getSortedHabits = (): Habit[] => {
-        return habits.sort((a, b) => {
-            const activeA = getActiveHabitDate(a);
-            const activeB = getActiveHabitDate(b);
-
-            if (activeA && !activeB) return -1;
-            if (!activeA && activeB) return 1;
-
-            return a.sortOrder - b.sortOrder;
-        });
+    const handleReorder = (newData: (Habit & { section?: number })[]) => {
+        setLocalHabits(newData as Habit[]);
     };
 
-    const sortedHabits = getSortedHabits();
+    const handleSaveOrder = async () => {
+        try {
+            const updatePromises = localHabits.map((habit, index) => {
+                if (habit.sortOrder !== index) return updateHabit(habit._id, { sortOrder: index });
+                return Promise.resolve();
+            });
+
+            await Promise.all(updatePromises);
+            await loadHabits();
+        } catch (error) {
+            console.error('Failed to save habit order:', error);
+        }
+    };
+
+    const handleCancelOrder = async () => {
+        await loadHabits();
+    };
 
     return (
         <>
@@ -111,7 +137,7 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
                 ) : (
                     <View>
                         {showExpandedView ? (
-                            sortedHabits.map((habit) => (
+                            localHabits.map((habit) => (
                                 <HabitCard
                                     key={habit._id}
                                     habit={habit}
@@ -120,15 +146,22 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
                                     onHabitUpdated={handleHabitUpdated}
                                 />
                             ))
-                        ) : (
-                            sortedHabits.map((habit) => (
-                                <HabitRowCondensed
-                                    key={habit._id}
-                                    habit={habit}
-                                    onPress={handleHabitPress}
-                                    onHabitUpdated={handleHabitUpdated}
-                                />
-                            ))
+                        ) : localHabits.length === 0 ? null : (
+                            <DraggableList
+                                data={localHabits}
+                                keyExtractor={(habit) => habit._id}
+                                renderItem={({ item }) => (
+                                    <HabitRowCondensed
+                                        habit={item}
+                                        onPress={handleHabitPress}
+                                        onHabitUpdated={handleHabitUpdated}
+                                    />
+                                )}
+                                onReorder={handleReorder}
+                                onSaveChanges={handleSaveOrder}
+                                onCancelChanges={handleCancelOrder}
+                                reorderable={false}
+                            />
                         )}
                     </View>
                 )}
