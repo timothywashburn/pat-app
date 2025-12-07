@@ -17,9 +17,9 @@ import BaseFormView from '@/src/components/common/BaseFormView';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/core';
 import { MainStackParamList } from '@/src/navigation/MainStack';
-import { 
-    getAvailableVariantsForEntity, 
-    getDefaultDataForVariant, 
+import {
+    getAvailableVariantsForEntity,
+    getDefaultDataForVariant,
     getVariantDefinition,
     NotificationVariantInformation
 } from '../variants';
@@ -147,7 +147,7 @@ export const NotificationFormScreen: React.FC<NotificationTemplateFormScreenProp
         }
 
         navigation.goBack();
-        setIsLoading(true);
+        setIsLoading(false);
     };
 
     const handleDelete = async () => {

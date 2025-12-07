@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { LocalSection } from '@/src/features/settings/sections/LocalSection';
 import { GeneralSection } from '@/src/features/settings/sections/GeneralSection';
+import { NotificationsSection } from '@/src/features/settings/sections/NotificationsSection';
 import { AgendaSection } from '@/src/features/settings/sections/AgendaSection';
 import { PeopleSection } from '@/src/features/settings/sections/PeopleSection';
 import { HabitsSection } from '@/src/features/settings/sections/HabitsSection';
@@ -132,6 +133,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     <View className="h-px bg-surface my-6" />
 
                     <LocalSection />
+
+                    <View className="h-px bg-surface my-6" />
+
+                    <NotificationsSection />
 
                     <View className="h-px bg-surface my-6" />
 

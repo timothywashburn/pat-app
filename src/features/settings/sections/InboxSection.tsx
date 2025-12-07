@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import NotificationService from '@/src/services/NotificationService';
 
 interface InboxSectionProps {
     editMode: boolean;
@@ -17,13 +18,17 @@ export const InboxSection: React.FC<InboxSectionProps> = ({
     const { getColor } = useTheme();
     const navigation = useNavigation<StackNavigationProp<MainStackParamList, 'Settings'>>();
 
-    const handleInboxEntityNotificationPress = () => {
-        navigation.navigate('NotificationInfo', {
-            targetEntityType: NotificationEntityType.INBOX_PANEL,
-            targetId: 'inbox_panel',
-            targetLevel: NotificationTemplateLevel.ENTITY,
-            entityName: 'Inbox Panel'
-        });
+    const handleInboxEntityNotificationPress = async () => {
+        const shouldNavigate = await NotificationService.shared.checkAndPromptForNotifications();
+
+        if (shouldNavigate) {
+            navigation.navigate('NotificationInfo', {
+                targetEntityType: NotificationEntityType.INBOX_PANEL,
+                targetId: 'inbox_panel',
+                targetLevel: NotificationTemplateLevel.ENTITY,
+                entityName: 'Inbox Panel'
+            });
+        }
     };
 
     return (

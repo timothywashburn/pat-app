@@ -8,6 +8,7 @@ import { SettingsList } from '@/src/features/settings/components/SettingsList';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import NotificationService from '@/src/services/NotificationService';
 
 interface AgendaSectionProps {
     editMode: boolean;
@@ -41,22 +42,30 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({
         onDataChange({ itemCategories: localItemCategories, itemTypes: updatedItems });
     };
 
-    const handleAgendaNotificationPress = () => {
-        navigation.navigate('NotificationInfo', {
-            targetEntityType: NotificationEntityType.AGENDA_PANEL,
-            targetId: 'agenda_panel',
-            targetLevel: NotificationTemplateLevel.ENTITY,
-            entityName: 'Agenda Panel'
-        });
+    const handleAgendaNotificationPress = async () => {
+        const shouldNavigate = await NotificationService.shared.checkAndPromptForNotifications();
+
+        if (shouldNavigate) {
+            navigation.navigate('NotificationInfo', {
+                targetEntityType: NotificationEntityType.AGENDA_PANEL,
+                targetId: 'agenda_panel',
+                targetLevel: NotificationTemplateLevel.ENTITY,
+                entityName: 'Agenda Panel'
+            });
+        }
     };
 
-    const handleCategoryNotificationPress = (category: string) => {
-        navigation.navigate('NotificationInfo', {
-            targetEntityType: NotificationEntityType.AGENDA_ITEM,
-            targetId: `agenda_item_${category}`,
-            targetLevel: NotificationTemplateLevel.PARENT,
-            entityName: `${category}`
-        });
+    const handleCategoryNotificationPress = async (category: string) => {
+        const shouldNavigate = await NotificationService.shared.checkAndPromptForNotifications();
+
+        if (shouldNavigate) {
+            navigation.navigate('NotificationInfo', {
+                targetEntityType: NotificationEntityType.AGENDA_ITEM,
+                targetId: `agenda_item_${category}`,
+                targetLevel: NotificationTemplateLevel.PARENT,
+                entityName: `${category}`
+            });
+        }
     };
 
     return (
