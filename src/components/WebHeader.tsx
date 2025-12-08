@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Link, usePathname } from 'expo-router';
+import { useRoute } from '@react-navigation/native';
 import { useTheme } from '@/src/context/ThemeContext';
 import { UserModuleData } from "@timothyw/pat-common";
 import { moduleInfo } from "@/src/components/ModuleInfo";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import HamburgerMenu from './HamburgerMenu';
+import { navigationRef } from '@/src/navigation/navigationRef';
 
 type WebHeaderProps = {
     modules: UserModuleData[];
@@ -14,7 +15,7 @@ type WebHeaderProps = {
 
 export default function WebHeader({ modules }: WebHeaderProps) {
     const { getColor } = useTheme();
-    const pathname = usePathname();
+    const route = useRoute();
     const { headerControls } = useHeaderControls();
     const [menuVisible, setMenuVisible] = useState(false);
 
@@ -35,28 +36,40 @@ export default function WebHeader({ modules }: WebHeaderProps) {
 
                         const moduleType = module.type;
                         const { icon, title } = moduleInfo[moduleType];
-                        const isActive = pathname.includes(moduleType);
+                        const isActive = route.name === moduleType;
 
                         return (
-                            <Link key={moduleType} href={`/${moduleType}`} asChild>
-                                <Pressable style={{ pointerEvents: 'auto' }}>
-                                    <View className="flex-row items-center px-4 h-full">
-                                        <Ionicons
-                                            name={icon}
-                                            size={24}
-                                            color={isActive ? getColor("primary") : getColor("on-surface")}
-                                        />
-                                        <Text
-                                            className="ml-2"
-                                            style={{
-                                                color: isActive ? getColor("primary") : getColor("on-surface")
-                                            }}
-                                        >
-                                            {title}
-                                        </Text>
-                                    </View>
-                                </Pressable>
-                            </Link>
+                            <TouchableOpacity
+                                key={moduleType}
+                                onPress={() => {
+                                    // Navigate using navigationRef - we need to navigate to the nested tab
+                                    if (navigationRef.isReady()) {
+                                        // Get the root state and find the tab navigator
+                                        const state = navigationRef.getRootState();
+                                        // Navigate to AppNavigator and then to the specific tab
+                                        navigationRef.navigate('AppNavigator' as any, {
+                                            screen: moduleType
+                                        });
+                                    }
+                                }}
+                                style={{ pointerEvents: 'auto' }}
+                            >
+                                <View className="flex-row items-center px-4 h-full">
+                                    <Ionicons
+                                        name={icon}
+                                        size={24}
+                                        color={isActive ? getColor("primary") : getColor("on-surface")}
+                                    />
+                                    <Text
+                                        className="ml-2"
+                                        style={{
+                                            color: isActive ? getColor("primary") : getColor("on-surface")
+                                        }}
+                                    >
+                                        {title}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
                         );
                     })}
                 </View>

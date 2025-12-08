@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomTextInput from '@/src/components/common/CustomTextInput';
+import { AuthStackParamList } from '@/src/navigation/AuthStack';
+
+type SignInNavigationProp = StackNavigationProp<AuthStackParamList, 'SignIn'>;
 
 export default function SignInScreen() {
     const { getColor } = useTheme();
@@ -14,7 +18,7 @@ export default function SignInScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const { errorToast } = useToast();
     const { signIn } = useAuthStore();
-    const router = useRouter();
+    const navigation = useNavigation<SignInNavigationProp>();
 
     const handleSignIn = async () => {
         if (!email || !password) {
@@ -76,7 +80,7 @@ export default function SignInScreen() {
 
                 <View className="flex-row justify-center mt-5">
                     <Text className="text-on-background-variant">Don't have an account? </Text>
-                    <TouchableOpacity onPress={() => router.replace('/(auth)/create-account')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
                         <Text className="text-primary font-semibold">Create an account</Text>
                     </TouchableOpacity>
                 </View>

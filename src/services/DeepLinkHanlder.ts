@@ -1,5 +1,5 @@
 import { Linking } from 'react-native';
-import { router } from 'expo-router';
+import { navigationRef } from '@/src/navigation/navigationRef';
 import { DataState } from "@/src/stores/useUserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 
@@ -21,12 +21,19 @@ export default class DeepLinkHandler {
 
             Logger.debug('linking', 'extracted path', { path });
 
+            if (!navigationRef.isReady()) {
+                Logger.debug('linking', 'navigation not ready, skipping', { path });
+                return;
+            }
+
             switch (path) {
                 case '/':
-                    router.replace(`/(tabs)/${DataState.getState().getFirstModule()}`);
+                    // Navigate to the first module in the app
+                    navigationRef.current?.navigate('AppNavigator' as any);
                     break;
                 case '/redirect':
-                    router.replace(`/(public)/verify-success`);
+                    // TODO: Handle verify-success route (needs to be added to navigation structure)
+                    Logger.debug('linking', 'verify-success redirect not yet implemented', { path });
                     break;
                 default:
                     console.log(`[deeplink] unhandled path: ${path}`);

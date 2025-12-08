@@ -22,7 +22,6 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/components/AgendaFilterDropdown";
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
-import { useLocalSearchParams } from "expo-router";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
@@ -36,15 +35,6 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     navigation,
     route
 }) => {
-    const params = useLocalSearchParams();
-
-    if (params.itemId) {
-        console.log('Navigating to item detail for ID:', params.itemId);
-        navigation.navigate('AgendaItemDetail', {
-            itemId: params.itemId as ItemId
-        });
-    }
-
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
     const { items, isInitialized, loadItems } = useAgendaStore();

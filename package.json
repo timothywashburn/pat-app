@@ -1,6 +1,6 @@
 {
   "name": "pat-app",
-  "main": "expo-router/entry",
+  "main": "src/App.tsx",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start --dev-client",
@@ -63,7 +63,6 @@
     "expo-haptics": "~14.1.4",
     "expo-linking": "~7.1.4",
     "expo-notifications": "~0.31.3",
-    "expo-router": "~5.1.0",
     "expo-secure-store": "~14.2.3",
     "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",

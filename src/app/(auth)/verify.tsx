@@ -1,5 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +9,15 @@ import { useToast } from '@/src/components/toast/ToastContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppFocus } from "@/src/hooks/useAppFocus";
 import SocketService from "@/src/services/SocketService";
+import { AuthStackParamList } from '@/src/navigation/AuthStack';
+
+type VerifyEmailScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Verify'>;
+type VerifyEmailScreenRouteProp = RouteProp<AuthStackParamList, 'Verify'>;
+
+interface VerifyEmailScreenProps {
+    navigation: VerifyEmailScreenNavigationProp;
+    route: VerifyEmailScreenRouteProp;
+}
 
 export default function VerifyEmailScreen() {
     const { getColor } = useTheme();

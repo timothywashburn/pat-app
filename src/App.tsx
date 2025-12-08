@@ -1,30 +1,32 @@
 import "@/global.css"
 
-import { Slot, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import SocketService from '@/src/services/SocketService';
-import { ThemeProvider } from "@react-navigation/native";
+import { NavigationContainer, ThemeProvider } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/context/ThemeContext";
 import { ToastProvider } from "@/src/components/toast/ToastContext";
 import { AlertProvider } from "@/src/components/alert";
-import AppNavigator from "@/src/navigation/AppNavigator";
+import RootNavigator from "@/src/navigation/RootNavigator";
+import { navigationRef } from "@/src/navigation/navigationRef";
+import { linking } from "@/src/navigation/linking";
 import * as SplashScreen from 'expo-splash-screen';
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { UserDataStoreStatus, useUserDataStore } from "@/src/stores/useUserDataStore";
 import { Logger } from "@/src/features/dev/components/Logger";
 import LogViewer from "@/src/features/dev/components/LogViewer";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ModuleProvider } from "@/src/components/ModuleContext";
 import * as Application from 'expo-application';
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { HeaderControlsProvider } from '@/src/context/HeaderControlsContext';
 import { ModalProvider } from '@/src/context/ModalContext';
-import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
+// import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { useAppFocus } from "@/src/hooks/useAppFocus";
+import { registerRootComponent } from "expo";
 
 const DEV_BOOT = false;
 
@@ -41,9 +43,6 @@ const AppContent: React.FC = () => {
     const [showDevTerminal, setShowDevTerminal] = useState(DEV_BOOT);
     const [isRetryingRefresh, setIsRetryingRefresh] = useState(false);
 
-    const pathname = usePathname();
-    // const segments = useSegments();
-
     const navigationStore = useNavigationStore();
 
     useAppFocus(useCallback(() => {
@@ -56,53 +55,54 @@ const AppContent: React.FC = () => {
         }
     }, [authStoreStatus, refreshAuth]));
 
-    useEffect(() => {
-        if (pathname.toLowerCase().includes("form")) {
-            navigationStore.setEnabled(false);
-        } else {
-            navigationStore.setEnabled(true);
-        }
-    }, [pathname]);
+    // prevent tab scrolling in forms
+    // useEffect(() => {
+    //     if (pathname.toLowerCase().includes("form")) {
+    //         navigationStore.setEnabled(false);
+    //     } else {
+    //         navigationStore.setEnabled(true);
+    //     }
+    // }, [pathname]);
 
     // Listen for actual URL changes and prevent detail screen URLs
-    useEffect(() => {
-        if (Platform.OS !== 'web') return;
-
-        const handleUrlChange = () => {
-            const pathname = window.location.pathname;
-            const search = window.location.search;
-
-            // remove everything after and including the first capital letter
-            const newPathname = pathname.replace(/\/[A-Z][^\/]*/g, '');
-            if (newPathname !== pathname || search) {
-                console.log(`overriding url change, changing ${pathname + search} to ${newPathname}`);
-                window.history.replaceState(null, '', newPathname);
-            }
-        };
-
-        // Listen for popstate events (back/forward)
-        window.addEventListener('popstate', handleUrlChange);
-
-        // Listen for pushState/replaceState calls
-        const originalPushState = window.history.pushState;
-        const originalReplaceState = window.history.replaceState;
-
-        window.history.pushState = function(...args) {
-            originalPushState.apply(this, args);
-            setTimeout(handleUrlChange, 0);
-        };
-
-        window.history.replaceState = function(...args) {
-            originalReplaceState.apply(this, args);
-            setTimeout(handleUrlChange, 0);
-        };
-
-        return () => {
-            window.removeEventListener('popstate', handleUrlChange);
-            window.history.pushState = originalPushState;
-            window.history.replaceState = originalReplaceState;
-        };
-    }, []);
+    // useEffect(() => {
+    //     if (Platform.OS !== 'web') return;
+    //
+    //     const handleUrlChange = () => {
+    //         const pathname = window.location.pathname;
+    //         const search = window.location.search;
+    //
+    //         // remove everything after and including the first capital letter
+    //         const newPathname = pathname.replace(/\/[A-Z][^\/]*/g, '');
+    //         if (newPathname !== pathname || search) {
+    //             console.log(`overriding url change, changing ${pathname + search} to ${newPathname}`);
+    //             window.history.replaceState(null, '', newPathname);
+    //         }
+    //     };
+    //
+    //     // Listen for popstate events (back/forward)
+    //     window.addEventListener('popstate', handleUrlChange);
+    //
+    //     // Listen for pushState/replaceState calls
+    //     const originalPushState = window.history.pushState;
+    //     const originalReplaceState = window.history.replaceState;
+    //
+    //     window.history.pushState = function(...args) {
+    //         originalPushState.apply(this, args);
+    //         setTimeout(handleUrlChange, 0);
+    //     };
+    //
+    //     window.history.replaceState = function(...args) {
+    //         originalReplaceState.apply(this, args);
+    //         setTimeout(handleUrlChange, 0);
+    //     };
+    //
+    //     return () => {
+    //         window.removeEventListener('popstate', handleUrlChange);
+    //         window.history.pushState = originalPushState;
+    //         window.history.replaceState = originalReplaceState;
+    //     };
+    // }, []);
 
     useEffect(() => {
         Logger.debug('startup', 'deciding whether to initialize auth', {
@@ -152,8 +152,10 @@ const AppContent: React.FC = () => {
 
         if (authStoreStatus !== AuthStoreStatus.NOT_INITIALIZED) {
             Logger.debug('startup', 'initializing deep links');
-            DeepLinkHandler.initialize();
+            // const cleanup = DeepLinkHandler.initialize();
             Logger.debug('startup', 'deep links initialized successfully');
+
+            // return cleanup;
         }
     }, [authStoreStatus]);
 
@@ -288,26 +290,26 @@ const AppContent: React.FC = () => {
     }
 
     return (
-        <ModuleProvider>
-            <HeaderControlsProvider>
-                <ModalProvider>
-                    <ToastProvider>
-                        <AlertProvider>
-                            <ThemeProvider value={theme}>
-                                <AppNavigator onLayout={hidesplash}>
-                                    <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-                                    {/*<Stack screenOptions={{ header: () => null }}>*/}
-                                    {/*    /!*<Stack.Screen name="(auth)" />*!/*/}
-                                    {/*    /!*<Stack.Screen name="(tabs)" />*!/*/}
-                                    {/*</Stack>*/}
-                                    <Slot />
-                                </AppNavigator>
-                            </ThemeProvider>
-                        </AlertProvider>
-                    </ToastProvider>
-                </ModalProvider>
-            </HeaderControlsProvider>
-        </ModuleProvider>
+        <SafeAreaProvider>
+            <ModuleProvider>
+                <HeaderControlsProvider>
+                    <ModalProvider>
+                        <ToastProvider>
+                            <AlertProvider>
+                                <ThemeProvider value={theme}>
+                                    <NavigationContainer theme={theme} ref={navigationRef} linking={linking}>
+                                        <View style={{ flex: 1 }} onLayout={hidesplash}>
+                                            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+                                            <RootNavigator />
+                                        </View>
+                                    </NavigationContainer>
+                                </ThemeProvider>
+                            </AlertProvider>
+                        </ToastProvider>
+                    </ModalProvider>
+                </HeaderControlsProvider>
+            </ModuleProvider>
+        </SafeAreaProvider>
     );
 };
 
@@ -318,3 +320,5 @@ export default function RootLayout() {
         </CustomThemeProvider>
     );
 }
+
+registerRootComponent(RootLayout);
