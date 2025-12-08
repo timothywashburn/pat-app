@@ -69,6 +69,7 @@ class HabitsWidgetDataManager {
             let encoder = JSONEncoder()
             let jsonData = try encoder.encode(habitAction)
             defaults.set(jsonData, forKey: "habit_action_queue")
+            defaults.synchronize()
         } catch {
             print("Failed to encode action: \(error)")
         }

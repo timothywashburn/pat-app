@@ -33,6 +33,7 @@ struct HabitsConfigIntent: WidgetConfigurationIntent {
 
 struct MarkCompleteIntent: AppIntent {
     static var title: LocalizedStringResource { "Mark Habit Complete" }
+    static var openAppWhenRun: Bool { true }
 
     @Parameter(title: "Habit ID")
     var habitId: String
@@ -51,6 +52,8 @@ struct MarkCompleteIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult {
+        print("[WIDGET_ACTION] MarkCompleteIntent starting - habitId: \(habitId), date: \(date)")
+
         // Queue the action for the main app to process
         HabitsWidgetDataManager.shared.queueAction(
             habitId: habitId,
@@ -58,8 +61,12 @@ struct MarkCompleteIntent: AppIntent {
             action: "complete"
         )
 
+        print("[WIDGET_ACTION] Action queued successfully")
+
         // Request widget timeline refresh to show optimistic update
         WidgetCenter.shared.reloadTimelines(ofKind: "HabitsWidget")
+
+        print("[WIDGET_ACTION] Widget reload requested")
 
         return .result()
     }

@@ -27,6 +27,9 @@ export default class DeepLinkHandler {
                 case '/redirect':
                     router.replace(`/(public)/verify-success`);
                     break;
+                case '/habits':
+                    router.replace('/(tabs)/habits');
+                    break;
                 default:
                     console.log(`[deeplink] unhandled path: ${path}`);
                     return;

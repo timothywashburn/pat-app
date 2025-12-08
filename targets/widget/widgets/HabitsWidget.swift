@@ -14,7 +14,7 @@ struct HabitsWidget: Widget {
         }
         .configurationDisplayName("Habits Tracker")
         .description("Track your daily habits at a glance")
-        .supportedFamilies([.systemLarge])
+        .supportedFamilies([.systemMedium])
     }
 }
 
@@ -34,7 +34,7 @@ extension HabitsConfigIntent {
     }
 }
 
-#Preview(as: .systemLarge) {
+#Preview(as: .systemMedium) {
     HabitsWidget()
 } timeline: {
     // Preview with active habits

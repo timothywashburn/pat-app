@@ -37,13 +37,8 @@ const ACTION_QUEUE_KEY = 'habit_action_queue';
 // Create storage instance
 const storage = new ExtensionStorage(APP_GROUP);
 
-/**
- * Sync habits data to widget via UserDefaults
- */
 export async function syncHabitsToWidget(habits: Habit[]): Promise<void> {
-    if (Platform.OS !== 'ios') {
-        return;
-    }
+    if (Platform.OS !== 'ios') return;
 
     try {
         const today = toDateOnlyString(new Date());
@@ -76,11 +71,7 @@ export async function syncHabitsToWidget(habits: Habit[]): Promise<void> {
         };
 
         const jsonString = JSON.stringify(widgetData);
-
-        // Use ExtensionStorage to write to UserDefaults
         storage.set(HABITS_DATA_KEY, jsonString);
-
-        // Reload widget timelines
         ExtensionStorage.reloadWidget('HabitsWidget');
 
         console.log('[WidgetSync] Synced habits to widget:', widgetHabits.length);
@@ -89,31 +80,37 @@ export async function syncHabitsToWidget(habits: Habit[]): Promise<void> {
     }
 }
 
-/**
- * Read and process any pending widget actions
- */
 export async function processWidgetActionQueue(): Promise<HabitAction | null> {
     if (Platform.OS !== 'ios') {
+        console.log('[WIDGET_ACTION] Skipping action queue processing - not iOS');
         return null;
     }
 
     try {
+        console.log('[WIDGET_ACTION] Checking for pending widget actions...');
         const jsonData = storage.get(ACTION_QUEUE_KEY);
 
         if (!jsonData) {
+            console.log('[WIDGET_ACTION] No pending actions found');
             return null;
         }
 
+        console.log('[WIDGET_ACTION] Found action data:', jsonData);
+
         const action = JSON.parse(jsonData) as HabitAction;
+
+        console.log('[WIDGET_ACTION] Parsed action:', action);
 
         // Clear the queue
         storage.remove(ACTION_QUEUE_KEY);
 
-        console.log('[WidgetSync] Processed widget action:', action);
+        console.log('[WidgetSync] Action queue cleared');
+        console.log('[WIDGET_ACTION] Processed widget action:', action);
 
         return action;
     } catch (error) {
         console.error('[WidgetSync] Failed to process widget action queue:', error);
+        console.error('[WIDGET_ACTION] Error details:', error);
         return null;
     }
 }

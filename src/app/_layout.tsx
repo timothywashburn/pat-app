@@ -51,16 +51,12 @@ const AppContent: React.FC = () => {
 
     const { markHabitEntry, syncToWidget } = useHabitsStore();
 
-    useAppFocus(useCallback(() => {
+    // Process widget actions - this runs whenever the app is active and authenticated
+    const processWidgetActions = useCallback(async () => {
         if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL ||
             authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
-            Logger.debug('auth', 'app refocused, refreshing token');
-            refreshAuth().catch((error) => {
-                Logger.error('auth', 'failed to refresh token on app refocus', error);
-            });
-
-            // Process widget action queue
-            processWidgetActionQueue().then(async (action) => {
+            try {
+                const action = await processWidgetActionQueue();
                 if (action) {
                     Logger.debug('unclassified', 'processing widget action', action);
                     try {
@@ -71,11 +67,35 @@ const AppContent: React.FC = () => {
                         Logger.error('unclassified', 'failed to process widget action', error);
                     }
                 }
-            }).catch((error) => {
+            } catch (error) {
                 Logger.error('unclassified', 'failed to read widget action queue', error);
-            });
+            }
         }
-    }, [authStoreStatus, refreshAuth, markHabitEntry, syncToWidget]));
+    }, [authStoreStatus, markHabitEntry, syncToWidget]);
+
+    // Poll for widget actions every 500ms when app is active
+    useEffect(() => {
+        if (Platform.OS !== 'ios') return;
+
+        const interval = setInterval(() => {
+            processWidgetActions();
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, [processWidgetActions]);
+
+    useAppFocus(useCallback(() => {
+        if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL ||
+            authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
+            Logger.debug('auth', 'app refocused, refreshing token');
+            refreshAuth().catch((error) => {
+                Logger.error('auth', 'failed to refresh token on app refocus', error);
+            });
+
+            // Process widget actions immediately on focus
+            processWidgetActions();
+        }
+    }, [authStoreStatus, refreshAuth, processWidgetActions]));
 
     useEffect(() => {
         if (pathname.toLowerCase().includes("form")) {
