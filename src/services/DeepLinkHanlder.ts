@@ -1,11 +1,12 @@
 import { Linking } from 'react-native';
 import { router } from 'expo-router';
 import { DataState } from "@/src/stores/useUserDataStore";
+import { Logger } from "@/src/features/dev/components/Logger";
 
 export default class DeepLinkHandler {
     static handleURL(url: string): void {
         try {
-            console.log(`[deeplink] handling url: ${url}`);
+            Logger.debug('linking', 'handling url', { url });
 
             let path = '';
             if (url.includes('://')) {
@@ -13,12 +14,12 @@ export default class DeepLinkHandler {
                 const parts = url.split('://');
                 if (parts.length > 1) path = '/' + parts[1];
             } else {
-                console.log(`[deeplink] Handling full URL: ${url}`);
+                Logger.debug('linking', 'handling full url', { url });
                 const urlObject = new URL(url);
                 path = urlObject.pathname;
             }
 
-            console.log(`[deeplink] extracted path: ${path}`);
+            Logger.debug('linking', 'extracted path', { path });
 
             switch (path) {
                 case '/':
@@ -29,12 +30,13 @@ export default class DeepLinkHandler {
                     break;
                 default:
                     console.log(`[deeplink] unhandled path: ${path}`);
+                    Logger.debug('linking', 'unhandled path', { path });
                     return;
             }
 
-            console.log('[deeplink] handled redirect');
+            Logger.debug('linking', 'handled redirect', { path });
         } catch (error) {
-            console.error('[deeplink] error handling URL:', error);
+            Logger.error('linking', 'error handling URL', { error });
         }
     }
 
@@ -43,6 +45,7 @@ export default class DeepLinkHandler {
         const subscription = Linking.addEventListener('url', ({ url }) => {
             if (url) {
                 console.log('[deeplink] received url event:', url);
+                Logger.debug('linking', 'received url event', { url });
                 DeepLinkHandler.handleURL(url);
             }
         });
@@ -50,13 +53,13 @@ export default class DeepLinkHandler {
         // Handle deep links when the app is opened from a link
         Linking.getInitialURL().then((url) => {
             if (url) {
-                console.log('[deeplink] received initial url:', url);
+                Logger.debug('linking', 'received initial url', { url });
                 DeepLinkHandler.handleURL(url);
             } else {
-                console.log('[deeplink] no initial url');
+                Logger.debug('linking', 'no initial url');
             }
-        }).catch(err => {
-            console.error('[deeplink] error getting initial url:', err);
+        }).catch(error => {
+            Logger.error('linking', 'error getting initial url', { error });
         });
 
         return () => {

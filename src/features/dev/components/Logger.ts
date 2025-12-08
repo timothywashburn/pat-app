@@ -1,5 +1,5 @@
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogCategory = 'startup' | 'auth' | 'unclassified';
+export type LogCategory = 'startup' | 'auth' | 'linking' | 'unclassified';
 
 export interface LogEntry {
     timestamp: Date;
