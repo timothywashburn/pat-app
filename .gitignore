@@ -2,12 +2,11 @@
 __tests__/
 coverage/
 node_modules/
-ios/
-android/
+/ios/
+/android/
 .env*.local
 .DS_Store
 service-account*.json
-google-services.json
 ignore-*.*
 
 # Expo
@@ -16,3 +15,8 @@ dist/
 web-build/
 expo-env.d.ts
 /build-*.*
+
+# gitignored but not easignored
+google-services.json
+targets/*/generated.entitlements
+targets/*/Assets.xcassets/
