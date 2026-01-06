@@ -10,7 +10,7 @@ import { useNavigationStore } from "@/src/stores/useNavigationStore";
 interface DraggableListProps<T extends { section?: number; sortOrder?: number }> {
     data: T[];
     keyExtractor: (item: T) => string;
-    renderItem: (data: {item: T, index: number}) => React.ReactNode;
+    renderItem: (data: {item: T, index: number, isEditMode: boolean}) => React.ReactNode;
     onReorder: (newData: T[]) => void;
     reorderable?: boolean;
     onEditModeChange?: (isEditing: boolean) => void;
@@ -517,7 +517,7 @@ export function DraggableList<T extends { section?: number; sortOrder?: number }
                         {/*    />*/}
                         {/*</Animated.View>*/}
                         <View className="flex-1">
-                            {renderItem({ item, index })}
+                            {renderItem({ item, index, isEditMode })}
                         </View>
                     </View>
                 </Animated.View>

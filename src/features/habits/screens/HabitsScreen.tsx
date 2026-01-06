@@ -150,11 +150,12 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
                             <DraggableList
                                 data={localHabits}
                                 keyExtractor={(habit) => habit._id}
-                                renderItem={({ item }) => (
+                                renderItem={({ item, isEditMode }) => (
                                     <HabitRowCondensed
                                         habit={item}
                                         onPress={handleHabitPress}
                                         onHabitUpdated={handleHabitUpdated}
+                                        isEditMode={isEditMode}
                                     />
                                 )}
                                 onReorder={handleReorder}

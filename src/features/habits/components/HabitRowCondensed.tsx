@@ -13,9 +13,10 @@ interface HabitRowCondensedProps {
     habit: Habit;
     onPress: (habit: Habit) => void;
     onHabitUpdated?: () => void;
+    isEditMode?: boolean;
 }
 
-const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, onHabitUpdated }) => {
+const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, onHabitUpdated, isEditMode }) => {
     const { errorToast } = useToast();
     const { getColor } = useTheme();
     const { markHabitEntry, deleteHabitEntry } = useHabitsStore();
@@ -89,6 +90,7 @@ const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, o
                     className="flex-1 pr-3"
                     onPress={() => onPress(habit)}
                     activeOpacity={0.7}
+                    disabled={isEditMode}
                 >
                     <Text className="text-on-surface text-base font-medium mb-0.5">
                         {habit.name}
