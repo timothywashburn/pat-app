@@ -40,8 +40,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     useNavStateLogger(navigation, 'settings');
 
     const [sectionData, setSectionData] = useState({
-        itemCategories: data.config.agenda.itemCategories,
-        itemTypes: data.config.agenda.itemTypes,
         propertyKeys: data.config.people.propertyKeys
     });
 
@@ -50,10 +48,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         try {
             await updateUserData({
                 config: {
-                    agenda: {
-                        itemCategories: sectionData.itemCategories,
-                        itemTypes: sectionData.itemTypes
-                    },
                     people: {
                         propertyKeys: sectionData.propertyKeys
                     }
@@ -68,10 +62,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             setIsSaving(false);
         }
     }, [sectionData, updateUserData, successToast, errorToast]);
-
-    const handleAgendaDataChange = (data: { itemCategories: string[], itemTypes: string[] }) => {
-        setSectionData(prev => ({ ...prev, itemCategories: data.itemCategories, itemTypes: data.itemTypes }));
-    };
 
     const handlePeopleDataChange = (data: { propertyKeys: string[] }) => {
         setSectionData(prev => ({ ...prev, propertyKeys: data.propertyKeys }));
@@ -132,10 +122,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                     <View className="h-px bg-surface my-6" />
 
-                    <AgendaSection
-                        editMode={editMode}
-                        onDataChange={handleAgendaDataChange}
-                    />
+                    <AgendaSection />
 
                     <View className="h-px bg-surface my-6" />
 

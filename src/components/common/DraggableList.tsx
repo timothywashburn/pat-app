@@ -26,6 +26,7 @@ const springConfig = {
     stiffness: 200,
 };
 
+// TODO: has an issue where if you save before animation has finished it looks like order should be updated to new ordering but it gets immediately reverted because animation never completed
 export function DraggableList<T extends { section?: number; sortOrder?: number }>({
     data,
     onReorder,
