@@ -1,16 +1,17 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useTheme } from '@/src/context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MainStackParamList } from '@/src/navigation/MainStack';
 
 export default function NotFoundScreen() {
     const { getColor } = useTheme();
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp<MainStackParamList>>();
 
     const handleGoHome = () => {
-        navigation.navigate('AppNavigator' as any);
+        navigation.navigate('Agenda');
     };
 
     return (
