@@ -14,7 +14,7 @@ import { useUserDataStore } from "@/src/stores/useUserDataStore";
 class SocketService {
     private static instance: SocketService;
     private socket: Socket | null = null;
-    private reconnectTimer: number | null = null;
+    private reconnectTimer: NodeJS.Timeout | null = null;
     private isConnected: boolean = false;
     private listeners: Map<string, ((data: any) => void)[]> = new Map();
 
