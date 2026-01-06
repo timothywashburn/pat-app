@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/src/context/ThemeContext";
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 
-interface DraggableListProps<T extends { section?: number }> {
+interface DraggableListProps<T extends { section?: number; sortOrder?: number }> {
     data: T[];
     keyExtractor: (item: T) => string;
     renderItem: (data: {item: T, index: number}) => React.ReactNode;
@@ -26,7 +26,7 @@ const springConfig = {
     stiffness: 200,
 };
 
-export function DraggableList<T extends { section?: number }>({
+export function DraggableList<T extends { section?: number; sortOrder?: number }>({
     data,
     onReorder,
     renderItem,
@@ -47,6 +47,7 @@ export function DraggableList<T extends { section?: number }>({
     const baseScrollY = useSharedValue(0);
 
     const [itemHeights, setItemHeights] = useState<Record<string, number>>({});
+    const internalSortOrderRef = useRef<Record<string, number>>({});
     const positions = useSharedValue<Record<string, number>>({});
     const heights = useSharedValue<Record<string, number>>({});
     const order = useSharedValue<string[]>([]);
@@ -62,12 +63,10 @@ export function DraggableList<T extends { section?: number }>({
     const editModeHeaderHeight = useSharedValue(isEditMode ? 1 : 0);
     const flashingKey = useSharedValue<string>('');
 
-    // Animate reorderable state changes
     useEffect(() => {
         reorderableProgress.value = withSpring(isInternallyReorderable ? 1 : 0, springConfig);
     }, [isInternallyReorderable]);
 
-    // Helper function to update scroll (must be on JS thread)
     const updateScroll = (scroll: number) => {
         scrollViewRef?.current?.scrollTo({
             y: scroll,
@@ -75,10 +74,8 @@ export function DraggableList<T extends { section?: number }>({
         });
     };
 
-    // Track if we're actively transitioning edit mode
     const isTransitioningEditMode = useSharedValue(false);
 
-    // Sync scroll position with animation progress (only during edit mode transitions)
     useAnimatedReaction(
         () => editModeHeaderHeight.value,
         (progress) => {
@@ -90,17 +87,14 @@ export function DraggableList<T extends { section?: number }>({
         }
     );
 
-    // Animate edit mode header
     useEffect(() => {
         if (isEditMode) {
-            // Store the base scroll position when entering edit mode
             baseScrollY.value = scrollYRef.current;
             isTransitioningEditMode.value = true;
             editModeHeaderHeight.value = withSpring(1, springConfig, () => {
                 isTransitioningEditMode.value = false;
             });
         } else {
-            // When exiting, baseScrollY should be current scroll minus the header offset
             const HEADER_HEIGHT = 72;
             baseScrollY.value = scrollYRef.current - HEADER_HEIGHT;
             isTransitioningEditMode.value = true;
@@ -110,10 +104,8 @@ export function DraggableList<T extends { section?: number }>({
         }
     }, [isEditMode]);
 
-    // Notify parent of edit mode changes and control navigation
     useEffect(() => {
         onEditModeChange?.(isEditMode);
-        // Disable module navigation when in edit mode
         setNavigationEnabled(!isEditMode);
     }, [isEditMode]);
 
@@ -122,7 +114,6 @@ export function DraggableList<T extends { section?: number }>({
             setIsEditMode(true);
             triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
 
-            // Clear flash after edit mode enters
             setTimeout(() => {
                 flashingKey.value = '';
             }, 600);
@@ -147,30 +138,46 @@ export function DraggableList<T extends { section?: number }>({
 
         if (!allMeasured) return;
 
-        // Check if any items have sections defined
+        const currentSortOrder = internalSortOrderRef.current;
+        data.forEach((item, index) => {
+            const key = keyExtractor(item);
+            if (currentSortOrder[key] === undefined) {
+                currentSortOrder[key] = index;
+            }
+        });
+
         const hasSections = data.some(item => item.section !== undefined);
 
-        // Sections are primary - always group by section first, preserving data order within sections
         let orderedData = [...data];
 
         if (hasSections) {
-            // Group items by section number, preserving original data order within each section
             const sectionGroups: Record<number, T[]> = {};
 
             data.forEach(item => {
-                const section = item.section ?? 0; // Default to section 0 if undefined
+                const section = item.section ?? 0;
                 if (!sectionGroups[section]) {
                     sectionGroups[section] = [];
                 }
                 sectionGroups[section].push(item);
             });
 
-            // Sort sections by number and flatten back into single array
             const sortedSectionNumbers = Object.keys(sectionGroups)
                 .map(Number)
                 .sort((a, b) => a - b);
 
-            orderedData = sortedSectionNumbers.flatMap(section => sectionGroups[section]);
+            orderedData = sortedSectionNumbers.flatMap(section => {
+                const items = sectionGroups[section];
+                return items.sort((a, b) => {
+                    const keyA = keyExtractor(a);
+                    const keyB = keyExtractor(b);
+                    const aOrder = currentSortOrder[keyA] ?? data.indexOf(a);
+                    const bOrder = currentSortOrder[keyB] ?? data.indexOf(b);
+                    if (aOrder !== bOrder) {
+                        return aOrder - bOrder;
+                    }
+                    return data.indexOf(a) - data.indexOf(b);
+                });
+            });
         }
 
         const newPositions: Record<string, number> = {};
@@ -192,6 +199,11 @@ export function DraggableList<T extends { section?: number }>({
         heights.value = itemHeights;
         order.value = newOrder;
         sections.value = newSections;
+
+        orderedData.forEach((item, index) => {
+            const key = keyExtractor(item);
+            internalSortOrderRef.current[key] = index;
+        });
     }, [data, itemHeights]);
 
     const triggerHaptic = async (style: Haptics.ImpactFeedbackStyle) => {
@@ -231,7 +243,6 @@ export function DraggableList<T extends { section?: number }>({
             return Math.max(0, orderKeys.length - 1);
         }
 
-        // Find section bounds based on current order
         let sectionStart = -1;
         let sectionEnd = -1;
         for (let i = 0; i < orderKeys.length; i++) {
@@ -248,7 +259,6 @@ export function DraggableList<T extends { section?: number }>({
             const midpoint = cumulativeY + height / 2;
 
             if (y < midpoint) {
-                // Clamp to section bounds
                 if (sectionStart !== -1 && i < sectionStart) return sectionStart;
                 if (sectionEnd !== -1 && i > sectionEnd) return sectionEnd;
                 return i;
@@ -257,7 +267,6 @@ export function DraggableList<T extends { section?: number }>({
             cumulativeY += height;
         }
 
-        // If we're past all items, return the end of our section
         return sectionEnd >= 0 ? sectionEnd : Math.max(0, orderKeys.length - 1);
     };
 
@@ -292,6 +301,11 @@ export function DraggableList<T extends { section?: number }>({
         });
 
         const newData = order.value.map((key) => keyToItem.get(key)!);
+
+        order.value.forEach((key, index) => {
+            internalSortOrderRef.current[key] = index;
+        });
+
         onReorder(newData);
     };
 

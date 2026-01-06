@@ -11,6 +11,7 @@ interface DemoItem {
     icon: keyof typeof Ionicons.glyphMap;
     description: string;
     section: number;
+    sortOrder: number;
 }
 
 const INITIAL_DEMO_ITEMS: DemoItem[] = [
@@ -20,6 +21,7 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
         icon: 'checkmark-circle',
         description: 'Organize your daily tasks',
         section: 0,
+        sortOrder: 0,
     },
     {
         id: '2',
@@ -27,6 +29,7 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
         icon: 'calendar',
         description: 'Schedule and track events',
         section: 0,
+        sortOrder: 1,
     },
     {
         id: '3',
@@ -34,6 +37,7 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
         icon: 'document-text',
         description: 'Quick notes and ideas',
         section: 0,
+        sortOrder: 2,
     },
     {
         id: '4',
@@ -41,6 +45,7 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
         icon: 'notifications',
         description: 'Never forget things',
         section: 1,
+        sortOrder: 3,
     },
     {
         id: '5',
@@ -48,6 +53,7 @@ const INITIAL_DEMO_ITEMS: DemoItem[] = [
         icon: 'folder',
         description: 'Manage long-term projects',
         section: 1,
+        sortOrder: 4,
     },
 ];
 

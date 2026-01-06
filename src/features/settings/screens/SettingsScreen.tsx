@@ -40,7 +40,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     useNavStateLogger(navigation, 'settings');
 
     const [sectionData, setSectionData] = useState({
-        modules: data.config.modules,
         itemCategories: data.config.agenda.itemCategories,
         itemTypes: data.config.agenda.itemTypes,
         propertyKeys: data.config.people.propertyKeys
@@ -57,8 +56,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     },
                     people: {
                         propertyKeys: sectionData.propertyKeys
-                    },
-                    modules: sectionData.modules
+                    }
                 }
             });
             successToast("Settings saved successfully");
@@ -70,10 +68,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             setIsSaving(false);
         }
     }, [sectionData, updateUserData, successToast, errorToast]);
-
-    const handleGeneralDataChange = (data: { modules: UserModuleData[] }) => {
-        setSectionData(prev => ({ ...prev, modules: data.modules }));
-    };
 
     const handleAgendaDataChange = (data: { itemCategories: string[], itemTypes: string[] }) => {
         setSectionData(prev => ({ ...prev, itemCategories: data.itemCategories, itemTypes: data.itemTypes }));
@@ -125,9 +119,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <ScrollView className="flex-1">
                 <View className="p-4">
                     <GeneralSection
-                        editMode={editMode}
                         onSignOut={() => signOut()}
-                        onDataChange={handleGeneralDataChange}
                     />
 
                     <View className="h-px bg-surface my-6" />
