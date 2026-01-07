@@ -42,13 +42,10 @@ export default function WebHeader({ modules }: WebHeaderProps) {
                             <TouchableOpacity
                                 key={moduleType}
                                 onPress={() => {
-                                    // Navigate using navigationRef - we need to navigate to the nested tab
                                     if (navigationRef.isReady()) {
-                                        // Get the root state and find the tab navigator
-                                        const state = navigationRef.getRootState();
-                                        // Navigate to AppNavigator and then to the specific tab
-                                        navigationRef.navigate('AppNavigator' as any, {
-                                            screen: moduleType
+                                        navigationRef.navigate('MainStack', {
+                                            screen: 'Tabs',
+                                            params: { screen: moduleType }
                                         });
                                     }
                                 }}
