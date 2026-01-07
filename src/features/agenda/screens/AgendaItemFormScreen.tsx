@@ -16,7 +16,7 @@ import { useAgendaStore } from "@/src/stores/useAgendaStore";
 import WebDateTimePicker from '../components/WebDateTimePicker';
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { useModal } from '@/src/context/ModalContext';
-import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest } from "@timothyw/pat-common";
+import { CreateAgendaItemRequest, AgendaItemData, UpdateAgendaItemRequest, ModuleType } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
@@ -117,12 +117,9 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
             }
 
             if (thoughtId) {
-                nav.popTo('Inbox', {
-                    thoughtProcessed: true,
-                    thoughtId: thoughtId
-                });
+                nav.navigate('Tabs', { screen: ModuleType.INBOX });
             } else {
-                nav.popTo('Agenda');
+                nav.navigate('Tabs', { screen: ModuleType.AGENDA });
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save item');
@@ -139,7 +136,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
         try {
             await deleteItem(currentItem._id);
-            nav.popTo('Agenda');
+            nav.navigate('Tabs', { screen: ModuleType.AGENDA });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
             setIsLoading(false);

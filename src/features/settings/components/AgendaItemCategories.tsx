@@ -4,13 +4,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { CompositeNavigationProp } from '@react-navigation/core';
 import { DraggableList } from '@/src/components/common/DraggableList';
 import { useToast } from '@/src/components/toast/ToastContext';
 import { useUserDataStore } from '@/src/stores/useUserDataStore';
-import { NotificationEntityType, NotificationTemplateLevel } from '@timothyw/pat-common';
+import { NotificationEntityType, NotificationTemplateLevel, ModuleType } from '@timothyw/pat-common';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import NotificationService from '@/src/services/NotificationService';
 import CustomTextInput from '@/src/components/common/CustomTextInput';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface CategoryItem {
     id: string;
@@ -34,7 +37,10 @@ export const AgendaItemCategories: React.FC = () => {
     const { getColor } = useTheme();
     const { errorToast, successToast } = useToast();
     const { data, updateUserData } = useUserDataStore();
-    const navigation = useNavigation<StackNavigationProp<MainStackParamList, 'Settings'>>();
+    const navigation = useNavigation<CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.SETTINGS>,
+        StackNavigationProp<MainStackParamList>
+    >>();
 
     const savedCategories = useMemo(() =>
         itemsToCategories(data.config.agenda.itemCategories),

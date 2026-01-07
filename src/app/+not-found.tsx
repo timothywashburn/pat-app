@@ -5,13 +5,14 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useTheme } from '@/src/context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { ModuleType } from '@timothyw/pat-common';
 
 export default function NotFoundScreen() {
     const { getColor } = useTheme();
     const navigation = useNavigation<NavigationProp<MainStackParamList>>();
 
     const handleGoHome = () => {
-        navigation.navigate('Agenda');
+        navigation.navigate('Tabs', { screen: ModuleType.AGENDA });
     };
 
     return (

@@ -7,9 +7,9 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import CustomTextInput from '@/src/components/common/CustomTextInput';
@@ -20,15 +20,20 @@ import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 import KeyboardAvoidingWrapper from "@/src/components/common/KeyboardAvoidingWrapper";
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
-interface AgendaItemDetailViewProps {
-    navigation: StackNavigationProp<MainStackParamList, 'Inbox'>;
-    route: RouteProp<MainStackParamList, 'Inbox'>;
+export interface InboxPanelProps {
+    navigation: CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.INBOX>,
+        StackNavigationProp<MainStackParamList>
+    >;
+    route: RouteProp<TabNavigatorParamList, ModuleType.INBOX>;
 }
 
-export const InboxPanel: React.FC<AgendaItemDetailViewProps> = ({
+export const InboxPanel: React.FC<InboxPanelProps> = ({
     navigation,
     route
 }) => {

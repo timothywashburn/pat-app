@@ -1,54 +1,52 @@
 import { ModuleType } from "@timothyw/pat-common";
 import { Ionicons } from "@expo/vector-icons";
-import MainStack, { MainStackParamList } from "@/src/navigation/MainStack";
 import React from "react";
+import AgendaPanel from "@/src/features/agenda/screens/AgendaScreen";
+import InboxPanel from '@/src/features/inbox/screens/InboxScreen';
+import ListsPanel from '@/src/features/lists/screens/ListsScreen';
+import PeoplePanel from '@/src/features/people/screens/PeopleScreen';
+import HabitsPanel from '@/src/features/habits/screens/HabitsScreen';
+import SettingsPanel from '@/src/features/settings/screens/SettingsScreen';
+import DevPanel from '@/src/features/dev/screens/DevScreen';
 
 export const moduleInfo: Record<ModuleType, {
-    Component: React.ComponentType;
+    Component: React.ComponentType<any>; // TODO: maybe fix this any type
     icon: keyof typeof Ionicons.glyphMap;
     title: string;
-    initialRouteName?: keyof MainStackParamList;
 }> = {
-    agenda: { 
-        Component: () => <MainStack initialRouteName="Agenda" />,
-        icon: 'calendar', 
+    agenda: {
+        Component: AgendaPanel,
+        icon: 'calendar',
         title: 'Agenda',
-        initialRouteName: 'Agenda'
     },
-    inbox: { 
-        Component: () => <MainStack initialRouteName="Inbox" />,
-        icon: 'mail', 
+    inbox: {
+        Component: InboxPanel,
+        icon: 'mail',
         title: 'Inbox',
-        initialRouteName: 'Inbox'
     },
-    lists: { 
-        Component: () => <MainStack initialRouteName="Lists" />,
-        icon: 'list', 
+    lists: {
+        Component: ListsPanel,
+        icon: 'list',
         title: 'Lists',
-        initialRouteName: 'Lists'
     },
-    people: { 
-        Component: () => <MainStack initialRouteName="People" />,
-        icon: 'people', 
+    people: {
+        Component: PeoplePanel,
+        icon: 'people',
         title: 'People',
-        initialRouteName: 'People'
     },
-    habits: { 
-        Component: () => <MainStack initialRouteName="Habits" />,
-        icon: 'repeat', 
+    habits: {
+        Component: HabitsPanel,
+        icon: 'repeat',
         title: 'Habits',
-        initialRouteName: 'Habits'
     },
-    settings: { 
-        Component: () => <MainStack initialRouteName="Settings" />,
-        icon: 'settings', 
+    settings: {
+        Component: SettingsPanel,
+        icon: 'settings',
         title: 'Settings',
-        initialRouteName: 'Settings'
     },
-    dev: { 
-        Component: () => <MainStack initialRouteName="Dev" />,
-        icon: 'code-slash', 
+    dev: {
+        Component: DevPanel,
+        icon: 'code-slash',
         title: 'Dev',
-        initialRouteName: 'Dev'
     },
 };

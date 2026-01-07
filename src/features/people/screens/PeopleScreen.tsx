@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@/src/context/ThemeContext';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
@@ -12,12 +12,17 @@ import PersonFormScreen from "@/src/features/people/screens/PersonFormScreen";
 import { ModuleType, Person } from "@timothyw/pat-common";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface PeoplePanelProps {
-    navigation: StackNavigationProp<MainStackParamList, 'People'>;
-    route: RouteProp<MainStackParamList, 'People'>;
+    navigation: CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.PEOPLE>,
+        StackNavigationProp<MainStackParamList>
+    >;
+    route: RouteProp<TabNavigatorParamList, ModuleType.PEOPLE>;
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({

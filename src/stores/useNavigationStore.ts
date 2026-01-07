@@ -23,7 +23,7 @@ interface NavigationActions {
 export const useNavigationStore = create<NavigationState & NavigationActions>((set, get) => ({
     enabled: true,
 
-    setEnabled: async (enabled: boolean): Promise<void> => {
+    setEnabled: (enabled: boolean): void => {
         set({ enabled });
     },
 }));

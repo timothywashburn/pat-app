@@ -3,12 +3,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigatorScreenParams, CommonActions, useNavigation } from '@react-navigation/native';
 import { AuthStoreStatus, useAuthStore } from '@/src/stores/useAuthStore';
 import AuthStack, { AuthStackParamList } from './AuthStack';
-import AppNavigator from './AppNavigator';
+import MainStack, { MainStackParamList } from './MainStack';
 import NotFoundScreen from '@/src/app/+not-found';
 
 export type RootStackParamList = {
   AuthStack: NavigatorScreenParams<AuthStackParamList>;
-  AppNavigator: undefined;
+  MainStack: NavigatorScreenParams<MainStackParamList>;
   NotFound: undefined;
 };
 
@@ -39,7 +39,7 @@ export default function RootNavigator() {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{ name: 'AppNavigator' }],
+          routes: [{ name: 'MainStack' }],
         })
       );
     }
@@ -48,7 +48,7 @@ export default function RootNavigator() {
   // Initial route based on auth status
   const getInitialRouteName = (): keyof RootStackParamList => {
     if (authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
-      return 'AppNavigator';
+      return 'MainStack';
     }
     return 'AuthStack';
   };
@@ -61,7 +61,7 @@ export default function RootNavigator() {
       }}
     >
       <Stack.Screen name="AuthStack" component={AuthStack} />
-      <Stack.Screen name="AppNavigator" component={AppNavigator} />
+      <Stack.Screen name="MainStack" component={MainStack} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
     </Stack.Navigator>
   );

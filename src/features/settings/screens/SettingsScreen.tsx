@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { useAuthStore } from "@/src/stores/useAuthStore";
@@ -10,6 +10,7 @@ import { useUserDataStore } from "@/src/stores/useUserDataStore";
 import { UserModuleData, ModuleType, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import { LocalSection } from '@/src/features/settings/sections/LocalSection';
 import { GeneralSection } from '@/src/features/settings/sections/GeneralSection';
 import { NotificationsSection } from '@/src/features/settings/sections/NotificationsSection';
@@ -19,10 +20,14 @@ import { HabitsSection } from '@/src/features/settings/sections/HabitsSection';
 import { InboxSection } from '@/src/features/settings/sections/InboxSection';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface SettingsPanelProps {
-    navigation: StackNavigationProp<MainStackParamList, 'Settings'>;
-    route: RouteProp<MainStackParamList, 'Settings'>;
+    navigation: CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.SETTINGS>,
+        StackNavigationProp<MainStackParamList>
+    >;
+    route: RouteProp<TabNavigatorParamList, ModuleType.SETTINGS>;
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({

@@ -2,24 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { ActivityIndicator, Platform, Text, View } from 'react-native';
-import {
-    UserDataStoreStatus,
-    useUserDataStore
-} from "@/src/stores/useUserDataStore";
+import { UserDataStoreStatus, useUserDataStore } from "@/src/stores/useUserDataStore";
 import WebHeader from '@/src/components/WebHeader';
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { ModuleType } from "@timothyw/pat-common";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
 import { useModuleContext } from "@/src/components/ModuleContext";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { moduleInfo } from "@/src/components/ModuleInfo";
-import MainStack from "@/src/navigation/MainStack";
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { FocusAwareWrapper } from '@/src/components/FocusAwareWrapper';
 
 export type TabNavigatorParamList = {
     [ModuleType.AGENDA]: undefined;
-    [ModuleType.INBOX]: undefined;
+    [ModuleType.INBOX]: {
+        thoughtProcessed?: boolean;
+        thoughtId?: string;
+    } | undefined;
     [ModuleType.LISTS]: undefined;
     [ModuleType.PEOPLE]: undefined;
     [ModuleType.HABITS]: undefined;
@@ -70,17 +68,11 @@ export default function AppNavigator() {
         if (!moduleConfig) return null;
         const Component = moduleConfig.Component;
 
-        return (
-            <SafeAreaView
-                className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}
-            >
-                <Component />
-            </SafeAreaView>
-        );
+        return <Component />;
     }
 
     return (
-        <SafeAreaView className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}>
+        <>
             {isWeb && <WebHeader modules={data?.config.modules} />}
             <Tab.Navigator
                 key={navigationKey}
@@ -133,15 +125,15 @@ export default function AppNavigator() {
                                 ),
                             }}
                         >
-                            {() => (
+                            {(props) => (
                                 <FocusAwareWrapper>
-                                    <MainStack initialRouteName={moduleConfig.initialRouteName} />
+                                    <Component {...props} />
                                 </FocusAwareWrapper>
                             )}
                         </Tab.Screen>
                     );
                 })}
             </Tab.Navigator>
-        </SafeAreaView>
+        </>
     );
 }

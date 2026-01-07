@@ -9,11 +9,9 @@ import {
     NotificationTemplateData,
     HabitId, ListItemId, ThoughtId
 } from '@timothyw/pat-common';
-import AgendaPanel from "@/src/features/agenda/screens/AgendaScreen";
-import InboxPanel from '@/src/features/inbox/screens/InboxScreen';
-import ListsPanel from '@/src/features/lists/screens/ListsScreen';
-import PeoplePanel from '@/src/features/people/screens/PeopleScreen';
-import HabitsPanel from '@/src/features/habits/screens/HabitsScreen';
+import { NavigatorScreenParams } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AppNavigator, { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import AgendaItemDetailScreen from '@/src/features/agenda/screens/AgendaItemDetailScreen';
 import ListDetailScreen from '@/src/features/lists/screens/ListDetailScreen';
 import ListItemDetailScreen from '@/src/features/lists/screens/ListItemDetailScreen';
@@ -24,17 +22,13 @@ import ListFormScreen from '@/src/features/lists/screens/ListFormScreen';
 import ListItemFormScreen from '@/src/features/lists/screens/ListItemFormScreen';
 import PersonFormScreen from '@/src/features/people/screens/PersonFormScreen';
 import HabitFormScreen from '@/src/features/habits/screens/HabitFormScreen';
-import SettingsPanel from '@/src/features/settings/screens/SettingsScreen';
-import DevPanel from '@/src/features/dev/screens/DevScreen';
 import NotificationInfoScreen from '@/src/features/notifications/screens/NotificationInfoScreen';
 import NotificationFormScreen from '@/src/features/notifications/screens/NotificationFormScreen';
 import { SplitScreenConfig } from '@/src/components/layout/SplitViewLayout';
 
 export type MainStackParamList = {
-    Agenda: {
-        thoughtProcessed?: boolean;
-        thoughtId?: string;
-    } | undefined;
+    Tabs: NavigatorScreenParams<TabNavigatorParamList>;
+
     AgendaItemDetail: {
         itemId: ItemId;
     };
@@ -45,12 +39,6 @@ export type MainStackParamList = {
         thoughtId?: ThoughtId;
     };
 
-    Inbox: {
-        thoughtProcessed?: boolean;
-        thoughtId?: ThoughtId;
-    } | undefined;
-
-    Lists: undefined;
     ListDetail: {
         listId: ListId;
         thoughtProcessed?: boolean;
@@ -73,7 +61,6 @@ export type MainStackParamList = {
         thoughtId?: ThoughtId;
     };
 
-    People: undefined;
     PersonDetail: {
         personId: PersonId;
     };
@@ -82,7 +69,6 @@ export type MainStackParamList = {
         isEditing?: boolean;
     };
 
-    Habits: undefined;
     HabitDetail: {
         habitId: HabitId;
     };
@@ -90,10 +76,6 @@ export type MainStackParamList = {
         habitId?: HabitId;
         isEditing?: boolean;
     };
-
-    Settings: undefined;
-
-    Dev: undefined;
 
     NotificationInfo: {
         targetLevel: NotificationTemplateLevel;
@@ -111,11 +93,9 @@ export type MainStackParamList = {
 };
 
 export const splitScreenConfigs = {
-    Agenda: {
+    Tabs: {
         AgendaItemDetail: AgendaItemDetailScreen,
         AgendaItemForm: AgendaItemFormScreen,
-    },
-    Lists: {
         ListDetail: ListDetailScreen,
         ListForm: ListFormScreen,
         ListItemDetail: ListItemDetailScreen,
@@ -125,44 +105,34 @@ export const splitScreenConfigs = {
 
 const Stack = createStackNavigator<MainStackParamList>();
 
-interface MainStackProps {
-    initialRouteName?: keyof MainStackParamList;
-}
-
-export default function MainStack({ initialRouteName }: MainStackProps) {
+export default function MainStack() {
     return (
-        <Stack.Navigator
-            initialRouteName={initialRouteName}
-            screenOptions={{
-                headerShown: false
-            }}
-        >
-            <Stack.Screen name="Agenda" component={AgendaPanel} />
-            <Stack.Screen name="AgendaItemDetail" component={AgendaItemDetailScreen} />
-            <Stack.Screen name="AgendaItemForm" component={AgendaItemFormScreen} />
+        <SafeAreaView className="bg-background flex-1" edges={['top', 'left', 'right', 'bottom']}>
+            <Stack.Navigator
+                initialRouteName="Tabs"
+                screenOptions={{
+                    headerShown: false
+                }}
+            >
+                <Stack.Screen name="Tabs" component={AppNavigator} />
 
-            <Stack.Screen name="Inbox" component={InboxPanel} />
+                <Stack.Screen name="AgendaItemDetail" component={AgendaItemDetailScreen} />
+                <Stack.Screen name="AgendaItemForm" component={AgendaItemFormScreen} />
 
-            <Stack.Screen name="Lists" component={ListsPanel} />
-            <Stack.Screen name="ListDetail" component={ListDetailScreen} />
-            <Stack.Screen name="ListForm" component={ListFormScreen} />
-            <Stack.Screen name="ListItemDetail" component={ListItemDetailScreen} />
-            <Stack.Screen name="ListItemForm" component={ListItemFormScreen} />
+                <Stack.Screen name="ListDetail" component={ListDetailScreen} />
+                <Stack.Screen name="ListForm" component={ListFormScreen} />
+                <Stack.Screen name="ListItemDetail" component={ListItemDetailScreen} />
+                <Stack.Screen name="ListItemForm" component={ListItemFormScreen} />
 
-            <Stack.Screen name="People" component={PeoplePanel} />
-            <Stack.Screen name="PersonDetail" component={PersonDetailScreen} />
-            <Stack.Screen name="PersonForm" component={PersonFormScreen} />
+                <Stack.Screen name="PersonDetail" component={PersonDetailScreen} />
+                <Stack.Screen name="PersonForm" component={PersonFormScreen} />
 
-            <Stack.Screen name="Habits" component={HabitsPanel} />
-            <Stack.Screen name="HabitDetail" component={HabitDetailScreen} />
-            <Stack.Screen name="HabitForm" component={HabitFormScreen} />
+                <Stack.Screen name="HabitDetail" component={HabitDetailScreen} />
+                <Stack.Screen name="HabitForm" component={HabitFormScreen} />
 
-            <Stack.Screen name="Settings" component={SettingsPanel} />
-
-            <Stack.Screen name="Dev" component={DevPanel} />
-            
-            <Stack.Screen name="NotificationInfo" component={NotificationInfoScreen} />
-            <Stack.Screen name="NotificationForm" component={NotificationFormScreen} />
-        </Stack.Navigator>
+                <Stack.Screen name="NotificationInfo" component={NotificationInfoScreen} />
+                <Stack.Screen name="NotificationForm" component={NotificationFormScreen} />
+            </Stack.Navigator>
+        </SafeAreaView>
     );
 }

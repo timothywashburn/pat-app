@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
@@ -12,14 +12,19 @@ import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
 import DraggableListSection from "@/src/features/dev/components/DraggableListSection";
 import { ModuleType } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import HabitResetTimeSlider from "@/src/components/common/HabitResetTimeSlider";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import DetailViewHeader from "@/src/components/headers/DetailViewHeader";
 import LogViewer from "@/src/features/dev/components/LogViewer";
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface DevPanelProps {
-    navigation: StackNavigationProp<MainStackParamList, 'Dev'>;
-    route: RouteProp<MainStackParamList, 'Dev'>;
+    navigation: CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.DEV>,
+        StackNavigationProp<MainStackParamList>
+    >;
+    route: RouteProp<TabNavigatorParamList, ModuleType.DEV>;
 }
 
 export const DevPanel: React.FC<DevPanelProps> = ({

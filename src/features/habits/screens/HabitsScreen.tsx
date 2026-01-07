@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
@@ -11,13 +11,18 @@ import HabitRowCondensed from '@/src/features/habits/components/HabitRowCondense
 import { getActiveHabitDate, getTimeRemainingUntilRollover } from '@/src/features/habits/models';
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
 import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import { DraggableList } from '@/src/components/common/DraggableList';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface HabitsPanelProps {
-    navigation: StackNavigationProp<MainStackParamList, 'Habits'>;
-    route: RouteProp<MainStackParamList, 'Habits'>;
+    navigation: CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.HABITS>,
+        StackNavigationProp<MainStackParamList>
+    >;
+    route: RouteProp<TabNavigatorParamList, ModuleType.HABITS>;
 }
 
 export const HabitsPanel: React.FC<HabitsPanelProps> = ({
