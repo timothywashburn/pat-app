@@ -4,13 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/context/ThemeContext';
 import * as Linking from 'expo-linking';
+import PatConfig from "@/src/misc/PatConfig";
 
 const VerifySuccess: React.FC = () => {
     const { getColor } = useTheme();
 
     const handleReturnToApp = async () => {
         try {
-            const appLink = `${process.env.EXPO_PUBLIC_API_URL}/app`;
+            const appLink = `${PatConfig.apiURL}/app`;
 
             console.log("attempting to open universal link:", appLink);
 

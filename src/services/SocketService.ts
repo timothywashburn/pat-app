@@ -9,6 +9,7 @@ import {
     UserId
 } from "@timothyw/pat-common";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
+import PatConfig from "@/src/misc/PatConfig";
 
 class SocketService {
     private static instance: SocketService;
@@ -45,7 +46,7 @@ class SocketService {
         // Disconnect existing socket if any
         this.disconnect();
 
-        this.socket = io(process.env.EXPO_PUBLIC_API_URL, {
+        this.socket = io(PatConfig.apiURL, {
             path: '/ws',
             transports: ['websocket'],
             reconnection: true,

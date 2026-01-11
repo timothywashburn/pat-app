@@ -2,12 +2,13 @@ import { useAuthStore } from '@/src/stores/useAuthStore';
 import axios, { AxiosRequestConfig } from 'axios';
 import { NetworkRequest } from '@/src/hooks/useNetworkRequest';
 import { ApiResponseBody } from "@/src/hooks/useNetworkRequestTypes";
+import PatConfig from "@/src/misc/PatConfig";
 
 export const performRequest = async <TReq, TRes>(
     config: NetworkRequest<TReq>,
     requireAuth: boolean = true
 ): Promise<ApiResponseBody<TRes>> => {
-    const url = `${process.env.EXPO_PUBLIC_API_URL}${config.endpoint}`;
+    const url = `${PatConfig.apiURL}${config.endpoint}`;
     
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
