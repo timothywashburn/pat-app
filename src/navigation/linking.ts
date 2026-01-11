@@ -12,6 +12,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
           Verify: 'verify',
         }
       },
+      OAuthConsent: 'oauth/consent',
       MainStack: {
         path: '',
         screens: {

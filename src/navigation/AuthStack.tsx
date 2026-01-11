@@ -5,7 +5,14 @@ import CreateAccountScreen from '@/src/app/(auth)/create-account';
 import VerifyEmailScreen from '@/src/app/(auth)/verify';
 
 export type AuthStackParamList = {
-  SignIn: undefined;
+  SignIn: {
+    oauth_redirect?: string;
+    pending_id?: string;
+    client_name?: string;
+    scopes?: string;
+    redirect_uri?: string;
+    state?: string;
+  } | undefined;
   CreateAccount: undefined;
   Verify: undefined;
 };
