@@ -1,52 +1,14 @@
 import { create } from 'zustand';
-import PatConfig from '@/src/misc/PatConfig';
-import axios, { AxiosRequestConfig } from 'axios';
-import { useAuthStore } from '@/src/stores/useAuthStore';
 import {
-    GetUserResponse, ListItemData,
+    GetUserResponse,
     ModuleType, Serializer,
     UpdateUserRequest,
     UpdateUserResponse,
     UserData, UserId
 } from "@timothyw/pat-common";
 import { Logger } from "@/src/features/dev/components/Logger";
-import { ApiResponseBody, HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
-
-const performAuthenticatedRequest = async <TReq, TRes>(config: {
-    endpoint: string;
-    method: HTTPMethod;
-    body?: TReq;
-}): Promise<ApiResponseBody<TRes>> => {
-    const authTokens = useAuthStore.getState().authTokens;
-    if (!authTokens) throw new Error('No auth tokens available');
-
-    const url = `${PatConfig.apiURL}${config.endpoint}`;
-
-    const axiosConfig: AxiosRequestConfig = {
-        method: config.method.toLowerCase() as any,
-        url,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authTokens.accessToken}`,
-        },
-        data: config.body,
-    };
-
-    try {
-        const response = await axios(axiosConfig);
-        const data: ApiResponseBody<TRes> = response.data;
-        return data;
-    } catch (error: any) {
-        if (error.response) {
-            const message = error.response.data?.error || error.response.statusText || 'Unknown error occurred';
-            throw new Error(message);
-        } else if (error.request) {
-            throw new Error('Network error: no response received');
-        } else {
-            throw new Error(error.message);
-        }
-    }
-};
+import { HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
+import { performAuthenticatedRequest } from "@/src/utils/networkUtils";
 
 export enum UserDataStoreStatus {
     NOT_LOADED = 'not_loaded',
