@@ -58,7 +58,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
                 setName('');
             }
 
-            nav.navigate('Tabs', { screen: ModuleType.LISTS });
+            nav.popTo('Tabs', { screen: ModuleType.LISTS });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list');
         } finally {
@@ -74,7 +74,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
 
         try {
             await deleteList(currentList._id);
-            nav.navigate('Tabs', { screen: ModuleType.LISTS });
+            nav.popTo('Tabs', { screen: ModuleType.LISTS });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
             setIsLoading(false);

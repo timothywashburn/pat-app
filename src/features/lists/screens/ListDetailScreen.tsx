@@ -76,7 +76,7 @@ const ListDetailScreen: React.FC<ListDetailViewProps> = ({
 
                 try {
                     await deleteList(currentList._id);
-                    nav.navigate('Tabs', { screen: ModuleType.LISTS });
+                    nav.popTo('Tabs', { screen: ModuleType.LISTS });
                 } catch (error) {
                     setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
                 } finally {

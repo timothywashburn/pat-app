@@ -117,9 +117,9 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
             }
 
             if (thoughtId) {
-                nav.navigate('Tabs', { screen: ModuleType.INBOX });
+                nav.popTo('Tabs', { screen: ModuleType.INBOX });
             } else {
-                nav.navigate('Tabs', { screen: ModuleType.AGENDA });
+                nav.popTo('Tabs', { screen: ModuleType.AGENDA });
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save item');
@@ -136,7 +136,7 @@ const AgendaItemFormScreen: React.FC<AgendaItemFormViewProps> = ({
 
         try {
             await deleteItem(currentItem._id);
-            nav.navigate('Tabs', { screen: ModuleType.AGENDA });
+            nav.popTo('Tabs', { screen: ModuleType.AGENDA });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete item');
             setIsLoading(false);

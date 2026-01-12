@@ -28,7 +28,11 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
 }) => {
     const { habits } = useHabitsStore();
 
-    const currentHabit = habits.find(habit => habit._id === route.params.habitId)!;
+    const currentHabit = habits.find(habit => habit._id === route.params.habitId);
+
+    if (!currentHabit) {
+        return null;
+    }
 
     const currentDate = getActiveHabitDate(currentHabit);
     const previousDate = getPreviousHabitDate(currentHabit);

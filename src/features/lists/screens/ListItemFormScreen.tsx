@@ -88,9 +88,9 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
             }
 
             if (thoughtId) {
-                nav.navigate('Tabs', { screen: ModuleType.INBOX });
+                nav.popTo('Tabs', { screen: ModuleType.INBOX });
             } else {
-                nav.navigate('Tabs', { screen: ModuleType.LISTS });
+                nav.popTo('Tabs', { screen: ModuleType.LISTS });
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list item');
@@ -107,7 +107,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
 
         try {
             await deleteListItem(currentListItem._id);
-            nav.navigate('ListDetail', { listId: selectedListId });
+            nav.popTo('ListDetail', { listId: selectedListId });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
             setIsLoading(false);
