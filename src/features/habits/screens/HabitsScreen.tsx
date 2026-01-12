@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import { Habit, ModuleType } from "@timothyw/pat-common";
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
 import HabitCard from '@/src/features/habits/components/HabitCard';
@@ -13,7 +14,6 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import { DraggableList } from '@/src/components/common/DraggableList';
 import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
@@ -29,9 +29,9 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
     navigation,
     route
 }) => {
+    console.log('[HabitsPanel] Component re-rendering');
     const { habits, isInitialized, loadHabits, updateHabit } = useHabitsStore();
     const { refreshControl } = useRefreshControl(loadHabits, 'Failed to refresh habits');
-    const { setHeaderControls } = useHeaderControls();
     const [localHabits, setLocalHabits] = useState<Habit[]>([]);
 
     useNavStateLogger(navigation, 'habits');
@@ -62,22 +62,6 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
     const handleAddHabit = () => {
         navigation.navigate('HabitForm', {});
     };
-
-    useFocusEffect(
-        useCallback(() => {
-            setHeaderControls({
-                showAddButton: true,
-                onAddTapped: handleAddHabit,
-                showFilterButton: true,
-                isFilterActive: showExpandedView,
-                onFilterTapped: () => setShowExpandedView(!showExpandedView),
-            });
-
-            return () => {
-                setHeaderControls({});
-            };
-        }, [showExpandedView])
-    );
 
     const handleEditHabit = (habit: Habit) => {
         navigation.navigate('HabitForm', { habitId: habit._id, isEditing: true });
@@ -117,11 +101,21 @@ export const HabitsPanel: React.FC<HabitsPanelProps> = ({
         await loadHabits();
     };
 
+    const headerProps = {
+        showAddButton: true,
+        onAddTapped: handleAddHabit,
+        showFilterButton: true,
+        isFilterActive: showExpandedView,
+        onFilterTapped: () => setShowExpandedView(!showExpandedView),
+    };
+
     return (
         <>
+            <WebHeader {...headerProps} />
             <MainViewHeader
                 moduleType={ModuleType.HABITS}
                 title="Habits"
+                {...headerProps}
             />
 
             <ScrollView

@@ -6,6 +6,7 @@ import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@/src/context/ThemeContext';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
 import PersonCard from "@/src/features/people/components/PersonCard";
 import PersonFormScreen from "@/src/features/people/screens/PersonFormScreen";
@@ -14,7 +15,6 @@ import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface PeoplePanelProps {
@@ -29,10 +29,10 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({
     navigation,
     route
 }) => {
+    console.log('[PeoplePanel] Component re-rendering');
     const { getColor } = useTheme();
     const { people, isInitialized, loadPeople } = usePeopleStore();
     const { refreshControl } = useRefreshControl(loadPeople, 'Failed to refresh people');
-    const { setHeaderControls } = useHeaderControls();
 
     useNavStateLogger(navigation, 'people');
 
@@ -49,19 +49,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({
         navigation.navigate('PersonForm', { isEditing: false });
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            setHeaderControls({
-                showAddButton: true,
-                onAddTapped: handleAddPerson,
-            });
-
-            return () => {
-                setHeaderControls({});
-            };
-        }, [])
-    );
-
     const handlePersonSelect = (person: Person) => {
         navigation.navigate('PersonDetail', { personId: person._id });
     };
@@ -70,11 +57,18 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({
         setShowingCreateForm(false);
     };
 
+    const headerProps = {
+        showAddButton: true,
+        onAddTapped: handleAddPerson,
+    };
+
     return (
         <>
+            <WebHeader {...headerProps} />
             <MainViewHeader
                 moduleType={ModuleType.PEOPLE}
                 title="People"
+                {...headerProps}
             />
 
             {!isInitialized && people.length === 0 ? (

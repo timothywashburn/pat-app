@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import { useAuthStore } from "@/src/stores/useAuthStore";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
@@ -19,7 +20,6 @@ import { PeopleSection } from '@/src/features/settings/sections/PeopleSection';
 import { HabitsSection } from '@/src/features/settings/sections/HabitsSection';
 import { InboxSection } from '@/src/features/settings/sections/InboxSection';
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface SettingsPanelProps {
@@ -34,11 +34,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     navigation,
     route
 }) => {
+    console.log('[SettingsPanel] Component re-rendering');
     const { errorToast, successToast } = useToast();
     const { signOut } = useAuthStore();
     const [editMode, setEditMode] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const { setHeaderControls } = useHeaderControls();
 
     const { data, updateUserData } = useUserDataStore();
 
@@ -72,43 +72,36 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         setSectionData(prev => ({ ...prev, propertyKeys: data.propertyKeys }));
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            setHeaderControls({
-                trailing: () => (
-                    <View className="flex-row">
-                        {editMode && (
-                            <TouchableOpacity
-                                onPress={handleSaveChanges}
-                                disabled={isSaving}
-                                className="mr-4"
-                            >
-                                <Text className="text-primary text-base">
-                                    {isSaving ? 'Saving...' : 'Save'}
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity onPress={() => setEditMode(!editMode)}>
-                            <Text className={`text-base ${editMode ? "text-on-error" : "text-primary"}`}>
-                                {editMode ? 'Cancel' : 'Edit'}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ),
-            });
-
-            return () => {
-                setHeaderControls({});
-            };
-        }, [editMode, isSaving, handleSaveChanges])
-    );
+    const headerProps = {
+        trailing: () => (
+            <View className="flex-row">
+                {editMode && (
+                    <TouchableOpacity
+                        onPress={handleSaveChanges}
+                        disabled={isSaving}
+                        className="mr-4"
+                    >
+                        <Text className="text-primary text-base">
+                            {isSaving ? 'Saving...' : 'Save'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+                <TouchableOpacity onPress={() => setEditMode(!editMode)}>
+                    <Text className={`text-base ${editMode ? "text-on-error" : "text-primary"}`}>
+                        {editMode ? 'Cancel' : 'Edit'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        ),
+    };
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
+            <WebHeader {...headerProps} />
             <MainViewHeader
                 moduleType={ModuleType.SETTINGS}
                 title="Settings"
-                hideOnWeb
+                {...headerProps}
             />
 
             <ScrollView className="flex-1">

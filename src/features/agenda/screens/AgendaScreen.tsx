@@ -5,6 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useTheme } from '@/src/context/ThemeContext';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import AgendaItemCard from '@/src/features/agenda/components/AgendaItemCard';
 import { MainStackParamList, splitScreenConfigs } from '@/src/navigation/MainStack';
 import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
@@ -25,7 +26,6 @@ import AgendaFilterDropdown, { FilterType } from "@/src/features/agenda/componen
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { useFocusEffect } from "@react-navigation/native";
 import { useNavStateLogger } from "@/src/hooks/useNavStateLogger";
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 export interface AgendaPanelProps {
@@ -40,13 +40,13 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
     navigation,
     route
 }) => {
+    console.log('[AgendaPanel] Component re-rendering');
     const { getColor } = useTheme();
     const { width } = useWindowDimensions();
     const { items, isInitialized, loadItems } = useAgendaStore();
     const { data } = useUserDataStore();
     const { refreshControl } = useRefreshControl(loadItems, 'Failed to refresh items');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('incomplete');
-    const { setHeaderControls } = useHeaderControls();
     const splitView = useSplitView('Tabs');
 
     useNavStateLogger(navigation, 'agenda');
@@ -66,26 +66,6 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
             navigation.navigate('AgendaItemForm', {});
         }
     };
-
-    useFocusEffect(
-        useCallback(() => {
-            setHeaderControls({
-                showAddButton: true,
-                onAddTapped: handleAddItem,
-                customFilter: () => (
-                    <AgendaFilterDropdown
-                        selectedFilter={selectedFilter}
-                        categories={data.config.agenda.itemCategories}
-                        onFilterChange={setSelectedFilter}
-                    />
-                ),
-            });
-
-            return () => {
-                setHeaderControls({});
-            };
-        }, [selectedFilter, data.config.agenda.itemCategories])
-    );
 
     const handleItemSelect = (item: AgendaItemData) => {
         if (splitView.isWideScreen) {
@@ -114,12 +94,25 @@ export const AgendaPanel: React.FC<AgendaPanelProps> = ({
             return 0;
         });
 
+    const headerProps = {
+        showAddButton: true,
+        onAddTapped: handleAddItem,
+        customFilter: () => (
+            <AgendaFilterDropdown
+                selectedFilter={selectedFilter}
+                categories={data.config.agenda.itemCategories}
+                onFilterChange={setSelectedFilter}
+            />
+        ),
+    };
+
     return (
         <>
+            <WebHeader {...headerProps} />
             <MainViewHeader
                 moduleType={ModuleType.AGENDA}
                 title="Agenda"
-                hideOnWeb
+                {...headerProps}
             />
 
             <SplitViewLayout

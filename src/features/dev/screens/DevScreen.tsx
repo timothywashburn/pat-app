@@ -5,6 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
 import DevicesSection from "@/src/features/dev/components/DevicesSection";
@@ -14,7 +15,6 @@ import { ModuleType } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
 import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import HabitResetTimeSlider from "@/src/components/common/HabitResetTimeSlider";
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import DetailViewHeader from "@/src/components/headers/DetailViewHeader";
 import LogViewer from "@/src/features/dev/components/LogViewer";
 import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
@@ -31,8 +31,8 @@ export const DevPanel: React.FC<DevPanelProps> = ({
     navigation,
     route
 }) => {
+    console.log('[DevPanel] Component re-rendering');
     const [logViewerPanelVisible, setLogViewerPanelVisible] = useState(false);
-    const { setHeaderControls } = useHeaderControls();
     const scrollViewRef = React.useRef<ScrollView>(null);
     const scrollYRef = React.useRef(0);
 
@@ -40,24 +40,18 @@ export const DevPanel: React.FC<DevPanelProps> = ({
         console.log('dev tapped');
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            setHeaderControls({
-                showAddButton: true,
-                onAddTapped: handleAddTapped,
-            });
-
-            return () => {
-                setHeaderControls({});
-            };
-        }, [])
-    );
+    const headerProps = {
+        showAddButton: true,
+        onAddTapped: handleAddTapped,
+    };
 
     return (
         <>
+            <WebHeader {...headerProps} />
             <MainViewHeader
                 moduleType={ModuleType.DEV}
                 title="Dev"
+                {...headerProps}
             />
 
             <ScrollView

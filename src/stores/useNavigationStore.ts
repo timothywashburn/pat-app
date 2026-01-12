@@ -24,6 +24,8 @@ export const useNavigationStore = create<NavigationState & NavigationActions>((s
     enabled: true,
 
     setEnabled: (enabled: boolean): void => {
-        set({ enabled });
+        if (get().enabled !== enabled) {
+            set({ enabled });
+        }
     },
 }));

@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { ActivityIndicator, Platform, Text, View } from 'react-native';
 import { UserDataStoreStatus, useUserDataStore } from "@/src/stores/useUserDataStore";
-import WebHeader from '@/src/components/WebHeader';
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { ModuleType } from "@timothyw/pat-common";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
@@ -73,7 +72,6 @@ export default function AppNavigator() {
 
     return (
         <>
-            {isWeb && <WebHeader modules={data?.config.modules} />}
             <Tab.Navigator
                 key={navigationKey}
                 initialRouteName={getFirstModule()}

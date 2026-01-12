@@ -15,6 +15,7 @@ import ThoughtView from '@/src/features/inbox/components/ThoughtView';
 import CustomTextInput from '@/src/components/common/CustomTextInput';
 import { useThoughtsStore } from '@/src/stores/useThoughtsStore';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { ModuleType, ThoughtData, NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
@@ -170,6 +171,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
 
     return (
         <KeyboardAvoidingWrapper>
+            <WebHeader />
             <MainViewHeader
                 moduleType={ModuleType.INBOX}
                 title="Inbox"
