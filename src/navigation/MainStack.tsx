@@ -111,7 +111,8 @@ export default function MainStack() {
             <Stack.Navigator
                 initialRouteName="Tabs"
                 screenOptions={{
-                    headerShown: false
+                    headerShown: false,
+                    cardStyle: { flex: 1 }
                 }}
             >
                 <Stack.Screen name="Tabs" component={AppNavigator} />
