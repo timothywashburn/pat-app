@@ -1,6 +1,5 @@
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
-import PatConfig from '@/src/misc/PatConfig';
 import { useAuthStore } from '@/src/stores/useAuthStore';
 import {
     ClientVerifyEmailResponseData,
@@ -10,6 +9,7 @@ import {
     UserId
 } from "@timothyw/pat-common";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
+import PatConfig from "@/src/misc/PatConfig";
 
 class SocketService {
     private static instance: SocketService;
@@ -47,7 +47,7 @@ class SocketService {
         this.disconnect();
 
         this.socket = io(PatConfig.apiURL, {
-            path: PatConfig.socketPath,
+            path: '/ws',
             transports: ['websocket'],
             reconnection: true,
             reconnectionAttempts: Infinity,

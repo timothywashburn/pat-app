@@ -1,14 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Linking, Platform } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigatorScreenParams, CommonActions, useNavigation } from '@react-navigation/native';
 import { AuthStoreStatus, useAuthStore } from '@/src/stores/useAuthStore';
 import AuthStack, { AuthStackParamList } from './AuthStack';
-import AppNavigator from './AppNavigator';
+import MainStack, { MainStackParamList } from './MainStack';
 import NotFoundScreen from '@/src/app/+not-found';
+import OAuthConsentScreen from '@/src/app/(auth)/oauth-consent';
+
+export type OAuthConsentParams = {
+  pending_id?: string;
+  client_name?: string;
+  scopes?: string;
+  redirect_uri?: string;
+  state?: string;
+};
 
 export type RootStackParamList = {
   AuthStack: NavigatorScreenParams<AuthStackParamList>;
-  AppNavigator: undefined;
+  MainStack: NavigatorScreenParams<MainStackParamList>;
+  OAuthConsent: OAuthConsentParams;
   NotFound: undefined;
 };
 
@@ -18,8 +29,29 @@ export default function RootNavigator() {
   const { authStoreStatus } = useAuthStore();
   const navigation = useNavigation();
 
+  // TODO: possible cleanup
+  const isOAuthConsentUrl = (): boolean => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return window.location.pathname.includes('/oauth/consent');
+    }
+    return false;
+  }
+
+  const isOAuthSignInUrl = (): boolean => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return window.location.pathname.includes('/sign-in') &&
+             window.location.search.includes('oauth_redirect=true');
+    }
+    return false;
+  }
+
   useEffect(() => {
     if (!navigation) return;
+
+    const state = navigation.getState();
+    const currentRoute = state?.routes[state.index]?.name;
+
+    if (currentRoute === 'OAuthConsent' || isOAuthConsentUrl() || isOAuthSignInUrl()) return;
 
     if (authStoreStatus === AuthStoreStatus.NOT_AUTHENTICATED) {
       navigation.dispatch(
@@ -39,7 +71,7 @@ export default function RootNavigator() {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{ name: 'AppNavigator' }],
+          routes: [{ name: 'MainStack' }],
         })
       );
     }
@@ -48,7 +80,7 @@ export default function RootNavigator() {
   // Initial route based on auth status
   const getInitialRouteName = (): keyof RootStackParamList => {
     if (authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
-      return 'AppNavigator';
+      return 'MainStack';
     }
     return 'AuthStack';
   };
@@ -61,7 +93,8 @@ export default function RootNavigator() {
       }}
     >
       <Stack.Screen name="AuthStack" component={AuthStack} />
-      <Stack.Screen name="AppNavigator" component={AppNavigator} />
+      <Stack.Screen name="MainStack" component={MainStack} />
+      <Stack.Screen name="OAuthConsent" component={OAuthConsentScreen} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
     </Stack.Navigator>
   );

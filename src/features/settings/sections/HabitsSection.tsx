@@ -4,9 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { NotificationEntityType, NotificationTemplateLevel } from "@timothyw/pat-common";
+import { CompositeNavigationProp } from '@react-navigation/core';
+import { NotificationEntityType, NotificationTemplateLevel, ModuleType } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import NotificationService from '@/src/services/NotificationService';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface HabitsSectionProps {
     editMode: boolean;
@@ -16,7 +19,10 @@ export const HabitsSection: React.FC<HabitsSectionProps> = ({
     editMode
 }) => {
     const { getColor } = useTheme();
-    const navigation = useNavigation<StackNavigationProp<MainStackParamList, 'Settings'>>();
+    const navigation = useNavigation<CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.SETTINGS>,
+        StackNavigationProp<MainStackParamList>
+    >>();
 
     const handleHabitsEntityNotificationPress = async () => {
         const shouldNavigate = await NotificationService.shared.checkAndPromptForNotifications();

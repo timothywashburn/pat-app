@@ -2,9 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import PushNotificationSection from "@/src/features/dev/components/PushNotificationSection";
 import DeepLinkSection from "@/src/features/dev/components/DeepLinksSection";
 import DevicesSection from "@/src/features/dev/components/DevicesSection";
@@ -12,22 +13,26 @@ import LogViewerSection from "@/src/features/dev/components/LogViewerSection";
 import DraggableListSection from "@/src/features/dev/components/DraggableListSection";
 import { ModuleType } from "@timothyw/pat-common";
 import { MainStackParamList } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import HabitResetTimeSlider from "@/src/components/common/HabitResetTimeSlider";
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import DetailViewHeader from "@/src/components/headers/DetailViewHeader";
 import LogViewer from "@/src/features/dev/components/LogViewer";
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface DevPanelProps {
-    navigation: StackNavigationProp<MainStackParamList, 'Dev'>;
-    route: RouteProp<MainStackParamList, 'Dev'>;
+    navigation: CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.DEV>,
+        StackNavigationProp<MainStackParamList>
+    >;
+    route: RouteProp<TabNavigatorParamList, ModuleType.DEV>;
 }
 
 export const DevPanel: React.FC<DevPanelProps> = ({
     navigation,
     route
 }) => {
+    console.log('[DevPanel] Component re-rendering');
     const [logViewerPanelVisible, setLogViewerPanelVisible] = useState(false);
-    const { setHeaderControls } = useHeaderControls();
     const scrollViewRef = React.useRef<ScrollView>(null);
     const scrollYRef = React.useRef(0);
 
@@ -35,24 +40,18 @@ export const DevPanel: React.FC<DevPanelProps> = ({
         console.log('dev tapped');
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            setHeaderControls({
-                showAddButton: true,
-                onAddTapped: handleAddTapped,
-            });
-
-            return () => {
-                setHeaderControls({});
-            };
-        }, [])
-    );
+    const headerProps = {
+        showAddButton: true,
+        onAddTapped: handleAddTapped,
+    };
 
     return (
         <>
+            <WebHeader {...headerProps} />
             <MainViewHeader
                 moduleType={ModuleType.DEV}
                 title="Dev"
+                {...headerProps}
             />
 
             <ScrollView

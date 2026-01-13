@@ -12,16 +12,22 @@ export const linking: LinkingOptions<RootStackParamList> = {
           Verify: 'verify',
         }
       },
-      AppNavigator: {
+      OAuthConsent: 'oauth/consent',
+      MainStack: {
         path: '',
         screens: {
-          agenda: 'agenda',
-          inbox: 'inbox',
-          lists: 'lists',
-          people: 'people',
-          habits: 'habits',
-          settings: 'settings',
-          dev: 'dev',
+          Tabs: {
+            path: '',
+            screens: {
+              agenda: 'agenda',
+              inbox: 'inbox',
+              lists: 'lists',
+              people: 'people',
+              habits: 'habits',
+              settings: 'settings',
+              dev: 'dev',
+            }
+          }
         }
       },
       // Catch-all route for 404 - must be last

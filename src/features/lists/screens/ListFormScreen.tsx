@@ -4,7 +4,7 @@ import FormField from '@/src/components/common/FormField';
 import FormSection from '@/src/components/common/FormSection';
 import SelectionList from '@/src/components/common/SelectionList';
 import { useListsStore } from '@/src/stores/useListsStore';
-import { ListType } from "@timothyw/pat-common";
+import { ListType, ModuleType } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
@@ -58,7 +58,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
                 setName('');
             }
 
-            nav.popTo('Lists');
+            nav.popTo('Tabs', { screen: ModuleType.LISTS });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list');
         } finally {
@@ -74,7 +74,7 @@ const ListFormScreen: React.FC<ListFormViewProps> = ({
 
         try {
             await deleteList(currentList._id);
-            nav.navigate('Lists');
+            nav.popTo('Tabs', { screen: ModuleType.LISTS });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
             setIsLoading(false);

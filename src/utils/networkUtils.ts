@@ -1,8 +1,8 @@
 import { useAuthStore } from '@/src/stores/useAuthStore';
-import PatConfig from '@/src/misc/PatConfig';
 import axios, { AxiosRequestConfig } from 'axios';
 import { NetworkRequest } from '@/src/hooks/useNetworkRequest';
-import { ApiResponseBody, HTTPMethod } from "@/src/hooks/useNetworkRequestTypes";
+import { ApiResponseBody } from "@/src/hooks/useNetworkRequestTypes";
+import PatConfig from "@/src/misc/PatConfig";
 
 export const performRequest = async <TReq, TRes>(
     config: NetworkRequest<TReq>,

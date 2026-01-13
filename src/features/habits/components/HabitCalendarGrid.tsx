@@ -4,6 +4,7 @@ import { Habit, HabitEntryData, HabitEntryStatus } from "@timothyw/pat-common";
 import { useToast } from "@/src/components/toast/ToastContext";
 import { fromDateOnlyString } from "@/src/features/habits/models";
 
+// TODO: clean up
 // Timezone-aware date utilities for consistent calendar logic
 const dateUtils = {
     // Convert any date to local calendar date (YYYY-MM-DD format)

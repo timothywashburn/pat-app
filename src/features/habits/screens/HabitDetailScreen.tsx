@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
+    InteractionManager,
     Text,
     View,
 } from 'react-native';
@@ -26,9 +28,24 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
     navigation,
     route,
 }) => {
+    const { getColor } = useTheme();
     const { habits } = useHabitsStore();
+    const [showCalendar, setShowCalendar] = useState(false);
 
-    const currentHabit = habits.find(habit => habit._id === route.params.habitId)!;
+    const currentHabit = habits.find(habit => habit._id === route.params.habitId);
+
+    // Defer calendar rendering until after screen transition
+    useEffect(() => {
+        const task = InteractionManager.runAfterInteractions(() => {
+            setShowCalendar(true);
+        });
+
+        return () => task.cancel();
+    }, []);
+
+    if (!currentHabit) {
+        return null;
+    }
 
     const currentDate = getActiveHabitDate(currentHabit);
     const previousDate = getPreviousHabitDate(currentHabit);
@@ -74,11 +91,16 @@ const HabitDetailScreen: React.FC<HabitDetailViewProps> = ({
         },
         // Calendar Grid Section
         {
-            content: (
+            content: showCalendar ? (
                 <HabitCalendarGrid
                     habit={currentHabit}
                     viewMode="weeks" // Default to last 52 weeks
                 />
+            ) : (
+                <View className="items-center justify-center py-[104px]">
+                    <ActivityIndicator size="large" color={getColor("primary")} />
+                    <Text className="text-on-surface-variant text-sm mt-2">Loading calendar...</Text>
+                </View>
             )
         },
         // Action Buttons Section
