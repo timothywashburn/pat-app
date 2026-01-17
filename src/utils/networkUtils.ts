@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/src/stores/useAuthStore';
+import { useAuthStore, NetworkError } from '@/src/stores/useAuthStore';
 import axios, { AxiosRequestConfig } from 'axios';
 import { NetworkRequest } from '@/src/hooks/useNetworkRequest';
 import { ApiResponseBody } from "@/src/hooks/useNetworkRequestTypes";
@@ -31,7 +31,14 @@ export const performRequest = async <TReq, TRes>(
         const response = await axios(axiosConfig);
         return response.data;
     } catch (error: any) {
-        throw new Error(error.response?.data?.error || error.message || 'Network error');
+        if (error.response) {
+            const message = error.response.data?.error || error.response.statusText || 'Unknown error occurred';
+            throw new NetworkError(message, error.response.status);
+        } else if (error.request) {
+            throw new NetworkError('Network error: no response received', 0);
+        } else {
+            throw new Error(error.message);
+        }
     }
 };
 

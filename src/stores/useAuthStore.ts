@@ -109,18 +109,7 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             }
         }
 
-        try {
-            Logger.debug('auth', 'attempting to refresh auth');
-            await get().refreshAuth();
-            Logger.debug('auth', 'auth refresh successful');
-        } catch (error) {
-            if (error instanceof NetworkError && error.status == 401) {
-                Logger.debug('auth', 'refresh failed (401 unauthorized), signing out');
-                get().signOut();
-                return;
-            }
-            Logger.error('auth', 'auth refresh failed', error);
-        }
+        await get().refreshAuth();
     },
 
     signIn: async (email: string, password: string) => {
@@ -180,6 +169,8 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
         }
 
         try {
+            Logger.debug('auth', 'attempting to refresh auth');
+
             const response = await performUnauthenticatedRequest<RefreshAuthRequest, RefreshAuthResponse>({
                 endpoint: '/api/auth/refresh',
                 method: HTTPMethod.POST,
@@ -199,6 +190,13 @@ export const useAuthStore = create<UseAuthStore>((set, get) => ({
             Logger.info('auth', 'auth refresh successful');
         } catch (error) {
             Logger.error('auth', 'auth refresh failed', error);
+
+            if (error instanceof NetworkError && error.status === 401) {
+                Logger.debug('auth', 'refresh failed (401 unauthorized), signing out');
+                get().signOut();
+                return;
+            }
+
             if (error instanceof NetworkError && error.status >= 500) {
                 set({ authStoreStatus: AuthStoreStatus.SERVER_ERROR });
                 throw new Error(AuthError.SERVER_ERROR);
