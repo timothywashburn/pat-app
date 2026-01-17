@@ -35,6 +35,10 @@ export default class DeepLinkHandler {
                     // TODO: Handle verify-success route (needs to be added to navigation structure)
                     Logger.debug('linking', 'verify-success redirect not yet implemented', { path });
                     break;
+                case '/habits':
+                    // TODO: no longer works since router was removed; also this deep link was supposed to be used in habits widget but can't find where
+                    // router.replace('/(tabs)/habits');
+                    break;
                 default:
                     console.log(`[deeplink] unhandled path: ${path}`);
                     Logger.debug('linking', 'unhandled path', { path });

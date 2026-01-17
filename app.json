@@ -9,6 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "appleTeamId": "2MSZNNJ354",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.dev.timothyw.patapp"
+        ]
+      },
       "icon": {
         "light": "./assets/images/icon.png",
         "dark": "./assets/images/icon.png",
@@ -16,7 +22,8 @@
       },
       "supportsTablet": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSSupportsLiveActivities": true
       },
       "bundleIdentifier": "dev.timothyw.patapp",
       "associatedDomains": [
@@ -60,6 +67,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "@bacons/apple-targets",
       "expo-secure-store",
       [
         "expo-splash-screen",
@@ -79,6 +87,14 @@
         {
           "color": "#ff00ff",
           "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "17.0"
+          }
         }
       ]
     ],

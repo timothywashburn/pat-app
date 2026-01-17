@@ -3,7 +3,7 @@ import "@/global.css"
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from "react";
 import { AuthStoreStatus, useAuthStore } from "@/src/stores/useAuthStore";
-import { Platform, Linking } from 'react-native';
+import { Platform } from 'react-native';
 import SocketService from '@/src/services/SocketService';
 import { NavigationContainer, ThemeProvider } from "@react-navigation/native";
 import { CustomThemeProvider, useTheme } from "@/src/context/ThemeContext";
@@ -24,9 +24,12 @@ import * as Application from 'expo-application';
 import { useNavigationStore } from "@/src/stores/useNavigationStore";
 import { HeaderControlsProvider } from '@/src/context/HeaderControlsContext';
 import { ModalProvider } from '@/src/context/ModalContext';
-// import DeepLinkHandler from "@/src/services/DeepLinkHanlder";
 import { useAppFocus } from "@/src/hooks/useAppFocus";
+import { processWidgetActionQueue } from "@/src/utils/widgetSync";
+import { useHabitsStore } from "@/src/stores/useHabitsStore";
+import { HabitEntryStatus } from "@timothyw/pat-common";
 import { registerRootComponent } from "expo";
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 const DEV_BOOT = false;
 
@@ -35,6 +38,19 @@ SplashScreen.setOptions({
     duration: 1000,
     fade: true,
 });
+
+// TODO: temp widget debugging
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+let ExtensionStorage: any = null;
+let AppleLiveActivityModule: any = null;
+let widgetStorage: any = null;
+
+if (!isExpoGo && Platform.OS === 'ios') {
+    ExtensionStorage = require("@bacons/apple-targets").ExtensionStorage;
+    AppleLiveActivityModule = require("@/modules/apple-live-activity").default;
+    widgetStorage = new ExtensionStorage('group.dev.timothyw.patapp');
+}
 
 const AppContent: React.FC = () => {
     const { theme, colorScheme, getColor } = useTheme();
@@ -45,6 +61,68 @@ const AppContent: React.FC = () => {
 
     const navigationStore = useNavigationStore();
 
+    const { markHabitEntry, syncToWidget } = useHabitsStore();
+
+    // TODO: temp widget debugging
+    useEffect(() => {
+        // if (isExpoGo) {
+        //     console.log('[Native Modules] Running in Expo Go - native modules disabled');
+        //     return;
+        // }
+        //
+        // if (!widgetStorage || !AppleLiveActivityModule) {
+        //     console.log('[Native Modules] Native modules not available');
+        //     return;
+        // }
+        //
+        // widgetStorage.set('test', 'Hello World!');
+        // ExtensionStorage.reloadWidget();
+        //
+        // // Start Live Activity for testing
+        // if (Platform.OS === 'ios') {
+        //     console.log('[Live Activity] Starting Live Activity with emoji: 🎉');
+        //     try {
+        //         AppleLiveActivityModule.startLiveActivity("🎉");
+        //         console.log('[Live Activity] ✅ Live Activity started!');
+        //     } catch (error: any) {
+        //         console.error('[Live Activity] ❌ Failed to start Live Activity:', error);
+        //         console.error('[Live Activity] Error details:', error.message);
+        //     }
+        // }
+    }, []);
+
+    const processWidgetActions = useCallback(async () => {
+        if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL ||
+            authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
+            try {
+                const action = await processWidgetActionQueue();
+                if (action) {
+                    Logger.debug('unclassified', 'processing widget action', action);
+                    try {
+                        await markHabitEntry(action.habitId, action.date as any, HabitEntryStatus.COMPLETED);
+                        await syncToWidget();
+                        Logger.debug('unclassified', 'widget action processed successfully');
+                    } catch (error) {
+                        Logger.error('unclassified', 'failed to process widget action', error);
+                    }
+                }
+            } catch (error) {
+                Logger.error('unclassified', 'failed to read widget action queue', error);
+            }
+        }
+    }, [authStoreStatus, markHabitEntry, syncToWidget]);
+
+    useEffect(() => {
+        if (Platform.OS !== 'ios') return;
+
+        // TODO: whole feature needs fixing
+        // const interval = setInterval(() => {
+        //     processWidgetActions();
+        // }, 500);
+        //
+        // return () => clearInterval(interval);
+    }, [processWidgetActions]);
+
     useAppFocus(useCallback(() => {
         if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL ||
             authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
@@ -52,8 +130,11 @@ const AppContent: React.FC = () => {
             refreshAuth().catch((error) => {
                 Logger.error('auth', 'failed to refresh token on app refocus', error);
             });
+
+            // Process widget actions immediately on focus
+            processWidgetActions();
         }
-    }, [authStoreStatus, refreshAuth]));
+    }, [authStoreStatus, refreshAuth, processWidgetActions]));
 
     // prevent tab scrolling in forms
     // useEffect(() => {
