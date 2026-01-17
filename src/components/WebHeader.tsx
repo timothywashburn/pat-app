@@ -1,22 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Link, usePathname } from 'expo-router';
+import { useRoute } from '@react-navigation/native';
 import { useTheme } from '@/src/context/ThemeContext';
 import { UserModuleData } from "@timothyw/pat-common";
 import { moduleInfo } from "@/src/components/ModuleInfo";
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import HamburgerMenu from './HamburgerMenu';
+import { navigationRef } from '@/src/navigation/navigationRef';
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 
 type WebHeaderProps = {
-    modules: UserModuleData[];
+    showAddButton?: boolean;
+    onAddTapped?: () => void;
+    showFilterButton?: boolean;
+    onFilterTapped?: () => void;
+    isFilterActive?: boolean;
+    customFilter?: () => React.ReactNode;
+    trailing?: () => React.ReactNode;
 }
 
-export default function WebHeader({ modules }: WebHeaderProps) {
+export default function WebHeader({
+    showAddButton,
+    onAddTapped,
+    showFilterButton,
+    onFilterTapped,
+    isFilterActive,
+    customFilter,
+    trailing,
+}: WebHeaderProps) {
     const { getColor } = useTheme();
-    const pathname = usePathname();
-    const { headerControls } = useHeaderControls();
+    const route = useRoute();
     const [menuVisible, setMenuVisible] = useState(false);
+    const { data } = useUserDataStore();
+
+    if (Platform.OS !== 'web') return null;
+
+    const modules = data?.config.modules || [];
 
     return (
         <>
@@ -35,55 +54,64 @@ export default function WebHeader({ modules }: WebHeaderProps) {
 
                         const moduleType = module.type;
                         const { icon, title } = moduleInfo[moduleType];
-                        const isActive = pathname.includes(moduleType);
+                        const isActive = route.name === moduleType;
 
                         return (
-                            <Link key={moduleType} href={`/${moduleType}`} asChild>
-                                <Pressable style={{ pointerEvents: 'auto' }}>
-                                    <View className="flex-row items-center px-4 h-full">
-                                        <Ionicons
-                                            name={icon}
-                                            size={24}
-                                            color={isActive ? getColor("primary") : getColor("on-surface")}
-                                        />
-                                        <Text
-                                            className="ml-2"
-                                            style={{
-                                                color: isActive ? getColor("primary") : getColor("on-surface")
-                                            }}
-                                        >
-                                            {title}
-                                        </Text>
-                                    </View>
-                                </Pressable>
-                            </Link>
+                            <TouchableOpacity
+                                key={moduleType}
+                                onPress={() => {
+                                    if (navigationRef.isReady()) {
+                                        navigationRef.navigate('MainStack', {
+                                            screen: 'Tabs',
+                                            params: { screen: moduleType }
+                                        });
+                                    }
+                                }}
+                                style={{ pointerEvents: 'auto' }}
+                            >
+                                <View className="flex-row items-center px-4 h-full">
+                                    <Ionicons
+                                        name={icon}
+                                        size={24}
+                                        color={isActive ? getColor("primary") : getColor("on-surface")}
+                                    />
+                                    <Text
+                                        className="ml-2"
+                                        style={{
+                                            color: isActive ? getColor("primary") : getColor("on-surface")
+                                        }}
+                                    >
+                                        {title}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
                         );
                     })}
                 </View>
 
                 {/* Right side: Header controls */}
                 <View className="absolute right-0 h-full flex-row items-center justify-end px-4" style={{ zIndex: 10 }}>
-                    {headerControls.customFilter ? (
+                    {customFilter ? (
                         <View className="ml-4">
-                            {headerControls.customFilter()}
+                            {customFilter()}
                         </View>
-                    ) : headerControls.showFilterButton ? (
-                        <TouchableOpacity onPress={headerControls.onFilterTapped} className="ml-4 p-1">
+                    ) : showFilterButton ? (
+                        <TouchableOpacity onPress={onFilterTapped} className="ml-4 p-1">
                             <Ionicons
                                 name="filter"
                                 size={24}
-                                color={headerControls.isFilterActive ? getColor("primary") : getColor("on-surface")}
+                                color={isFilterActive ? getColor("primary") : getColor("on-surface")}
                             />
                         </TouchableOpacity>
                     ) : null}
 
-                    {headerControls.showAddButton && (
-                        <TouchableOpacity onPress={headerControls.onAddTapped} className="ml-4 p-1">
+                    {showAddButton && (
+                        <TouchableOpacity onPress={onAddTapped} className="ml-4 p-1">
                             <Ionicons name="add" size={24} color={getColor("on-surface")} />
                         </TouchableOpacity>
                     )}
 
-                    {headerControls.trailing && headerControls.trailing()}
+                    {trailing && trailing()}
                 </View>
             </View>
 

@@ -1,174 +1,150 @@
-import React, { useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import { UserModuleData, ModuleType } from "@timothyw/pat-common";
-import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
+import { DraggableList } from '@/src/components/common/DraggableList';
 import { useToast } from "@/src/components/toast/ToastContext";
 import { moduleInfo } from "@/src/components/ModuleInfo";
+import { useUserDataStore } from "@/src/stores/useUserDataStore";
 
-interface ModuleManagementProps {
-    editMode: boolean;
-    modules: UserModuleData[];
-    onUpdateModules: (updatedModules: UserModuleData[]) => void;
-}
+type UserModuleDataWithSection = UserModuleData & { section: number };
 
-export const ModuleManagement: React.FC<ModuleManagementProps> = ({
-    editMode,
-    modules,
-    onUpdateModules
-}) => {
+const addSections = (modules: UserModuleData[]): UserModuleDataWithSection[] => {
+    return modules.map(module => ({
+        ...module,
+        section: module.visible ? 0 : 1
+    }));
+};
+
+const removeSections = (modules: UserModuleDataWithSection[]): UserModuleData[] => {
+    return modules.map(({ section, ...module }) => ({
+        ...module,
+        visible: section === 0
+    }));
+};
+
+export const ModuleManagement: React.FC = () => {
     const { getColor } = useTheme();
-    const { errorToast } = useToast();
-    const visibleListRef = useRef(null);
-    const hiddenListRef = useRef(null);
+    const { errorToast, successToast } = useToast();
+    const { data, updateUserData } = useUserDataStore();
 
-    const visibleModules: UserModuleData[] = modules.filter(module => module.visible);
-    const hiddenModules: UserModuleData[] = modules.filter(module => !module.visible);
+    const savedModules = useMemo(() =>
+        addSections(data.config.modules),
+        [data.config.modules]
+    );
 
-    const toggleModuleVisibility = (moduleType: ModuleType, visible: boolean) => {
-        const moduleToToggle = modules.find(m => m.type === moduleType);
-        if (!moduleToToggle) return;
+    const [localModules, setLocalModules] = useState<UserModuleDataWithSection[]>(savedModules);
+    const [isEditMode, setIsEditMode] = useState(false);
 
-        const otherModules = modules.filter(m => m.type !== moduleType);
+    useEffect(() => {
+        setLocalModules(savedModules);
+    }, [savedModules]);
 
-        const updatedModule = { ...moduleToToggle, visible };
-        const updatedModules: UserModuleData[] = [];
-
-        updatedModules.push(...otherModules.filter(m => m.visible));
-        updatedModules.push(updatedModule);
-        updatedModules.push(...otherModules.filter(m => !m.visible));
-
-        onUpdateModules(updatedModules);
-        console.log(`module ${moduleType} visibility toggled to ${visible}`);
-        console.log(`modules (toggle): ${updatedModules.map(m => m.type)}`);
+    const handleReorder = (newData: UserModuleDataWithSection[]) => {
+        setLocalModules(newData);
     };
 
-    const onDragEnd = (data: UserModuleData[], isVisible: boolean) => {
-        let updatedModules: UserModuleData[];
-        if (isVisible) {
-            const hiddenModules = modules.filter(m => !m.visible);
-            updatedModules = [...data, ...hiddenModules];
-        } else {
-            const visibleModules = modules.filter(m => m.visible);
-            updatedModules = [...visibleModules, ...data];
-        }
+    const handleToggleVisibility = (moduleType: ModuleType) => {
+        setLocalModules(prevModules => {
+            const visibleCount = prevModules.filter(m => m.section === 0).length;
+            const moduleToToggle = prevModules.find(m => m.type === moduleType);
 
-        if (modules.length !== updatedModules.length) {
-            errorToast(`Some modules were lost during reordering`);
-            console.log("original modules:", modules.map(m => m.type));
-            console.log("updated modules:", updatedModules.map(m => m.type));
-            return;
-        }
+            if (moduleToToggle?.section === 0 && visibleCount === 1) {
+                errorToast("At least one module must remain visible");
+                return prevModules;
+            }
 
-        onUpdateModules(updatedModules);
-        console.log(`modules reordered in ${isVisible ? 'visible' : 'hidden'} section`);
-        console.log(`panel names (drag): ${updatedModules.map(m => m.type)}`);
+            return prevModules.map(module =>
+                module.type === moduleType
+                    ? { ...module, section: module.section === 0 ? 1 : 0 }
+                    : module
+            );
+        });
     };
 
-    const renderItem = ({ item, drag, isActive }: RenderItemParams<UserModuleData>) => {
+    const handleSave = async () => {
+        try {
+            const modulesToSave = removeSections(localModules);
+            await updateUserData({
+                config: {
+                    modules: modulesToSave
+                }
+            });
+            successToast("Module arrangement saved successfully");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown error';
+
+            if (message.includes('Network error')) {
+                errorToast("Network error. Please check your connection and try again.");
+            } else {
+                errorToast(`Failed to save module arrangement: ${message}`);
+            }
+
+            throw error;
+        }
+    };
+
+    const handleCancel = async () => {
+        setLocalModules(savedModules);
+    };
+
+    const renderModuleItem = ({ item }: { item: UserModuleDataWithSection }) => {
         return (
-            <ScaleDecorator>
-                <TouchableOpacity
-                    activeOpacity={1}
-                    onLongPress={editMode ? drag : undefined}
-                    disabled={!editMode}
-                    className={`flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2 ${isActive ? 'border border-primary' : ''}`}
-                >
-                    <View className="flex-row items-center">
-                        {editMode && (
-                            <Ionicons
-                                name="reorder-three"
-                                size={24}
-                                color={getColor("on-surface-variant")}
-                                style={{ marginRight: 8 }}
-                            />
-                        )}
-                        <Ionicons
-                            name={moduleInfo[item.type]?.icon || "help-circle"}
-                            size={24}
-                            color={item.visible ? getColor("primary") : getColor("on-surface-variant")}
-                        />
-                        <Text className={`text-base ml-3 ${item.visible ? 'text-on-surface' : 'text-on-surface-variant'}`}>
-                            {moduleInfo[item.type]?.title || "Unknown Module"}
-                        </Text>
-                    </View>
+            <View className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg">
+                <View className="flex-row items-center">
+                    <Ionicons
+                        name={moduleInfo[item.type]?.icon || "help-circle"}
+                        size={24}
+                        color={item.section === 0 ? getColor("primary") : getColor("on-surface-variant")}
+                    />
+                    <Text className={`text-base ml-3 ${item.section === 0 ? 'text-on-surface' : 'text-on-surface-variant'}`}>
+                        {moduleInfo[item.type]?.title || "Unknown Module"}
+                    </Text>
+                </View>
 
-                    {editMode && (
-                        <TouchableOpacity
-                            onPress={() => toggleModuleVisibility(item.type, !item.visible)}
-                        >
-                            <Ionicons
-                                name={item.visible ? 'eye' : 'eye-off'}
-                                size={24}
-                                color={item.visible ? getColor("primary") : getColor("on-surface-variant")}
-                            />
-                        </TouchableOpacity>
-                    )}
-                </TouchableOpacity>
-            </ScaleDecorator>
+                {isEditMode && (
+                    <TouchableOpacity
+                        onPress={() => handleToggleVisibility(item.type)}
+                    >
+                        <Ionicons
+                            name={item.section === 0 ? 'eye' : 'eye-off'}
+                            size={24}
+                            color={item.section === 0 ? getColor("primary") : getColor("on-surface-variant")}
+                        />
+                    </TouchableOpacity>
+                )}
+            </View>
         );
     };
 
-    // For non-edit mode, we use a simpler renderer
-    const renderStaticItem = (item: UserModuleData) => (
-        <View key={item.type} className="flex-row justify-between items-center py-3 px-4 bg-surface rounded-lg mb-2">
-            <View className="flex-row items-center">
-                <Ionicons
-                    name={moduleInfo[item.type]?.icon || "help-circle"}
-                    size={24}
-                    color={item.visible ? getColor("primary") : getColor("on-surface-variant")}
-                />
-                <Text className={`text-base ml-3 ${item.visible ? 'text-on-surface' : 'text-on-surface-variant'}`}>
-                    {moduleInfo[item.type]?.title || "Unknown Module"}
+    if (savedModules.length === 0) {
+        return (
+            <View className="mb-5">
+                <Text className="text-on-background text-base font-bold mb-4">
+                    Module Arrangement
+                </Text>
+                <Text className="text-on-surface-variant text-center py-4">
+                    No modules configured
                 </Text>
             </View>
-        </View>
-    );
+        );
+    }
 
     return (
         <View className="mb-5">
             <Text className="text-on-background text-base font-bold mb-4">Module Arrangement</Text>
 
-            <View className="mb-4">
-                <Text className="text-on-background-variant text-sm mb-2">Visible Modules</Text>
-                {editMode ? (
-                    <View style={{ height: visibleModules.length * 60, minHeight: 60 }}>
-                        <DraggableFlatList
-                            ref={visibleListRef}
-                            data={visibleModules}
-                            renderItem={renderItem}
-                            keyExtractor={(item: UserModuleData) => item.type}
-                            onDragEnd={({ data }) => onDragEnd(data, true)}
-                            activationDistance={10}
-                            scrollEnabled={false}
-                            containerStyle={{ flex: 1 }}
-                        />
-                    </View>
-                ) : (
-                    visibleModules.map(renderStaticItem)
-                )}
-            </View>
-
-            <View className="mb-4">
-                <Text className="text-on-background-variant text-sm mb-2">Hidden Modules</Text>
-                {editMode ? (
-                    <View style={{ height: hiddenModules.length * 60, minHeight: 60 }}>
-                        <DraggableFlatList
-                            ref={hiddenListRef}
-                            data={hiddenModules}
-                            renderItem={renderItem}
-                            keyExtractor={(item: UserModuleData) => item.type}
-                            onDragEnd={({ data }) => onDragEnd(data, false)}
-                            activationDistance={10}
-                            scrollEnabled={false}
-                            containerStyle={{ flex: 1 }}
-                        />
-                    </View>
-                ) : (
-                    hiddenModules.map(renderStaticItem)
-                )}
-            </View>
+            <DraggableList
+                data={localModules}
+                keyExtractor={(module) => module.type}
+                renderItem={renderModuleItem}
+                onReorder={handleReorder}
+                onSaveChanges={handleSave}
+                onCancelChanges={handleCancel}
+                onEditModeChange={setIsEditMode}
+                reorderable={false}
+            />
         </View>
     );
 }

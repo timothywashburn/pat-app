@@ -12,7 +12,7 @@ import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import HabitResetTimeSlider from '@/src/components/common/HabitResetTimeSlider';
 import { useHabitsStore } from '@/src/stores/useHabitsStore';
-import { Habit, HabitFrequency } from "@timothyw/pat-common";
+import { Habit, HabitFrequency, ModuleType } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
@@ -71,7 +71,7 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
                 });
             }
 
-            navigation.popTo('Habits');
+            navigation.navigate('Tabs', { screen: ModuleType.HABITS });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save habit');
         } finally {
@@ -87,7 +87,7 @@ const HabitFormScreen: React.FC<HabitFormViewProps> = ({
 
         try {
             await deleteHabit(currentHabit._id);
-            navigation.popTo('Habits');
+            navigation.navigate('Tabs', { screen: ModuleType.HABITS });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete habit');
             setIsLoading(false);

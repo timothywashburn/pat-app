@@ -4,7 +4,10 @@
     "details": [
       {
         "appID": "2MSZNNJ354.dev.timothyw.patapp",
-        "paths": ["/app"]
+        "paths": [
+          "/app",
+          "/habits"
+        ]
       }
     ]
   },

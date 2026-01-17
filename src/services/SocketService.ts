@@ -1,6 +1,5 @@
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
-import PatConfig from '@/src/misc/PatConfig';
 import { useAuthStore } from '@/src/stores/useAuthStore';
 import {
     ClientVerifyEmailResponseData,
@@ -10,11 +9,12 @@ import {
     UserId
 } from "@timothyw/pat-common";
 import { useUserDataStore } from "@/src/stores/useUserDataStore";
+import PatConfig from "@/src/misc/PatConfig";
 
 class SocketService {
     private static instance: SocketService;
     private socket: Socket | null = null;
-    private reconnectTimer: number | null = null;
+    private reconnectTimer: NodeJS.Timeout | null = null;
     private isConnected: boolean = false;
     private listeners: Map<string, ((data: any) => void)[]> = new Map();
 
@@ -47,7 +47,7 @@ class SocketService {
         this.disconnect();
 
         this.socket = io(PatConfig.apiURL, {
-            path: PatConfig.socketPath,
+            path: '/ws',
             transports: ['websocket'],
             reconnection: true,
             reconnectionAttempts: Infinity,
@@ -143,7 +143,8 @@ class SocketService {
         }
 
         const { type, userId } = message;
-        console.log(`socket handling message type: ${type}`);
+        // TODO: figure out what I want to do with this
+        // console.log(`socket handling message type: ${type}`);
 
         switch (type) {
             case SocketMessageType.CLIENT_HEARTBEAT_ACK:
@@ -175,7 +176,8 @@ class SocketService {
             data: { timestamp: Date.now() }
         };
 
-        console.log(`socket sending heartbeat: ${JSON.stringify(heartbeat)}`);
+        // TODO: figure out what I want to do with this
+        // console.log(`socket sending heartbeat: ${JSON.stringify(heartbeat)}`);
         this.emit(SocketMessageType.SERVER_HEARTBEAT, heartbeat);
     }
 

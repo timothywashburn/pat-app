@@ -4,25 +4,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/src/context/ThemeContext';
 import * as Linking from 'expo-linking';
+import PatConfig from "@/src/misc/PatConfig";
 
 const VerifySuccess: React.FC = () => {
     const { getColor } = useTheme();
 
     const handleReturnToApp = async () => {
         try {
-            const universalLinkUrl = 'https://pat.timothyw.dev/app'; // Replace with your domain
+            const appLink = `${PatConfig.apiURL}/app`;
 
-            console.log("attempting to open universal link:", universalLinkUrl);
+            console.log("attempting to open universal link:", appLink);
 
             if (Platform.OS === 'web') {
-                // For web, directly navigate to the universal link
-                // This will either open your app (if installed) or go to your website
-                window.location.href = universalLinkUrl;
+                window.location.href = appLink;
             } else {
-                // For native platforms, use expo-linking
-                const canOpen = await Linking.canOpenURL(universalLinkUrl);
+                const canOpen = await Linking.canOpenURL(appLink);
                 if (canOpen) {
-                    await Linking.openURL(universalLinkUrl);
+                    await Linking.openURL(appLink);
                 } else {
                     console.log("cannot open universal link");
                 }

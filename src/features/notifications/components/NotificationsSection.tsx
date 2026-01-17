@@ -7,6 +7,7 @@ import { useNotifications } from '@/src/features/notifications/hooks/useNotifica
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "@/src/navigation/MainStack";
+import NotificationService from '@/src/services/NotificationService';
 
 interface NotificationsSectionProps {
     targetEntityType: NotificationEntityType;
@@ -46,13 +47,17 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         return getColor('success');
     };
 
-    const onPress = () => {
-        navigation.navigate('NotificationInfo', {
-            targetEntityType,
-            targetId,
-            targetLevel,
-            entityName,
-        })
+    const onPress = async () => {
+        const shouldNavigate = await NotificationService.shared.checkAndPromptForNotifications();
+
+        if (shouldNavigate) {
+            navigation.navigate('NotificationInfo', {
+                targetEntityType,
+                targetId,
+                targetLevel,
+                entityName,
+            });
+        }
     };
 
     const activeTemplates = templates.filter((t: NotificationTemplateData) => t.active);

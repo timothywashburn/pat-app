@@ -15,7 +15,7 @@ const TimeRemainingIndicator: React.FC<TimeRemainingIndicatorProps> = ({
     const { startOffsetMinutes, endOffsetMinutes } = habit;
     const { getColor } = useTheme();
     const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(() => getTimeRemainingUntilRollover(startOffsetMinutes, endOffsetMinutes));
-    const intervalRef = useRef<number | null>(null);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const updateTimeRemaining = () => {
         setTimeRemaining(getTimeRemainingUntilRollover(startOffsetMinutes, endOffsetMinutes));

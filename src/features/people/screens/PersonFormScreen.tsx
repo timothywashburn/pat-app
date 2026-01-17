@@ -10,7 +10,7 @@ import BaseFormView from '@/src/components/common/BaseFormView';
 import FormField from '@/src/components/common/FormField';
 import CustomTextInput from '@/src/components/common/CustomTextInput';
 import { usePeopleStore } from '@/src/stores/usePeopleStore';
-import { PersonNoteData, PersonNoteId, PersonPropertyData } from "@timothyw/pat-common";
+import { ModuleType, PersonNoteData, PersonNoteId, PersonPropertyData } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
@@ -115,7 +115,7 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
                 setNewNote('');
             }
 
-            navigation.popTo('People');
+            navigation.navigate('Tabs', { screen: ModuleType.PEOPLE });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save person');
         } finally {
@@ -131,7 +131,7 @@ const PersonFormScreen: React.FC<PersonFormViewProps> = ({
 
         try {
             await deletePerson(currentPerson._id);
-            navigation.popTo('People');
+            navigation.navigate('Tabs', { screen: ModuleType.PEOPLE });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete person');
             setIsLoading(false);

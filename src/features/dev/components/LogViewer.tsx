@@ -31,7 +31,7 @@ const LogViewer: React.FC<LogViewerProps> = ({
     const [isPaused, setIsPaused] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
     const flatListRef = useRef<FlatList>(null);
-    const updateTimeoutRef = useRef<number | null>(null);
+    const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const loadLogs = useCallback(() => {
         if (isPaused) return;

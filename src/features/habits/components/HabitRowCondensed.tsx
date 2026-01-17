@@ -13,9 +13,10 @@ interface HabitRowCondensedProps {
     habit: Habit;
     onPress: (habit: Habit) => void;
     onHabitUpdated?: () => void;
+    isEditMode?: boolean;
 }
 
-const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, onHabitUpdated }) => {
+const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, onHabitUpdated, isEditMode }) => {
     const { errorToast } = useToast();
     const { getColor } = useTheme();
     const { markHabitEntry, deleteHabitEntry } = useHabitsStore();
@@ -82,13 +83,14 @@ const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, o
     const dateInfo = activeDate ? getDateInfo(activeDate) : null;
 
     return (
-        <View className="mb-3">
+        <>
             <View className="flex-row items-center justify-between">
                 {/* Left side: Habit name and date */}
                 <TouchableOpacity
                     className="flex-1 pr-3"
                     onPress={() => onPress(habit)}
                     activeOpacity={0.7}
+                    disabled={isEditMode}
                 >
                     <Text className="text-on-surface text-base font-medium mb-0.5">
                         {habit.name}
@@ -216,7 +218,7 @@ const HabitRowCondensed: React.FC<HabitRowCondensedProps> = ({ habit, onPress, o
                     <TimeRemainingIndicator habit={habit} />
                 </View>
             )}
-        </View>
+        </>
     );
 };
 

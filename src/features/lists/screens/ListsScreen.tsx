@@ -2,10 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/core';
+import { RouteProp, CompositeNavigationProp } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import MainViewHeader from '@/src/components/headers/MainViewHeader';
+import WebHeader from '@/src/components/WebHeader';
 import { ListId, ListItemData, ModuleType } from "@timothyw/pat-common";
 import { useListsStore } from '@/src/stores/useListsStore';
 import ListCard from '@/src/features/lists/components/ListCard';
@@ -13,28 +14,32 @@ import { useToast } from "@/src/components/toast/ToastContext";
 import { ListWithItems } from "@/src/features/lists/models";
 import { useRefreshControl } from '@/src/hooks/useRefreshControl';
 import { MainStackParamList, splitScreenConfigs } from '@/src/navigation/MainStack';
+import { TabNavigatorParamList } from '@/src/navigation/AppNavigator';
 import { useNavStateLogger } from '@/src/hooks/useNavStateLogger';
-import { useHeaderControls } from '@/src/context/HeaderControlsContext';
 import { useSplitView } from '@/src/hooks/useSplitView';
 import { SplitViewLayout } from '@/src/components/layout/SplitViewLayout';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 
 interface ListsPanelProps {
-    navigation: StackNavigationProp<MainStackParamList, 'Lists'>;
-    route: RouteProp<MainStackParamList, 'Lists'>;
+    navigation: CompositeNavigationProp<
+        MaterialTopTabNavigationProp<TabNavigatorParamList, ModuleType.LISTS>,
+        StackNavigationProp<MainStackParamList>
+    >;
+    route: RouteProp<TabNavigatorParamList, ModuleType.LISTS>;
 }
 
 export const ListsPanel: React.FC<ListsPanelProps> = ({
     navigation,
     route
 }) => {
+    console.log('[ListsPanel] Component re-rendering');
     const { getColor } = useTheme();
     const { errorToast } = useToast();
     const { getListsWithItems, isInitialized, loadAll } = useListsStore();
     const lists = getListsWithItems();
     const { isRefreshing, refreshControl } = useRefreshControl(loadAll, 'Failed to refresh lists');
-    const { setHeaderControls } = useHeaderControls();
     const [showCompleted, setShowCompleted] = useState(false);
-    const splitView = useSplitView('Lists');
+    const splitView = useSplitView('Tabs');
 
     useNavStateLogger(navigation, 'lists');
 
@@ -62,22 +67,6 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
             navigation.navigate('ListForm', {});
         }
     };
-
-    useFocusEffect(
-        useCallback(() => {
-            setHeaderControls({
-                showAddButton: true,
-                onAddTapped: handleAddList,
-                showFilterButton: true,
-                isFilterActive: showCompleted,
-                onFilterTapped: () => setShowCompleted(!showCompleted),
-            });
-
-            return () => {
-                setHeaderControls({});
-            };
-        }, [showCompleted])
-    );
 
     const handleListSelect = (list: ListWithItems) => {
         if (splitView.isWideScreen) {
@@ -119,16 +108,26 @@ export const ListsPanel: React.FC<ListsPanelProps> = ({
         }
     };
 
+    const headerProps = {
+        showAddButton: true,
+        onAddTapped: handleAddList,
+        showFilterButton: true,
+        isFilterActive: showCompleted,
+        onFilterTapped: () => setShowCompleted(!showCompleted),
+    };
+
     return (
         <>
+            <WebHeader {...headerProps} />
             <MainViewHeader
                 moduleType={ModuleType.LISTS}
                 title="Lists"
+                {...headerProps}
             />
 
             <SplitViewLayout
                 splitView={splitView}
-                splitScreenConfig={splitScreenConfigs.Lists}
+                splitScreenConfig={splitScreenConfigs.Tabs}
                 centeredWidthPercentage={70}
                 mainContent={(
                     <>

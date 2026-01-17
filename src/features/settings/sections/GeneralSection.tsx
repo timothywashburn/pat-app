@@ -1,45 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text } from 'react-native';
 import { ModuleManagement } from '@/src/features/settings/components/ModuleManagement';
-import { UserModuleData } from "@timothyw/pat-common";
 import { useAuthStore } from "@/src/stores/useAuthStore";
-import { useUserDataStore } from "@/src/stores/useUserDataStore";
 
 interface GeneralSectionProps {
-    editMode: boolean;
     onSignOut: () => void;
-    onDataChange: (data: { modules: UserModuleData[] }) => void;
 }
 
 export const GeneralSection: React.FC<GeneralSectionProps> = ({
-    editMode,
-    onSignOut,
-    onDataChange
+    onSignOut
 }) => {
     const { authData } = useAuthStore();
-    const { data } = useUserDataStore();
-    const [localModules, setLocalModules] = useState(data.config.modules);
-
-    useEffect(() => {
-        if (editMode) {
-            setLocalModules([...data.config.modules]);
-        }
-    }, [editMode, data.config.modules]);
-
-    const handleModulesUpdate = (updatedModules: UserModuleData[]) => {
-        setLocalModules(updatedModules);
-        onDataChange({ modules: updatedModules });
-    };
 
     return (
         <View className="mb-5">
             <Text className="text-on-background text-lg font-bold mb-4">General</Text>
 
-            <ModuleManagement
-                editMode={editMode}
-                modules={editMode ? localModules : data.config.modules}
-                onUpdateModules={handleModulesUpdate}
-            />
+            <ModuleManagement />
 
             <View className="h-px bg-surface my-4" />
 

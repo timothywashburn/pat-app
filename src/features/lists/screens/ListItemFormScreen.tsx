@@ -8,7 +8,7 @@ import FormField from '@/src/components/common/FormField';
 import SelectionList from '@/src/components/common/SelectionList';
 import FormSection from '@/src/components/common/FormSection';
 import { useListsStore } from '@/src/stores/useListsStore';
-import { ListId, UpdateListItemRequest } from "@timothyw/pat-common";
+import { ListId, ModuleType, UpdateListItemRequest } from "@timothyw/pat-common";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/core";
 import { MainStackParamList } from "@/src/navigation/MainStack";
@@ -88,12 +88,9 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
             }
 
             if (thoughtId) {
-                nav.popTo('Inbox', {
-                    thoughtProcessed: true,
-                    thoughtId: thoughtId
-                });
+                nav.popTo('Tabs', { screen: ModuleType.INBOX });
             } else {
-                nav.popTo('Lists');
+                nav.popTo('Tabs', { screen: ModuleType.LISTS });
             }
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to save list item');
@@ -110,7 +107,7 @@ const ListItemFormScreen: React.FC<ListItemFormViewProps> = ({
 
         try {
             await deleteListItem(currentListItem._id);
-            nav.navigate('ListDetail', { listId: selectedListId });
+            nav.popTo('ListDetail', { listId: selectedListId });
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list item');
             setIsLoading(false);

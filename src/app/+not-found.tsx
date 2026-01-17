@@ -1,16 +1,18 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useTheme } from '@/src/context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MainStackParamList } from '@/src/navigation/MainStack';
+import { ModuleType } from '@timothyw/pat-common';
 
 export default function NotFoundScreen() {
     const { getColor } = useTheme();
-    const router = useRouter();
+    const navigation = useNavigation<NavigationProp<MainStackParamList>>();
 
     const handleGoHome = () => {
-        router.replace('/');
+        navigation.navigate('Tabs', { screen: ModuleType.AGENDA });
     };
 
     return (

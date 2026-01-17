@@ -8,7 +8,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/src/context/ThemeContext';
 import BaseDetailView from '@/src/components/common/BaseDetailView';
-import { ListItemData, ListType } from '@timothyw/pat-common';
+import { ListItemData, ListType, ModuleType } from '@timothyw/pat-common';
 import { useListsStore } from '@/src/stores/useListsStore';
 import { useAlert } from '@/src/components/alert';
 import ListItemCard from '../components/ListItemCard';
@@ -76,7 +76,7 @@ const ListDetailScreen: React.FC<ListDetailViewProps> = ({
 
                 try {
                     await deleteList(currentList._id);
-                    nav.popTo('Lists');
+                    nav.popTo('Tabs', { screen: ModuleType.LISTS });
                 } catch (error) {
                     setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list');
                 } finally {
