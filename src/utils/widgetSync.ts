@@ -2,6 +2,7 @@ import { Habit } from '@timothyw/pat-common';
 import { Platform } from 'react-native';
 import { ExtensionStorage } from '@bacons/apple-targets';
 import { toDateOnlyString } from "@/src/features/habits/models";
+import { Logger } from "@/src/features/dev/components/Logger";
 
 interface WidgetHabitData {
     habits: WidgetHabit[];
@@ -34,7 +35,6 @@ const APP_GROUP = 'group.dev.timothyw.patapp';
 const HABITS_DATA_KEY = 'habits_widget_data';
 const ACTION_QUEUE_KEY = 'habit_action_queue';
 
-// Create storage instance
 const storage = new ExtensionStorage(APP_GROUP);
 
 export async function syncHabitsToWidget(habits: Habit[]): Promise<void> {
@@ -74,43 +74,42 @@ export async function syncHabitsToWidget(habits: Habit[]): Promise<void> {
         storage.set(HABITS_DATA_KEY, jsonString);
         ExtensionStorage.reloadWidget('HabitsWidget');
 
-        console.log('[WidgetSync] Synced habits to widget:', widgetHabits.length);
+        Logger.debug('widget', 'Synced habits to widget', widgetHabits.length);
     } catch (error) {
-        console.error('[WidgetSync] Failed to sync habits to widget:', error);
+        Logger.error('widget', 'Failed to sync habits to widget', error);
     }
 }
 
 export async function processWidgetActionQueue(): Promise<HabitAction | null> {
     if (Platform.OS !== 'ios') {
-        console.log('[WIDGET_ACTION] Skipping action queue processing - not iOS');
+        Logger.debug('widget', 'Skipping action queue processing - not iOS');
         return null;
     }
 
     try {
-        console.log('[WIDGET_ACTION] Checking for pending widget actions...');
+        Logger.debug('widget', 'Checking for pending widget actions...');
         const jsonData = storage.get(ACTION_QUEUE_KEY);
 
         if (!jsonData) {
-            console.log('[WIDGET_ACTION] No pending actions found');
+            Logger.debug('widget', 'No pending actions found');
             return null;
         }
 
-        console.log('[WIDGET_ACTION] Found action data:', jsonData);
+        Logger.debug('widget', 'Found action data', jsonData);
 
         const action = JSON.parse(jsonData) as HabitAction;
 
-        console.log('[WIDGET_ACTION] Parsed action:', action);
+        Logger.debug('widget', 'Parsed action', action);
 
-        // Clear the queue
         storage.remove(ACTION_QUEUE_KEY);
 
-        console.log('[WidgetSync] Action queue cleared');
-        console.log('[WIDGET_ACTION] Processed widget action:', action);
+        Logger.debug('widget', 'Action queue cleared');
+        Logger.debug('widget', 'Processed widget action', action);
 
         return action;
     } catch (error) {
-        console.error('[WidgetSync] Failed to process widget action queue:', error);
-        console.error('[WIDGET_ACTION] Error details:', error);
+        Logger.error('widget', 'Failed to process widget action queue', error);
+        Logger.error('widget', 'Error details', error);
         return null;
     }
 }

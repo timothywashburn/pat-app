@@ -60,7 +60,6 @@ export const useHabitsStore = create<HabitsState & HabitsActions>((set, get) => 
             const habits = response.habits.map(habit => Serializer.deserialize<Habit>(habit));
             set({ habits, isInitialized: true, isLoading: false });
 
-            // Sync to widget
             syncHabitsToWidget(habits).catch(err => console.error('Failed to sync to widget:', err));
 
             return habits;

@@ -109,12 +109,11 @@ struct TimeRemaining {
     let hours: Int
     let minutes: Int
     let totalMinutes: Int
-    let percentage: Double // 0-100, how much of the period has passed
+    let percentage: Double
     let isOverdue: Bool
 }
 
 extension WidgetHabit {
-    /// Get the active date for this habit (if currently active)
     func getActiveDate() -> String? {
         let now = Date()
         var date = Date.yesterday
@@ -133,29 +132,24 @@ extension WidgetHabit {
         return nil
     }
 
-    /// Check if this habit is currently active
     var isActive: Bool {
         return getActiveDate() != nil
     }
 
-    /// Get time remaining until habit period ends
     func getTimeRemaining() -> TimeRemaining {
         let now = Date()
         var date = Date.yesterday
 
-        // Find the current active habit period
         for _ in 0..<2 {
             let habitStart = date.addingTimeInterval(TimeInterval(startOffsetMinutes * 60))
             let habitEnd = date.addingTimeInterval(TimeInterval(endOffsetMinutes * 60))
 
             if now >= habitStart && now <= habitEnd {
-                // We're in the active period, calculate time until end
                 let diffSeconds = habitEnd.timeIntervalSince(now)
                 let totalMinutes = Int(diffSeconds / 60)
                 let hours = totalMinutes / 60
                 let minutes = totalMinutes % 60
 
-                // Calculate percentage of period passed
                 let periodDuration = habitEnd.timeIntervalSince(habitStart)
                 let elapsed = now.timeIntervalSince(habitStart)
                 let percentage = min(100.0, max(0.0, (elapsed / periodDuration) * 100.0))
@@ -172,11 +166,9 @@ extension WidgetHabit {
             date = Calendar.current.date(byAdding: .day, value: 1, to: date)!
         }
 
-        // Not in an active period
         return TimeRemaining(hours: 0, minutes: 0, totalMinutes: 0, percentage: 100, isOverdue: true)
     }
 
-    /// Format time remaining as string
     func formatTimeRemaining() -> String {
         let timeRemaining = getTimeRemaining()
 
@@ -193,7 +185,6 @@ extension WidgetHabit {
         }
     }
 
-    /// Check if today's entry is completed
     var isCompleted: Bool {
         guard let entry = todayEntry,
               let activeDate = getActiveDate(),
@@ -203,7 +194,6 @@ extension WidgetHabit {
         return entry.status == "completed"
     }
 
-    /// Check if today's entry is missed
     var isMissed: Bool {
         guard let entry = todayEntry,
               let activeDate = getActiveDate(),
@@ -213,7 +203,6 @@ extension WidgetHabit {
         return entry.status == "missed"
     }
 
-    /// Check if today's entry is excused
     var isExcused: Bool {
         guard let entry = todayEntry,
               let activeDate = getActiveDate(),
@@ -251,7 +240,6 @@ extension WidgetHabit {
         let now = Date()
         var date = Date.yesterday
 
-        // Check if we're currently in an active period
         for _ in 0..<2 {
             let habitStart = date.addingTimeInterval(TimeInterval(startOffsetMinutes * 60))
             let habitEnd = date.addingTimeInterval(TimeInterval(endOffsetMinutes * 60))
@@ -269,7 +257,7 @@ extension WidgetHabit {
             date = Calendar.current.date(byAdding: .day, value: 1, to: date)!
         }
 
-        // Find next start time
+        // Otherwise find next start time
         date = Date.today
         for _ in 0..<3 {
             let habitStart = date.addingTimeInterval(TimeInterval(startOffsetMinutes * 60))

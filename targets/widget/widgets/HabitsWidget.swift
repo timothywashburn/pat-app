@@ -37,7 +37,6 @@ extension HabitsConfigIntent {
 #Preview(as: .systemMedium) {
     HabitsWidget()
 } timeline: {
-    // Preview with active habits
     HabitsWidgetEntry(
         date: .now,
         configuration: .activeOnly,
@@ -70,7 +69,6 @@ extension HabitsConfigIntent {
         lastUpdated: ISO8601DateFormatter().string(from: Date())
     )
 
-    // Preview with all completed
     HabitsWidgetEntry(
         date: .now,
         configuration: .todaysAll,

@@ -6,5 +6,4 @@ declare class AppleLiveActivityModule extends NativeModule {
   stopAllLiveActivities(): void;
 }
 
-// This call loads the native module object from the JSI.
 export default requireNativeModule<AppleLiveActivityModule>('AppleLiveActivity');

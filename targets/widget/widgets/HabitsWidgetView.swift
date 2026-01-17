@@ -26,7 +26,6 @@ struct HabitsListView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            // Habits list
             let displayHabits = Array(habits.prefix(5))
 
             if displayHabits.isEmpty {
@@ -56,21 +55,17 @@ struct HabitRowView: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            // Main row: name, date, and action button
             HStack(alignment: .center, spacing: 6) {
-                // Status indicator dot
                 Circle()
                     .fill(statusColor)
                     .frame(width: 6, height: 6)
 
-                // Habit name and date on same line
                 VStack(alignment: .leading, spacing: 1) {
                     Text(habit.name)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(1)
 
-                    // Date and status info
                     HStack(spacing: 3) {
                         if habit.isActive && !habit.isCompleted {
                             Text(habit.formatTimeRemaining())
@@ -94,7 +89,6 @@ struct HabitRowView: View {
 
                 Spacer()
 
-                // Mark complete button
                 if !habit.isCompleted && habit.isActive {
                     Button(intent: MarkCompleteIntent(
                         habitId: habit.id,
@@ -121,16 +115,13 @@ struct HabitRowView: View {
                 }
             }
 
-            // Progress bar - only show if habit is active and not completed
             if habit.isActive && !habit.isCompleted {
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        // Background
                         RoundedRectangle(cornerRadius: 2)
                             .fill(Color.gray.opacity(0.2))
                             .frame(height: 3)
 
-                        // Progress
                         let timeRemaining = habit.getTimeRemaining()
                         RoundedRectangle(cornerRadius: 2)
                             .fill(progressGradient(for: timeRemaining.percentage))
@@ -141,7 +132,7 @@ struct HabitRowView: View {
                     }
                 }
                 .frame(height: 3)
-                .padding(.leading, 12) // Align with text, accounting for dot
+                .padding(.leading, 12)
             }
         }
         .padding(.vertical, 4)

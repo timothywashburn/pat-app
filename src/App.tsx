@@ -65,33 +65,32 @@ const AppContent: React.FC = () => {
 
     // TODO: temp widget debugging
     useEffect(() => {
-        if (isExpoGo) {
-            console.log('[Native Modules] Running in Expo Go - native modules disabled');
-            return;
-        }
-
-        if (!widgetStorage || !AppleLiveActivityModule) {
-            console.log('[Native Modules] Native modules not available');
-            return;
-        }
-
-        widgetStorage.set('test', 'Hello World!');
-        ExtensionStorage.reloadWidget();
-
-        // Start Live Activity for testing
-        if (Platform.OS === 'ios') {
-            console.log('[Live Activity] Starting Live Activity with emoji: 🎉');
-            try {
-                AppleLiveActivityModule.startLiveActivity("🎉");
-                console.log('[Live Activity] ✅ Live Activity started!');
-            } catch (error: any) {
-                console.error('[Live Activity] ❌ Failed to start Live Activity:', error);
-                console.error('[Live Activity] Error details:', error.message);
-            }
-        }
+        // if (isExpoGo) {
+        //     console.log('[Native Modules] Running in Expo Go - native modules disabled');
+        //     return;
+        // }
+        //
+        // if (!widgetStorage || !AppleLiveActivityModule) {
+        //     console.log('[Native Modules] Native modules not available');
+        //     return;
+        // }
+        //
+        // widgetStorage.set('test', 'Hello World!');
+        // ExtensionStorage.reloadWidget();
+        //
+        // // Start Live Activity for testing
+        // if (Platform.OS === 'ios') {
+        //     console.log('[Live Activity] Starting Live Activity with emoji: 🎉');
+        //     try {
+        //         AppleLiveActivityModule.startLiveActivity("🎉");
+        //         console.log('[Live Activity] ✅ Live Activity started!');
+        //     } catch (error: any) {
+        //         console.error('[Live Activity] ❌ Failed to start Live Activity:', error);
+        //         console.error('[Live Activity] Error details:', error.message);
+        //     }
+        // }
     }, []);
 
-    // Process widget actions - this runs whenever the app is active and authenticated
     const processWidgetActions = useCallback(async () => {
         if (authStoreStatus === AuthStoreStatus.AUTHENTICATED_NO_EMAIL ||
             authStoreStatus === AuthStoreStatus.FULLY_AUTHENTICATED) {
@@ -113,15 +112,15 @@ const AppContent: React.FC = () => {
         }
     }, [authStoreStatus, markHabitEntry, syncToWidget]);
 
-    // Poll for widget actions every 500ms when app is active
     useEffect(() => {
         if (Platform.OS !== 'ios') return;
 
-        const interval = setInterval(() => {
-            processWidgetActions();
-        }, 500);
-
-        return () => clearInterval(interval);
+        // TODO: whole feature needs fixing
+        // const interval = setInterval(() => {
+        //     processWidgetActions();
+        // }, 500);
+        //
+        // return () => clearInterval(interval);
     }, [processWidgetActions]);
 
     useAppFocus(useCallback(() => {

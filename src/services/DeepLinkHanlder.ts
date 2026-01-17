@@ -36,7 +36,8 @@ export default class DeepLinkHandler {
                     Logger.debug('linking', 'verify-success redirect not yet implemented', { path });
                     break;
                 case '/habits':
-                    router.replace('/(tabs)/habits');
+                    // TODO: no longer works since router was removed; also this deep link was supposed to be used in habits widget but can't find where
+                    // router.replace('/(tabs)/habits');
                     break;
                 default:
                     console.log(`[deeplink] unhandled path: ${path}`);
