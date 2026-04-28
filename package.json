@@ -13,6 +13,7 @@
     "build:ios:dev": "scripts/build-ios-dev.sh",
     "build:android": "scripts/build-android.sh",
     "build:web": "npx expo export --platform web",
+    "fingerprint:ios": "npx expo-updates fingerprint:generate --platform=ios",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
